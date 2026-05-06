@@ -20,13 +20,14 @@ const nav = [
 
 export function AdminLayout({ children, title }: { children: ReactNode; title: string }) {
   const navigate = useNavigate();
+  const hydrated = useStoreHydrated();
   const isAdmin = useStore(s => s.isAdmin);
   const logout = useStore(s => s.logoutAdmin);
   const path = useRouterState({ select: r => r.location.pathname });
   const [open, setOpen] = useState(false);
 
-  useEffect(() => { if (!isAdmin) navigate({ to: "/admin/login" }); }, [isAdmin, navigate]);
-  if (!isAdmin) return null;
+  useEffect(() => { if (hydrated && !isAdmin) navigate({ to: "/admin/login" }); }, [hydrated, isAdmin, navigate]);
+  if (!hydrated || !isAdmin) return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
