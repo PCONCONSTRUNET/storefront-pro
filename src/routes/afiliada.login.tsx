@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
-import { Sparkles, Loader2 } from "lucide-react";
+import logo from "@/assets/logo-princesa.png";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/afiliada/login")({
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/afiliada/login")({
 
 function Page() {
   const navigate = useNavigate();
-  const router = useRouter();
   const hydrated = useStoreHydrated();
   const currentId = useStore(s => s.currentAffiliateId);
   const login = useStore(s => s.loginAffiliate);
@@ -19,11 +18,7 @@ function Page() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    router.preloadRoute({ to: "/afiliada" }).catch(() => {});
-  }, [router]);
-
-  useEffect(() => {
-    if (hydrated && currentId) navigate({ to: "/afiliada" });
+    if (hydrated && currentId) navigate({ to: "/afiliada", replace: true });
   }, [hydrated, currentId, navigate]);
 
   const submit = (e: React.FormEvent) => {
@@ -32,7 +27,6 @@ function Page() {
     setSubmitting(true);
     const r = login(email, pwd);
     if (r.ok) {
-      window.history.replaceState(null, "", "/afiliada");
       navigate({ to: "/afiliada", replace: true });
       toast.success(r.message);
     }
@@ -43,7 +37,7 @@ function Page() {
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-rose/30 to-accent p-4">
       <div className="w-full max-w-sm bg-card rounded-3xl shadow-soft p-6">
         <div className="text-center">
-          <div className="w-14 h-14 mx-auto rounded-full gradient-primary grid place-items-center text-primary-foreground"><Sparkles className="h-7 w-7" /></div>
+          <img src={logo} alt="Princesa de Laços" className="h-20 w-auto mx-auto object-contain" style={{ mixBlendMode: "multiply" }} />
           <h1 className="font-display text-2xl text-primary mt-3">Painel da Afiliada</h1>
           <p className="text-xs text-muted-foreground">Acesse com seu e-mail e senha</p>
         </div>
@@ -59,8 +53,7 @@ function Page() {
               className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary/50" />
           </label>
           <button disabled={submitting} className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-70">
-            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {submitting ? "Entrando..." : "Entrar"}
+            Entrar
           </button>
           <p className="text-[11px] text-muted-foreground text-center pt-2">
             Ainda não é afiliada? <Link to="/afiliada/cadastro" className="text-primary underline">Criar conta</Link>
