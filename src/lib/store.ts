@@ -372,7 +372,7 @@ export const useStore = create<AppState>()(
           active: true,
           createdAt: new Date().toISOString(),
         };
-        set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id }));
+        set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id, sessions: { ...s.sessions, affiliate: makeSession(newA.id) } }));
         return { ok: true, message: "Cadastro realizado! Aguarde a administradora definir sua comissão." };
       },
       upsertAffiliate: (a) => set((s) => ({
