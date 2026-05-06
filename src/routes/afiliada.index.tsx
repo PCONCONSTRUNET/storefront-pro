@@ -117,13 +117,7 @@ function Page() {
             )}
             {view === "vendas" && <SalesList sales={mySales} />}
             {view === "resumo" && (
-              <Summary
-                cards={[
-                  { label: "Vendas no mês", value: String(monthSales.length), sub: brl(monthRevenue), icon: ShoppingBag, color: "text-primary" },
-                  { label: "Comissão do mês", value: brl(monthCommission), sub: "calculada", icon: TrendingUp, color: "text-gold" },
-                  { label: "Comissão confirmada", value: brl(totalConfirmedCommission), sub: `${confirmed.length} vendas`, icon: DollarSign, color: "text-success" },
-                ]}
-              />
+              <Summary sales={mySales} affiliateName={me.name} commissionLabel={commissionLabel} />
             )}
           </main>
         </div>
