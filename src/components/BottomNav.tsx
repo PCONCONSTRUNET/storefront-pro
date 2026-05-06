@@ -3,13 +3,14 @@ import { Home, Grid3x3, ShoppingBag, Package, User } from "lucide-react";
 import { useStore, selectCartCount } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-const items = [
+type NavItem = { to: string; label: string; icon: typeof Home; exact?: boolean; badge?: boolean };
+const items: NavItem[] = [
   { to: "/", label: "Início", icon: Home, exact: true },
   { to: "/categorias", label: "Categorias", icon: Grid3x3 },
   { to: "/carrinho", label: "Carrinho", icon: ShoppingBag, badge: true },
   { to: "/pedidos", label: "Pedidos", icon: Package },
   { to: "/perfil", label: "Perfil", icon: User },
-] as const;
+];
 
 export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
