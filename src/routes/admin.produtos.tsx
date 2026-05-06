@@ -292,6 +292,10 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
                   </span>
                 )}
                 <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button type="button" onClick={() => setCropIdx(i)} title="Recortar"
+                    className="w-6 h-6 grid place-items-center rounded-full bg-card/90 hover:bg-card shadow">
+                    <Crop className="h-3 w-3" />
+                  </button>
                   {i !== 0 && (
                     <button type="button" onClick={() => setMain(i)} title="Definir como capa"
                       className="w-6 h-6 grid place-items-center rounded-full bg-card/90 hover:bg-card shadow">
