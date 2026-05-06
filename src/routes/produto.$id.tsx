@@ -19,6 +19,20 @@ function Page() {
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
   const [imgError, setImgError] = useState(false);
+  const [selected, setSelected] = useState<Record<string, number>>({});
+
+  const priceDelta = (() => {
+    if (!product?.variations) return 0;
+    let d = 0;
+    for (const v of product.variations) {
+      const idx = selected[v.name];
+      if (idx == null) continue;
+      const opt = v.options[idx];
+      if (typeof opt === "object" && opt.priceDelta) d += opt.priceDelta;
+    }
+    return d;
+  })();
+  const finalPrice = (product?.price ?? 0) + priceDelta;
 
   if (!product) {
     return (
