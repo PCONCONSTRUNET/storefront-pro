@@ -68,7 +68,7 @@ function Page() {
           <p className="text-xs text-muted-foreground">Siga a gente</p>
           <div className="flex items-center justify-center gap-4">
             <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/princesadelacos58/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -79,7 +79,7 @@ function Page() {
               <span className="absolute inset-0 bg-white/0 group-hover:bg-white/15 transition-colors" />
             </a>
             <a
-              href="https://wa.me/5511999999999"
+              href="https://wa.me/554888644474"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
