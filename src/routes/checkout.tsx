@@ -142,7 +142,7 @@ function Field({ label, value, onChange, type = "text" }: { label: string; value
   return (
     <label className="block">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40" />
+      <input type={type} value={value} onChange={e => onChange(e.target.value)} className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/40 focus:bg-background transition-all" />
     </label>
   );
 }
