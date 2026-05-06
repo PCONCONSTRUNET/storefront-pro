@@ -76,6 +76,8 @@ export type Customer = {
   phone: string;
   password: string;
   address?: string;
+  addresses?: string[];
+  favorites?: string[];
   createdAt: string;
 };
 
