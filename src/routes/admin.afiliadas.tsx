@@ -234,6 +234,16 @@ function Page() {
         </div>
       )}
 
+      {viewing && (
+        <AffiliateDetailsModal
+          affiliate={viewing}
+          sales={sales.filter(s => s.affiliateId === viewing.id)}
+          onClose={() => setViewing(null)}
+          onEdit={() => { setEditing({ ...viewing }); setViewing(null); }}
+          onViewSales={() => { setFilterAff(viewing.id); setTab("vendas"); setViewing(null); }}
+        />
+      )}
+
       {editing && (
         <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4" onClick={() => setEditing(null)}>
           <form onSubmit={save} onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-md space-y-3">
