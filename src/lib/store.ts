@@ -350,10 +350,10 @@ export const useStore = create<AppState>()(
         const a = get().affiliates.find(x => x.email.toLowerCase() === normalized && x.password === password);
         if (!a) return { ok: false, message: "Credenciais inválidas" };
         if (!a.active) return { ok: false, message: "Conta desativada. Contate a administradora." };
-        set({ currentAffiliateId: a.id });
+        set(s => ({ currentAffiliateId: a.id, sessions: { ...s.sessions, affiliate: makeSession(a.id) } }));
         return { ok: true, message: `Bem-vinda, ${a.name}!` };
       },
-      logoutAffiliate: () => set({ currentAffiliateId: null }),
+      logoutAffiliate: () => set(s => ({ currentAffiliateId: null, sessions: { ...s.sessions, affiliate: null } })),
       registerAffiliate: (data) => {
         const name = data.name.trim();
         const email = data.email.trim().toLowerCase();
