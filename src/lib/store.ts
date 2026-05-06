@@ -373,7 +373,19 @@ export const useStore = create<AppState>()(
       deleteCoupon: (code) => set((s) => ({ coupons: s.coupons.filter(c => c.code !== code) })),
       updateSettings: (s2) => set((s) => ({ settings: { ...s.settings, ...s2 } })),
     }),
-    { name: "princesa-store-v1", skipHydration: typeof window === "undefined" },
+    {
+      name: "princesa-store-v1",
+      version: 2,
+      skipHydration: typeof window === "undefined",
+      migrate: (persisted: any, version) => {
+        if (!persisted) return persisted;
+        if (version < 2) {
+          persisted.products = initialProducts;
+          persisted.categories = initialCategories;
+        }
+        return persisted;
+      },
+    },
   ),
 );
 
