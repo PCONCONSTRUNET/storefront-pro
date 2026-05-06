@@ -18,10 +18,12 @@ import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AfiliadaIndexRouteImport } from './routes/afiliada.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
+import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
@@ -31,6 +33,7 @@ import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
+import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
 
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
@@ -77,6 +80,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AfiliadaIndexRoute = AfiliadaIndexRouteImport.update({
+  id: '/afiliada/',
+  path: '/afiliada/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -95,6 +103,11 @@ const PedidoIdRoute = PedidoIdRouteImport.update({
 const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
   id: '/categoria/$slug',
   path: '/categoria/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadaLoginRoute = AfiliadaLoginRouteImport.update({
+  id: '/afiliada/login',
+  path: '/afiliada/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProdutosRoute = AdminProdutosRouteImport.update({
@@ -142,6 +155,11 @@ const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   path: '/admin/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
+  id: '/admin/afiliadas',
+  path: '/admin/afiliadas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -153,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -162,10 +181,12 @@ export interface FileRoutesByFullPath {
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/afiliada/': typeof AfiliadaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,6 +198,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -186,10 +208,12 @@ export interface FileRoutesByTo {
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin': typeof AdminIndexRoute
+  '/afiliada': typeof AfiliadaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -202,6 +226,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
   '/perfil': typeof PerfilRoute
+  '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
@@ -211,10 +236,12 @@ export interface FileRoutesById {
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/afiliada/': typeof AfiliadaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -228,6 +255,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedidos'
     | '/perfil'
+    | '/admin/afiliadas'
     | '/admin/categorias'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -237,10 +265,12 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/produto/$id'
     | '/admin/'
+    | '/afiliada/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -252,6 +282,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedidos'
     | '/perfil'
+    | '/admin/afiliadas'
     | '/admin/categorias'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -261,10 +292,12 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/produto/$id'
     | '/admin'
+    | '/afiliada'
   id:
     | '__root__'
     | '/'
@@ -276,6 +309,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedidos'
     | '/perfil'
+    | '/admin/afiliadas'
     | '/admin/categorias'
     | '/admin/clientes'
     | '/admin/configuracoes'
@@ -285,10 +319,12 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/produto/$id'
     | '/admin/'
+    | '/afiliada/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -301,6 +337,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PedidosRoute: typeof PedidosRoute
   PerfilRoute: typeof PerfilRoute
+  AdminAfiliadasRoute: typeof AdminAfiliadasRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
@@ -310,10 +347,12 @@ export interface RootRouteChildren {
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
+  AfiliadaLoginRoute: typeof AfiliadaLoginRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   PedidoIdRoute: typeof PedidoIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AfiliadaIndexRoute: typeof AfiliadaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -381,6 +420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/afiliada/': {
+      id: '/afiliada/'
+      path: '/afiliada'
+      fullPath: '/afiliada/'
+      preLoaderRoute: typeof AfiliadaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -407,6 +453,13 @@ declare module '@tanstack/react-router' {
       path: '/categoria/$slug'
       fullPath: '/categoria/$slug'
       preLoaderRoute: typeof CategoriaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliada/login': {
+      id: '/afiliada/login'
+      path: '/afiliada/login'
+      fullPath: '/afiliada/login'
+      preLoaderRoute: typeof AfiliadaLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/produtos': {
@@ -472,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/afiliadas': {
+      id: '/admin/afiliadas'
+      path: '/admin/afiliadas'
+      fullPath: '/admin/afiliadas'
+      preLoaderRoute: typeof AdminAfiliadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -485,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PedidosRoute: PedidosRoute,
   PerfilRoute: PerfilRoute,
+  AdminAfiliadasRoute: AdminAfiliadasRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
@@ -494,10 +555,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminNotificacoesRoute: AdminNotificacoesRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
+  AfiliadaLoginRoute: AfiliadaLoginRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   PedidoIdRoute: PedidoIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AfiliadaIndexRoute: AfiliadaIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
