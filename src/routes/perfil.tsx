@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram, MessageCircle } from "lucide-react";
+import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram } from "lucide-react";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Minha conta — Princesa de Laços" }] }),
