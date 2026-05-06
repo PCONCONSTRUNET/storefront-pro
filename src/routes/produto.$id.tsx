@@ -97,13 +97,34 @@ function Page() {
 
             <p className="mt-5 text-sm text-foreground/80 leading-relaxed">{product.description}</p>
 
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="text-3xl font-bold text-primary">{brl(finalPrice)}</span>
+              {product.oldPrice && <span className="text-base text-muted-foreground line-through">{brl(product.oldPrice)}</span>}
+            </div>
+            <p className="text-xs text-success font-medium mt-1">ou Pix com 5% off: {brl(finalPrice * 0.95)}</p>
+
+            <p className="mt-5 text-sm text-foreground/80 leading-relaxed">{product.description}</p>
+
             {product.variations?.map(v => (
               <div key={v.name} className="mt-4">
                 <div className="text-sm font-semibold mb-2">{v.name}</div>
                 <div className="flex gap-2 flex-wrap">
-                  {v.options.map(o => (
-                    <button key={o} className="px-3 py-1.5 rounded-full border border-border text-sm hover:border-primary hover:bg-primary/5 transition-colors">{o}</button>
-                  ))}
+                  {v.options.map((o, idx) => {
+                    const label = typeof o === "string" ? o : o.label;
+                    const delta = typeof o === "object" ? o.priceDelta : undefined;
+                    const isSel = selected[v.name] === idx;
+                    return (
+                      <button
+                        key={label + idx}
+                        type="button"
+                        onClick={() => setSelected(s => ({ ...s, [v.name]: idx }))}
+                        className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${isSel ? "border-primary bg-primary/10 text-primary font-semibold" : "border-border hover:border-primary hover:bg-primary/5"}`}
+                      >
+                        {label}
+                        {delta ? <span className="ml-1 text-xs opacity-80">+{brl(delta)}</span> : null}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
