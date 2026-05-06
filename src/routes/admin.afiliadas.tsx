@@ -119,8 +119,8 @@ function Page() {
             </div>
           </div>
 
-          {affiliates.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Nenhuma afiliada cadastrada.</p>
+          {filteredAffiliates.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">{affiliates.length === 0 ? "Nenhuma afiliada cadastrada." : "Nenhum resultado para a busca."}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -130,15 +130,17 @@ function Page() {
                     <th className="py-2 pr-2">E-mail</th>
                     <th className="py-2 pr-2">Comissão</th>
                     <th className="py-2 pr-2">Status</th>
-                    <th className="py-2 pr-2">Vendas</th>
+                    <th className="py-2 pr-2">Pagas</th>
+                    <th className="py-2 pr-2">Comissão paga</th>
                     <th className="py-2 pr-2"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {affiliates.map(a => {
-                    const aSales = sales.filter(s => s.affiliateId === a.id && s.status !== "cancelada");
+                  {filteredAffiliates.map(a => {
+                    const paid = sales.filter(s => s.affiliateId === a.id && s.status === "confirmada");
+                    const earned = paid.reduce((acc, s) => acc + s.commissionEarned, 0);
                     return (
-                      <tr key={a.id} className="border-b border-border last:border-0">
+                      <tr key={a.id} onClick={() => setViewing(a)} className="border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-colors">
                         <td className="py-2 pr-2 font-medium">{a.name}</td>
                         <td className="py-2 pr-2 text-muted-foreground">{a.email}</td>
                         <td className="py-2 pr-2">
@@ -149,11 +151,13 @@ function Page() {
                             {a.active ? "Ativa" : "Inativa"}
                           </span>
                         </td>
-                        <td className="py-2 pr-2">{aSales.length}</td>
-                        <td className="py-2 pr-2">
+                        <td className="py-2 pr-2">{paid.length}</td>
+                        <td className="py-2 pr-2 text-gold font-semibold">{brl(earned)}</td>
+                        <td className="py-2 pr-2" onClick={e => e.stopPropagation()}>
                           <div className="flex gap-1 justify-end">
-                            <button onClick={() => setEditing({ ...a })} className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="h-4 w-4" /></button>
-                            <button onClick={() => { if (confirm(`Excluir ${a.name}? Vendas dela também serão removidas.`)) { remove(a.id); toast.success("Afiliada removida"); } }} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
+                            <button onClick={() => setViewing(a)} title="Ver detalhes" className="p-1.5 rounded-lg hover:bg-muted"><Eye className="h-4 w-4" /></button>
+                            <button onClick={() => setEditing({ ...a })} title="Editar" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="h-4 w-4" /></button>
+                            <button onClick={() => { if (confirm(`Excluir ${a.name}? Vendas dela também serão removidas.`)) { remove(a.id); toast.success("Afiliada removida"); } }} title="Excluir" className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
                           </div>
                         </td>
                       </tr>
