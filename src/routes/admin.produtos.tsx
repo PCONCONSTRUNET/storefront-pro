@@ -73,36 +73,139 @@ function Page() {
 
 function ProductForm({ product, categories, onSave }: { product: Product; categories: { id: string; name: string }[]; onSave: (p: Product) => void }) {
   const [p, setP] = useState(product);
+  const [tab, setTab] = useState<"basico" | "midia" | "var" | "desc">("basico");
+  const tabs = [
+    { id: "basico", label: "Básico" },
+    { id: "midia", label: "Mídia" },
+    { id: "var", label: "Variações" },
+    { id: "desc", label: "Descrição" },
+  ] as const;
+
   return (
     <form onSubmit={e => { e.preventDefault(); onSave(p); }} className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Nome" value={p.name} onChange={v => setP({ ...p, name: v })} className="col-span-2" required />
-        <Field label="SKU" value={p.sku} onChange={v => setP({ ...p, sku: v })} required />
-        <label className="block">
-          <span className="text-xs font-medium text-muted-foreground">Categoria</span>
-          <select value={p.category} onChange={e => setP({ ...p, category: e.target.value })} className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none">
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </label>
-        <Field label="Preço" type="number" value={String(p.price)} onChange={v => setP({ ...p, price: parseFloat(v) || 0 })} required />
-        <Field label="Preço promocional" type="number" value={String(p.oldPrice ?? "")} onChange={v => setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })} />
-        <Field label="Estoque" type="number" value={String(p.stock)} onChange={v => setP({ ...p, stock: parseInt(v) || 0 })} required />
-        <label className="flex items-center gap-2 mt-6">
-          <input type="checkbox" checked={p.active} onChange={e => setP({ ...p, active: e.target.checked })} />
-          <span className="text-sm">Ativo</span>
-        </label>
+      <div className="flex gap-1 p-1 bg-muted rounded-xl">
+        {tabs.map(t => (
+          <button key={t.id} type="button" onClick={() => setTab(t.id)}
+            className={`flex-1 h-8 text-xs font-semibold rounded-lg transition ${tab === t.id ? "bg-card shadow text-foreground" : "text-muted-foreground"}`}>
+            {t.label}
+          </button>
+        ))}
       </div>
-      <GalleryEditor
-        gallery={p.gallery && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : [])}
-        onChange={(imgs) => setP({ ...p, gallery: imgs, image: imgs[0] || "" })}
-      />
-      <label className="block">
-        <span className="text-xs font-medium text-muted-foreground">Descrição</span>
-        <textarea value={p.description} onChange={e => setP({ ...p, description: e.target.value })} rows={3}
-          className="mt-1 w-full px-3 py-2 rounded-xl bg-muted outline-none" />
-      </label>
+
+      {tab === "basico" && (
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Nome" value={p.name} onChange={v => setP({ ...p, name: v })} className="col-span-2" required />
+          <Field label="SKU" value={p.sku} onChange={v => setP({ ...p, sku: v })} required />
+          <label className="block">
+            <span className="text-xs font-medium text-muted-foreground">Categoria</span>
+            <select value={p.category} onChange={e => setP({ ...p, category: e.target.value })} className="mt-1 w-full h-10 px-2 text-sm rounded-xl bg-muted outline-none">
+              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </label>
+          <Field label="Preço" type="number" value={String(p.price)} onChange={v => setP({ ...p, price: parseFloat(v) || 0 })} required />
+          <Field label="Promocional" type="number" value={String(p.oldPrice ?? "")} onChange={v => setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })} />
+          <Field label="Estoque" type="number" value={String(p.stock)} onChange={v => setP({ ...p, stock: parseInt(v) || 0 })} required />
+          <label className="flex items-center gap-2 mt-5">
+            <input type="checkbox" checked={p.active} onChange={e => setP({ ...p, active: e.target.checked })} />
+            <span className="text-sm">Ativo</span>
+          </label>
+        </div>
+      )}
+
+      {tab === "midia" && (
+        <GalleryEditor
+          gallery={p.gallery && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : [])}
+          onChange={(imgs) => setP({ ...p, gallery: imgs, image: imgs[0] || "" })}
+        />
+      )}
+
+      {tab === "var" && (
+        <VariationsEditor
+          variations={p.variations ?? []}
+          onChange={(v) => setP({ ...p, variations: v })}
+        />
+      )}
+
+      {tab === "desc" && (
+        <label className="block">
+          <span className="text-xs font-medium text-muted-foreground">Descrição</span>
+          <textarea value={p.description} onChange={e => setP({ ...p, description: e.target.value })} rows={6}
+            className="mt-1 w-full px-3 py-2 text-sm rounded-xl bg-muted outline-none" />
+        </label>
+      )}
+
       <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold">Salvar</button>
     </form>
+  );
+}
+
+function VariationsEditor({ variations, onChange }: { variations: { name: string; options: string[] }[]; onChange: (v: { name: string; options: string[] }[]) => void }) {
+  const add = () => onChange([...variations, { name: "", options: [] }]);
+  const update = (i: number, patch: Partial<{ name: string; options: string[] }>) => {
+    onChange(variations.map((v, idx) => idx === i ? { ...v, ...patch } : v));
+  };
+  const remove = (i: number) => onChange(variations.filter((_, idx) => idx !== i));
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] text-muted-foreground">Ex.: Tamanho → P, M, G · Cor → Rosa, Azul</p>
+      {variations.length === 0 && (
+        <div className="text-center py-6 text-xs text-muted-foreground bg-muted/40 rounded-xl">Nenhuma variação.</div>
+      )}
+      {variations.map((v, i) => (
+        <div key={i} className="bg-muted/40 rounded-xl p-2 space-y-2">
+          <div className="flex gap-2">
+            <input
+              placeholder="Nome (ex: Tamanho)"
+              value={v.name}
+              onChange={e => update(i, { name: e.target.value })}
+              className="flex-1 h-9 px-2 text-sm rounded-lg bg-card outline-none focus:ring-2 ring-primary/40"
+            />
+            <button type="button" onClick={() => remove(i)} className="w-9 h-9 grid place-items-center rounded-lg bg-destructive/10 text-destructive">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+          <OptionsInput options={v.options} onChange={(opts) => update(i, { options: opts })} />
+        </div>
+      ))}
+      <button type="button" onClick={add} className="w-full h-9 rounded-xl bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-1">
+        <Plus className="h-4 w-4" /> Adicionar variação
+      </button>
+    </div>
+  );
+}
+
+function OptionsInput({ options, onChange }: { options: string[]; onChange: (o: string[]) => void }) {
+  const [val, setVal] = useState("");
+  const add = () => {
+    const v = val.trim();
+    if (!v || options.includes(v)) { setVal(""); return; }
+    onChange([...options, v]);
+    setVal("");
+  };
+  return (
+    <div>
+      <div className="flex flex-wrap gap-1 mb-1">
+        {options.map((o, i) => (
+          <span key={i} className="inline-flex items-center gap-1 bg-card px-2 py-1 rounded-full text-xs">
+            {o}
+            <button type="button" onClick={() => onChange(options.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-destructive">
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="flex gap-1">
+        <input
+          value={val}
+          onChange={e => setVal(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          placeholder="Opção e Enter"
+          className="flex-1 h-8 px-2 text-xs rounded-lg bg-card outline-none"
+        />
+        <button type="button" onClick={add} className="px-3 h-8 rounded-lg bg-primary/10 text-primary text-xs font-semibold">Add</button>
+      </div>
+    </div>
   );
 }
 
