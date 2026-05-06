@@ -112,12 +112,22 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body { -webkit-font-smoothing: antialiased; }
+  html, body {
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
+  input, textarea, select { font-size: 16px; }
+  img, video { max-width: 100%; height: auto; }
   .font-display { font-family: var(--font-display); }
 }
 
