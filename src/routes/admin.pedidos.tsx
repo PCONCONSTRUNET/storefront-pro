@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/pedidos")({
 const statuses: OrderStatus[] = ["aguardando_pagamento", "pago", "em_separacao", "saiu_para_entrega", "concluido", "cancelado", "reembolsado"];
 
 function Page() {
-  const { orders, updateOrderStatus } = useStore();
+  const { orders, updateOrderStatus, deleteOrder } = useStore();
   const [filter, setFilter] = useState<OrderStatus | "todos">("todos");
   const [selected, setSelected] = useState<string | null>(null);
   const list = filter === "todos" ? orders : orders.filter(o => o.status === filter);
