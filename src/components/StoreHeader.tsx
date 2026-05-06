@@ -35,7 +35,7 @@ export function StoreHeader() {
 
       <div className="max-w-6xl mx-auto px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-4">
         <Link to="/" className="flex items-center shrink-0">
-          <img src={logo} alt={settings.storeName} className="h-9 md:h-12 w-auto object-contain bg-white/95 rounded-lg px-2 py-0.5" />
+          <img src={logo} alt={settings.storeName} className="h-14 md:h-20 w-auto object-contain drop-shadow-md" />
         </Link>
 
         <form onSubmit={onSearch} className="flex-1 relative">
