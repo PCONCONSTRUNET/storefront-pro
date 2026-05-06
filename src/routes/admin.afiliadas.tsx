@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useStore, type Affiliate, type AffiliateSaleStatus } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Pencil, Trash2, Check, X, Clock, Users, DollarSign, ShoppingBag } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, Clock, Users, DollarSign, ShoppingBag, Search, Eye, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/afiliadas")({
