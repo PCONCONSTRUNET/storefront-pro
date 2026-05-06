@@ -3,9 +3,10 @@ import { useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Edit, Trash2, X, Upload, Star, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Star, GripVertical, Crop } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/data";
+import { ImageCropModal } from "@/components/ImageCropModal";
 
 export const Route = createFileRoute("/admin/produtos")({
   component: Page,
