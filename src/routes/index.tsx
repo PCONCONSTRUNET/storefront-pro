@@ -35,8 +35,8 @@ function useCountdown(hours: number) {
 
 function Home() {
   const { products, categories, settings, coupons } = useStore();
-  const flash = useMemo(() => products.filter(p => p.active && p.oldPrice).slice(0, 8), [products]);
-  const all = useMemo(() => products.filter(p => p.active), [products]);
+  const flash = useMemo(() => products.filter(p => p.active && !p.hidden && p.oldPrice).slice(0, 8), [products]);
+  const all = useMemo(() => products.filter(p => p.active && !p.hidden), [products]);
   const { h, m, s } = useCountdown(8);
 
   const banners = [

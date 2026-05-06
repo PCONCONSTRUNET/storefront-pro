@@ -32,7 +32,7 @@ function Page() {
   }
 
   const gallery = product.gallery && product.gallery.length > 0 ? product.gallery : [product.image];
-  const related = products.filter(p => p.category === product.category && p.id !== product.id && p.active).slice(0, 4);
+  const related = products.filter(p => p.category === product.category && p.id !== product.id && p.active && !p.hidden).slice(0, 4);
   const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
 
   const handleBuyNow = () => {

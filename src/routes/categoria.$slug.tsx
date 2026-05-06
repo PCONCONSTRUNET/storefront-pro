@@ -12,7 +12,7 @@ function Page() {
   const { slug } = Route.useParams();
   const { products, categories } = useStore();
   const cat = categories.find(c => c.id === slug);
-  const list = products.filter(p => p.category === slug && p.active);
+  const list = products.filter(p => p.category === slug && p.active && !p.hidden);
 
   return (
     <StoreLayout>
