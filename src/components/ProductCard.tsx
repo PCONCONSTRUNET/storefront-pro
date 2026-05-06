@@ -1,15 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Star, Truck } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
-import { useStore } from "@/lib/store";
 import { brl } from "@/lib/format";
 import type { Product } from "@/lib/data";
 
 export function ProductCard({ product }: { product: Product }) {
-  const addToCart = useStore((s) => s.addToCart);
   const [imgError, setImgError] = useState(false);
-  const [added, setAdded] = useState(false);
   const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
   // Pseudo-random but stable based on id, for the demo
   const seed = product.id.charCodeAt(1) || 3;
