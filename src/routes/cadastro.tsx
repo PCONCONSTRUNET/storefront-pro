@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { toast } from "sonner";
@@ -11,14 +11,27 @@ export const Route = createFileRoute("/cadastro")({
 
 function Page() {
   const navigate = useNavigate();
+  const router = useRouter();
   const registerCustomer = useStore(s => s.registerCustomer);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    router.preloadRoute({ to: "/perfil" }).catch(() => {});
+  }, [router]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const r = registerCustomer(form);
-    if (r.ok) { toast.success(r.message); navigate({ to: "/perfil" }); }
-    else toast.error(r.message);
+    if (r.ok) {
+      navigate({ to: "/perfil" });
+      toast.success(r.message);
+    } else {
+      toast.error(r.message);
+      setSubmitting(false);
+    }
   };
 
   const close = () => navigate({ to: "/" });
