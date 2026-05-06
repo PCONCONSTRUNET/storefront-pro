@@ -140,6 +140,12 @@ type AppState = {
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
   transactions: Transaction[];
+  sessions: {
+    admin: SessionToken | null;
+    customer: SessionToken | null;
+    affiliate: SessionToken | null;
+  };
+  refreshSession: (kind: SessionKind) => void;
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
