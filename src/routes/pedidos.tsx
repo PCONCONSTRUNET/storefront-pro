@@ -11,7 +11,8 @@ export const Route = createFileRoute("/pedidos")({
 
 function Page() {
   const customer = useStore(selectCurrentCustomer);
-  const orders = useStore(s => s.orders.filter(o => customer ? o.customerId === customer.id : o.customerEmail));
+  const allOrders = useStore(s => s.orders);
+  const orders = customer ? allOrders.filter(o => o.customerId === customer.id) : [];
 
   if (!customer) {
     return (
