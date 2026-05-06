@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const nav = [
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
   { to: "/admin/clientes", label: "Clientes", icon: Users },
+  { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },
   { to: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
