@@ -1,14 +1,23 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { Search, Bell, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
 import logo from "@/assets/logo-princesa.png";
 
+const STORE_ROUTES_TO_PRELOAD = ["/", "/categorias", "/pedidos", "/perfil", "/carrinho", "/cadastro", "/login"] as const;
+
 export function StoreHeader() {
   const navigate = useNavigate();
+  const router = useRouter();
   const count = useStore(selectCartCount);
   const settings = useStore((s) => s.settings);
   const [q, setQ] = useState("");
+
+  useEffect(() => {
+    STORE_ROUTES_TO_PRELOAD.forEach((to) => {
+      router.preloadRoute({ to }).catch(() => {});
+    });
+  }, [router]);
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();

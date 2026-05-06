@@ -6,4 +6,30 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig();
+export default defineConfig({
+  tanstackStart: {
+    router: {
+      codeSplittingOptions: {
+        splitBehavior: ({ routeId }: { routeId: string }) => {
+          const instantStoreRoutes = new Set([
+            "/",
+            "/buscar",
+            "/cadastro",
+            "/carrinho",
+            "/categorias",
+            "/checkout",
+            "/login",
+            "/pedidos",
+            "/perfil",
+            "/categoria/$slug",
+            "/pedido/$id",
+            "/produto/$id",
+          ]);
+
+          return instantStoreRoutes.has(routeId) ? [] : undefined;
+        },
+        defaultBehavior: [["component", "errorComponent", "notFoundComponent"]],
+      },
+    },
+  },
+});
