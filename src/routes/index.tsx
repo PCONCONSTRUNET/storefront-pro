@@ -170,3 +170,72 @@ function Home() {
     </StoreLayout>
   );
 }
+
+function CategoriesScroller({ categories }: { categories: { id: string; name: string; image: string }[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [autoplay, setAutoplay] = useState(true);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const id = setInterval(() => {
+      if (!el) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft >= max - 2) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 80, behavior: "smooth" });
+      }
+    }, 2000);
+    return () => clearInterval(id);
+  }, [autoplay]);
+
+  const scrollBy = (dir: number) => {
+    scrollRef.current?.scrollBy({ left: dir * 200, behavior: "smooth" });
+  };
+
+  return (
+    <section className="mt-3 max-w-6xl mx-auto">
+      <div className="bg-card rounded-md border border-border mx-3 md:mx-4 p-3 md:p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm md:text-base font-bold flex items-center gap-1.5">
+            <Crown className="h-4 w-4 text-gold fill-gold" /> Categorias
+          </h2>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setAutoplay((v) => !v)}
+              aria-label={autoplay ? "Pausar rolagem" : "Iniciar rolagem"}
+              className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 text-foreground grid place-items-center transition-colors"
+            >
+              {autoplay ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            </button>
+            <button onClick={() => scrollBy(-1)} aria-label="Anterior" className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 grid place-items-center transition-colors">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button onClick={() => scrollBy(1)} aria-label="Próximo" className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 grid place-items-center transition-colors">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <Link to="/categorias" className="ml-1 text-[11px] md:text-xs text-primary font-semibold flex items-center">
+              Ver todas <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+        <div
+          ref={scrollRef}
+          onPointerDown={() => setAutoplay(false)}
+          className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 snap-x"
+        >
+          {categories.map((c) => (
+            <Link key={c.id} to="/categoria/$slug" params={{ slug: c.id }} className="shrink-0 snap-start flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors w-[72px] md:w-[88px]">
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform">
+                {c.image}
+              </div>
+              <span className="text-[10px] md:text-xs font-medium text-foreground text-center line-clamp-1">{c.name}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
