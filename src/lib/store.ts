@@ -101,7 +101,7 @@ type AppState = {
   registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => { ok: boolean; message: string };
   loginCustomer: (email: string, password: string) => { ok: boolean; message: string };
   logoutCustomer: () => void;
-  loginAdmin: (password: string) => boolean;
+  loginAdmin: (email: string, password: string) => { ok: boolean; message: string };
   logoutAdmin: () => void;
 
   placeOrder: (data: {
@@ -171,9 +171,16 @@ export const useStore = create<AppState>()(
         return { ok: true, message: "Bem-vinda!" };
       },
       logoutCustomer: () => set({ currentCustomerId: null }),
-      loginAdmin: (password) => {
-        if (password === "admin123") { set({ isAdmin: true }); return true; }
-        return false;
+      loginAdmin: (email, password) => {
+        const AUTHORIZED_ADMINS: Record<string, string> = {
+          "lucaspereirabn10@gmail.com": "admin123",
+        };
+        const normalized = email.trim().toLowerCase();
+        const expected = AUTHORIZED_ADMINS[normalized];
+        if (!expected) return { ok: false, message: "E-mail não autorizado" };
+        if (expected !== password) return { ok: false, message: "Senha incorreta" };
+        set({ isAdmin: true });
+        return { ok: true, message: "Bem-vindo!" };
       },
       logoutAdmin: () => set({ isAdmin: false }),
 

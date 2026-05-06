@@ -11,12 +11,14 @@ export const Route = createFileRoute("/admin/login")({
 function Page() {
   const navigate = useNavigate();
   const loginAdmin = useStore(s => s.loginAdmin);
+  const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginAdmin(pwd)) { toast.success("Bem-vindo!"); navigate({ to: "/admin" }); }
-    else toast.error("Senha incorreta");
+    const r = loginAdmin(email, pwd);
+    if (r.ok) { toast.success(r.message); navigate({ to: "/admin" }); }
+    else toast.error(r.message);
   };
 
   return (
@@ -25,16 +27,33 @@ function Page() {
         <div className="text-center">
           <div className="w-14 h-14 mx-auto rounded-full gradient-primary grid place-items-center text-primary-foreground"><Crown className="h-7 w-7" /></div>
           <h1 className="font-display text-2xl text-primary mt-3">Painel Admin</h1>
-          <p className="text-xs text-muted-foreground">Princesa de Laços</p>
+          <p className="text-xs text-muted-foreground">Acesso restrito a e-mails autorizados</p>
         </div>
         <form onSubmit={submit} className="mt-6 space-y-3">
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Senha de administrador</span>
-            <input type="password" value={pwd} onChange={e => setPwd(e.target.value)} required autoFocus
-              className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40" />
+            <span className="text-xs font-medium text-muted-foreground">E-mail autorizado</span>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoFocus
+              placeholder="seu@email.com"
+              className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-medium text-muted-foreground">Senha</span>
+            <input
+              type="password"
+              value={pwd}
+              onChange={e => setPwd(e.target.value)}
+              required
+              placeholder="Sua senha"
+              className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+            />
           </label>
           <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold">Entrar</button>
-          <p className="text-[11px] text-center text-muted-foreground mt-2">Demo: senha <strong>admin123</strong></p>
         </form>
       </div>
     </div>
