@@ -6,7 +6,7 @@ import { brl } from "@/lib/format";
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar, CartesianGrid } from "recharts";
 
-export const Route = createFileRoute("/admin/")({
+export const Route = createFileRoute("/admin/dashboard")({
   component: Page,
 });
 
