@@ -69,6 +69,22 @@ export type AffiliateSale = {
   createdAt: string;
 };
 
+export type TransactionKind = "entrada" | "saida";
+export type TransactionCategory = "venda" | "comissao_afiliada" | "fornecedor" | "marketing" | "operacional" | "outros";
+
+export type Transaction = {
+  id: string;
+  kind: TransactionKind;
+  category: TransactionCategory;
+  description: string;
+  amount: number;
+  date: string;
+  affiliateId?: string;
+  productSummary?: string;
+  notes?: string;
+  createdAt: string;
+};
+
 export type Customer = {
   id: string;
   name: string;
