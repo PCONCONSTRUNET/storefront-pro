@@ -47,6 +47,11 @@ function Page() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
 
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const monthAgoISO = (() => { const d = new Date(); d.setDate(d.getDate() - 29); return d.toISOString().slice(0, 10); })();
+  const [reportFrom, setReportFrom] = useState(monthAgoISO);
+  const [reportTo, setReportTo] = useState(todayISO);
+
   const rows: Row[] = useMemo(() => {
     const list: Row[] = [];
 
