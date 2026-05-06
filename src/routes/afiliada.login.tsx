@@ -11,8 +11,8 @@ export const Route = createFileRoute("/afiliada/login")({
 function Page() {
   const navigate = useNavigate();
   const hydrated = useStoreHydrated();
-  const currentId = useStore(s => s.currentAffiliateId);
-  const login = useStore(s => s.loginAffiliate);
+  const currentId = useStore((s) => s.currentAffiliateId);
+  const login = useStore((s) => s.loginAffiliate);
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -29,34 +29,58 @@ function Page() {
     if (r.ok) {
       navigate({ to: "/afiliada", replace: true });
       toast.success(r.message);
+    } else {
+      toast.error(r.message);
+      setSubmitting(false);
     }
-    else { toast.error(r.message); setSubmitting(false); }
   };
 
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-rose/30 to-accent p-4">
       <div className="w-full max-w-sm bg-card rounded-3xl shadow-soft p-6">
         <div className="text-center">
-          <img src={logo} alt="Princesa de Laços" className="h-20 w-auto mx-auto object-contain" style={{ mixBlendMode: "multiply" }} />
+          <img
+            src={logo}
+            alt="Princesa de Laços"
+            className="h-20 w-auto mx-auto object-contain"
+            style={{ mixBlendMode: "multiply" }}
+          />
           <h1 className="font-display text-2xl text-primary mt-3">Painel da Afiliada</h1>
           <p className="text-xs text-muted-foreground">Acesse com seu e-mail e senha</p>
         </div>
         <form onSubmit={submit} className="mt-6 space-y-3">
           <label className="block">
             <span className="text-xs font-medium text-muted-foreground">E-mail</span>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required autoFocus
-              className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary/50" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary/50"
+            />
           </label>
           <label className="block">
             <span className="text-xs font-medium text-muted-foreground">Senha</span>
-            <input type="password" value={pwd} onChange={e => setPwd(e.target.value)} required
-              className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary/50" />
+            <input
+              type="password"
+              value={pwd}
+              onChange={(e) => setPwd(e.target.value)}
+              required
+              className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary/50"
+            />
           </label>
-          <button disabled={submitting} className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-70">
+          <button
+            disabled={submitting}
+            className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-70"
+          >
             Entrar
           </button>
           <p className="text-[11px] text-muted-foreground text-center pt-2">
-            Ainda não é afiliada? <Link to="/afiliada/cadastro" className="text-primary underline">Criar conta</Link>
+            Ainda não é afiliada?{" "}
+            <Link to="/afiliada/cadastro" className="text-primary underline">
+              Criar conta
+            </Link>
           </p>
         </form>
       </div>
