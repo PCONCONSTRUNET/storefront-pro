@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { useStore } from "@/lib/store";
+import { useEffect, useState } from "react";
+import { useStore, useStoreHydrated } from "@/lib/store";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,8 +10,14 @@ export const Route = createFileRoute("/afiliada/cadastro")({
 
 function Page() {
   const navigate = useNavigate();
+  const hydrated = useStoreHydrated();
+  const currentId = useStore(s => s.currentAffiliateId);
   const register = useStore(s => s.registerAffiliate);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+
+  useEffect(() => {
+    if (hydrated && currentId) navigate({ to: "/afiliada" });
+  }, [hydrated, currentId, navigate]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useStore, useStoreHydrated } from "@/lib/store";
 import { brl } from "@/lib/format";
 import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ type View = "registrar" | "vendas" | "resumo";
 
 function Page() {
   const navigate = useNavigate();
+  const hydrated = useStoreHydrated();
   const currentId = useStore(s => s.currentAffiliateId);
   const affiliates = useStore(s => s.affiliates);
   const sales = useStore(s => s.affiliateSales);
@@ -29,13 +30,16 @@ function Page() {
   const me = useMemo(() => affiliates.find(a => a.id === currentId) || null, [affiliates, currentId]);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!currentId) { navigate({ to: "/afiliada/login" }); return; }
-    if (currentId && !me) { logout(); navigate({ to: "/afiliada/login" }); }
-  }, [currentId, me, navigate, logout]);
+    if (!me) { logout(); navigate({ to: "/afiliada/login" }); }
+  }, [hydrated, currentId, me, navigate, logout]);
 
   const [view, setView] = useState<View>("registrar");
 
-  if (!me) return null;
+  if (!hydrated || !me) {
+    return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
+  }
 
   const mySales = sales.filter(s => s.affiliateId === me.id);
 
