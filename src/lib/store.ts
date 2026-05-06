@@ -390,7 +390,7 @@ export const useStore = create<AppState>()(
 );
 
 export function useStoreHydrated() {
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(() => typeof window !== "undefined" && useStore.persist.hasHydrated());
   useEffect(() => {
     if (useStore.persist.hasHydrated()) { setHydrated(true); return; }
     const unsub = useStore.persist.onFinishHydration(() => setHydrated(true));
