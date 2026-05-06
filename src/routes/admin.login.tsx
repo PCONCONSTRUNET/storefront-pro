@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
-import { Crown } from "lucide-react";
+import { Crown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/login")({
@@ -10,11 +10,17 @@ export const Route = createFileRoute("/admin/login")({
 
 function Page() {
   const navigate = useNavigate();
+  const router = useRouter();
   const hydrated = useStoreHydrated();
   const isAdmin = useStore(s => s.isAdmin);
   const loginAdmin = useStore(s => s.loginAdmin);
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    router.preloadRoute({ to: "/admin/dashboard" }).catch(() => {});
+  }, [router]);
 
   useEffect(() => {
     if (hydrated && isAdmin) navigate({ to: "/admin/dashboard" });
@@ -22,9 +28,11 @@ function Page() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const r = loginAdmin(email, pwd);
     if (r.ok) { toast.success(r.message); navigate({ to: "/admin/dashboard" }); }
-    else toast.error(r.message);
+    else { toast.error(r.message); setSubmitting(false); }
   };
 
   return (
