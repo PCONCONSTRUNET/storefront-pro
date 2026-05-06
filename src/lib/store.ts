@@ -235,6 +235,27 @@ export const useStore = create<AppState>()(
         return { ok: true, message: `Bem-vinda, ${a.name}!` };
       },
       logoutAffiliate: () => set({ currentAffiliateId: null }),
+      registerAffiliate: (data) => {
+        const name = data.name.trim();
+        const email = data.email.trim().toLowerCase();
+        if (!name || !email || !data.password) return { ok: false, message: "Preencha todos os campos" };
+        if (data.password.length < 4) return { ok: false, message: "Senha muito curta" };
+        const exists = get().affiliates.find(a => a.email.toLowerCase() === email);
+        if (exists) return { ok: false, message: "E-mail já cadastrado" };
+        const newA: Affiliate = {
+          id: `aff_${Date.now()}`,
+          name,
+          email,
+          password: data.password,
+          phone: data.phone.trim(),
+          commissionType: "percent",
+          commissionValue: 10,
+          active: true,
+          createdAt: new Date().toISOString(),
+        };
+        set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id }));
+        return { ok: true, message: "Cadastro realizado! Aguarde a administradora definir sua comissão." };
+      },
       upsertAffiliate: (a) => set((s) => ({
         affiliates: s.affiliates.find(x => x.id === a.id) ? s.affiliates.map(x => x.id === a.id ? a : x) : [...s.affiliates, a],
       })),
