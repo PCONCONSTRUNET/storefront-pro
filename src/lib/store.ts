@@ -390,6 +390,7 @@ export const useStore = create<AppState>()(
         return order;
       },
       updateOrderStatus: (id, status) => set((s) => ({ orders: s.orders.map(o => o.id === id ? { ...o, status } : o) })),
+      deleteOrder: (id) => set((s) => ({ orders: s.orders.filter(o => o.id !== id) })),
 
       upsertProduct: (p) => set((s) => ({
         products: s.products.find(x => x.id === p.id) ? s.products.map(x => x.id === p.id ? p : x) : [...s.products, p],
