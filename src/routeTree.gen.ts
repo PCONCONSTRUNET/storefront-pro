@@ -101,19 +101,19 @@ const ProdutoIdRoute = ProdutoIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilFavoritosRoute = PerfilFavoritosRouteImport.update({
-  id: '/favoritos',
-  path: '/favoritos',
-  getParentRoute: () => PerfilRoute,
+  id: '/perfil/favoritos',
+  path: '/perfil/favoritos',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilEnderecosRoute = PerfilEnderecosRouteImport.update({
-  id: '/enderecos',
-  path: '/enderecos',
-  getParentRoute: () => PerfilRoute,
+  id: '/perfil/enderecos',
+  path: '/perfil/enderecos',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilConfiguracoesRoute = PerfilConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => PerfilRoute,
+  id: '/perfil/configuracoes',
+  path: '/perfil/configuracoes',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PedidoIdRoute = PedidoIdRouteImport.update({
   id: '/pedido/$id',
@@ -411,6 +411,9 @@ export interface RootRouteChildren {
   AfiliadaLoginRoute: typeof AfiliadaLoginRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   PedidoIdRoute: typeof PedidoIdRoute
+  PerfilConfiguracoesRoute: typeof PerfilConfiguracoesRoute
+  PerfilEnderecosRoute: typeof PerfilEnderecosRoute
+  PerfilFavoritosRoute: typeof PerfilFavoritosRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AfiliadaIndexRoute: typeof AfiliadaIndexRoute
@@ -505,24 +508,24 @@ declare module '@tanstack/react-router' {
     }
     '/perfil/favoritos': {
       id: '/perfil/favoritos'
-      path: '/favoritos'
+      path: '/perfil/favoritos'
       fullPath: '/perfil/favoritos'
       preLoaderRoute: typeof PerfilFavoritosRouteImport
-      parentRoute: typeof PerfilRoute
+      parentRoute: typeof rootRouteImport
     }
     '/perfil/enderecos': {
       id: '/perfil/enderecos'
-      path: '/enderecos'
+      path: '/perfil/enderecos'
       fullPath: '/perfil/enderecos'
       preLoaderRoute: typeof PerfilEnderecosRouteImport
-      parentRoute: typeof PerfilRoute
+      parentRoute: typeof rootRouteImport
     }
     '/perfil/configuracoes': {
       id: '/perfil/configuracoes'
-      path: '/configuracoes'
+      path: '/perfil/configuracoes'
       fullPath: '/perfil/configuracoes'
       preLoaderRoute: typeof PerfilConfiguracoesRouteImport
-      parentRoute: typeof PerfilRoute
+      parentRoute: typeof rootRouteImport
     }
     '/pedido/$id': {
       id: '/pedido/$id'
@@ -656,6 +659,9 @@ const rootRouteChildren: RootRouteChildren = {
   AfiliadaLoginRoute: AfiliadaLoginRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   PedidoIdRoute: PedidoIdRoute,
+  PerfilConfiguracoesRoute: PerfilConfiguracoesRoute,
+  PerfilEnderecosRoute: PerfilEnderecosRoute,
+  PerfilFavoritosRoute: PerfilFavoritosRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   AfiliadaIndexRoute: AfiliadaIndexRoute,
@@ -664,12 +670,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
