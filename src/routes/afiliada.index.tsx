@@ -213,6 +213,13 @@ function Field({ label, children, full, required, icon: Icon }: { label: string;
 }
 
 function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["affiliateSales"] }) {
+  const deleteSale = useStore(s => s.deleteAffiliateSale);
+  const handleDelete = (id: string, name: string) => {
+    if (confirm(`Excluir a venda de "${name}"? Esta ação não pode ser desfeita.`)) {
+      deleteSale(id);
+      toast.success("Venda excluída");
+    }
+  };
   return (
     <div className="bg-card rounded-2xl p-4 shadow-card">
       <h2 className="font-bold mb-3">Minhas vendas</h2>
@@ -232,6 +239,14 @@ function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["aff
                 <div className="text-xs text-success">+ {brl(s.commissionEarned)}</div>
                 <StatusBadge status={s.status} />
               </div>
+              <button
+                onClick={() => handleDelete(s.id, s.customerName)}
+                className="h-8 w-8 grid place-items-center rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+                aria-label="Excluir venda"
+                title="Excluir venda"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </li>
           ))}
         </ul>
