@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
@@ -10,7 +11,11 @@ export const Route = createFileRoute("/buscar")({
 
 function Page() {
   const { q } = Route.useSearch();
-  const products = useStore(s => s.products.filter(p => p.active && p.name.toLowerCase().includes(q.toLowerCase())));
+  const allProducts = useStore(s => s.products);
+  const products = useMemo(
+    () => allProducts.filter(p => p.active && p.name.toLowerCase().includes(q.toLowerCase())),
+    [allProducts, q]
+  );
   return (
     <StoreLayout>
       <div className="max-w-6xl mx-auto px-4 py-5">
