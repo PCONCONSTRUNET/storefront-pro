@@ -66,29 +66,19 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
           <span>{sold} vendidos</span>
         </div>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (product.stock === 0) return;
-            addToCart(product.id);
-            toast.success(`${product.name} adicionado ao carrinho`);
-            setAdded(true);
-            setTimeout(() => setAdded(false), 1200);
-          }}
-          disabled={product.stock === 0}
+        <Link
+          to="/produto/$id"
+          params={{ id: product.id }}
+          aria-disabled={product.stock === 0}
           className={
-            "mt-1.5 h-8 rounded-sm text-[11px] font-semibold transition-all " +
+            "mt-1.5 h-8 rounded-sm text-[11px] font-semibold transition-all grid place-items-center " +
             (product.stock === 0
-              ? "bg-muted text-muted-foreground cursor-not-allowed"
-              : added
-                ? "bg-success text-success-foreground border border-success"
-                : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:scale-95 border border-primary/30")
+              ? "bg-muted text-muted-foreground cursor-not-allowed pointer-events-none"
+              : "bg-primary text-primary-foreground hover:opacity-90 active:scale-95")
           }
         >
-          {product.stock === 0 ? "Esgotado" : added ? "✓ Adicionado" : "+ Adicionar"}
-        </button>
+          {product.stock === 0 ? "Esgotado" : "Comprar"}
+        </Link>
       </div>
     </article>
   );
