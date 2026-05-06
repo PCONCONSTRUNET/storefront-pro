@@ -433,3 +433,140 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
+
+function AffiliateReport({ from, to, onFromChange, onToChange }: {
+  from: string; to: string; onFromChange: (v: string) => void; onToChange: (v: string) => void;
+}) {
+  const affiliates = useStore(s => s.affiliates);
+  const affiliateSales = useStore(s => s.affiliateSales);
+  const transactions = useStore(s => s.transactions);
+
+  const report = useMemo(() => {
+    const start = new Date(from + "T00:00:00");
+    const end = new Date(to + "T23:59:59");
+    const inRange = (iso: string) => { const d = new Date(iso); return d >= start && d <= end; };
+
+    const rows = affiliates.map(a => {
+      const sales = affiliateSales.filter(s => s.affiliateId === a.id && inRange(s.createdAt));
+      const confirmed = sales.filter(s => s.status === "confirmada");
+      const pending = sales.filter(s => s.status === "pendente");
+      const canceled = sales.filter(s => s.status === "cancelada");
+      const revenueConfirmed = confirmed.reduce((acc, s) => acc + s.saleValue, 0);
+      const commissionConfirmed = confirmed.reduce((acc, s) => acc + s.commissionEarned, 0);
+      const revenuePending = pending.reduce((acc, s) => acc + s.saleValue, 0);
+      const commissionPending = pending.reduce((acc, s) => acc + s.commissionEarned, 0);
+      const manualPaid = transactions
+        .filter(t => t.affiliateId === a.id && t.kind === "saida" && t.category === "comissao_afiliada" && inRange(t.date))
+        .reduce((acc, t) => acc + t.amount, 0);
+      return {
+        id: a.id,
+        name: a.name,
+        salesCount: sales.length,
+        confirmedCount: confirmed.length,
+        pendingCount: pending.length,
+        canceledCount: canceled.length,
+        revenueConfirmed,
+        commissionConfirmed,
+        revenuePending,
+        commissionPending,
+        commissionPaid: manualPaid,
+        commissionToPay: commissionConfirmed - manualPaid,
+      };
+    }).filter(r => r.salesCount > 0 || r.commissionPaid > 0)
+      .sort((a, b) => b.commissionConfirmed - a.commissionConfirmed);
+
+    const totals = rows.reduce((acc, r) => ({
+      sales: acc.sales + r.salesCount,
+      revenue: acc.revenue + r.revenueConfirmed,
+      commission: acc.commission + r.commissionConfirmed,
+      paid: acc.paid + r.commissionPaid,
+      toPay: acc.toPay + r.commissionToPay,
+    }), { sales: 0, revenue: 0, commission: 0, paid: 0, toPay: 0 });
+
+    return { rows, totals };
+  }, [affiliates, affiliateSales, transactions, from, to]);
+
+  const exportCsv = () => {
+    const header = ["Afiliada", "Vendas", "Confirmadas", "Pendentes", "Faturamento (confirmado)", "Comissão (confirmada)", "Comissão paga", "A pagar"];
+    const lines = report.rows.map(r => [
+      r.name, r.salesCount, r.confirmedCount, r.pendingCount,
+      r.revenueConfirmed.toFixed(2), r.commissionConfirmed.toFixed(2),
+      r.commissionPaid.toFixed(2), r.commissionToPay.toFixed(2),
+    ].join(";"));
+    const csv = [header.join(";"), ...lines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `relatorio-afiliadas-${from}-a-${to}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV baixado!");
+  };
+
+  return (
+    <div className="bg-card rounded-2xl shadow-card mt-4 overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+        <div className="font-bold flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> Relatório por afiliada</div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="text-xs flex items-center gap-1">
+            <span className="text-muted-foreground">De</span>
+            <input type="date" value={from} onChange={e => onFromChange(e.target.value)} className="h-8 px-2 rounded-lg bg-background border border-border text-xs" />
+          </label>
+          <label className="text-xs flex items-center gap-1">
+            <span className="text-muted-foreground">Até</span>
+            <input type="date" value={to} onChange={e => onToChange(e.target.value)} className="h-8 px-2 rounded-lg bg-background border border-border text-xs" />
+          </label>
+          <button onClick={exportCsv} className="text-xs bg-foreground text-background px-3 py-1.5 rounded-full font-semibold">CSV</button>
+        </div>
+      </div>
+
+      {report.rows.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground text-sm">Nenhuma venda de afiliada no período.</div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-xs text-muted-foreground">
+                <tr>
+                  <th className="text-left px-4 py-2">Afiliada</th>
+                  <th className="text-center px-2 py-2">Vendas</th>
+                  <th className="text-right px-2 py-2">Faturamento</th>
+                  <th className="text-right px-2 py-2">Comissão</th>
+                  <th className="text-right px-2 py-2">Paga</th>
+                  <th className="text-right px-4 py-2">A pagar</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {report.rows.map(r => (
+                  <tr key={r.id}>
+                    <td className="px-4 py-2 font-medium">
+                      {r.name}
+                      <div className="text-[10px] text-muted-foreground">
+                        {r.confirmedCount} conf. · {r.pendingCount} pend. · {r.canceledCount} canc.
+                      </div>
+                    </td>
+                    <td className="text-center px-2 py-2">{r.salesCount}</td>
+                    <td className="text-right px-2 py-2">{brl(r.revenueConfirmed)}</td>
+                    <td className="text-right px-2 py-2 text-gold font-semibold">{brl(r.commissionConfirmed)}</td>
+                    <td className="text-right px-2 py-2 text-success">{brl(r.commissionPaid)}</td>
+                    <td className="text-right px-4 py-2 font-bold">{brl(r.commissionToPay)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="bg-muted/30 font-bold text-sm">
+                <tr>
+                  <td className="px-4 py-2">Totais</td>
+                  <td className="text-center px-2 py-2">{report.totals.sales}</td>
+                  <td className="text-right px-2 py-2">{brl(report.totals.revenue)}</td>
+                  <td className="text-right px-2 py-2 text-gold">{brl(report.totals.commission)}</td>
+                  <td className="text-right px-2 py-2 text-success">{brl(report.totals.paid)}</td>
+                  <td className="text-right px-4 py-2">{brl(report.totals.toPay)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
