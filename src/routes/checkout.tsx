@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl } from "@/lib/format";
 import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode } from "lucide-react";
@@ -17,7 +18,7 @@ function Page() {
   const navigate = useNavigate();
   const { cart, settings, placeOrder } = useStore();
   const customer = useStore(selectCurrentCustomer);
-  const totals = useStore(selectCartTotals);
+  const totals = useStore(useShallow(selectCartTotals));
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     name: customer?.name || "", email: customer?.email || "", phone: customer?.phone || "",
