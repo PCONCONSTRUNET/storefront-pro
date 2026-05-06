@@ -202,6 +202,17 @@ export const useStore = create<AppState>()(
       affiliates: [],
       affiliateSales: [],
       currentAffiliateId: null,
+      transactions: [],
+
+      addTransaction: (t) => {
+        const tx: Transaction = { ...t, id: `tx_${Date.now()}`, createdAt: new Date().toISOString() };
+        set(s => ({ transactions: [tx, ...s.transactions] }));
+        return tx;
+      },
+      updateTransaction: (id, patch) => set(s => ({
+        transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t),
+      })),
+      deleteTransaction: (id) => set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })),
 
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
