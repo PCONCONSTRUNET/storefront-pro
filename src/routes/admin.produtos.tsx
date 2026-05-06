@@ -3,9 +3,10 @@ import { useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Edit, Trash2, X, Upload, Star, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Star, GripVertical, Crop } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/data";
+import { ImageCropModal } from "@/components/ImageCropModal";
 
 export const Route = createFileRoute("/admin/produtos")({
   component: Page,
@@ -223,6 +224,7 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
   const fileRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState("");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [cropIdx, setCropIdx] = useState<number | null>(null);
 
   const addFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -290,6 +292,10 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
                   </span>
                 )}
                 <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button type="button" onClick={() => setCropIdx(i)} title="Recortar"
+                    className="w-6 h-6 grid place-items-center rounded-full bg-card/90 hover:bg-card shadow">
+                    <Crop className="h-3 w-3" />
+                  </button>
                   {i !== 0 && (
                     <button type="button" onClick={() => setMain(i)} title="Definir como capa"
                       className="w-6 h-6 grid place-items-center rounded-full bg-card/90 hover:bg-card shadow">
@@ -340,6 +346,20 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
           Adicionar
         </button>
       </div>
+
+      {cropIdx !== null && gallery[cropIdx] && (
+        <ImageCropModal
+          src={gallery[cropIdx]}
+          onCancel={() => setCropIdx(null)}
+          onConfirm={(dataUrl) => {
+            const next = [...gallery];
+            next[cropIdx] = dataUrl;
+            onChange(next);
+            setCropIdx(null);
+            toast.success("Imagem recortada");
+          }}
+        />
+      )}
     </div>
   );
 }
