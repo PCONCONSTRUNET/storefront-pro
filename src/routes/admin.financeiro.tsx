@@ -222,6 +222,13 @@ function Page() {
         )}
       </div>
 
+      <AffiliateReport
+        from={reportFrom}
+        to={reportTo}
+        onFromChange={setReportFrom}
+        onToChange={setReportTo}
+      />
+
       {showForm && (
         <TransactionForm
           editing={editing}
