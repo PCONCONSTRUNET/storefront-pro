@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Star, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/data";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/produtos")({
 });
 
 const empty = (): Product => ({
-  id: `p_${Date.now()}`, name: "", description: "", price: 0, image: "", category: "lacos", stock: 0, sku: "", active: true,
+  id: `p_${Date.now()}`, name: "", description: "", price: 0, image: "", gallery: [], category: "lacos", stock: 0, sku: "", active: true,
 });
 
 function Page() {
@@ -92,7 +92,10 @@ function ProductForm({ product, categories, onSave }: { product: Product; catego
           <span className="text-sm">Ativo</span>
         </label>
       </div>
-      <Field label="URL da imagem" value={p.image} onChange={v => setP({ ...p, image: v })} required />
+      <GalleryEditor
+        gallery={p.gallery && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : [])}
+        onChange={(imgs) => setP({ ...p, gallery: imgs, image: imgs[0] || "" })}
+      />
       <label className="block">
         <span className="text-xs font-medium text-muted-foreground">Descrição</span>
         <textarea value={p.description} onChange={e => setP({ ...p, description: e.target.value })} rows={3}
@@ -110,6 +113,131 @@ function Field({ label, value, onChange, type = "text", className = "", required
       <input type={type} value={value} onChange={e => onChange(e.target.value)} required={required}
         className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40" />
     </label>
+  );
+}
+
+function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (imgs: string[]) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [url, setUrl] = useState("");
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  const addFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files);
+    const tooBig = arr.find(f => f.size > 5 * 1024 * 1024);
+    if (tooBig) { toast.error("Cada imagem deve ter no máximo 5MB"); return; }
+    const dataUrls = await Promise.all(arr.map(f => new Promise<string>((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result as string);
+      r.onerror = rej;
+      r.readAsDataURL(f);
+    })));
+    onChange([...gallery, ...dataUrls]);
+    toast.success(`${dataUrls.length} foto${dataUrls.length > 1 ? "s" : ""} adicionada${dataUrls.length > 1 ? "s" : ""}`);
+  };
+
+  const addUrl = () => {
+    const u = url.trim();
+    if (!u) return;
+    onChange([...gallery, u]);
+    setUrl("");
+  };
+
+  const remove = (i: number) => onChange(gallery.filter((_, idx) => idx !== i));
+  const setMain = (i: number) => {
+    const next = [gallery[i], ...gallery.filter((_, idx) => idx !== i)];
+    onChange(next);
+  };
+  const onDrop = (i: number) => {
+    if (dragIdx === null || dragIdx === i) return;
+    const next = [...gallery];
+    const [m] = next.splice(dragIdx, 1);
+    next.splice(i, 0, m);
+    onChange(next);
+    setDragIdx(null);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-muted-foreground">Fotos do produto ({gallery.length})</span>
+        <span className="text-[10px] text-muted-foreground">A primeira é a capa. Arraste para reordenar.</span>
+      </div>
+
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
+        className="border-2 border-dashed border-border rounded-xl p-3 bg-muted/30"
+      >
+        {gallery.length > 0 && (
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3">
+            {gallery.map((src, i) => (
+              <div
+                key={src + i}
+                draggable
+                onDragStart={() => setDragIdx(i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(i); }}
+                className={`relative group aspect-square rounded-lg overflow-hidden border-2 ${i === 0 ? "border-primary" : "border-transparent"} bg-card cursor-move`}
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" />
+                {i === 0 && (
+                  <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                    <Star className="h-2.5 w-2.5 fill-current" /> Capa
+                  </span>
+                )}
+                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {i !== 0 && (
+                    <button type="button" onClick={() => setMain(i)} title="Definir como capa"
+                      className="w-6 h-6 grid place-items-center rounded-full bg-card/90 hover:bg-card shadow">
+                      <Star className="h-3 w-3" />
+                    </button>
+                  )}
+                  <button type="button" onClick={() => remove(i)} title="Remover"
+                    className="w-6 h-6 grid place-items-center rounded-full bg-destructive text-destructive-foreground shadow">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="absolute bottom-1 left-1 bg-black/40 text-white rounded p-0.5">
+                  <GripVertical className="h-3 w-3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="w-full py-3 rounded-lg bg-card hover:bg-muted border border-border flex items-center justify-center gap-2 text-sm font-medium"
+        >
+          <Upload className="h-4 w-4" /> Enviar fotos do dispositivo
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
+        />
+        <p className="text-[10px] text-muted-foreground text-center mt-1">ou arraste e solte aqui · até 5MB cada</p>
+      </div>
+
+      <div className="flex gap-2 mt-2">
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addUrl(); } }}
+          placeholder="ou cole uma URL de imagem"
+          className="flex-1 h-10 px-3 rounded-xl bg-muted text-sm outline-none focus:ring-2 ring-primary/40"
+        />
+        <button type="button" onClick={addUrl} className="px-4 h-10 rounded-xl bg-primary/10 text-primary text-sm font-semibold">
+          Adicionar
+        </button>
+      </div>
+    </div>
   );
 }
 
