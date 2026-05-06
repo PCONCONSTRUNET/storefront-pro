@@ -151,20 +151,28 @@ function ProductForm({ product, categories, onSave }: { product: Product; catego
   );
 }
 
-function VariationsEditor({ variations, onChange }: { variations: { name: string; options: string[] }[]; onChange: (v: { name: string; options: string[] }[]) => void }) {
-  const add = () => onChange([...variations, { name: "", options: [] }]);
-  const update = (i: number, patch: Partial<{ name: string; options: string[] }>) => {
-    onChange(variations.map((v, idx) => idx === i ? { ...v, ...patch } : v));
+type VarOption = { label: string; priceDelta?: number };
+type Variation = { name: string; options: VarOption[] };
+
+function normalizeOptions(opts: (string | VarOption)[]): VarOption[] {
+  return opts.map(o => typeof o === "string" ? { label: o } : o);
+}
+
+function VariationsEditor({ variations, onChange }: { variations: { name: string; options: (string | VarOption)[] }[]; onChange: (v: Variation[]) => void }) {
+  const norm: Variation[] = variations.map(v => ({ name: v.name, options: normalizeOptions(v.options) }));
+  const add = () => onChange([...norm, { name: "", options: [] }]);
+  const update = (i: number, patch: Partial<Variation>) => {
+    onChange(norm.map((v, idx) => idx === i ? { ...v, ...patch } : v));
   };
-  const remove = (i: number) => onChange(variations.filter((_, idx) => idx !== i));
+  const remove = (i: number) => onChange(norm.filter((_, idx) => idx !== i));
 
   return (
     <div className="space-y-2">
-      <p className="text-[11px] text-muted-foreground">Ex.: Tamanho → P, M, G · Cor → Rosa, Azul</p>
-      {variations.length === 0 && (
+      <p className="text-[11px] text-muted-foreground">Ex.: Tamanho → P (+0), G (+5,00) · Cor → Rosa, Azul</p>
+      {norm.length === 0 && (
         <div className="text-center py-6 text-xs text-muted-foreground bg-muted/40 rounded-xl">Nenhuma variação.</div>
       )}
-      {variations.map((v, i) => (
+      {norm.map((v, i) => (
         <div key={i} className="bg-muted/40 rounded-xl p-2 space-y-2">
           <div className="flex gap-2">
             <input
@@ -187,33 +195,58 @@ function VariationsEditor({ variations, onChange }: { variations: { name: string
   );
 }
 
-function OptionsInput({ options, onChange }: { options: string[]; onChange: (o: string[]) => void }) {
-  const [val, setVal] = useState("");
+function OptionsInput({ options, onChange }: { options: VarOption[]; onChange: (o: VarOption[]) => void }) {
+  const [label, setLabel] = useState("");
+  const [delta, setDelta] = useState("");
   const add = () => {
-    const v = val.trim();
-    if (!v || options.includes(v)) { setVal(""); return; }
-    onChange([...options, v]);
-    setVal("");
+    const l = label.trim();
+    if (!l || options.some(o => o.label === l)) { setLabel(""); setDelta(""); return; }
+    const d = parseFloat(delta);
+    onChange([...options, { label: l, priceDelta: isNaN(d) ? undefined : d }]);
+    setLabel("");
+    setDelta("");
+  };
+  const updateDelta = (i: number, v: string) => {
+    const d = parseFloat(v);
+    onChange(options.map((o, idx) => idx === i ? { ...o, priceDelta: isNaN(d) ? undefined : d } : o));
   };
   return (
     <div>
-      <div className="flex flex-wrap gap-1 mb-1">
+      <div className="space-y-1 mb-2">
         {options.map((o, i) => (
-          <span key={i} className="inline-flex items-center gap-1 bg-card px-2 py-1 rounded-full text-xs">
-            {o}
+          <div key={i} className="flex items-center gap-1 bg-card px-2 py-1 rounded-lg">
+            <span className="text-xs flex-1 truncate">{o.label}</span>
+            <span className="text-[10px] text-muted-foreground">+R$</span>
+            <input
+              type="number"
+              step="0.01"
+              value={o.priceDelta ?? ""}
+              onChange={e => updateDelta(i, e.target.value)}
+              placeholder="0,00"
+              className="w-16 h-7 px-1 text-xs rounded bg-muted outline-none text-right"
+            />
             <button type="button" onClick={() => onChange(options.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-destructive">
               <X className="h-3 w-3" />
             </button>
-          </span>
+          </div>
         ))}
       </div>
       <div className="flex gap-1">
         <input
-          value={val}
-          onChange={e => setVal(e.target.value)}
+          value={label}
+          onChange={e => setLabel(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-          placeholder="Opção e Enter"
+          placeholder="Opção (ex: G)"
           className="flex-1 h-8 px-2 text-xs rounded-lg bg-card outline-none"
+        />
+        <input
+          type="number"
+          step="0.01"
+          value={delta}
+          onChange={e => setDelta(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+          placeholder="+R$ 0,00"
+          className="w-24 h-8 px-2 text-xs rounded-lg bg-card outline-none"
         />
         <button type="button" onClick={add} className="px-3 h-8 rounded-lg bg-primary/10 text-primary text-xs font-semibold">Add</button>
       </div>
