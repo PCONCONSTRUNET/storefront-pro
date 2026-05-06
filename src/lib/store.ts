@@ -172,6 +172,7 @@ type AppState = {
     address: string; paymentMethod: "pix" | "card" | "cash";
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  deleteOrder: (id: string) => void;
 
   upsertProduct: (p: Product) => void;
   deleteProduct: (id: string) => void;
