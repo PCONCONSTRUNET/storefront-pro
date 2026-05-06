@@ -1,7 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X, Sparkles } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useStore, useStoreHydrated } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
