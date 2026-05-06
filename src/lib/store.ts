@@ -76,6 +76,8 @@ export type Customer = {
   phone: string;
   password: string;
   address?: string;
+  addresses?: string[];
+  favorites?: string[];
   createdAt: string;
 };
 
@@ -132,6 +134,10 @@ type AppState = {
   registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => { ok: boolean; message: string };
   loginCustomer: (email: string, password: string) => { ok: boolean; message: string };
   logoutCustomer: () => void;
+  updateCustomer: (data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>) => { ok: boolean; message: string };
+  addAddress: (address: string) => void;
+  removeAddress: (index: number) => void;
+  toggleFavorite: (productId: string) => void;
   loginAdmin: (email: string, password: string) => { ok: boolean; message: string };
   logoutAdmin: () => void;
 
@@ -214,6 +220,31 @@ export const useStore = create<AppState>()(
         return { ok: true, message: "Bem-vinda!" };
       },
       logoutCustomer: () => set({ currentCustomerId: null }),
+      updateCustomer: (data) => {
+        const id = get().currentCustomerId;
+        if (!id) return { ok: false, message: "Não autenticada" };
+        set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, ...data } : c) }));
+        return { ok: true, message: "Dados atualizados" };
+      },
+      addAddress: (address) => {
+        const id = get().currentCustomerId;
+        if (!id || !address.trim()) return;
+        set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, addresses: [...(c.addresses || []), address.trim()] } : c) }));
+      },
+      removeAddress: (index) => {
+        const id = get().currentCustomerId;
+        if (!id) return;
+        set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, addresses: (c.addresses || []).filter((_, i) => i !== index) } : c) }));
+      },
+      toggleFavorite: (productId) => {
+        const id = get().currentCustomerId;
+        if (!id) return;
+        set(s => ({ customers: s.customers.map(c => {
+          if (c.id !== id) return c;
+          const favs = c.favorites || [];
+          return { ...c, favorites: favs.includes(productId) ? favs.filter(p => p !== productId) : [...favs, productId] };
+        }) }));
+      },
       loginAdmin: (email, password) => {
         const AUTHORIZED_ADMINS: Record<string, string> = {
           "lucaspereirabn10@gmail.com": "admin123",

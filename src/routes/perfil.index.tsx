@@ -3,7 +3,7 @@ import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram } from "lucide-react";
 
-export const Route = createFileRoute("/perfil")({
+export const Route = createFileRoute("/perfil/")({
   head: () => ({ meta: [{ title: "Minha conta — Princesa de Laços" }] }),
   component: Page,
 });
@@ -31,9 +31,9 @@ function Page() {
 
   const items = [
     { to: "/pedidos", icon: Package, label: "Meus pedidos" },
-    { to: "/perfil", icon: MapPin, label: "Endereços" },
-    { to: "/perfil", icon: Heart, label: "Favoritos" },
-    { to: "/perfil", icon: Settings, label: "Configurações" },
+    { to: "/perfil/enderecos", icon: MapPin, label: "Endereços" },
+    { to: "/perfil/favoritos", icon: Heart, label: "Favoritos" },
+    { to: "/perfil/configuracoes", icon: Settings, label: "Configurações" },
   ] as const;
 
   return (
