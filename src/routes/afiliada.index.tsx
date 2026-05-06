@@ -26,7 +26,11 @@ function Page() {
 
   const me = useMemo(() => affiliates.find(a => a.id === currentId) || null, [affiliates, currentId]);
 
-  useEffect(() => { if (!currentId) navigate({ to: "/afiliada/login" }); }, [currentId, navigate]);
+  const logoutAction = useStore(s => s.logoutAffiliate);
+  useEffect(() => {
+    if (!currentId) { navigate({ to: "/afiliada/login" }); return; }
+    if (currentId && !me) { logoutAction(); navigate({ to: "/afiliada/login" }); }
+  }, [currentId, me, navigate, logoutAction]);
 
   const [view, setView] = useState<View>("registrar");
 
