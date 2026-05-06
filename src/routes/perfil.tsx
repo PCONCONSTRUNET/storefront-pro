@@ -64,6 +64,34 @@ function Page() {
           <LogOut className="h-4 w-4" /> Sair
         </button>
 
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <p className="text-xs text-muted-foreground">Siga a gente</p>
+          <div className="flex items-center justify-center gap-4">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="group relative w-12 h-12 rounded-2xl flex items-center justify-center text-white overflow-hidden shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+              style={{ background: "linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)" }}
+            >
+              <Instagram className="h-6 w-6 relative z-10" />
+              <span className="absolute inset-0 bg-white/0 group-hover:bg-white/15 transition-colors" />
+            </a>
+            <a
+              href="https://wa.me/5511999999999"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className="group relative w-12 h-12 rounded-2xl flex items-center justify-center text-white overflow-hidden shadow-lg transition-all hover:scale-110 hover:shadow-xl"
+              style={{ background: "linear-gradient(135deg, #25d366, #128c7e)" }}
+            >
+              <MessageCircle className="h-6 w-6 relative z-10" />
+              <span className="absolute inset-0 bg-white/0 group-hover:bg-white/15 transition-colors" />
+            </a>
+          </div>
+        </div>
+
         <Link to="/admin/login" className="mt-6 block text-center text-xs text-muted-foreground underline">​</Link>
       </div>
     </StoreLayout>
