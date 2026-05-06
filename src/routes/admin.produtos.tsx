@@ -243,13 +243,13 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
 
 export function Modal({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-3" onClick={onClose}>
-      <div className="bg-card rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-soft" onClick={e => e.stopPropagation()}>
-        <div className="sticky top-0 bg-card flex items-center justify-between p-4 border-b border-border z-10">
-          <h2 className="font-bold">{title}</h2>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center sm:p-3" onClick={onClose}>
+      <div className="bg-card rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[85vh] sm:max-h-[85vh] overflow-y-auto shadow-soft" onClick={e => e.stopPropagation()}>
+        <div className="sticky top-0 bg-card flex items-center justify-between px-4 py-3 border-b border-border z-10">
+          <h2 className="font-bold text-sm">{title}</h2>
           <button onClick={onClose} className="w-8 h-8 grid place-items-center rounded-lg hover:bg-muted"><X className="h-4 w-4" /></button>
         </div>
-        <div className="p-4">{children}</div>
+        <div className="p-3">{children}</div>
       </div>
     </div>
   );
