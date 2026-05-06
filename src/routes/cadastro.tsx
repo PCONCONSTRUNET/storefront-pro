@@ -43,8 +43,14 @@ function Page() {
 function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)} required className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40" />
+      <span className="text-sm font-semibold text-foreground">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        required
+        className="mt-1.5 w-full h-12 px-4 rounded-xl bg-background text-foreground placeholder:text-muted-foreground border border-border outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+      />
     </label>
   );
 }
