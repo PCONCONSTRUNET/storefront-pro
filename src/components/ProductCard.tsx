@@ -50,6 +50,16 @@ export function ProductCard({ product }: { product: Product }) {
           )}
         </div>
       </Link>
+      {customer && (
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(product.id); }}
+          aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-card/90 backdrop-blur grid place-items-center shadow-sm hover:scale-110 transition-transform z-10"
+        >
+          <Heart className={"h-4 w-4 " + (isFav ? "fill-primary text-primary" : "text-muted-foreground")} />
+        </button>
+      )}
       <div className="p-2 flex flex-col gap-1 flex-1">
         <Link to="/produto/$id" params={{ id: product.id }} className="block">
           <h3 className="text-[12px] md:text-sm text-foreground line-clamp-2 min-h-[34px] leading-tight">{product.name}</h3>
