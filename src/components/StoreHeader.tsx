@@ -20,10 +20,6 @@ export function StoreHeader() {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img src={logo} alt={settings.storeName} className="h-10 md:h-12 w-auto object-contain" />
-          <span className="hidden lg:flex items-center gap-1.5 text-primary">
-            <Crown className="h-4 w-4 text-gold fill-gold" />
-            <span className="font-display text-lg">{settings.storeName}</span>
-          </span>
         </Link>
 
         <form onSubmit={onSearch} className="flex-1 relative">
