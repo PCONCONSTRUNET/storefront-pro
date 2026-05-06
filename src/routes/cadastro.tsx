@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
@@ -13,7 +12,6 @@ export const Route = createFileRoute("/cadastro")({
 function Page() {
   const navigate = useNavigate();
   const registerCustomer = useStore(s => s.registerCustomer);
-  const [open, setOpen] = useState(true);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
 
   const submit = (e: React.FormEvent) => {
@@ -23,32 +21,31 @@ function Page() {
     else toast.error(r.message);
   };
 
-  const close = (v: boolean) => {
-    setOpen(v);
-    if (!v) navigate({ to: "/" });
-  };
+  const close = () => navigate({ to: "/" });
 
   return (
     <StoreLayout>
-      <Dialog open={open} onOpenChange={close}>
-        <DialogContent className="w-[88vw] max-w-[340px] sm:max-w-sm p-0 overflow-hidden border-0 shadow-2xl rounded-2xl [&>button]:hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={close}>
+        <div
+          className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="gradient-primary text-primary-foreground px-4 pt-4 pb-5 relative">
             <button
-              onClick={() => close(false)}
+              onClick={close}
               className="absolute right-3 top-3 w-7 h-7 grid place-items-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
               aria-label="Fechar"
+              type="button"
             >
               <X className="h-3.5 w-3.5" />
             </button>
-            <DialogHeader className="text-left space-y-0.5">
-              <DialogTitle className="font-display text-2xl text-primary-foreground">Crie sua conta</DialogTitle>
-              <DialogDescription className="text-primary-foreground/90 text-xs">
-                Preencha os dados para começar.
-              </DialogDescription>
-            </DialogHeader>
+            <h2 className="font-display text-2xl">Crie sua conta</h2>
+            <p className="text-primary-foreground/90 text-xs">Preencha os dados para começar.</p>
           </div>
 
-          <form onSubmit={submit} className="bg-card px-4 py-4 space-y-3">
+          <form onSubmit={submit} className="px-4 py-4 space-y-3">
             <Field label="Nome completo" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="Como devemos te chamar?" />
             <Field label="E-mail" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="seu@email.com" />
             <Field label="Telefone" value={form.phone} onChange={v => setForm({ ...form, phone: v })} placeholder="(11) 99999-9999" />
@@ -60,8 +57,8 @@ function Page() {
               Já tem conta? <Link to="/login" className="text-primary font-semibold">Entrar</Link>
             </p>
           </form>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </StoreLayout>
   );
 }
