@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
+import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
@@ -97,6 +98,11 @@ const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
   path: '/categoria/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AfiliadaLoginRoute = AfiliadaLoginRouteImport.update({
+  id: '/afiliada/login',
+  path: '/afiliada/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminProdutosRoute = AdminProdutosRouteImport.update({
   id: '/admin/produtos',
   path: '/admin/produtos',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$id': typeof ProdutoIdRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/produto/$id'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/produto/$id'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/produto/$id'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
+  AfiliadaLoginRoute: typeof AfiliadaLoginRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   PedidoIdRoute: typeof PedidoIdRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
@@ -409,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriaSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/afiliada/login': {
+      id: '/afiliada/login'
+      path: '/afiliada/login'
+      fullPath: '/afiliada/login'
+      preLoaderRoute: typeof AfiliadaLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/produtos': {
       id: '/admin/produtos'
       path: '/admin/produtos'
@@ -494,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminNotificacoesRoute: AdminNotificacoesRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
+  AfiliadaLoginRoute: AfiliadaLoginRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   PedidoIdRoute: PedidoIdRoute,
   ProdutoIdRoute: ProdutoIdRoute,
