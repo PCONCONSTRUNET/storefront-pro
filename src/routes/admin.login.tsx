@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useStore } from "@/lib/store";
+import { useEffect, useState } from "react";
+import { useStore, useStoreHydrated } from "@/lib/store";
 import { Crown } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,9 +10,15 @@ export const Route = createFileRoute("/admin/login")({
 
 function Page() {
   const navigate = useNavigate();
+  const hydrated = useStoreHydrated();
+  const isAdmin = useStore(s => s.isAdmin);
   const loginAdmin = useStore(s => s.loginAdmin);
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
+
+  useEffect(() => {
+    if (hydrated && isAdmin) navigate({ to: "/admin" });
+  }, [hydrated, isAdmin, navigate]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
