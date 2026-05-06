@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
 import logo from "@/assets/logo-princesa.png";
 
+const STORE_ROUTES_TO_PRELOAD = ["/", "/categorias", "/pedidos", "/perfil", "/carrinho", "/cadastro", "/login"] as const;
+
 export function StoreHeader() {
   const navigate = useNavigate();
   const router = useRouter();
@@ -12,7 +14,7 @@ export function StoreHeader() {
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    ["/", "/categorias", "/pedidos", "/perfil", "/carrinho", "/cadastro", "/login"].forEach((to) => {
+    STORE_ROUTES_TO_PRELOAD.forEach((to) => {
       router.preloadRoute({ to }).catch(() => {});
     });
   }, [router]);
