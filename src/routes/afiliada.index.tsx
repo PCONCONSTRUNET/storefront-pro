@@ -152,39 +152,58 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
   };
 
   return (
-    <div className="bg-card rounded-2xl p-4 shadow-card">
-      <h2 className="font-bold mb-1">Registrar nova venda</h2>
-      <p className="text-xs text-muted-foreground mb-4">Preencha os dados da venda. A comissão é calculada automaticamente.</p>
-      <form onSubmit={submit} className="grid sm:grid-cols-2 gap-3">
-        <Field label="Nome da cliente *">
-          <input value={form.customerName} onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))} required className="input" />
-        </Field>
-        <Field label="WhatsApp da cliente">
-          <input value={form.customerPhone} onChange={e => setForm(f => ({ ...f, customerPhone: e.target.value }))} className="input" />
-        </Field>
-        <Field label="Produto(s) vendido(s) *" full>
-          <input value={form.productDescription} onChange={e => setForm(f => ({ ...f, productDescription: e.target.value }))} required placeholder="Ex: 2 laços rosa + 1 tiara" className="input" />
-        </Field>
-        <Field label="Valor total da venda (R$) *">
-          <input type="text" inputMode="decimal" value={form.saleValue} onChange={e => setForm(f => ({ ...f, saleValue: e.target.value }))} required placeholder="0,00" className="input" />
-        </Field>
-        <Field label="Observações">
-          <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input" />
-        </Field>
-        <button className="sm:col-span-2 h-11 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-1">
-          <Plus className="h-4 w-4" /> Registrar venda
-        </button>
-      </form>
-      <style>{`.input{margin-top:4px;width:100%;height:40px;padding:0 12px;border-radius:10px;background:var(--background);border:1px solid var(--border);outline:none}.input:focus{box-shadow:0 0 0 2px color-mix(in oklab,var(--primary) 50%,transparent)}`}</style>
+    <div className="relative overflow-hidden rounded-3xl p-[1.5px] gradient-primary shadow-soft">
+      <div className="relative bg-card rounded-[calc(1.5rem-1.5px)] p-5">
+        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full bg-accent/40 blur-3xl pointer-events-none" />
+
+        <div className="relative flex items-center gap-3 mb-5">
+          <div className="w-11 h-11 rounded-2xl gradient-primary grid place-items-center text-primary-foreground shadow-soft">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="font-display text-xl text-primary leading-tight">Nova venda</h2>
+            <p className="text-[11px] text-muted-foreground">A comissão é calculada automaticamente ✨</p>
+          </div>
+        </div>
+
+        <form onSubmit={submit} className="relative grid sm:grid-cols-2 gap-3">
+          <Field label="Nome da cliente" required icon={User}>
+            <input value={form.customerName} onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))} required className="input" placeholder="Ex: Maria Silva" />
+          </Field>
+          <Field label="WhatsApp" icon={Phone}>
+            <input value={form.customerPhone} onChange={e => setForm(f => ({ ...f, customerPhone: e.target.value }))} className="input" placeholder="(11) 99999-9999" />
+          </Field>
+          <Field label="Produto(s) vendido(s)" required full icon={ShoppingBag}>
+            <input value={form.productDescription} onChange={e => setForm(f => ({ ...f, productDescription: e.target.value }))} required placeholder="Ex: 2 laços rosa + 1 tiara" className="input" />
+          </Field>
+          <Field label="Valor total (R$)" required icon={DollarSign}>
+            <input type="text" inputMode="decimal" value={form.saleValue} onChange={e => setForm(f => ({ ...f, saleValue: e.target.value }))} required placeholder="0,00" className="input" />
+          </Field>
+          <Field label="Observações" icon={MessageCircle}>
+            <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input" placeholder="Opcional" />
+          </Field>
+          <button className="sm:col-span-2 group relative h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 shadow-soft hover:scale-[1.02] active:scale-[0.98] transition-transform overflow-hidden">
+            <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
+            <Plus className="h-5 w-5" /> Registrar venda
+          </button>
+        </form>
+        <style>{`.input{margin-top:4px;width:100%;height:44px;padding:0 14px 0 38px;border-radius:14px;background:var(--background);border:1px solid var(--border);outline:none;transition:all .2s ease;font-size:14px}.input:focus{border-color:color-mix(in oklab,var(--primary) 60%,transparent);box-shadow:0 0 0 4px color-mix(in oklab,var(--primary) 15%,transparent);background:var(--card)}.input::placeholder{color:color-mix(in oklab,var(--muted-foreground) 70%,transparent)}`}</style>
+      </div>
     </div>
   );
 }
 
-function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+function Field({ label, children, full, required, icon: Icon }: { label: string; children: React.ReactNode; full?: boolean; required?: boolean; icon?: React.ElementType }) {
   return (
-    <label className={`block ${full ? "sm:col-span-2" : ""}`}>
-      <span className="text-xs text-muted-foreground">{label}</span>
-      {children}
+    <label className={`block group ${full ? "sm:col-span-2" : ""}`}>
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+        {label} {required && <span className="text-primary">*</span>}
+      </span>
+      <div className="relative">
+        {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 mt-[2px] h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />}
+        {children}
+      </div>
     </label>
   );
 }
