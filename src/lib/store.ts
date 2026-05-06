@@ -117,6 +117,9 @@ type AppState = {
   isAdmin: boolean;
   settings: StoreSettings;
   appliedCoupon: string | null;
+  affiliates: Affiliate[];
+  affiliateSales: AffiliateSale[];
+  currentAffiliateId: string | null;
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
@@ -130,6 +133,14 @@ type AppState = {
   logoutCustomer: () => void;
   loginAdmin: (email: string, password: string) => { ok: boolean; message: string };
   logoutAdmin: () => void;
+
+  loginAffiliate: (email: string, password: string) => { ok: boolean; message: string };
+  logoutAffiliate: () => void;
+  upsertAffiliate: (a: Affiliate) => void;
+  deleteAffiliate: (id: string) => void;
+  registerAffiliateSale: (s: Omit<AffiliateSale, "id" | "createdAt" | "commissionEarned" | "status"> & { status?: AffiliateSaleStatus }) => AffiliateSale | null;
+  updateAffiliateSaleStatus: (id: string, status: AffiliateSaleStatus) => void;
+  deleteAffiliateSale: (id: string) => void;
 
   placeOrder: (data: {
     customerName: string; customerEmail: string; customerPhone: string;
@@ -159,6 +170,9 @@ export const useStore = create<AppState>()(
       isAdmin: false,
       settings: defaultSettings,
       appliedCoupon: null,
+      affiliates: [],
+      affiliateSales: [],
+      currentAffiliateId: null,
 
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
