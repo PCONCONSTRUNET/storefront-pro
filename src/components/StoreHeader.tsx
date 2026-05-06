@@ -50,12 +50,6 @@ export function StoreHeader() {
               <Search className="h-4 w-4 text-primary-foreground" />
             </button>
           </div>
-          <div className="hidden md:flex items-center gap-3 mt-1.5 text-[11px] text-primary-foreground/85">
-            <button type="button" onClick={() => { setQ("laço"); navigate({ to: "/buscar", search: { q: "laço" } as never }); }} className="hover:underline">laço rosa</button>
-            <button type="button" onClick={() => { setQ("tiara"); navigate({ to: "/buscar", search: { q: "tiara" } as never }); }} className="hover:underline">tiara coroa</button>
-            <button type="button" onClick={() => { setQ("kit"); navigate({ to: "/buscar", search: { q: "kit" } as never }); }} className="hover:underline">kit presente</button>
-            <button type="button" onClick={() => { setQ("bico"); navigate({ to: "/buscar", search: { q: "bico" } as never }); }} className="hover:underline">bico de pato</button>
-          </div>
         </form>
 
         <Link to="/perfil" className="hidden md:grid w-10 h-10 place-items-center rounded-full hover:bg-white/15 transition-colors" aria-label="Notificações">
