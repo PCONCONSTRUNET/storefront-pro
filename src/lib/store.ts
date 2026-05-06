@@ -340,10 +340,10 @@ export const useStore = create<AppState>()(
         const expected = AUTHORIZED_ADMINS[normalized];
         if (!expected) return { ok: false, message: "E-mail não autorizado" };
         if (expected !== password) return { ok: false, message: "Senha incorreta" };
-        set({ isAdmin: true });
+        set(s => ({ isAdmin: true, sessions: { ...s.sessions, admin: makeSession(normalized) } }));
         return { ok: true, message: "Bem-vindo!" };
       },
-      logoutAdmin: () => set({ isAdmin: false }),
+      logoutAdmin: () => set(s => ({ isAdmin: false, sessions: { ...s.sessions, admin: null } })),
 
       loginAffiliate: (email, password) => {
         const normalized = email.trim().toLowerCase();
