@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Star, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/data";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/produtos")({
 });
 
 const empty = (): Product => ({
-  id: `p_${Date.now()}`, name: "", description: "", price: 0, image: "", category: "lacos", stock: 0, sku: "", active: true,
+  id: `p_${Date.now()}`, name: "", description: "", price: 0, image: "", gallery: [], category: "lacos", stock: 0, sku: "", active: true,
 });
 
 function Page() {
@@ -92,7 +92,10 @@ function ProductForm({ product, categories, onSave }: { product: Product; catego
           <span className="text-sm">Ativo</span>
         </label>
       </div>
-      <Field label="URL da imagem" value={p.image} onChange={v => setP({ ...p, image: v })} required />
+      <GalleryEditor
+        gallery={p.gallery && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : [])}
+        onChange={(imgs) => setP({ ...p, gallery: imgs, image: imgs[0] || "" })}
+      />
       <label className="block">
         <span className="text-xs font-medium text-muted-foreground">Descrição</span>
         <textarea value={p.description} onChange={e => setP({ ...p, description: e.target.value })} rows={3}
