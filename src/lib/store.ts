@@ -125,6 +125,36 @@ const defaultSettings: StoreSettings = {
   bannerSubtitle: "Laços feitos com amor para princesas de todas as idades",
 };
 
+export type SessionKind = "admin" | "customer" | "affiliate";
+export type SessionToken = {
+  token: string;
+  subjectId: string;
+  issuedAt: string;
+  expiresAt: string;
+};
+
+// Sliding session: any user activity within this window keeps the session alive.
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SESSION_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // refresh at most once/day
+
+function makeSession(subjectId: string): SessionToken {
+  const now = Date.now();
+  const rand = typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return {
+    token: `${subjectId}.${rand}`,
+    subjectId,
+    issuedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
+  };
+}
+
+function isSessionValid(s: SessionToken | null | undefined): s is SessionToken {
+  if (!s) return false;
+  return new Date(s.expiresAt).getTime() > Date.now();
+}
+
 type AppState = {
   products: Product[];
   categories: Category[];
