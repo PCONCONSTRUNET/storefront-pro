@@ -29,8 +29,14 @@ export const initialCategories: Category[] = [
   { id: "presilhas", name: "Presilhas", image: "✨", order: 6 },
 ];
 
-const img = (seed: string) =>
-  `https://images.unsplash.com/photo-${seed}?w=800&auto=format&fit=crop&q=80`;
+import lacoRosaGlitter from "@/assets/products/laco-rosa-glitter.jpg";
+import tiaraCoroaDourada from "@/assets/products/tiara-coroa-dourada.jpg";
+import kit5Lacos from "@/assets/products/kit-5-lacos.jpg";
+import bicoPatoFloral from "@/assets/products/bico-pato-floral.jpg";
+import presilhaBorboleta from "@/assets/products/presilha-borboleta-perola.jpg";
+import elasticoVeludo from "@/assets/products/elastico-veludo-rosa.jpg";
+import lacoMaxiDourado from "@/assets/products/laco-maxi-dourado.jpg";
+import tiaraFlorCerejeira from "@/assets/products/tiara-flor-cerejeira.jpg";
 
 export const initialProducts: Product[] = [
   {
