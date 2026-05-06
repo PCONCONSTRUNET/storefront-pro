@@ -31,32 +31,32 @@ function Page() {
   return (
     <StoreLayout>
       <Dialog open={open} onOpenChange={close}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl [&>button]:hidden">
-          <div className="gradient-primary text-primary-foreground px-6 pt-6 pb-8 relative">
+        <DialogContent className="w-[88vw] max-w-[340px] sm:max-w-sm p-0 overflow-hidden border-0 shadow-2xl rounded-2xl [&>button]:hidden">
+          <div className="gradient-primary text-primary-foreground px-4 pt-4 pb-5 relative">
             <button
               onClick={() => close(false)}
-              className="absolute right-4 top-4 w-8 h-8 grid place-items-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+              className="absolute right-3 top-3 w-7 h-7 grid place-items-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
               aria-label="Fechar"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
             </button>
-            <DialogHeader className="text-left space-y-1">
-              <DialogTitle className="font-display text-3xl text-primary-foreground">Crie sua conta</DialogTitle>
-              <DialogDescription className="text-primary-foreground/90 text-sm">
-                Preencha os dados para começar a comprar.
+            <DialogHeader className="text-left space-y-0.5">
+              <DialogTitle className="font-display text-2xl text-primary-foreground">Crie sua conta</DialogTitle>
+              <DialogDescription className="text-primary-foreground/90 text-xs">
+                Preencha os dados para começar.
               </DialogDescription>
             </DialogHeader>
           </div>
 
-          <form onSubmit={submit} className="bg-card px-6 py-6 space-y-4">
+          <form onSubmit={submit} className="bg-card px-4 py-4 space-y-3">
             <Field label="Nome completo" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="Como devemos te chamar?" />
             <Field label="E-mail" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="seu@email.com" />
             <Field label="Telefone" value={form.phone} onChange={v => setForm({ ...form, phone: v })} placeholder="(11) 99999-9999" />
             <Field label="Senha" type="password" value={form.password} onChange={v => setForm({ ...form, password: v })} placeholder="Mínimo 6 caracteres" />
-            <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold mt-2 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all">
+            <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm">
               Criar conta
             </button>
-            <p className="text-center text-sm text-muted-foreground pt-1">
+            <p className="text-center text-xs text-muted-foreground pt-0.5">
               Já tem conta? <Link to="/login" className="text-primary font-semibold">Entrar</Link>
             </p>
           </form>
@@ -76,7 +76,7 @@ function Field({ label, value, onChange, type = "text", placeholder }: { label: 
         onChange={e => onChange(e.target.value)}
         required
         placeholder={placeholder}
-        className="mt-1.5 w-full h-12 px-4 rounded-xl bg-background text-foreground placeholder:text-muted-foreground border border-border outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+        className="mt-1 w-full h-10 px-3 rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground border border-border outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
       />
     </label>
   );
