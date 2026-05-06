@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { ChevronRight, ChevronLeft, Zap, Truck, ShieldCheck, Tag, Crown, Sparkles, Gift, Flame, Pause, Play } from "lucide-react";
-import { useRef } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
