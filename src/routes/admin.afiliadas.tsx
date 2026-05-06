@@ -32,15 +32,38 @@ function Page() {
 
   const [tab, setTab] = useState<"afiliadas" | "vendas">("afiliadas");
   const [editing, setEditing] = useState<Affiliate | null>(null);
+  const [viewing, setViewing] = useState<Affiliate | null>(null);
   const [filterAff, setFilterAff] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<"" | AffiliateSaleStatus>("");
+  const [search, setSearch] = useState("");
+  const [searchAff, setSearchAff] = useState("");
 
   const totals = useMemo(() => {
-    const totalRevenue = sales.filter(s => s.status !== "cancelada").reduce((a, s) => a + s.saleValue, 0);
-    const totalCommission = sales.filter(s => s.status !== "cancelada").reduce((a, s) => a + s.commissionEarned, 0);
-    return { totalRevenue, totalCommission, count: sales.length };
+    const totalRevenue = sales.filter(s => s.status === "confirmada").reduce((a, s) => a + s.saleValue, 0);
+    const totalCommission = sales.filter(s => s.status === "confirmada").reduce((a, s) => a + s.commissionEarned, 0);
+    const paidCount = sales.filter(s => s.status === "confirmada").length;
+    return { totalRevenue, totalCommission, count: sales.length, paidCount };
   }, [sales]);
 
-  const filteredSales = filterAff ? sales.filter(s => s.affiliateId === filterAff) : sales;
+  const filteredSales = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return sales.filter(s => {
+      if (filterAff && s.affiliateId !== filterAff) return false;
+      if (filterStatus && s.status !== filterStatus) return false;
+      if (q) {
+        const aff = affiliates.find(a => a.id === s.affiliateId);
+        const hay = `${s.customerName} ${s.productDescription} ${s.customerPhone || ""} ${aff?.name || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [sales, filterAff, filterStatus, search, affiliates]);
+
+  const filteredAffiliates = useMemo(() => {
+    const q = searchAff.trim().toLowerCase();
+    if (!q) return affiliates;
+    return affiliates.filter(a => `${a.name} ${a.email} ${a.phone || ""}`.toLowerCase().includes(q));
+  }, [affiliates, searchAff]);
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
