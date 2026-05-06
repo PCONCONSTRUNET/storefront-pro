@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { Sparkles } from "lucide-react";
@@ -42,7 +42,7 @@ function Page() {
           </label>
           <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold">Entrar</button>
           <p className="text-[11px] text-muted-foreground text-center pt-2">
-            Ainda não é afiliada? Fale com a administradora da loja.
+            Ainda não é afiliada? <Link to="/afiliada/cadastro" className="text-primary underline">Criar conta</Link>
           </p>
         </form>
       </div>
