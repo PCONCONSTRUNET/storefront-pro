@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
