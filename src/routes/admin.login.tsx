@@ -23,7 +23,7 @@ function Page() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const r = loginAdmin(email, pwd);
-    if (r.ok) { toast.success(r.message); navigate({ to: "/admin" }); }
+    if (r.ok) { toast.success(r.message); navigate({ to: "/admin/dashboard" }); }
     else toast.error(r.message);
   };
 
