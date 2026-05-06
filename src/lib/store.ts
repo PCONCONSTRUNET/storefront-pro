@@ -341,9 +341,20 @@ export const useStore = create<AppState>()(
       deleteCoupon: (code) => set((s) => ({ coupons: s.coupons.filter(c => c.code !== code) })),
       updateSettings: (s2) => set((s) => ({ settings: { ...s.settings, ...s2 } })),
     }),
-    { name: "princesa-store-v1" },
+    { name: "princesa-store-v1", skipHydration: typeof window === "undefined" },
   ),
 );
+
+export function useStoreHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    if (useStore.persist.hasHydrated()) { setHydrated(true); return; }
+    const unsub = useStore.persist.onFinishHydration(() => setHydrated(true));
+    useStore.persist.rehydrate();
+    return () => unsub();
+  }, []);
+  return hydrated;
+}
 
 function computeSubtotal(s: AppState) {
   return s.cart.reduce((a, ci) => {
