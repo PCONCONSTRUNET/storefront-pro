@@ -240,6 +240,20 @@ export const useStore = create<AppState>()(
       affiliateSales: [],
       currentAffiliateId: null,
       transactions: [],
+      sessions: { admin: null, customer: null, affiliate: null },
+
+      refreshSession: (kind) => {
+        const sess = get().sessions[kind];
+        if (!isSessionValid(sess)) return;
+        const remaining = new Date(sess.expiresAt).getTime() - Date.now();
+        // Slide forward only if more than the threshold has been used.
+        if (SESSION_TTL_MS - remaining < SESSION_REFRESH_THRESHOLD_MS) return;
+        const next: SessionToken = {
+          ...sess,
+          expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+        };
+        set(s => ({ sessions: { ...s.sessions, [kind]: next } }));
+      },
 
       addTransaction: (t) => {
         const tx: Transaction = { ...t, id: `tx_${Date.now()}`, createdAt: new Date().toISOString() };
