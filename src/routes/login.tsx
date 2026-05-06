@@ -11,6 +11,7 @@ export const Route = createFileRoute("/login")({
 function Page() {
   const navigate = useNavigate();
   const loginCustomer = useStore(s => s.loginCustomer);
+  const [open, setOpen] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
