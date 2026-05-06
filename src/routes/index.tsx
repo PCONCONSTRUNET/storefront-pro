@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
-import { ChevronRight, Zap, Truck, ShieldCheck, Tag, Crown, Sparkles, Gift, Flame } from "lucide-react";
+import { ChevronRight, ChevronLeft, Zap, Truck, ShieldCheck, Tag, Crown, Sparkles, Gift, Flame, Pause, Play } from "lucide-react";
+import { useRef } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
