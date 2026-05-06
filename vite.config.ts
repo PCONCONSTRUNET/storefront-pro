@@ -10,6 +10,24 @@ export default defineConfig({
   tanstackStart: {
     router: {
       codeSplittingOptions: {
+        splitBehavior: ({ routeId }) => {
+          const instantStoreRoutes = new Set([
+            "/",
+            "/buscar",
+            "/cadastro",
+            "/carrinho",
+            "/categorias",
+            "/checkout",
+            "/login",
+            "/pedidos",
+            "/perfil",
+            "/categoria/$slug",
+            "/pedido/$id",
+            "/produto/$id",
+          ]);
+
+          return instantStoreRoutes.has(routeId) ? [] : undefined;
+        },
         defaultBehavior: [["component", "errorComponent", "notFoundComponent"]],
       },
     },
