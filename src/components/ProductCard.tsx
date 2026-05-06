@@ -1,11 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Star, Truck } from "lucide-react";
+import { Star, Truck, Heart } from "lucide-react";
 import { useState } from "react";
 import { brl } from "@/lib/format";
+import { useStore, selectCurrentCustomer } from "@/lib/store";
 import type { Product } from "@/lib/data";
 
 export function ProductCard({ product }: { product: Product }) {
   const [imgError, setImgError] = useState(false);
+  const customer = useStore(selectCurrentCustomer);
+  const toggleFavorite = useStore(s => s.toggleFavorite);
+  const isFav = !!customer?.favorites?.includes(product.id);
   const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
   // Pseudo-random but stable based on id, for the demo
   const seed = product.id.charCodeAt(1) || 3;
