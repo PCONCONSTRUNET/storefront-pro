@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/afiliada/login")({
@@ -10,11 +10,17 @@ export const Route = createFileRoute("/afiliada/login")({
 
 function Page() {
   const navigate = useNavigate();
+  const router = useRouter();
   const hydrated = useStoreHydrated();
   const currentId = useStore(s => s.currentAffiliateId);
   const login = useStore(s => s.loginAffiliate);
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    router.preloadRoute({ to: "/afiliada" }).catch(() => {});
+  }, [router]);
 
   useEffect(() => {
     if (hydrated && currentId) navigate({ to: "/afiliada" });
@@ -22,9 +28,11 @@ function Page() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const r = login(email, pwd);
     if (r.ok) { toast.success(r.message); navigate({ to: "/afiliada" }); }
-    else toast.error(r.message);
+    else { toast.error(r.message); setSubmitting(false); }
   };
 
   return (
