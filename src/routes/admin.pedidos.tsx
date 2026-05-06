@@ -78,6 +78,17 @@ function Page() {
               </select>
             </label>
             <button onClick={() => window.print()} className="w-full h-10 rounded-full bg-muted font-semibold">Imprimir guia</button>
+            <button
+              onClick={() => {
+                if (confirm(`Excluir o pedido #${order.id}? Esta ação não pode ser desfeita.`)) {
+                  deleteOrder(order.id);
+                  setSelected(null);
+                }
+              }}
+              className="w-full h-10 rounded-full bg-destructive/10 text-destructive font-semibold hover:bg-destructive/20 transition-colors"
+            >
+              Excluir pedido
+            </button>
           </div>
         </Modal>
       )}
