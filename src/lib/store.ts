@@ -139,6 +139,7 @@ type AppState = {
   affiliates: Affiliate[];
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
+  transactions: Transaction[];
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
