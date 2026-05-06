@@ -105,10 +105,21 @@ function ProductForm({ product, categories, onSave }: { product: Product; catego
           </label>
           <Field label="Preço" type="number" value={String(p.price)} onChange={v => setP({ ...p, price: parseFloat(v) || 0 })} required />
           <Field label="Promocional" type="number" value={String(p.oldPrice ?? "")} onChange={v => setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })} />
-          <Field label="Estoque" type="number" value={String(p.stock)} onChange={v => setP({ ...p, stock: parseInt(v) || 0 })} required />
-          <label className="flex items-center gap-2 mt-5">
+          <div className="col-span-2 flex gap-2">
+            <Field label="Estoque" type="number" value={String(p.stock)} onChange={v => setP({ ...p, stock: parseInt(v) || 0 })} className="flex-1" required />
+            <button type="button" onClick={() => setP({ ...p, stock: 0 })}
+              className="self-end h-11 px-3 rounded-xl bg-destructive/10 text-destructive text-xs font-semibold whitespace-nowrap">
+              Marcar sem estoque
+            </button>
+          </div>
+          <label className="col-span-2 flex items-center gap-2 p-3 rounded-xl bg-muted/50">
             <input type="checkbox" checked={p.active} onChange={e => setP({ ...p, active: e.target.checked })} />
             <span className="text-sm">Ativo</span>
+          </label>
+          <label className="col-span-2 flex items-center gap-2 p-3 rounded-xl bg-muted/50">
+            <input type="checkbox" checked={!!p.hidden} onChange={e => setP({ ...p, hidden: e.target.checked })} />
+            <span className="text-sm">Ocultar da vitrine</span>
+            <span className="text-[10px] text-muted-foreground ml-auto">não aparece na home/categorias</span>
           </label>
         </div>
       )}
