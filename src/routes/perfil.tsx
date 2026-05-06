@@ -42,7 +42,7 @@ function Page() {
         <div className="bg-gradient-to-br from-primary to-rose text-primary-foreground rounded-2xl p-5 flex items-center gap-4 shadow-soft">
           <div className="w-14 h-14 rounded-full bg-white/20 grid place-items-center text-2xl font-bold">{customer.name[0]?.toUpperCase()}</div>
           <div>
-            <div className="text-xs opacity-90">Olá, princesa</div>
+            
             <div className="font-bold text-lg">{customer.name}</div>
             <div className="text-xs opacity-90">{customer.email}</div>
           </div>
