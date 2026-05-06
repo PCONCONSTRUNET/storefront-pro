@@ -320,3 +320,100 @@ function StatusBadge({ status }: { status: AffiliateSaleStatus }) {
   const m = map[status];
   return <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1 ${m.cls}`}>{m.label}</span>;
 }
+
+function AffiliateDetailsModal({
+  affiliate,
+  sales,
+  onClose,
+  onEdit,
+  onViewSales,
+}: {
+  affiliate: Affiliate;
+  sales: ReturnType<typeof useStore.getState>["affiliateSales"];
+  onClose: () => void;
+  onEdit: () => void;
+  onViewSales: () => void;
+}) {
+  const paid = sales.filter(s => s.status === "confirmada");
+  const pending = sales.filter(s => s.status === "pendente");
+  const cancelled = sales.filter(s => s.status === "cancelada");
+  const totalPaid = paid.reduce((a, s) => a + s.saleValue, 0);
+  const totalCommission = paid.reduce((a, s) => a + s.commissionEarned, 0);
+  const recent = [...sales].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 5);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-bold text-lg">{affiliate.name}</h3>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full ${affiliate.active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}>
+              {affiliate.active ? "Ativa" : "Inativa"}
+            </span>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="h-4 w-4" /></button>
+        </div>
+
+        <div className="space-y-2 text-sm mb-4">
+          <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> {affiliate.email}</div>
+          {affiliate.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {affiliate.phone}</div>}
+          <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> Comissão: {affiliate.commissionType === "percent" ? `${affiliate.commissionValue}%` : brl(affiliate.commissionValue)}</div>
+          <div className="text-xs text-muted-foreground">Cadastrada em {new Date(affiliate.createdAt).toLocaleDateString("pt-BR")}</div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-success/10 rounded-xl p-3 text-center">
+            <div className="text-lg font-bold text-success">{paid.length}</div>
+            <div className="text-[10px] text-muted-foreground">Pagas</div>
+          </div>
+          <div className="bg-gold/10 rounded-xl p-3 text-center">
+            <div className="text-lg font-bold text-gold">{pending.length}</div>
+            <div className="text-[10px] text-muted-foreground">Pendentes</div>
+          </div>
+          <div className="bg-destructive/10 rounded-xl p-3 text-center">
+            <div className="text-lg font-bold text-destructive">{cancelled.length}</div>
+            <div className="text-[10px] text-muted-foreground">Canceladas</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="bg-muted/50 rounded-xl p-3">
+            <div className="text-xs text-muted-foreground">Faturado (pago)</div>
+            <div className="font-bold">{brl(totalPaid)}</div>
+          </div>
+          <div className="bg-muted/50 rounded-xl p-3">
+            <div className="text-xs text-muted-foreground">Comissão paga</div>
+            <div className="font-bold text-gold">{brl(totalCommission)}</div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="text-xs font-semibold text-muted-foreground mb-2">Últimas vendas</div>
+          {recent.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">Nenhuma venda ainda.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {recent.map(s => (
+                <li key={s.id} className="py-2 flex justify-between items-center text-sm">
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{s.customerName}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{s.productDescription}</div>
+                  </div>
+                  <div className="text-right ml-2">
+                    <div className="font-semibold">{brl(s.saleValue)}</div>
+                    <StatusBadge status={s.status} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={onViewSales} className="flex-1 h-10 rounded-full border border-border text-sm font-semibold">Ver todas as vendas</button>
+          <button onClick={onEdit} className="flex-1 h-10 rounded-full gradient-primary text-primary-foreground text-sm font-semibold">Editar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
