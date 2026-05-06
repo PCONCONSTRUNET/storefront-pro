@@ -29,8 +29,14 @@ export const initialCategories: Category[] = [
   { id: "presilhas", name: "Presilhas", image: "✨", order: 6 },
 ];
 
-const img = (seed: string) =>
-  `https://images.unsplash.com/photo-${seed}?w=800&auto=format&fit=crop&q=80`;
+import lacoRosaGlitter from "@/assets/products/laco-rosa-glitter.jpg";
+import tiaraCoroaDourada from "@/assets/products/tiara-coroa-dourada.jpg";
+import kit5Lacos from "@/assets/products/kit-5-lacos.jpg";
+import bicoPatoFloral from "@/assets/products/bico-pato-floral.jpg";
+import presilhaBorboleta from "@/assets/products/presilha-borboleta-perola.jpg";
+import elasticoVeludo from "@/assets/products/elastico-veludo-rosa.jpg";
+import lacoMaxiDourado from "@/assets/products/laco-maxi-dourado.jpg";
+import tiaraFlorCerejeira from "@/assets/products/tiara-flor-cerejeira.jpg";
 
 export const initialProducts: Product[] = [
   {
@@ -39,8 +45,8 @@ export const initialProducts: Product[] = [
     description: "Laço artesanal em fita de cetim com detalhes em glitter dourado. Perfeito para princesas de todas as idades. Acompanha bico de pato resistente.",
     price: 24.9,
     oldPrice: 34.9,
-    image: img("1599643478518-a784e5dc4c8f"),
-    gallery: [img("1599643478518-a784e5dc4c8f"), img("1602910344008-22f323cc1817")],
+    image: lacoRosaGlitter,
+    gallery: [lacoRosaGlitter, lacoMaxiDourado],
     category: "lacos",
     stock: 25,
     sku: "LC-001",
@@ -53,7 +59,7 @@ export const initialProducts: Product[] = [
     description: "Tiara estilo coroa banhada a ouro com strass. Ideal para festas, ensaios e momentos especiais.",
     price: 49.9,
     oldPrice: 69.9,
-    image: img("1535632787350-4e68ef0ac584"),
+    image: tiaraCoroaDourada,
     category: "tiaras",
     stock: 12,
     sku: "TR-002",
@@ -65,7 +71,7 @@ export const initialProducts: Product[] = [
     description: "Kit promocional com 5 laços de cores variadas. Embalagem presenteável.",
     price: 79.9,
     oldPrice: 119.9,
-    image: img("1612901532700-4c3c9aac1de8"),
+    image: kit5Lacos,
     category: "kits",
     stock: 8,
     sku: "KT-003",
@@ -76,7 +82,7 @@ export const initialProducts: Product[] = [
     name: "Bico de Pato Floral",
     description: "Bico de pato com flor de cetim feita à mão. Antialérgico.",
     price: 18.9,
-    image: img("1583292650898-7d22cd27ca6f"),
+    image: bicoPatoFloral,
     category: "bicos",
     stock: 40,
     sku: "BP-004",
@@ -88,7 +94,7 @@ export const initialProducts: Product[] = [
     description: "Presilha em formato de borboleta com pérolas delicadas.",
     price: 22.5,
     oldPrice: 29.9,
-    image: img("1611652022419-a9419f74343d"),
+    image: presilhaBorboleta,
     category: "presilhas",
     stock: 18,
     sku: "PR-005",
@@ -99,7 +105,7 @@ export const initialProducts: Product[] = [
     name: "Elástico Veludo Rosa",
     description: "Conjunto de 3 elásticos de veludo macio que não marcam o cabelo.",
     price: 14.9,
-    image: img("1591348122449-02525d70379b"),
+    image: elasticoVeludo,
     category: "elasticos",
     stock: 60,
     sku: "EL-006",
@@ -110,7 +116,7 @@ export const initialProducts: Product[] = [
     name: "Laço Maxi Cetim Dourado",
     description: "Laço grande estilo maxi em cetim com brilho dourado, ideal para ocasiões especiais.",
     price: 34.9,
-    image: img("1606107557195-0e29a4b5b4aa"),
+    image: lacoMaxiDourado,
     category: "lacos",
     stock: 15,
     sku: "LC-007",
@@ -121,7 +127,7 @@ export const initialProducts: Product[] = [
     name: "Tiara Flor de Cerejeira",
     description: "Tiara delicada com aplique de flor rosa em tecido.",
     price: 29.9,
-    image: img("1602910344008-22f323cc1817"),
+    image: tiaraFlorCerejeira,
     category: "tiaras",
     stock: 22,
     sku: "TR-008",
