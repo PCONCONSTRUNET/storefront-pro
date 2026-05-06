@@ -89,9 +89,9 @@ function Page() {
     <AdminLayout title="Afiliadas">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card icon={Users} label="Afiliadas" value={String(affiliates.length)} />
-        <Card icon={ShoppingBag} label="Vendas registradas" value={String(totals.count)} />
-        <Card icon={DollarSign} label="Faturado por afiliadas" value={brl(totals.totalRevenue)} />
-        <Card icon={DollarSign} label="Comissões totais" value={brl(totals.totalCommission)} colorClass="text-gold" />
+        <Card icon={ShoppingBag} label="Vendas pagas" value={String(totals.paidCount)} />
+        <Card icon={DollarSign} label="Faturado (pago)" value={brl(totals.totalRevenue)} />
+        <Card icon={DollarSign} label="Comissões pagas" value={brl(totals.totalCommission)} colorClass="text-gold" />
       </div>
 
       <div className="flex gap-2 mb-3">
@@ -101,11 +101,22 @@ function Page() {
 
       {tab === "afiliadas" && (
         <div className="bg-card rounded-2xl shadow-card p-4">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
             <h2 className="font-bold">Cadastro de afiliadas</h2>
-            <button onClick={() => setEditing({ ...empty })} className="flex items-center gap-1 text-sm bg-primary text-primary-foreground px-3 py-2 rounded-full">
-              <Plus className="h-4 w-4" /> Nova afiliada
-            </button>
+            <div className="flex gap-2 items-center">
+              <div className="relative">
+                <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={searchAff}
+                  onChange={e => setSearchAff(e.target.value)}
+                  placeholder="Buscar por nome, e-mail..."
+                  className="h-9 pl-8 pr-3 rounded-full bg-background border border-border text-sm w-52"
+                />
+              </div>
+              <button onClick={() => setEditing({ ...empty })} className="flex items-center gap-1 text-sm bg-primary text-primary-foreground px-3 py-2 rounded-full whitespace-nowrap">
+                <Plus className="h-4 w-4" /> Nova
+              </button>
+            </div>
           </div>
 
           {affiliates.length === 0 ? (
