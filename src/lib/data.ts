@@ -10,6 +10,7 @@ export type Product = {
   stock: number;
   sku: string;
   active: boolean;
+  hidden?: boolean;
   variations?: { name: string; options: string[] }[];
 };
 
