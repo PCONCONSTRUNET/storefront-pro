@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { toast } from "sonner";
@@ -11,14 +11,27 @@ export const Route = createFileRoute("/cadastro")({
 
 function Page() {
   const navigate = useNavigate();
+  const router = useRouter();
   const registerCustomer = useStore(s => s.registerCustomer);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    router.preloadRoute({ to: "/perfil" }).catch(() => {});
+  }, [router]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const r = registerCustomer(form);
-    if (r.ok) { toast.success(r.message); navigate({ to: "/perfil" }); }
-    else toast.error(r.message);
+    if (r.ok) {
+      navigate({ to: "/perfil" });
+      toast.success(r.message);
+    } else {
+      toast.error(r.message);
+      setSubmitting(false);
+    }
   };
 
   const close = () => navigate({ to: "/" });
@@ -50,8 +63,8 @@ function Page() {
             <Field label="E-mail" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="seu@email.com" />
             <Field label="Telefone" value={form.phone} onChange={v => setForm({ ...form, phone: v })} placeholder="(11) 99999-9999" />
             <Field label="Senha" type="password" value={form.password} onChange={v => setForm({ ...form, password: v })} placeholder="Mínimo 6 caracteres" />
-            <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm">
-              Criar conta
+            <button disabled={submitting} className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm disabled:opacity-70">
+              {submitting ? "Criando..." : "Criar conta"}
             </button>
             <p className="text-center text-xs text-muted-foreground pt-0.5">
               Já tem conta? <Link to="/login" className="text-primary font-semibold">Entrar</Link>
