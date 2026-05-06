@@ -69,6 +69,22 @@ export type AffiliateSale = {
   createdAt: string;
 };
 
+export type TransactionKind = "entrada" | "saida";
+export type TransactionCategory = "venda" | "comissao_afiliada" | "fornecedor" | "marketing" | "operacional" | "outros";
+
+export type Transaction = {
+  id: string;
+  kind: TransactionKind;
+  category: TransactionCategory;
+  description: string;
+  amount: number;
+  date: string;
+  affiliateId?: string;
+  productSummary?: string;
+  notes?: string;
+  createdAt: string;
+};
+
 export type Customer = {
   id: string;
   name: string;
@@ -123,6 +139,7 @@ type AppState = {
   affiliates: Affiliate[];
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
+  transactions: Transaction[];
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
@@ -163,6 +180,10 @@ type AppState = {
   upsertCoupon: (c: Coupon) => void;
   deleteCoupon: (code: string) => void;
   updateSettings: (s: Partial<StoreSettings>) => void;
+
+  addTransaction: (t: Omit<Transaction, "id" | "createdAt">) => Transaction;
+  updateTransaction: (id: string, patch: Partial<Omit<Transaction, "id" | "createdAt">>) => void;
+  deleteTransaction: (id: string) => void;
 };
 
 export const useStore = create<AppState>()(
@@ -181,6 +202,17 @@ export const useStore = create<AppState>()(
       affiliates: [],
       affiliateSales: [],
       currentAffiliateId: null,
+      transactions: [],
+
+      addTransaction: (t) => {
+        const tx: Transaction = { ...t, id: `tx_${Date.now()}`, createdAt: new Date().toISOString() };
+        set(s => ({ transactions: [tx, ...s.transactions] }));
+        return tx;
+      },
+      updateTransaction: (id, patch) => set(s => ({
+        transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t),
+      })),
+      deleteTransaction: (id) => set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })),
 
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
