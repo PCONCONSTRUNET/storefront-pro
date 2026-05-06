@@ -17,13 +17,6 @@ function Page() {
   return (
     <AdminLayout title="Configurações da loja">
       <div className="grid lg:grid-cols-2 gap-4">
-        <Card title="Identidade">
-          <Field label="Nome da loja" value={s.storeName} onChange={v => setS({ ...s, storeName: v })} />
-          <Field label="WhatsApp" value={s.whatsapp} onChange={v => setS({ ...s, whatsapp: v })} />
-          <Field label="Endereço" value={s.address} onChange={v => setS({ ...s, address: v })} />
-          <Field label="Instagram" value={s.instagram} onChange={v => setS({ ...s, instagram: v })} />
-          <Field label="Facebook" value={s.facebook} onChange={v => setS({ ...s, facebook: v })} />
-        </Card>
         <Card title="Banner principal">
           <Field label="Título" value={s.bannerTitle} onChange={v => setS({ ...s, bannerTitle: v })} />
           <Field label="Subtítulo" value={s.bannerSubtitle} onChange={v => setS({ ...s, bannerSubtitle: v })} />
