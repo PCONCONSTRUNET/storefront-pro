@@ -63,8 +63,8 @@ function Page() {
             <Field label="E-mail" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="seu@email.com" />
             <Field label="Telefone" value={form.phone} onChange={v => setForm({ ...form, phone: v })} placeholder="(11) 99999-9999" />
             <Field label="Senha" type="password" value={form.password} onChange={v => setForm({ ...form, password: v })} placeholder="Mínimo 6 caracteres" />
-            <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm">
-              Criar conta
+            <button disabled={submitting} className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm disabled:opacity-70">
+              {submitting ? "Criando..." : "Criar conta"}
             </button>
             <p className="text-center text-xs text-muted-foreground pt-0.5">
               Já tem conta? <Link to="/login" className="text-primary font-semibold">Entrar</Link>
