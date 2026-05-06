@@ -134,6 +134,10 @@ type AppState = {
   registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => { ok: boolean; message: string };
   loginCustomer: (email: string, password: string) => { ok: boolean; message: string };
   logoutCustomer: () => void;
+  updateCustomer: (data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>) => { ok: boolean; message: string };
+  addAddress: (address: string) => void;
+  removeAddress: (index: number) => void;
+  toggleFavorite: (productId: string) => void;
   loginAdmin: (email: string, password: string) => { ok: boolean; message: string };
   logoutAdmin: () => void;
 
