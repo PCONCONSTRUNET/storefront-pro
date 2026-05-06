@@ -224,6 +224,7 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
   const fileRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState("");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [cropIdx, setCropIdx] = useState<number | null>(null);
 
   const addFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
