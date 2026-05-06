@@ -22,7 +22,11 @@ function Page() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const r = register(form);
-    if (r.ok) { toast.success(r.message); navigate({ to: "/afiliada" }); }
+    if (r.ok) {
+      window.history.replaceState(null, "", "/afiliada");
+      navigate({ to: "/afiliada", replace: true });
+      toast.success(r.message);
+    }
     else toast.error(r.message);
   };
 
