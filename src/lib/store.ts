@@ -463,7 +463,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 2,
+      version: 3,
       skipHydration: typeof window === "undefined",
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
@@ -471,7 +471,30 @@ export const useStore = create<AppState>()(
           persisted.products = initialProducts;
           persisted.categories = initialCategories;
         }
+        if (version < 3) {
+          persisted.sessions = { admin: null, customer: null, affiliate: null };
+        }
         return persisted;
+      },
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // Enforce session expiry on every page load — invalid tokens force re-login.
+        const sessions = state.sessions || { admin: null, customer: null, affiliate: null };
+        const patch: Partial<AppState> = {};
+        const nextSessions = { ...sessions };
+        if (!isSessionValid(sessions.admin) && state.isAdmin) {
+          patch.isAdmin = false;
+          nextSessions.admin = null;
+        }
+        if (!isSessionValid(sessions.customer) && state.currentCustomerId) {
+          patch.currentCustomerId = null;
+          nextSessions.customer = null;
+        }
+        if (!isSessionValid(sessions.affiliate) && state.currentAffiliateId) {
+          patch.currentAffiliateId = null;
+          nextSessions.affiliate = null;
+        }
+        useStore.setState({ ...patch, sessions: nextSessions });
       },
     },
   ),
