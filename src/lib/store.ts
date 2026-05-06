@@ -136,6 +136,7 @@ type AppState = {
 
   loginAffiliate: (email: string, password: string) => { ok: boolean; message: string };
   logoutAffiliate: () => void;
+  registerAffiliate: (data: { name: string; email: string; password: string; phone: string }) => { ok: boolean; message: string };
   upsertAffiliate: (a: Affiliate) => void;
   deleteAffiliate: (id: string) => void;
   registerAffiliateSale: (s: Omit<AffiliateSale, "id" | "createdAt" | "commissionEarned" | "status"> & { status?: AffiliateSaleStatus }) => AffiliateSale | null;
