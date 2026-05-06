@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useStore, type Affiliate, type AffiliateSaleStatus } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Pencil, Trash2, Check, X, Clock, Users, DollarSign, ShoppingBag } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, Clock, Users, DollarSign, ShoppingBag, Search, Eye, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/afiliadas")({
@@ -32,15 +32,38 @@ function Page() {
 
   const [tab, setTab] = useState<"afiliadas" | "vendas">("afiliadas");
   const [editing, setEditing] = useState<Affiliate | null>(null);
+  const [viewing, setViewing] = useState<Affiliate | null>(null);
   const [filterAff, setFilterAff] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<"" | AffiliateSaleStatus>("");
+  const [search, setSearch] = useState("");
+  const [searchAff, setSearchAff] = useState("");
 
   const totals = useMemo(() => {
-    const totalRevenue = sales.filter(s => s.status !== "cancelada").reduce((a, s) => a + s.saleValue, 0);
-    const totalCommission = sales.filter(s => s.status !== "cancelada").reduce((a, s) => a + s.commissionEarned, 0);
-    return { totalRevenue, totalCommission, count: sales.length };
+    const totalRevenue = sales.filter(s => s.status === "confirmada").reduce((a, s) => a + s.saleValue, 0);
+    const totalCommission = sales.filter(s => s.status === "confirmada").reduce((a, s) => a + s.commissionEarned, 0);
+    const paidCount = sales.filter(s => s.status === "confirmada").length;
+    return { totalRevenue, totalCommission, count: sales.length, paidCount };
   }, [sales]);
 
-  const filteredSales = filterAff ? sales.filter(s => s.affiliateId === filterAff) : sales;
+  const filteredSales = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return sales.filter(s => {
+      if (filterAff && s.affiliateId !== filterAff) return false;
+      if (filterStatus && s.status !== filterStatus) return false;
+      if (q) {
+        const aff = affiliates.find(a => a.id === s.affiliateId);
+        const hay = `${s.customerName} ${s.productDescription} ${s.customerPhone || ""} ${aff?.name || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [sales, filterAff, filterStatus, search, affiliates]);
+
+  const filteredAffiliates = useMemo(() => {
+    const q = searchAff.trim().toLowerCase();
+    if (!q) return affiliates;
+    return affiliates.filter(a => `${a.name} ${a.email} ${a.phone || ""}`.toLowerCase().includes(q));
+  }, [affiliates, searchAff]);
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,9 +89,9 @@ function Page() {
     <AdminLayout title="Afiliadas">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card icon={Users} label="Afiliadas" value={String(affiliates.length)} />
-        <Card icon={ShoppingBag} label="Vendas registradas" value={String(totals.count)} />
-        <Card icon={DollarSign} label="Faturado por afiliadas" value={brl(totals.totalRevenue)} />
-        <Card icon={DollarSign} label="Comissões totais" value={brl(totals.totalCommission)} colorClass="text-gold" />
+        <Card icon={ShoppingBag} label="Vendas pagas" value={String(totals.paidCount)} />
+        <Card icon={DollarSign} label="Faturado (pago)" value={brl(totals.totalRevenue)} />
+        <Card icon={DollarSign} label="Comissões pagas" value={brl(totals.totalCommission)} colorClass="text-gold" />
       </div>
 
       <div className="flex gap-2 mb-3">
@@ -78,15 +101,26 @@ function Page() {
 
       {tab === "afiliadas" && (
         <div className="bg-card rounded-2xl shadow-card p-4">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
             <h2 className="font-bold">Cadastro de afiliadas</h2>
-            <button onClick={() => setEditing({ ...empty })} className="flex items-center gap-1 text-sm bg-primary text-primary-foreground px-3 py-2 rounded-full">
-              <Plus className="h-4 w-4" /> Nova afiliada
-            </button>
+            <div className="flex gap-2 items-center">
+              <div className="relative">
+                <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={searchAff}
+                  onChange={e => setSearchAff(e.target.value)}
+                  placeholder="Buscar por nome, e-mail..."
+                  className="h-9 pl-8 pr-3 rounded-full bg-background border border-border text-sm w-52"
+                />
+              </div>
+              <button onClick={() => setEditing({ ...empty })} className="flex items-center gap-1 text-sm bg-primary text-primary-foreground px-3 py-2 rounded-full whitespace-nowrap">
+                <Plus className="h-4 w-4" /> Nova
+              </button>
+            </div>
           </div>
 
-          {affiliates.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Nenhuma afiliada cadastrada.</p>
+          {filteredAffiliates.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">{affiliates.length === 0 ? "Nenhuma afiliada cadastrada." : "Nenhum resultado para a busca."}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -96,15 +130,17 @@ function Page() {
                     <th className="py-2 pr-2">E-mail</th>
                     <th className="py-2 pr-2">Comissão</th>
                     <th className="py-2 pr-2">Status</th>
-                    <th className="py-2 pr-2">Vendas</th>
+                    <th className="py-2 pr-2">Pagas</th>
+                    <th className="py-2 pr-2">Comissão paga</th>
                     <th className="py-2 pr-2"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {affiliates.map(a => {
-                    const aSales = sales.filter(s => s.affiliateId === a.id && s.status !== "cancelada");
+                  {filteredAffiliates.map(a => {
+                    const paid = sales.filter(s => s.affiliateId === a.id && s.status === "confirmada");
+                    const earned = paid.reduce((acc, s) => acc + s.commissionEarned, 0);
                     return (
-                      <tr key={a.id} className="border-b border-border last:border-0">
+                      <tr key={a.id} onClick={() => setViewing(a)} className="border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-colors">
                         <td className="py-2 pr-2 font-medium">{a.name}</td>
                         <td className="py-2 pr-2 text-muted-foreground">{a.email}</td>
                         <td className="py-2 pr-2">
@@ -115,11 +151,13 @@ function Page() {
                             {a.active ? "Ativa" : "Inativa"}
                           </span>
                         </td>
-                        <td className="py-2 pr-2">{aSales.length}</td>
-                        <td className="py-2 pr-2">
+                        <td className="py-2 pr-2">{paid.length}</td>
+                        <td className="py-2 pr-2 text-gold font-semibold">{brl(earned)}</td>
+                        <td className="py-2 pr-2" onClick={e => e.stopPropagation()}>
                           <div className="flex gap-1 justify-end">
-                            <button onClick={() => setEditing({ ...a })} className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="h-4 w-4" /></button>
-                            <button onClick={() => { if (confirm(`Excluir ${a.name}? Vendas dela também serão removidas.`)) { remove(a.id); toast.success("Afiliada removida"); } }} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
+                            <button onClick={() => setViewing(a)} title="Ver detalhes" className="p-1.5 rounded-lg hover:bg-muted"><Eye className="h-4 w-4" /></button>
+                            <button onClick={() => setEditing({ ...a })} title="Editar" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="h-4 w-4" /></button>
+                            <button onClick={() => { if (confirm(`Excluir ${a.name}? Vendas dela também serão removidas.`)) { remove(a.id); toast.success("Afiliada removida"); } }} title="Excluir" className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"><Trash2 className="h-4 w-4" /></button>
                           </div>
                         </td>
                       </tr>
@@ -139,11 +177,28 @@ function Page() {
       {tab === "vendas" && (
         <div className="bg-card rounded-2xl shadow-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 className="font-bold">Todas as vendas</h2>
-            <select value={filterAff} onChange={e => setFilterAff(e.target.value)} className="h-9 px-2 rounded-lg bg-background border border-border text-sm">
-              <option value="">Todas as afiliadas</option>
-              {affiliates.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
+            <h2 className="font-bold">Vendas {filterStatus === "confirmada" ? "(pagas)" : "registradas"}</h2>
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
+                <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Buscar cliente, produto, afiliada..."
+                  className="h-9 pl-8 pr-3 rounded-lg bg-background border border-border text-sm w-64"
+                />
+              </div>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} className="h-9 px-2 rounded-lg bg-background border border-border text-sm">
+                <option value="">Todos status</option>
+                <option value="confirmada">Pagas</option>
+                <option value="pendente">Pendentes</option>
+                <option value="cancelada">Canceladas</option>
+              </select>
+              <select value={filterAff} onChange={e => setFilterAff(e.target.value)} className="h-9 px-2 rounded-lg bg-background border border-border text-sm">
+                <option value="">Todas as afiliadas</option>
+                {affiliates.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
           </div>
 
           {filteredSales.length === 0 ? (
@@ -177,6 +232,16 @@ function Page() {
             </ul>
           )}
         </div>
+      )}
+
+      {viewing && (
+        <AffiliateDetailsModal
+          affiliate={viewing}
+          sales={sales.filter(s => s.affiliateId === viewing.id)}
+          onClose={() => setViewing(null)}
+          onEdit={() => { setEditing({ ...viewing }); setViewing(null); }}
+          onViewSales={() => { setFilterAff(viewing.id); setTab("vendas"); setViewing(null); }}
+        />
       )}
 
       {editing && (
@@ -254,4 +319,101 @@ function StatusBadge({ status }: { status: AffiliateSaleStatus }) {
   };
   const m = map[status];
   return <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1 ${m.cls}`}>{m.label}</span>;
+}
+
+function AffiliateDetailsModal({
+  affiliate,
+  sales,
+  onClose,
+  onEdit,
+  onViewSales,
+}: {
+  affiliate: Affiliate;
+  sales: ReturnType<typeof useStore.getState>["affiliateSales"];
+  onClose: () => void;
+  onEdit: () => void;
+  onViewSales: () => void;
+}) {
+  const paid = sales.filter(s => s.status === "confirmada");
+  const pending = sales.filter(s => s.status === "pendente");
+  const cancelled = sales.filter(s => s.status === "cancelada");
+  const totalPaid = paid.reduce((a, s) => a + s.saleValue, 0);
+  const totalCommission = paid.reduce((a, s) => a + s.commissionEarned, 0);
+  const recent = [...sales].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 5);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-bold text-lg">{affiliate.name}</h3>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full ${affiliate.active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}>
+              {affiliate.active ? "Ativa" : "Inativa"}
+            </span>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="h-4 w-4" /></button>
+        </div>
+
+        <div className="space-y-2 text-sm mb-4">
+          <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> {affiliate.email}</div>
+          {affiliate.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {affiliate.phone}</div>}
+          <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> Comissão: {affiliate.commissionType === "percent" ? `${affiliate.commissionValue}%` : brl(affiliate.commissionValue)}</div>
+          <div className="text-xs text-muted-foreground">Cadastrada em {new Date(affiliate.createdAt).toLocaleDateString("pt-BR")}</div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-success/10 rounded-xl p-3 text-center">
+            <div className="text-lg font-bold text-success">{paid.length}</div>
+            <div className="text-[10px] text-muted-foreground">Pagas</div>
+          </div>
+          <div className="bg-gold/10 rounded-xl p-3 text-center">
+            <div className="text-lg font-bold text-gold">{pending.length}</div>
+            <div className="text-[10px] text-muted-foreground">Pendentes</div>
+          </div>
+          <div className="bg-destructive/10 rounded-xl p-3 text-center">
+            <div className="text-lg font-bold text-destructive">{cancelled.length}</div>
+            <div className="text-[10px] text-muted-foreground">Canceladas</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="bg-muted/50 rounded-xl p-3">
+            <div className="text-xs text-muted-foreground">Faturado (pago)</div>
+            <div className="font-bold">{brl(totalPaid)}</div>
+          </div>
+          <div className="bg-muted/50 rounded-xl p-3">
+            <div className="text-xs text-muted-foreground">Comissão paga</div>
+            <div className="font-bold text-gold">{brl(totalCommission)}</div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="text-xs font-semibold text-muted-foreground mb-2">Últimas vendas</div>
+          {recent.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">Nenhuma venda ainda.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {recent.map(s => (
+                <li key={s.id} className="py-2 flex justify-between items-center text-sm">
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{s.customerName}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{s.productDescription}</div>
+                  </div>
+                  <div className="text-right ml-2">
+                    <div className="font-semibold">{brl(s.saleValue)}</div>
+                    <StatusBadge status={s.status} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={onViewSales} className="flex-1 h-10 rounded-full border border-border text-sm font-semibold">Ver todas as vendas</button>
+          <button onClick={onEdit} className="flex-1 h-10 rounded-full gradient-primary text-primary-foreground text-sm font-semibold">Editar</button>
+        </div>
+      </div>
+    </div>
+  );
 }
