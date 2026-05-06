@@ -1,14 +1,20 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useStore, type AffiliateSale } from "@/lib/store";
 import { brl } from "@/lib/format";
-import { DollarSign, ShoppingBag, TrendingUp, Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered } from "lucide-react";
+import { DollarSign, ShoppingBag, TrendingUp, Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, Download } from "lucide-react";
 import { toast } from "sonner";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
   SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
+  CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from "recharts";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export const Route = createFileRoute("/afiliada/")({
   component: Page,
