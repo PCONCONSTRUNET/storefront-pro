@@ -13,7 +13,7 @@ function Page() {
   const { q } = Route.useSearch();
   const allProducts = useStore(s => s.products);
   const products = useMemo(
-    () => allProducts.filter(p => p.active && p.name.toLowerCase().includes(q.toLowerCase())),
+    () => allProducts.filter(p => p.active && !p.hidden && p.name.toLowerCase().includes(q.toLowerCase())),
     [allProducts, q]
   );
   return (
