@@ -31,7 +31,11 @@ function Page() {
     if (submitting) return;
     setSubmitting(true);
     const r = loginAdmin(email, pwd);
-    if (r.ok) { toast.success(r.message); navigate({ to: "/admin/dashboard" }); }
+    if (r.ok) {
+      window.history.replaceState(null, "", "/admin/dashboard");
+      navigate({ to: "/admin/dashboard", replace: true });
+      toast.success(r.message);
+    }
     else { toast.error(r.message); setSubmitting(false); }
   };
 

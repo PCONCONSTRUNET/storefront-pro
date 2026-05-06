@@ -31,7 +31,11 @@ function Page() {
     if (submitting) return;
     setSubmitting(true);
     const r = login(email, pwd);
-    if (r.ok) { toast.success(r.message); navigate({ to: "/afiliada" }); }
+    if (r.ok) {
+      window.history.replaceState(null, "", "/afiliada");
+      navigate({ to: "/afiliada", replace: true });
+      toast.success(r.message);
+    }
     else { toast.error(r.message); setSubmitting(false); }
   };
 

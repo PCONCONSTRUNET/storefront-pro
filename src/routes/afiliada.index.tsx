@@ -37,7 +37,7 @@ function Page() {
 
   const [view, setView] = useState<View>("registrar");
 
-  if (!hydrated || !me) {
+  if (!me) {
     return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
   }
 
