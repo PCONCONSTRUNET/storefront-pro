@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram } from "lucide-react";
+import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram, X } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/perfil/")({
   head: () => ({ meta: [{ title: "Minha conta — Princesa de Laços" }] }),
@@ -11,6 +13,7 @@ export const Route = createFileRoute("/perfil/")({
 function Page() {
   const customer = useStore(selectCurrentCustomer);
   const logoutCustomer = useStore(s => s.logoutCustomer);
+  const [authMode, setAuthMode] = useState<"login" | "cadastro" | null>(null);
 
   if (!customer) {
     return (
@@ -20,11 +23,12 @@ function Page() {
           <h1 className="text-xl font-bold mt-4">Bem-vinda à Princesa de Laços</h1>
           <p className="text-sm text-muted-foreground mt-1">Entre ou crie sua conta para acompanhar pedidos.</p>
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <Link to="/login" className="h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center">Entrar</Link>
-            <Link to="/cadastro" className="h-12 rounded-full border-2 border-primary text-primary font-semibold flex items-center justify-center">Cadastrar</Link>
+            <button type="button" onClick={() => setAuthMode("login")} className="h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center">Entrar</button>
+            <button type="button" onClick={() => setAuthMode("cadastro")} className="h-12 rounded-full border-2 border-primary text-primary font-semibold flex items-center justify-center">Cadastrar</button>
           </div>
           <Link to="/admin/login" className="mt-8 inline-block text-xs text-muted-foreground underline">​</Link>
         </div>
+        {authMode && <AuthModal mode={authMode} setMode={setAuthMode} onClose={() => setAuthMode(null)} />}
       </StoreLayout>
     );
   }
@@ -97,5 +101,87 @@ function Page() {
         <Link to="/admin/login" className="mt-6 block text-center text-xs text-muted-foreground underline">​</Link>
       </div>
     </StoreLayout>
+  );
+}
+
+function AuthModal({ mode, setMode, onClose }: { mode: "login" | "cadastro"; setMode: (mode: "login" | "cadastro") => void; onClose: () => void }) {
+  const loginCustomer = useStore(s => s.loginCustomer);
+  const registerCustomer = useStore(s => s.registerCustomer);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+
+  const submitLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const r = loginCustomer(email, password);
+    if (r.ok) {
+      toast.success(r.message);
+      onClose();
+    } else {
+      toast.error(r.message);
+    }
+  };
+
+  const submitCadastro = (e: React.FormEvent) => {
+    e.preventDefault();
+    const r = registerCustomer(form);
+    if (r.ok) {
+      toast.success(r.message);
+      onClose();
+    } else {
+      toast.error(r.message);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="gradient-primary text-primary-foreground px-4 pt-4 pb-5 relative text-left">
+          <button onClick={onClose} className="absolute right-3 top-3 w-7 h-7 grid place-items-center rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors" aria-label="Fechar" type="button">
+            <X className="h-3.5 w-3.5" />
+          </button>
+          <h2 className="font-display text-2xl">{mode === "login" ? "Bem-vinda" : "Crie sua conta"}</h2>
+          <p className="text-primary-foreground/90 text-xs">{mode === "login" ? "Entre na sua conta." : "Preencha os dados para começar."}</p>
+        </div>
+
+        {mode === "login" ? (
+          <form onSubmit={submitLogin} className="px-4 py-4 space-y-3 text-left">
+            <AuthField label="E-mail" type="email" value={email} onChange={setEmail} placeholder="seu@email.com" />
+            <AuthField label="Senha" type="password" value={password} onChange={setPassword} placeholder="Sua senha" />
+            <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm">Entrar</button>
+            <p className="text-center text-xs text-muted-foreground pt-0.5">
+              Não tem conta? <button type="button" onClick={() => setMode("cadastro")} className="text-primary font-semibold">Cadastre-se</button>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={submitCadastro} className="px-4 py-4 space-y-3 text-left">
+            <AuthField label="Nome completo" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="Como devemos te chamar?" />
+            <AuthField label="E-mail" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="seu@email.com" />
+            <AuthField label="Telefone" value={form.phone} onChange={v => setForm({ ...form, phone: v })} placeholder="(11) 99999-9999" />
+            <AuthField label="Senha" type="password" value={form.password} onChange={v => setForm({ ...form, password: v })} placeholder="Mínimo 6 caracteres" />
+            <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm">Criar conta</button>
+            <p className="text-center text-xs text-muted-foreground pt-0.5">
+              Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold">Entrar</button>
+            </p>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AuthField({ label, value, onChange, type = "text", placeholder }: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string }) {
+  return (
+    <label className="block">
+      <span className="text-sm font-semibold text-foreground">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        required
+        placeholder={placeholder}
+        className="mt-1 w-full h-10 px-3 rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground border border-border outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+      />
+    </label>
   );
 }
