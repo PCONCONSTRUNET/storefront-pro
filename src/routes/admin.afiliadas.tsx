@@ -177,11 +177,28 @@ function Page() {
       {tab === "vendas" && (
         <div className="bg-card rounded-2xl shadow-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 className="font-bold">Todas as vendas</h2>
-            <select value={filterAff} onChange={e => setFilterAff(e.target.value)} className="h-9 px-2 rounded-lg bg-background border border-border text-sm">
-              <option value="">Todas as afiliadas</option>
-              {affiliates.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
+            <h2 className="font-bold">Vendas {filterStatus === "confirmada" ? "(pagas)" : "registradas"}</h2>
+            <div className="flex flex-wrap gap-2">
+              <div className="relative">
+                <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Buscar cliente, produto, afiliada..."
+                  className="h-9 pl-8 pr-3 rounded-lg bg-background border border-border text-sm w-64"
+                />
+              </div>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} className="h-9 px-2 rounded-lg bg-background border border-border text-sm">
+                <option value="">Todos status</option>
+                <option value="confirmada">Pagas</option>
+                <option value="pendente">Pendentes</option>
+                <option value="cancelada">Canceladas</option>
+              </select>
+              <select value={filterAff} onChange={e => setFilterAff(e.target.value)} className="h-9 px-2 rounded-lg bg-background border border-border text-sm">
+                <option value="">Todas as afiliadas</option>
+                {affiliates.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
           </div>
 
           {filteredSales.length === 0 ? (
