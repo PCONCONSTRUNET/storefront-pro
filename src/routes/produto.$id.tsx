@@ -90,14 +90,6 @@ function Page() {
             <div className="text-xs text-muted-foreground mt-1">SKU: {product.sku} · Estoque: {product.stock}</div>
 
             <div className="mt-4 flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-primary">{brl(product.price)}</span>
-              {product.oldPrice && <span className="text-base text-muted-foreground line-through">{brl(product.oldPrice)}</span>}
-            </div>
-            <p className="text-xs text-success font-medium mt-1">ou Pix com 5% off: {brl(product.price * 0.95)}</p>
-
-            <p className="mt-5 text-sm text-foreground/80 leading-relaxed">{product.description}</p>
-
-            <div className="mt-4 flex items-baseline gap-3">
               <span className="text-3xl font-bold text-primary">{brl(finalPrice)}</span>
               {product.oldPrice && <span className="text-base text-muted-foreground line-through">{brl(product.oldPrice)}</span>}
             </div>
