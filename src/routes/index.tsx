@@ -108,10 +108,10 @@ function Home() {
               Ver todas <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
+          <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
             {categories.map((c) => (
-              <Link key={c.id} to="/categoria/$slug" params={{ slug: c.id }} className="flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform">
+              <Link key={c.id} to="/categoria/$slug" params={{ slug: c.id }} className="shrink-0 snap-start flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors w-[72px] md:w-[88px]">
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform">
                   {c.image}
                 </div>
                 <span className="text-[10px] md:text-xs font-medium text-foreground text-center line-clamp-1">{c.name}</span>
