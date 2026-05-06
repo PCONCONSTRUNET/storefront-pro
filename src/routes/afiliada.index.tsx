@@ -157,7 +157,7 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
       <p className="text-xs text-muted-foreground mb-4">Preencha os dados da venda. A comissão é calculada automaticamente.</p>
       <form onSubmit={submit} className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome da cliente *">
-          <input value={form.customerName} onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))} required className="input" autoFocus />
+          <input value={form.customerName} onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))} required className="input" />
         </Field>
         <Field label="WhatsApp da cliente">
           <input value={form.customerPhone} onChange={e => setForm(f => ({ ...f, customerPhone: e.target.value }))} className="input" />
