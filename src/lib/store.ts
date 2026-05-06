@@ -225,6 +225,48 @@ export const useStore = create<AppState>()(
       },
       logoutAdmin: () => set({ isAdmin: false }),
 
+      loginAffiliate: (email, password) => {
+        const normalized = email.trim().toLowerCase();
+        const a = get().affiliates.find(x => x.email.toLowerCase() === normalized && x.password === password);
+        if (!a) return { ok: false, message: "Credenciais inválidas" };
+        if (!a.active) return { ok: false, message: "Conta desativada. Contate a administradora." };
+        set({ currentAffiliateId: a.id });
+        return { ok: true, message: `Bem-vinda, ${a.name}!` };
+      },
+      logoutAffiliate: () => set({ currentAffiliateId: null }),
+      upsertAffiliate: (a) => set((s) => ({
+        affiliates: s.affiliates.find(x => x.id === a.id) ? s.affiliates.map(x => x.id === a.id ? a : x) : [...s.affiliates, a],
+      })),
+      deleteAffiliate: (id) => set((s) => ({
+        affiliates: s.affiliates.filter(a => a.id !== id),
+        affiliateSales: s.affiliateSales.filter(v => v.affiliateId !== id),
+      })),
+      registerAffiliateSale: (data) => {
+        const aff = get().affiliates.find(a => a.id === data.affiliateId);
+        if (!aff) return null;
+        const commission = aff.commissionType === "percent"
+          ? data.saleValue * aff.commissionValue / 100
+          : aff.commissionValue;
+        const sale: AffiliateSale = {
+          id: `vaf_${Date.now()}`,
+          affiliateId: data.affiliateId,
+          customerName: data.customerName,
+          customerPhone: data.customerPhone,
+          productDescription: data.productDescription,
+          saleValue: data.saleValue,
+          commissionEarned: Math.round(commission * 100) / 100,
+          status: data.status || "pendente",
+          notes: data.notes,
+          createdAt: new Date().toISOString(),
+        };
+        set(s => ({ affiliateSales: [sale, ...s.affiliateSales] }));
+        return sale;
+      },
+      updateAffiliateSaleStatus: (id, status) => set(s => ({
+        affiliateSales: s.affiliateSales.map(v => v.id === id ? { ...v, status } : v),
+      })),
+      deleteAffiliateSale: (id) => set(s => ({ affiliateSales: s.affiliateSales.filter(v => v.id !== id) })),
+
       placeOrder: (data) => {
         const state = get();
         const items = state.cart.map((ci) => {
