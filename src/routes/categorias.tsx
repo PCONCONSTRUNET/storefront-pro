@@ -16,7 +16,7 @@ function Page() {
         <p className="text-sm text-muted-foreground mb-5">Encontre o acessório perfeito.</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {categories.map((c) => {
-            const count = products.filter(p => p.category === c.id && p.active).length;
+            const count = products.filter(p => p.category === c.id && p.active && !p.hidden).length;
             return (
               <Link key={c.id} to="/categoria/$slug" params={{ slug: c.id }}
                 className="bg-card rounded-2xl p-5 shadow-card hover:shadow-soft transition-all flex flex-col items-center text-center group">
