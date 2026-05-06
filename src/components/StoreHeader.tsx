@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, ShoppingBag, Crown } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
 import logo from "@/assets/logo-princesa.png";
@@ -37,7 +37,11 @@ export function StoreHeader() {
           className="relative shrink-0 w-10 h-10 grid place-items-center rounded-full hover:bg-muted transition-colors"
           aria-label="Carrinho"
         >
-          <ShoppingBag className="h-5 w-5 text-foreground" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.25em" height="1.25em" strokeLinejoin="round" strokeLinecap="round" viewBox="0 0 24 24" strokeWidth={2} fill="none" stroke="currentColor" className="text-foreground">
+            <circle r={1} cy={21} cx={9} />
+            <circle r={1} cy={21} cx={20} />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+          </svg>
           {count > 0 && (
             <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
               {count}
