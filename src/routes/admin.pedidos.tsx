@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/pedidos")({
 const statuses: OrderStatus[] = ["aguardando_pagamento", "pago", "em_separacao", "saiu_para_entrega", "concluido", "cancelado", "reembolsado"];
 
 function Page() {
-  const { orders, updateOrderStatus } = useStore();
+  const { orders, updateOrderStatus, deleteOrder } = useStore();
   const [filter, setFilter] = useState<OrderStatus | "todos">("todos");
   const [selected, setSelected] = useState<string | null>(null);
   const list = filter === "todos" ? orders : orders.filter(o => o.status === filter);
@@ -78,6 +78,17 @@ function Page() {
               </select>
             </label>
             <button onClick={() => window.print()} className="w-full h-10 rounded-full bg-muted font-semibold">Imprimir guia</button>
+            <button
+              onClick={() => {
+                if (confirm(`Excluir o pedido #${order.id}? Esta ação não pode ser desfeita.`)) {
+                  deleteOrder(order.id);
+                  setSelected(null);
+                }
+              }}
+              className="w-full h-10 rounded-full bg-destructive/10 text-destructive font-semibold hover:bg-destructive/20 transition-colors"
+            >
+              Excluir pedido
+            </button>
           </div>
         </Modal>
       )}

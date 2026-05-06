@@ -172,6 +172,7 @@ type AppState = {
     address: string; paymentMethod: "pix" | "card" | "cash";
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  deleteOrder: (id: string) => void;
 
   upsertProduct: (p: Product) => void;
   deleteProduct: (id: string) => void;
@@ -390,6 +391,7 @@ export const useStore = create<AppState>()(
         return order;
       },
       updateOrderStatus: (id, status) => set((s) => ({ orders: s.orders.map(o => o.id === id ? { ...o, status } : o) })),
+      deleteOrder: (id) => set((s) => ({ orders: s.orders.filter(o => o.id !== id) })),
 
       upsertProduct: (p) => set((s) => ({
         products: s.products.find(x => x.id === p.id) ? s.products.map(x => x.id === p.id ? p : x) : [...s.products, p],
