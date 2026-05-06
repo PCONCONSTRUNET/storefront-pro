@@ -23,7 +23,7 @@ function Page() {
             <Link to="/login" className="h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center">Entrar</Link>
             <Link to="/cadastro" className="h-12 rounded-full border-2 border-primary text-primary font-semibold flex items-center justify-center">Cadastrar</Link>
           </div>
-          <Link to="/admin/login" className="mt-8 inline-block text-xs text-muted-foreground underline">Acessar painel admin</Link>
+          <Link to="/admin/login" className="mt-8 inline-block text-xs text-muted-foreground underline">​</Link>
         </div>
       </StoreLayout>
     );
@@ -64,7 +64,7 @@ function Page() {
           <LogOut className="h-4 w-4" /> Sair
         </button>
 
-        <Link to="/admin/login" className="mt-6 block text-center text-xs text-muted-foreground underline">Acessar painel admin</Link>
+        <Link to="/admin/login" className="mt-6 block text-center text-xs text-muted-foreground underline">​</Link>
       </div>
     </StoreLayout>
   );
