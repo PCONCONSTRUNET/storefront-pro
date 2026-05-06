@@ -10,7 +10,7 @@ export default defineConfig({
   tanstackStart: {
     router: {
       codeSplittingOptions: {
-        splitBehavior: ({ routeId }) => {
+        splitBehavior: ({ routeId }: { routeId: string }) => {
           const instantStoreRoutes = new Set([
             "/",
             "/buscar",
