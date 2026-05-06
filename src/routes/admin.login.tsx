@@ -67,7 +67,10 @@ function Page() {
               className="mt-1 w-full h-11 px-3 rounded-xl bg-background border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
             />
           </label>
-          <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold">Entrar</button>
+          <button disabled={submitting} className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 disabled:opacity-70">
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {submitting ? "Entrando..." : "Entrar"}
+          </button>
         </form>
       </div>
     </div>
