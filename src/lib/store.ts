@@ -293,16 +293,20 @@ export const useStore = create<AppState>()(
         const exists = get().customers.find((x) => x.email === c.email);
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
         const newC: Customer = { ...c, id: `c_${Date.now()}`, createdAt: new Date().toISOString() };
-        set((s) => ({ customers: [...s.customers, newC], currentCustomerId: newC.id }));
+        set((s) => ({
+          customers: [...s.customers, newC],
+          currentCustomerId: newC.id,
+          sessions: { ...s.sessions, customer: makeSession(newC.id) },
+        }));
         return { ok: true, message: "Cadastro realizado!" };
       },
       loginCustomer: (email, password) => {
         const c = get().customers.find((x) => x.email === email && x.password === password);
         if (!c) return { ok: false, message: "Credenciais inválidas" };
-        set({ currentCustomerId: c.id });
+        set(s => ({ currentCustomerId: c.id, sessions: { ...s.sessions, customer: makeSession(c.id) } }));
         return { ok: true, message: "Bem-vinda!" };
       },
-      logoutCustomer: () => set({ currentCustomerId: null }),
+      logoutCustomer: () => set(s => ({ currentCustomerId: null, sessions: { ...s.sessions, customer: null } })),
       updateCustomer: (data) => {
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
