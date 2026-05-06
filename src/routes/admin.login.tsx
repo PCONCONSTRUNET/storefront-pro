@@ -17,7 +17,7 @@ function Page() {
   const [pwd, setPwd] = useState("");
 
   useEffect(() => {
-    if (hydrated && isAdmin) navigate({ to: "/admin" });
+    if (hydrated && isAdmin) navigate({ to: "/admin/dashboard" });
   }, [hydrated, isAdmin, navigate]);
 
   const submit = (e: React.FormEvent) => {
