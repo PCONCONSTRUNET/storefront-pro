@@ -9,6 +9,7 @@ import type { Product } from "@/lib/data";
 export function ProductCard({ product }: { product: Product }) {
   const addToCart = useStore((s) => s.addToCart);
   const [imgError, setImgError] = useState(false);
+  const [added, setAdded] = useState(false);
   const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
   // Pseudo-random but stable based on id, for the demo
   const seed = product.id.charCodeAt(1) || 3;
@@ -70,16 +71,27 @@ export function ProductCard({ product }: { product: Product }) {
           <span>{sold} vendidos</span>
         </div>
         <button
-          onClick={() => { addToCart(product.id); toast.success("Adicionado ao carrinho"); }}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (product.stock === 0) return;
+            addToCart(product.id);
+            toast.success(`${product.name} adicionado ao carrinho`);
+            setAdded(true);
+            setTimeout(() => setAdded(false), 1200);
+          }}
           disabled={product.stock === 0}
           className={
             "mt-1.5 h-8 rounded-sm text-[11px] font-semibold transition-all " +
             (product.stock === 0
               ? "bg-muted text-muted-foreground cursor-not-allowed"
-              : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:scale-95 border border-primary/30")
+              : added
+                ? "bg-success text-success-foreground border border-success"
+                : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:scale-95 border border-primary/30")
           }
         >
-          {product.stock === 0 ? "Esgotado" : "+ Adicionar"}
+          {product.stock === 0 ? "Esgotado" : added ? "✓ Adicionado" : "+ Adicionar"}
         </button>
       </div>
     </article>
