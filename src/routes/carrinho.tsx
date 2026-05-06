@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore, selectCartTotals } from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl } from "@/lib/format";
 import { Minus, Plus, Trash2, Tag, ShoppingBag, ChevronLeft } from "lucide-react";
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/carrinho")({
 
 function Page() {
   const { cart, products, updateCartQty, removeFromCart, applyCoupon, removeCoupon, appliedCoupon } = useStore();
-  const totals = useStore(selectCartTotals);
+  const totals = useStore(useShallow(selectCartTotals));
   const [code, setCode] = useState("");
 
   if (cart.length === 0) {
