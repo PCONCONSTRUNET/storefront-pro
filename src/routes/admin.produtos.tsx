@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/produtos")({
 });
 
 const empty = (): Product => ({
-  id: `p_${Date.now()}`, name: "", description: "", price: 0, image: "", gallery: [], category: "lacos", stock: 0, sku: "", active: true,
+  id: `p_${Date.now()}`, name: "", description: "", price: 0, image: "", gallery: [], category: "lacos", stock: 0, sku: "", active: true, variations: [],
 });
 
 function Page() {
