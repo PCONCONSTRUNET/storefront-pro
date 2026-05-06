@@ -21,6 +21,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AfiliadaIndexRouteImport } from './routes/afiliada.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as PerfilFavoritosRouteImport } from './routes/perfil.favoritos'
+import { Route as PerfilEnderecosRouteImport } from './routes/perfil.enderecos'
+import { Route as PerfilConfiguracoesRouteImport } from './routes/perfil.configuracoes'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
@@ -96,6 +99,21 @@ const ProdutoIdRoute = ProdutoIdRouteImport.update({
   id: '/produto/$id',
   path: '/produto/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilFavoritosRoute = PerfilFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => PerfilRoute,
+} as any)
+const PerfilEnderecosRoute = PerfilEnderecosRouteImport.update({
+  id: '/enderecos',
+  path: '/enderecos',
+  getParentRoute: () => PerfilRoute,
+} as any)
+const PerfilConfiguracoesRoute = PerfilConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => PerfilRoute,
 } as any)
 const PedidoIdRoute = PedidoIdRouteImport.update({
   id: '/pedido/$id',
@@ -182,7 +200,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
+  '/perfil': typeof PerfilRouteWithChildren
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -198,6 +216,9 @@ export interface FileRoutesByFullPath {
   '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
+  '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
+  '/perfil/enderecos': typeof PerfilEnderecosRoute
+  '/perfil/favoritos': typeof PerfilFavoritosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
@@ -211,7 +232,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
+  '/perfil': typeof PerfilRouteWithChildren
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -227,6 +248,9 @@ export interface FileRoutesByTo {
   '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
+  '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
+  '/perfil/enderecos': typeof PerfilEnderecosRoute
+  '/perfil/favoritos': typeof PerfilFavoritosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin': typeof AdminIndexRoute
   '/afiliada': typeof AfiliadaIndexRoute
@@ -241,7 +265,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
-  '/perfil': typeof PerfilRoute
+  '/perfil': typeof PerfilRouteWithChildren
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -257,6 +281,9 @@ export interface FileRoutesById {
   '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
+  '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
+  '/perfil/enderecos': typeof PerfilEnderecosRoute
+  '/perfil/favoritos': typeof PerfilFavoritosRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
@@ -288,6 +315,9 @@ export interface FileRouteTypes {
     | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
+    | '/perfil/configuracoes'
+    | '/perfil/enderecos'
+    | '/perfil/favoritos'
     | '/produto/$id'
     | '/admin/'
     | '/afiliada/'
@@ -317,6 +347,9 @@ export interface FileRouteTypes {
     | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
+    | '/perfil/configuracoes'
+    | '/perfil/enderecos'
+    | '/perfil/favoritos'
     | '/produto/$id'
     | '/admin'
     | '/afiliada'
@@ -346,6 +379,9 @@ export interface FileRouteTypes {
     | '/afiliada/login'
     | '/categoria/$slug'
     | '/pedido/$id'
+    | '/perfil/configuracoes'
+    | '/perfil/enderecos'
+    | '/perfil/favoritos'
     | '/produto/$id'
     | '/admin/'
     | '/afiliada/'
@@ -360,7 +396,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   LoginRoute: typeof LoginRoute
   PedidosRoute: typeof PedidosRoute
-  PerfilRoute: typeof PerfilRoute
+  PerfilRoute: typeof PerfilRouteWithChildren
   AdminAfiliadasRoute: typeof AdminAfiliadasRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminClientesRoute: typeof AdminClientesRoute
@@ -466,6 +502,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/produto/$id'
       preLoaderRoute: typeof ProdutoIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/perfil/favoritos': {
+      id: '/perfil/favoritos'
+      path: '/favoritos'
+      fullPath: '/perfil/favoritos'
+      preLoaderRoute: typeof PerfilFavoritosRouteImport
+      parentRoute: typeof PerfilRoute
+    }
+    '/perfil/enderecos': {
+      id: '/perfil/enderecos'
+      path: '/enderecos'
+      fullPath: '/perfil/enderecos'
+      preLoaderRoute: typeof PerfilEnderecosRouteImport
+      parentRoute: typeof PerfilRoute
+    }
+    '/perfil/configuracoes': {
+      id: '/perfil/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/perfil/configuracoes'
+      preLoaderRoute: typeof PerfilConfiguracoesRouteImport
+      parentRoute: typeof PerfilRoute
     }
     '/pedido/$id': {
       id: '/pedido/$id'
@@ -575,6 +632,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PerfilRouteChildren {
+  PerfilConfiguracoesRoute: typeof PerfilConfiguracoesRoute
+  PerfilEnderecosRoute: typeof PerfilEnderecosRoute
+  PerfilFavoritosRoute: typeof PerfilFavoritosRoute
+}
+
+const PerfilRouteChildren: PerfilRouteChildren = {
+  PerfilConfiguracoesRoute: PerfilConfiguracoesRoute,
+  PerfilEnderecosRoute: PerfilEnderecosRoute,
+  PerfilFavoritosRoute: PerfilFavoritosRoute,
+}
+
+const PerfilRouteWithChildren =
+  PerfilRoute._addFileChildren(PerfilRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BuscarRoute: BuscarRoute,
@@ -584,7 +656,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   LoginRoute: LoginRoute,
   PedidosRoute: PedidosRoute,
-  PerfilRoute: PerfilRoute,
+  PerfilRoute: PerfilRouteWithChildren,
   AdminAfiliadasRoute: AdminAfiliadasRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminClientesRoute: AdminClientesRoute,

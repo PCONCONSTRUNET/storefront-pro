@@ -3,7 +3,7 @@ import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram } from "lucide-react";
 
-export const Route = createFileRoute("/perfil")({
+export const Route = createFileRoute("/perfil/")({
   head: () => ({ meta: [{ title: "Minha conta — Princesa de Laços" }] }),
   component: Page,
 });
