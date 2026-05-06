@@ -1,5 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { useStore } from "@/lib/store";
 
 import appCss from "../styles.css?url";
 
@@ -70,5 +72,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const refreshSession = useStore(s => s.refreshSession);
+  useEffect(() => {
+    // Sliding session: any user activity refreshes the active sessions.
+    const tick = () => {
+      refreshSession("admin");
+      refreshSession("customer");
+      refreshSession("affiliate");
+    };
+    tick();
+    const events = ["click", "keydown", "visibilitychange", "focus"] as const;
+    events.forEach(e => window.addEventListener(e, tick));
+    const interval = window.setInterval(tick, 1000 * 60 * 15); // every 15 min
+    return () => {
+      events.forEach(e => window.removeEventListener(e, tick));
+      window.clearInterval(interval);
+    };
+  }, [refreshSession]);
   return <Outlet />;
 }

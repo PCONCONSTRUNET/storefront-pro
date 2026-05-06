@@ -125,6 +125,36 @@ const defaultSettings: StoreSettings = {
   bannerSubtitle: "Laços feitos com amor para princesas de todas as idades",
 };
 
+export type SessionKind = "admin" | "customer" | "affiliate";
+export type SessionToken = {
+  token: string;
+  subjectId: string;
+  issuedAt: string;
+  expiresAt: string;
+};
+
+// Sliding session: any user activity within this window keeps the session alive.
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SESSION_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // refresh at most once/day
+
+function makeSession(subjectId: string): SessionToken {
+  const now = Date.now();
+  const rand = typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return {
+    token: `${subjectId}.${rand}`,
+    subjectId,
+    issuedAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
+  };
+}
+
+function isSessionValid(s: SessionToken | null | undefined): s is SessionToken {
+  if (!s) return false;
+  return new Date(s.expiresAt).getTime() > Date.now();
+}
+
 type AppState = {
   products: Product[];
   categories: Category[];
@@ -140,6 +170,12 @@ type AppState = {
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
   transactions: Transaction[];
+  sessions: {
+    admin: SessionToken | null;
+    customer: SessionToken | null;
+    affiliate: SessionToken | null;
+  };
+  refreshSession: (kind: SessionKind) => void;
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
@@ -204,6 +240,20 @@ export const useStore = create<AppState>()(
       affiliateSales: [],
       currentAffiliateId: null,
       transactions: [],
+      sessions: { admin: null, customer: null, affiliate: null },
+
+      refreshSession: (kind) => {
+        const sess = get().sessions[kind];
+        if (!isSessionValid(sess)) return;
+        const remaining = new Date(sess.expiresAt).getTime() - Date.now();
+        // Slide forward only if more than the threshold has been used.
+        if (SESSION_TTL_MS - remaining < SESSION_REFRESH_THRESHOLD_MS) return;
+        const next: SessionToken = {
+          ...sess,
+          expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+        };
+        set(s => ({ sessions: { ...s.sessions, [kind]: next } }));
+      },
 
       addTransaction: (t) => {
         const tx: Transaction = { ...t, id: `tx_${Date.now()}`, createdAt: new Date().toISOString() };
@@ -243,16 +293,20 @@ export const useStore = create<AppState>()(
         const exists = get().customers.find((x) => x.email === c.email);
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
         const newC: Customer = { ...c, id: `c_${Date.now()}`, createdAt: new Date().toISOString() };
-        set((s) => ({ customers: [...s.customers, newC], currentCustomerId: newC.id }));
+        set((s) => ({
+          customers: [...s.customers, newC],
+          currentCustomerId: newC.id,
+          sessions: { ...s.sessions, customer: makeSession(newC.id) },
+        }));
         return { ok: true, message: "Cadastro realizado!" };
       },
       loginCustomer: (email, password) => {
         const c = get().customers.find((x) => x.email === email && x.password === password);
         if (!c) return { ok: false, message: "Credenciais inválidas" };
-        set({ currentCustomerId: c.id });
+        set(s => ({ currentCustomerId: c.id, sessions: { ...s.sessions, customer: makeSession(c.id) } }));
         return { ok: true, message: "Bem-vinda!" };
       },
-      logoutCustomer: () => set({ currentCustomerId: null }),
+      logoutCustomer: () => set(s => ({ currentCustomerId: null, sessions: { ...s.sessions, customer: null } })),
       updateCustomer: (data) => {
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
@@ -286,20 +340,20 @@ export const useStore = create<AppState>()(
         const expected = AUTHORIZED_ADMINS[normalized];
         if (!expected) return { ok: false, message: "E-mail não autorizado" };
         if (expected !== password) return { ok: false, message: "Senha incorreta" };
-        set({ isAdmin: true });
+        set(s => ({ isAdmin: true, sessions: { ...s.sessions, admin: makeSession(normalized) } }));
         return { ok: true, message: "Bem-vindo!" };
       },
-      logoutAdmin: () => set({ isAdmin: false }),
+      logoutAdmin: () => set(s => ({ isAdmin: false, sessions: { ...s.sessions, admin: null } })),
 
       loginAffiliate: (email, password) => {
         const normalized = email.trim().toLowerCase();
         const a = get().affiliates.find(x => x.email.toLowerCase() === normalized && x.password === password);
         if (!a) return { ok: false, message: "Credenciais inválidas" };
         if (!a.active) return { ok: false, message: "Conta desativada. Contate a administradora." };
-        set({ currentAffiliateId: a.id });
+        set(s => ({ currentAffiliateId: a.id, sessions: { ...s.sessions, affiliate: makeSession(a.id) } }));
         return { ok: true, message: `Bem-vinda, ${a.name}!` };
       },
-      logoutAffiliate: () => set({ currentAffiliateId: null }),
+      logoutAffiliate: () => set(s => ({ currentAffiliateId: null, sessions: { ...s.sessions, affiliate: null } })),
       registerAffiliate: (data) => {
         const name = data.name.trim();
         const email = data.email.trim().toLowerCase();
@@ -318,7 +372,7 @@ export const useStore = create<AppState>()(
           active: true,
           createdAt: new Date().toISOString(),
         };
-        set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id }));
+        set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id, sessions: { ...s.sessions, affiliate: makeSession(newA.id) } }));
         return { ok: true, message: "Cadastro realizado! Aguarde a administradora definir sua comissão." };
       },
       upsertAffiliate: (a) => set((s) => ({
@@ -409,7 +463,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 2,
+      version: 3,
       skipHydration: typeof window === "undefined",
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
@@ -417,7 +471,30 @@ export const useStore = create<AppState>()(
           persisted.products = initialProducts;
           persisted.categories = initialCategories;
         }
+        if (version < 3) {
+          persisted.sessions = { admin: null, customer: null, affiliate: null };
+        }
         return persisted;
+      },
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // Enforce session expiry on every page load — invalid tokens force re-login.
+        const sessions = state.sessions || { admin: null, customer: null, affiliate: null };
+        const patch: Partial<AppState> = {};
+        const nextSessions = { ...sessions };
+        if (!isSessionValid(sessions.admin) && state.isAdmin) {
+          patch.isAdmin = false;
+          nextSessions.admin = null;
+        }
+        if (!isSessionValid(sessions.customer) && state.currentCustomerId) {
+          patch.currentCustomerId = null;
+          nextSessions.customer = null;
+        }
+        if (!isSessionValid(sessions.affiliate) && state.currentAffiliateId) {
+          patch.currentAffiliateId = null;
+          nextSessions.affiliate = null;
+        }
+        useStore.setState({ ...patch, sessions: nextSessions });
       },
     },
   ),
