@@ -98,29 +98,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Categories grid - Shopee style */}
-      <section className="mt-3 max-w-6xl mx-auto">
-        <div className="bg-card rounded-md border border-border mx-3 md:mx-4 p-3 md:p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm md:text-base font-bold flex items-center gap-1.5">
-              <Crown className="h-4 w-4 text-gold fill-gold" /> Categorias
-            </h2>
-            <Link to="/categorias" className="text-[11px] md:text-xs text-primary font-semibold flex items-center">
-              Ver todas <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
-            {categories.map((c) => (
-              <Link key={c.id} to="/categoria/$slug" params={{ slug: c.id }} className="shrink-0 snap-start flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors w-[72px] md:w-[88px]">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform">
-                  {c.image}
-                </div>
-                <span className="text-[10px] md:text-xs font-medium text-foreground text-center line-clamp-1">{c.name}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CategoriesScroller categories={categories} />
 
       {/* Coupons strip */}
       {coupons.filter(c => c.active).length > 0 && (
