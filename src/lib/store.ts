@@ -41,6 +41,33 @@ export type Order = {
   couponCode?: string;
 };
 
+export type Affiliate = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  commissionType: "percent" | "fixed";
+  commissionValue: number;
+  active: boolean;
+  createdAt: string;
+};
+
+export type AffiliateSaleStatus = "pendente" | "confirmada" | "cancelada";
+
+export type AffiliateSale = {
+  id: string;
+  affiliateId: string;
+  customerName: string;
+  customerPhone?: string;
+  productDescription: string;
+  saleValue: number;
+  commissionEarned: number;
+  status: AffiliateSaleStatus;
+  notes?: string;
+  createdAt: string;
+};
+
 export type Customer = {
   id: string;
   name: string;
