@@ -346,6 +346,20 @@ function GalleryEditor({ gallery, onChange }: { gallery: string[]; onChange: (im
           Adicionar
         </button>
       </div>
+
+      {cropIdx !== null && gallery[cropIdx] && (
+        <ImageCropModal
+          src={gallery[cropIdx]}
+          onCancel={() => setCropIdx(null)}
+          onConfirm={(dataUrl) => {
+            const next = [...gallery];
+            next[cropIdx] = dataUrl;
+            onChange(next);
+            setCropIdx(null);
+            toast.success("Imagem recortada");
+          }}
+        />
+      )}
     </div>
   );
 }
