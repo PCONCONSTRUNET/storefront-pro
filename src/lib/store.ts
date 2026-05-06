@@ -180,6 +180,10 @@ type AppState = {
   upsertCoupon: (c: Coupon) => void;
   deleteCoupon: (code: string) => void;
   updateSettings: (s: Partial<StoreSettings>) => void;
+
+  addTransaction: (t: Omit<Transaction, "id" | "createdAt">) => Transaction;
+  updateTransaction: (id: string, patch: Partial<Omit<Transaction, "id" | "createdAt">>) => void;
+  deleteTransaction: (id: string) => void;
 };
 
 export const useStore = create<AppState>()(
