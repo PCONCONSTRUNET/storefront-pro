@@ -109,6 +109,13 @@ function Page() {
             </div>
           )}
         </div>
+
+        <button
+          onClick={reorder}
+          className="mt-4 w-full h-12 rounded-full bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 shadow-soft hover:opacity-90 transition-opacity"
+        >
+          <RotateCcw className="h-4 w-4" /> Comprar de novo
+        </button>
       </div>
     </StoreLayout>
   );
