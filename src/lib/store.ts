@@ -485,11 +485,29 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ affiliateSales: [sale, ...s.affiliateSales] }));
+        // Notifica admin sobre nova venda de afiliada
+        try {
+          useNotifications.getState().trigger("afiliada_nova_venda", {
+            afiliada: aff.name,
+            cliente: data.customerName,
+            total: brlFmt(data.saleValue),
+          }, { audience: "admin" });
+        } catch { /* ignore */ }
         return sale;
       },
-      updateAffiliateSaleStatus: (id, status) => set(s => ({
-        affiliateSales: s.affiliateSales.map(v => v.id === id ? { ...v, status } : v),
-      })),
+      updateAffiliateSaleStatus: (id, status) => {
+        const sale = get().affiliateSales.find(v => v.id === id);
+        set(s => ({ affiliateSales: s.affiliateSales.map(v => v.id === id ? { ...v, status } : v) }));
+        if (sale && status === "confirmada") {
+          const aff = get().affiliates.find(a => a.id === sale.affiliateId);
+          try {
+            useNotifications.getState().trigger("afiliada_venda_confirmada", {
+              cliente: sale.customerName,
+              comissao: brlFmt(sale.commissionEarned),
+            }, { audience: "afiliada", recipientId: aff?.id });
+          } catch { /* ignore */ }
+        }
+      },
       deleteAffiliateSale: (id) => set(s => ({ affiliateSales: s.affiliateSales.filter(v => v.id !== id) })),
 
       placeOrder: (data) => {
