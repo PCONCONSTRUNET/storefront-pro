@@ -72,6 +72,7 @@ function Page() {
           </ul>
         )}
       </div>
+      {reorderOrder && <ReorderModal order={reorderOrder} onClose={() => setReorderOrder(null)} />}
     </StoreLayout>
   );
 }
