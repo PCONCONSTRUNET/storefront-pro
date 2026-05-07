@@ -543,7 +543,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 4,
+      version: 5,
       skipHydration: typeof window === "undefined",
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
@@ -556,6 +556,9 @@ export const useStore = create<AppState>()(
         }
         if (version < 4) {
           persisted.adminPasswordOverride = {};
+        }
+        if (version < 5) {
+          persisted.reviews = [];
         }
         return persisted;
       },
