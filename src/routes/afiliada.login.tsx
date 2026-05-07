@@ -52,6 +52,11 @@ function Page() {
           <p className="text-xs text-muted-foreground">Acesse com seu e-mail e senha</p>
         </div>
         <form onSubmit={submit} className="mt-6 space-y-3">
+          {error && (
+            <div className="text-xs text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+              {error}
+            </div>
+          )}
           <label className="block">
             <span className="text-xs font-medium text-muted-foreground">E-mail</span>
             <input
