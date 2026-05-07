@@ -34,6 +34,20 @@ function Page() {
 
   return (
     <AdminLayout title="Pedidos">
+      <div className="relative mb-3">
+        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar por ID, nome ou telefone"
+          className="w-full h-10 pl-9 pr-9 rounded-full bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        {query && (
+          <button onClick={() => setQuery("")} aria-label="Limpar" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted">
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
       <div className="flex gap-2 overflow-x-auto pb-2 mb-3 scrollbar-hide">
         {(["todos", ...statuses] as const).map(s => (
           <button key={s} onClick={() => setFilter(s)}
