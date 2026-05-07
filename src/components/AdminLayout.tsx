@@ -1,8 +1,8 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X, Sparkles } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X, Sparkles, Search } from "lucide-react";
 import { useStore, useStoreHydrated } from "@/lib/store";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -83,9 +83,10 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="bg-card border-b border-border h-14 flex items-center px-4 sticky top-0 z-30">
-          <button className="md:hidden mr-2" onClick={() => setOpen(true)} aria-label="Menu"><Menu className="h-5 w-5" /></button>
-          <h1 className="text-lg font-bold">{title}</h1>
+        <header className="bg-card border-b border-border h-14 flex items-center px-4 sticky top-0 z-30 gap-3">
+          <button className="md:hidden" onClick={() => setOpen(true)} aria-label="Menu"><Menu className="h-5 w-5" /></button>
+          <h1 className="text-lg font-bold truncate">{title}</h1>
+          <div className="ml-auto"><GlobalSearch /></div>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
