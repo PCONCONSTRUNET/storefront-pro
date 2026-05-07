@@ -88,6 +88,17 @@ function Page() {
 
           <div>
             <h1 className="text-2xl md:text-3xl font-bold leading-tight">{product.name}</h1>
+            {(() => {
+              const r = productRating(reviews, product.id);
+              if (r.count === 0) return null;
+              return (
+                <a href="#avaliacoes" className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+                  <Stars value={r.avg} size={14} />
+                  <span className="font-semibold text-foreground">{r.avg.toFixed(1)}</span>
+                  <span>· {r.count} avaliação{r.count === 1 ? "" : "ões"}</span>
+                </a>
+              );
+            })()}
             <div className="text-xs text-muted-foreground mt-1">SKU: {product.sku} · Estoque: {product.stock}</div>
 
             <div className="mt-4 flex items-baseline gap-3">
