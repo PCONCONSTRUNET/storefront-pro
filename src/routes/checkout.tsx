@@ -90,6 +90,18 @@ function Page() {
             <div className="space-y-3">
               <h2 className="font-semibold">Endereço de entrega</h2>
               <Field label="Endereço completo (rua, número, bairro, cidade)" value={form.address} onChange={v => setForm({ ...form, address: v })} />
+              <label className="block">
+                <span className="text-xs font-medium text-muted-foreground">Observações (opcional)</span>
+                <textarea
+                  value={form.notes}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  rows={3}
+                  maxLength={300}
+                  placeholder='Ex.: "É um presente, não inclua nota fiscal" ou "Entregar depois das 18h"'
+                  className="mt-1 w-full px-3 py-2 rounded-xl bg-muted/70 border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/40 focus:bg-background transition-all resize-none"
+                />
+                <span className="text-[10px] text-muted-foreground">{form.notes.length}/300</span>
+              </label>
               <p className="text-xs text-muted-foreground">Frete fixo: <span className="font-semibold text-foreground">{brl(settings.shippingFee)}</span></p>
             </div>
           )}
