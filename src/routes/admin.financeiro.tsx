@@ -3,8 +3,9 @@ import { useMemo, useState } from "react";
 import { useStore, type Transaction, type TransactionCategory, type TransactionKind } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
-import { TrendingUp, TrendingDown, Wallet, Plus, Trash2, X, Filter, Users, ShoppingBag, Pencil } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Plus, Trash2, X, Filter, Users, ShoppingBag, Pencil, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { downloadCSV, downloadPDF } from "@/lib/export";
 
 export const Route = createFileRoute("/admin/financeiro")({
   component: Page,
