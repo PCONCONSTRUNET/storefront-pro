@@ -467,6 +467,7 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
           address: data.address,
           couponCode: state.appliedCoupon || undefined,
+          notes: data.notes?.trim() || undefined,
         };
         set((s) => ({
           orders: [order, ...s.orders],
