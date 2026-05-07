@@ -85,7 +85,7 @@ function Page() {
           <div className="space-y-3 text-sm">
             <div><strong>Cliente:</strong> {order.customerName}</div>
             <div><strong>Contato:</strong> {order.customerEmail} · {order.customerPhone}</div>
-            <div><strong>Endereço:</strong> {order.address}</div>
+            <div><strong>{order.deliveryMethod === "retirada" ? "Retirada no ateliê" : "Endereço"}:</strong> {order.address}</div>
             <div><strong>Pagamento:</strong> {order.paymentMethod.toUpperCase()}</div>
             {order.notes && (
               <div className="p-3 rounded-xl bg-gold/10 border border-gold/30">

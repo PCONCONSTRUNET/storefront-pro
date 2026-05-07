@@ -4,7 +4,7 @@ import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode } from "lucide-react";
+import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode, Truck, Store } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/checkout")({
   component: Page,
 });
 
-const steps = ["Seus dados", "Endereço", "Pagamento", "Revisão"];
+const steps = ["Seus dados", "Entrega", "Pagamento", "Revisão"];
 
 function Page() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ function Page() {
   const [form, setForm] = useState({
     name: customer?.name || "", email: customer?.email || "", phone: customer?.phone || "",
     address: customer?.address || "", payment: "pix" as "pix" | "card" | "cash",
+    delivery: "entrega" as "entrega" | "retirada",
     notes: "",
   });
 
@@ -37,14 +38,15 @@ function Page() {
 
   const next = () => {
     if (step === 0 && (!form.name || !form.email || !form.phone)) return toast.error("Preencha todos os campos");
-    if (step === 1 && !form.address) return toast.error("Informe o endereço");
+    if (step === 1 && form.delivery === "entrega" && !form.address) return toast.error("Informe o endereço de entrega");
     setStep(s => s + 1);
   };
 
   const finish = () => {
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
-      address: form.address, paymentMethod: form.payment, notes: form.notes,
+      address: form.address, paymentMethod: form.payment,
+      deliveryMethod: form.delivery, notes: form.notes,
     });
     toast.success("Pedido realizado!");
     navigate({ to: "/pedido/$id", params: { id: order.id } });
@@ -88,8 +90,35 @@ function Page() {
           )}
           {step === 1 && (
             <div className="space-y-3">
-              <h2 className="font-semibold">Endereço de entrega</h2>
-              <Field label="Endereço completo (rua, número, bairro, cidade)" value={form.address} onChange={v => setForm({ ...form, address: v })} />
+              <h2 className="font-semibold">Como você quer receber?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {([
+                  { id: "entrega", label: "Entrega no endereço", sub: `Frete ${brl(settings.shippingFee)}`, icon: Truck },
+                  { id: "retirada", label: "Retirar no ateliê", sub: "Sem custo de frete", icon: Store },
+                ] as const).map(opt => (
+                  <button key={opt.id} type="button" onClick={() => setForm({ ...form, delivery: opt.id })}
+                    className={cn("flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
+                      form.delivery === opt.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50")}>
+                    <div className="w-10 h-10 rounded-full bg-muted grid place-items-center shrink-0"><opt.icon className="h-5 w-5 text-primary" /></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm">{opt.label}</div>
+                      <div className="text-xs text-muted-foreground truncate">{opt.sub}</div>
+                    </div>
+                    <div className={cn("w-5 h-5 rounded-full border-2 shrink-0", form.delivery === opt.id ? "border-primary bg-primary" : "border-border")} />
+                  </button>
+                ))}
+              </div>
+
+              {form.delivery === "entrega" ? (
+                <Field label="Endereço completo (rua, número, bairro, cidade)" value={form.address} onChange={v => setForm({ ...form, address: v })} />
+              ) : (
+                <div className="rounded-xl bg-accent/40 border border-accent p-3 text-sm">
+                  <div className="font-semibold text-accent-foreground mb-0.5">📍 Retirada no ateliê</div>
+                  <div className="text-muted-foreground">{settings.address}</div>
+                  <div className="text-xs text-muted-foreground mt-1">Avisaremos pelo WhatsApp quando o pedido estiver pronto.</div>
+                </div>
+              )}
+
               <label className="block">
                 <span className="text-xs font-medium text-muted-foreground">Observações (opcional)</span>
                 <textarea
@@ -102,7 +131,6 @@ function Page() {
                 />
                 <span className="text-[10px] text-muted-foreground">{form.notes.length}/300</span>
               </label>
-              <p className="text-xs text-muted-foreground">Frete fixo: <span className="font-semibold text-foreground">{brl(settings.shippingFee)}</span></p>
             </div>
           )}
           {step === 2 && (
@@ -122,21 +150,26 @@ function Page() {
               ))}
             </div>
           )}
-          {step === 3 && (
-            <div className="space-y-3">
-              <h2 className="font-semibold">Revise seu pedido</h2>
-              <Row label="Cliente" value={form.name} />
-              <Row label="Contato" value={`${form.email} · ${form.phone}`} />
-              <Row label="Endereço" value={form.address} />
-              {form.notes.trim() && <Row label="Observações" value={form.notes} />}
-              <Row label="Pagamento" value={paymentOptions.find(p => p.id === form.payment)?.label || ""} />
-              <hr className="border-border" />
-              <Row label="Subtotal" value={brl(totals.subtotal)} />
-              {totals.discount > 0 && <Row label="Desconto" value={`− ${brl(totals.discount)}`} />}
-              <Row label="Frete" value={brl(totals.shipping)} />
-              <div className="flex justify-between font-bold text-lg pt-1"><span>Total</span><span className="text-primary">{brl(totals.total)}</span></div>
-            </div>
-          )}
+          {step === 3 && (() => {
+            const shipping = form.delivery === "retirada" ? 0 : totals.shipping;
+            const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+            return (
+              <div className="space-y-3">
+                <h2 className="font-semibold">Revise seu pedido</h2>
+                <Row label="Cliente" value={form.name} />
+                <Row label="Contato" value={`${form.email} · ${form.phone}`} />
+                <Row label="Entrega" value={form.delivery === "retirada" ? "Retirar no ateliê" : "Entrega no endereço"} />
+                <Row label={form.delivery === "retirada" ? "Local" : "Endereço"} value={form.delivery === "retirada" ? settings.address : form.address} />
+                {form.notes.trim() && <Row label="Observações" value={form.notes} />}
+                <Row label="Pagamento" value={paymentOptions.find(p => p.id === form.payment)?.label || ""} />
+                <hr className="border-border" />
+                <Row label="Subtotal" value={brl(totals.subtotal)} />
+                {totals.discount > 0 && <Row label="Desconto" value={`− ${brl(totals.discount)}`} />}
+                <Row label="Frete" value={shipping === 0 ? "Grátis" : brl(shipping)} />
+                <div className="flex justify-between font-bold text-lg pt-1"><span>Total</span><span className="text-primary">{brl(total)}</span></div>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="flex gap-3 mt-4">

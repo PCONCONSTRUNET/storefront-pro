@@ -86,7 +86,7 @@ function Page() {
         </div>
 
         <div className="mt-4 bg-card rounded-2xl p-4 shadow-card text-sm">
-          <h2 className="font-semibold mb-2">Entrega</h2>
+          <h2 className="font-semibold mb-2">{order.deliveryMethod === "retirada" ? "Retirada no ateliê" : "Entrega"}</h2>
           <p className="text-muted-foreground">{order.address}</p>
           {order.notes && (
             <div className="mt-3 p-3 rounded-xl bg-gold/10 border border-gold/30">
