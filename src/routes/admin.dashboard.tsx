@@ -96,14 +96,23 @@ function Page() {
       <div className="mt-4 bg-card rounded-2xl p-4 shadow-card">
         <h2 className="font-bold mb-3 flex items-center gap-2"><Package className="h-4 w-4" /> Estoque crítico</h2>
         <ul className="divide-y divide-border">
-          {products.filter(p => p.stock < 10).slice(0, 5).map(p => (
-            <li key={p.id} className="flex items-center gap-3 py-2">
-              <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-muted" />
-              <span className="flex-1 text-sm">{p.name}</span>
-              <span className="text-xs font-bold text-destructive">{p.stock} un.</span>
-            </li>
-          ))}
-          {products.filter(p => p.stock < 10).length === 0 && <li className="text-sm text-muted-foreground py-4">Tudo ok!</li>}
+          {products.filter(p => p.stock <= (p.minStock ?? 5)).slice(0, 8).map(p => {
+            const min = p.minStock ?? 5;
+            const out = p.stock <= 0;
+            return (
+              <li key={p.id} className="flex items-center gap-3 py-2">
+                <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-muted" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm truncate">{p.name}</div>
+                  <div className="text-[11px] text-muted-foreground">Mínimo: {min} un.</div>
+                </div>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${out ? "bg-destructive/15 text-destructive" : "bg-gold/15 text-gold"}`}>
+                  {out ? "Esgotado" : `${p.stock} un.`}
+                </span>
+              </li>
+            );
+          })}
+          {products.filter(p => p.stock <= (p.minStock ?? 5)).length === 0 && <li className="text-sm text-muted-foreground py-4">Tudo ok!</li>}
         </ul>
       </div>
     </AdminLayout>
