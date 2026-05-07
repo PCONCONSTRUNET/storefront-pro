@@ -546,9 +546,54 @@ export const useStore = create<AppState>()(
             return it ? { ...p, stock: Math.max(0, p.stock - it.quantity) } : p;
           }),
         }));
+        // Notificações automáticas
+        try {
+          const notif = useNotifications.getState();
+          notif.trigger("pedido_realizado", {
+            cliente: order.customerName,
+            pedido: order.id,
+            total: brlFmt(order.total),
+          }, { audience: "cliente", recipientId: order.customerId });
+          notif.trigger("novo_pedido_admin", {
+            cliente: order.customerName,
+            pedido: order.id,
+            total: brlFmt(order.total),
+          }, { audience: "admin" });
+          if (order.status === "pago") {
+            notif.trigger("pagamento_aprovado", {
+              cliente: order.customerName, pedido: order.id, total: brlFmt(order.total),
+            }, { audience: "cliente", recipientId: order.customerId });
+          }
+          // Estoque baixo
+          get().products.forEach(p => {
+            if (items.find(i => i.productId === p.id) && p.stock > 0 && p.stock <= 3) {
+              notif.trigger("estoque_baixo", { produto: p.name, estoque: p.stock }, { audience: "admin" });
+            }
+          });
+        } catch { /* ignore */ }
         return order;
       },
-      updateOrderStatus: (id, status) => set((s) => ({ orders: s.orders.map(o => o.id === id ? { ...o, status } : o) })),
+      updateOrderStatus: (id, status) => {
+        const order = get().orders.find(o => o.id === id);
+        set((s) => ({ orders: s.orders.map(o => o.id === id ? { ...o, status } : o) }));
+        if (!order) return;
+        const map: Record<string, "pagamento_aprovado" | "pedido_em_separacao" | "pedido_enviado" | "pedido_entregue" | "pedido_cancelado" | null> = {
+          pago: "pagamento_aprovado",
+          em_separacao: "pedido_em_separacao",
+          enviado: "pedido_enviado",
+          entregue: "pedido_entregue",
+          cancelado: "pedido_cancelado",
+          aguardando_pagamento: null,
+        };
+        const cat = map[status];
+        if (cat) {
+          try {
+            useNotifications.getState().trigger(cat, {
+              cliente: order.customerName, pedido: order.id, total: brlFmt(order.total),
+            }, { audience: "cliente", recipientId: order.customerId });
+          } catch { /* ignore */ }
+        }
+      },
       deleteOrder: (id) => set((s) => ({ orders: s.orders.filter(o => o.id !== id) })),
 
       upsertProduct: (p) => set((s) => ({
