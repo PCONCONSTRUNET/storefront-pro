@@ -2,6 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useEffect, useState } from "react";
 import { initialProducts, initialCategories, initialCoupons, type Product, type Category, type Coupon } from "./data";
+import { useNotifications } from "./notifications";
+
+const brlFmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export type CartItem = { productId: string; quantity: number; variation?: string };
 
