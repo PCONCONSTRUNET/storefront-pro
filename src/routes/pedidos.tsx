@@ -1,10 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useStore, useStoreHydrated, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { OrderListSkeleton } from "@/components/Skeleton";
+import { ReorderModal } from "@/components/ReorderModal";
 import { brl, formatDate } from "@/lib/format";
 import { Package, RotateCcw } from "lucide-react";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/pedidos")({
   head: () => ({ meta: [{ title: "Meus pedidos — Princesa de Laços" }] }),
@@ -15,10 +16,8 @@ function Page() {
   const customer = useStore(selectCurrentCustomer);
   const hydrated = useStoreHydrated();
   const allOrders = useStore(s => s.orders);
-  const products = useStore(s => s.products);
-  const addToCart = useStore(s => s.addToCart);
-  const navigate = useNavigate();
   const orders = customer ? allOrders.filter(o => o.customerId === customer.id) : [];
+  const [reorderOrder, setReorderOrder] = useState<Order | null>(null);
 
   if (hydrated && !customer) {
     return (
@@ -32,25 +31,10 @@ function Page() {
     );
   }
 
-  const reorder = (e: React.MouseEvent, o: Order) => {
+  const openReorder = (e: React.MouseEvent, o: Order) => {
     e.preventDefault();
     e.stopPropagation();
-    let added = 0;
-    let unavailable = 0;
-    o.items.forEach(it => {
-      const p = products.find(x => x.id === it.productId);
-      if (!p || p.stock <= 0) { unavailable++; return; }
-      const qty = Math.min(it.quantity, p.stock);
-      addToCart(p.id, qty);
-      added++;
-    });
-    if (added === 0) {
-      toast.error("Nenhum item disponível para recompra");
-      return;
-    }
-    if (unavailable > 0) toast.warning(`${unavailable} item(s) indisponível(is) foram ignorados`);
-    toast.success("Itens adicionados ao carrinho");
-    navigate({ to: "/carrinho" });
+    setReorderOrder(o);
   };
 
   return (
@@ -77,7 +61,7 @@ function Page() {
                     </div>
                   </div>
                   <button
-                    onClick={(e) => reorder(e, o)}
+                    onClick={(e) => openReorder(e, o)}
                     className="mt-3 w-full h-10 rounded-full bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors"
                   >
                     <RotateCcw className="h-4 w-4" /> Comprar de novo
@@ -88,6 +72,7 @@ function Page() {
           </ul>
         )}
       </div>
+      {reorderOrder && <ReorderModal order={reorderOrder} onClose={() => setReorderOrder(null)} />}
     </StoreLayout>
   );
 }
