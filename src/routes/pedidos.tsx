@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useStore, selectCurrentCustomer, ORDER_STATUS_LABEL } from "@/lib/store";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useStore, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl, formatDate } from "@/lib/format";
-import { Package } from "lucide-react";
+import { Package, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/pedidos")({
   head: () => ({ meta: [{ title: "Meus pedidos — Princesa de Laços" }] }),
@@ -12,6 +13,9 @@ export const Route = createFileRoute("/pedidos")({
 function Page() {
   const customer = useStore(selectCurrentCustomer);
   const allOrders = useStore(s => s.orders);
+  const products = useStore(s => s.products);
+  const addToCart = useStore(s => s.addToCart);
+  const navigate = useNavigate();
   const orders = customer ? allOrders.filter(o => o.customerId === customer.id) : [];
 
   if (!customer) {
@@ -25,6 +29,27 @@ function Page() {
       </StoreLayout>
     );
   }
+
+  const reorder = (e: React.MouseEvent, o: Order) => {
+    e.preventDefault();
+    e.stopPropagation();
+    let added = 0;
+    let unavailable = 0;
+    o.items.forEach(it => {
+      const p = products.find(x => x.id === it.productId);
+      if (!p || p.stock <= 0) { unavailable++; return; }
+      const qty = Math.min(it.quantity, p.stock);
+      addToCart(p.id, qty);
+      added++;
+    });
+    if (added === 0) {
+      toast.error("Nenhum item disponível para recompra");
+      return;
+    }
+    if (unavailable > 0) toast.warning(`${unavailable} item(s) indisponível(is) foram ignorados`);
+    toast.success("Itens adicionados ao carrinho");
+    navigate({ to: "/carrinho" });
+  };
 
   return (
     <StoreLayout>
@@ -47,6 +72,12 @@ function Page() {
                       <span className="text-[11px] inline-block mt-1 bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-semibold">{ORDER_STATUS_LABEL[o.status]}</span>
                     </div>
                   </div>
+                  <button
+                    onClick={(e) => reorder(e, o)}
+                    className="mt-3 w-full h-10 rounded-full bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors"
+                  >
+                    <RotateCcw className="h-4 w-4" /> Comprar de novo
+                  </button>
                 </Link>
               </li>
             ))}
