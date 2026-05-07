@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useStore, useStoreHydrated } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductGridSkeleton } from "@/components/Skeleton";
 import { ChevronRight, ChevronLeft, Zap, Truck, ShieldCheck, Tag, Crown, Sparkles, Gift, Flame, Pause, Play } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -35,6 +36,7 @@ function useCountdown(hours: number) {
 
 function Home() {
   const { products, categories, settings, coupons } = useStore();
+  const hydrated = useStoreHydrated();
   const flash = useMemo(() => products.filter(p => p.active && !p.hidden && p.oldPrice).slice(0, 8), [products]);
   const all = useMemo(() => products.filter(p => p.active && !p.hidden), [products]);
   const { h, m, s } = useCountdown(8);
@@ -141,7 +143,7 @@ function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 p-2 md:p-3">
-              {flash.map((p) => <ProductCard key={p.id} product={p} />)}
+              {!hydrated ? <ProductGridSkeleton count={4} /> : flash.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         </section>
@@ -157,7 +159,7 @@ function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3">
-            {all.map((p) => <ProductCard key={p.id} product={p} />)}
+            {!hydrated ? <ProductGridSkeleton count={10} /> : all.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
           <div className="mt-6 text-center">
             <Link to="/categorias" className="inline-flex items-center gap-1 text-sm text-primary font-semibold hover:underline">

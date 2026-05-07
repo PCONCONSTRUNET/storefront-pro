@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useStore, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
+import { useStore, useStoreHydrated, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
+import { OrderListSkeleton } from "@/components/Skeleton";
 import { brl, formatDate } from "@/lib/format";
 import { Package, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
