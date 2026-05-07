@@ -172,9 +172,52 @@ function Page() {
       </div>
 
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
-        <div className="px-4 py-3 border-b border-border font-bold flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-border font-bold flex items-center justify-between gap-2 flex-wrap">
           <span>Movimentações</span>
-          <span className="text-xs text-muted-foreground font-normal">{filteredRows.length} lançamento{filteredRows.length === 1 ? "" : "s"}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-normal">{filteredRows.length} lançamento{filteredRows.length === 1 ? "" : "s"}</span>
+            <button
+              onClick={() => {
+                if (filteredRows.length === 0) { toast.error("Sem dados para exportar"); return; }
+                const head = ["Data", "Descrição", "Categoria/Detalhes", "Tipo", "Valor (R$)"];
+                const body = filteredRows.map(r => [
+                  new Date(r.date).toLocaleDateString("pt-BR"),
+                  r.description,
+                  r.meta || "",
+                  r.isOut ? "Saída" : "Entrada",
+                  (r.isOut ? -r.amount : r.amount).toFixed(2).replace(".", ","),
+                ]);
+                downloadCSV(`financeiro-${new Date().toISOString().slice(0,10)}.csv`, [head, ...body]);
+                toast.success("CSV baixado");
+              }}
+              className="text-xs flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/70 font-semibold"
+            >
+              <Download className="h-3.5 w-3.5" /> CSV
+            </button>
+            <button
+              onClick={() => {
+                if (filteredRows.length === 0) { toast.error("Sem dados para exportar"); return; }
+                downloadPDF({
+                  filename: `financeiro-${new Date().toISOString().slice(0,10)}.pdf`,
+                  title: "Relatório Financeiro — Movimentações",
+                  subtitle: `${filteredRows.length} lançamento(s) · Entradas ${brl(totals.entradas)} · Saídas ${brl(totals.saidas)} · Caixa ${brl(totals.caixa)}`,
+                  head: ["Data", "Descrição", "Detalhes", "Tipo", "Valor"],
+                  body: filteredRows.map(r => [
+                    new Date(r.date).toLocaleDateString("pt-BR"),
+                    r.description,
+                    r.meta || "—",
+                    r.isOut ? "Saída" : "Entrada",
+                    `${r.isOut ? "− " : "+ "}${brl(r.amount)}`,
+                  ]),
+                  foot: ["", "", "", "Caixa", brl(totals.caixa)],
+                });
+                toast.success("PDF baixado");
+              }}
+              className="text-xs flex items-center gap-1 px-3 py-1.5 rounded-full bg-foreground text-background font-semibold"
+            >
+              <FileText className="h-3.5 w-3.5" /> PDF
+            </button>
+          </div>
         </div>
         {filteredRows.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">Sem movimentações.</div>
