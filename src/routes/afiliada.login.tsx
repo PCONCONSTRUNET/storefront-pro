@@ -16,6 +16,7 @@ function Page() {
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (hydrated && currentId) navigate({ to: "/afiliada", replace: true });
@@ -24,12 +25,14 @@ function Page() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
+    setError(null);
     setSubmitting(true);
     const r = login(email, pwd);
     if (r.ok) {
-      navigate({ to: "/afiliada", replace: true });
       toast.success(r.message);
+      navigate({ to: "/afiliada", replace: true });
     } else {
+      setError(r.message);
       toast.error(r.message);
       setSubmitting(false);
     }
