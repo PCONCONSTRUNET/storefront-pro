@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductReviews, Stars, productRating } from "@/components/ProductReviews";
 import { brl } from "@/lib/format";
 import { ChevronLeft, Minus, Plus, ShoppingBag, Zap, Truck, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
