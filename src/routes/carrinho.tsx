@@ -51,7 +51,7 @@ function Page() {
 
   if (cart.length === 0) {
     return (
-      <StoreLayout>
+      <StoreLayout header={<CartHeader />}>
         <div className="max-w-md mx-auto text-center py-20 px-4">
           <div className="w-20 h-20 mx-auto rounded-full gradient-soft grid place-items-center">
             <ShoppingBag className="h-9 w-9 text-primary" />
@@ -71,7 +71,7 @@ function Page() {
   };
 
   return (
-    <StoreLayout>
+    <StoreLayout header={<CartHeader />}>
       <div className="max-w-6xl mx-auto px-4 py-4">
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-2">
           <ChevronLeft className="h-4 w-4" /> Continuar comprando
