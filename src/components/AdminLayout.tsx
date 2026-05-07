@@ -93,3 +93,101 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
     </div>
   );
 }
+
+function GlobalSearch() {
+  const navigate = useNavigate();
+  const orders = useStore(s => s.orders);
+  const customers = useStore(s => s.customers);
+  const products = useStore(s => s.products);
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  const results = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return { orders: [], customers: [], products: [] };
+    const digits = term.replace(/\D/g, "");
+    return {
+      orders: orders.filter(o =>
+        o.id.toLowerCase().includes(term) ||
+        o.customerName.toLowerCase().includes(term) ||
+        (digits && o.customerPhone.replace(/\D/g, "").includes(digits))
+      ).slice(0, 5),
+      customers: customers.filter(c =>
+        c.name.toLowerCase().includes(term) ||
+        c.email.toLowerCase().includes(term) ||
+        (digits && c.phone.replace(/\D/g, "").includes(digits))
+      ).slice(0, 5),
+      products: products.filter(p => p.name.toLowerCase().includes(term)).slice(0, 5),
+    };
+  }, [q, orders, customers, products]);
+
+  const total = results.orders.length + results.customers.length + results.products.length;
+
+  return (
+    <div ref={ref} className="relative w-44 sm:w-72">
+      <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <input
+        value={q}
+        onChange={(e) => { setQ(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        placeholder="Buscar pedido, cliente, produto..."
+        className="w-full h-9 pl-9 pr-3 rounded-full bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+      />
+      {open && q.trim() && (
+        <div className="absolute right-0 left-0 mt-2 bg-card border border-border rounded-2xl shadow-soft overflow-hidden max-h-96 overflow-y-auto z-50">
+          {total === 0 ? (
+            <div className="p-4 text-sm text-muted-foreground text-center">Nada encontrado para "{q}"</div>
+          ) : (
+            <>
+              {results.orders.length > 0 && (
+                <div>
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-muted-foreground tracking-wide">Pedidos</div>
+                  {results.orders.map(o => (
+                    <button key={o.id} onClick={() => { setOpen(false); setQ(""); navigate({ to: "/admin/pedidos", search: { q: o.id } as never }); }}
+                      className="w-full text-left px-3 py-2 hover:bg-muted text-sm">
+                      <div className="font-semibold">#{o.id}</div>
+                      <div className="text-xs text-muted-foreground">{o.customerName} · {o.customerPhone}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {results.customers.length > 0 && (
+                <div className="border-t border-border">
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-muted-foreground tracking-wide">Clientes</div>
+                  {results.customers.map(c => (
+                    <button key={c.id} onClick={() => { setOpen(false); setQ(""); navigate({ to: "/admin/clientes" }); }}
+                      className="w-full text-left px-3 py-2 hover:bg-muted text-sm">
+                      <div className="font-semibold">{c.name}</div>
+                      <div className="text-xs text-muted-foreground">{c.email} · {c.phone}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {results.products.length > 0 && (
+                <div className="border-t border-border">
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-muted-foreground tracking-wide">Produtos</div>
+                  {results.products.map(p => (
+                    <button key={p.id} onClick={() => { setOpen(false); setQ(""); navigate({ to: "/admin/produtos" }); }}
+                      className="w-full text-left px-3 py-2 hover:bg-muted text-sm flex items-center gap-2">
+                      {p.image && <img src={p.image} alt="" className="w-8 h-8 rounded-lg object-cover" />}
+                      <div className="flex-1"><div className="font-semibold">{p.name}</div></div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
