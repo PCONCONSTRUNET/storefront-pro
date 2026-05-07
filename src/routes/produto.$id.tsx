@@ -15,7 +15,7 @@ export const Route = createFileRoute("/produto/$id")({
 function Page() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { products, addToCart } = useStore();
+  const { products, addToCart, reviews } = useStore();
   const product = products.find(p => p.id === id);
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
