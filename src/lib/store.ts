@@ -47,6 +47,7 @@ export type Order = {
   shipping: number;
   total: number;
   paymentMethod: "pix" | "card" | "cash";
+  deliveryMethod: "entrega" | "retirada";
   status: OrderStatus;
   createdAt: string;
   address: string;
@@ -221,7 +222,8 @@ type AppState = {
 
   placeOrder: (data: {
     customerName: string; customerEmail: string; customerPhone: string;
-    address: string; paymentMethod: "pix" | "card" | "cash"; notes?: string;
+    address: string; paymentMethod: "pix" | "card" | "cash";
+    deliveryMethod: "entrega" | "retirada"; notes?: string;
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
@@ -496,7 +498,7 @@ export const useStore = create<AppState>()(
         const subtotal = items.reduce((a, b) => a + b.price * b.quantity, 0);
         const coupon = state.coupons.find((c) => c.code === state.appliedCoupon);
         const discount = coupon ? (coupon.type === "percent" ? subtotal * coupon.value / 100 : coupon.value) : 0;
-        const shipping = state.settings.shippingFee;
+        const shipping = data.deliveryMethod === "retirada" ? 0 : state.settings.shippingFee;
         const total = Math.max(0, subtotal - discount) + shipping;
         const order: Order = {
           id: `PED${Date.now().toString().slice(-6)}`,
@@ -506,9 +508,10 @@ export const useStore = create<AppState>()(
           customerPhone: data.customerPhone,
           items, subtotal, discount, shipping, total,
           paymentMethod: data.paymentMethod,
+          deliveryMethod: data.deliveryMethod,
           status: data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
           createdAt: new Date().toISOString(),
-          address: data.address,
+          address: data.deliveryMethod === "retirada" ? state.settings.address : data.address,
           couponCode: state.appliedCoupon || undefined,
           notes: data.notes?.trim() || undefined,
         };
