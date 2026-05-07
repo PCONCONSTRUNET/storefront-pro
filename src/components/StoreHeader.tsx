@@ -47,7 +47,7 @@ export function StoreHeader() {
           <img src={logo} alt={settings.storeName} className="h-14 md:h-20 w-auto object-contain" style={{ mixBlendMode: "multiply" }} />
         </Link>
 
-        <form onSubmit={onSearch} className="flex-1 relative">
+        <form onSubmit={onSearch} className="flex-1 min-w-0 relative">
           <div className="flex items-stretch bg-white rounded-md md:rounded-sm overflow-hidden shadow-sm border-2 border-white">
             <input
               value={q}
