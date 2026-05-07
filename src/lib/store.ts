@@ -209,7 +209,7 @@ type AppState = {
 
   placeOrder: (data: {
     customerName: string; customerEmail: string; customerPhone: string;
-    address: string; paymentMethod: "pix" | "card" | "cash";
+    address: string; paymentMethod: "pix" | "card" | "cash"; notes?: string;
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
