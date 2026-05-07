@@ -23,6 +23,7 @@ function Page() {
   const [form, setForm] = useState({
     name: customer?.name || "", email: customer?.email || "", phone: customer?.phone || "",
     address: customer?.address || "", payment: "pix" as "pix" | "card" | "cash",
+    notes: "",
   });
 
   if (cart.length === 0 && step < 4) {
@@ -43,7 +44,7 @@ function Page() {
   const finish = () => {
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
-      address: form.address, paymentMethod: form.payment,
+      address: form.address, paymentMethod: form.payment, notes: form.notes,
     });
     toast.success("Pedido realizado!");
     navigate({ to: "/pedido/$id", params: { id: order.id } });
@@ -89,6 +90,18 @@ function Page() {
             <div className="space-y-3">
               <h2 className="font-semibold">Endereço de entrega</h2>
               <Field label="Endereço completo (rua, número, bairro, cidade)" value={form.address} onChange={v => setForm({ ...form, address: v })} />
+              <label className="block">
+                <span className="text-xs font-medium text-muted-foreground">Observações (opcional)</span>
+                <textarea
+                  value={form.notes}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  rows={3}
+                  maxLength={300}
+                  placeholder='Ex.: "É um presente, não inclua nota fiscal" ou "Entregar depois das 18h"'
+                  className="mt-1 w-full px-3 py-2 rounded-xl bg-muted/70 border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/40 focus:bg-background transition-all resize-none"
+                />
+                <span className="text-[10px] text-muted-foreground">{form.notes.length}/300</span>
+              </label>
               <p className="text-xs text-muted-foreground">Frete fixo: <span className="font-semibold text-foreground">{brl(settings.shippingFee)}</span></p>
             </div>
           )}
@@ -115,6 +128,7 @@ function Page() {
               <Row label="Cliente" value={form.name} />
               <Row label="Contato" value={`${form.email} · ${form.phone}`} />
               <Row label="Endereço" value={form.address} />
+              {form.notes.trim() && <Row label="Observações" value={form.notes} />}
               <Row label="Pagamento" value={paymentOptions.find(p => p.id === form.payment)?.label || ""} />
               <hr className="border-border" />
               <Row label="Subtotal" value={brl(totals.subtotal)} />

@@ -59,6 +59,12 @@ function Page() {
             <div><strong>Contato:</strong> {order.customerEmail} · {order.customerPhone}</div>
             <div><strong>Endereço:</strong> {order.address}</div>
             <div><strong>Pagamento:</strong> {order.paymentMethod.toUpperCase()}</div>
+            {order.notes && (
+              <div className="p-3 rounded-xl bg-gold/10 border border-gold/30">
+                <div className="text-[11px] font-bold text-gold uppercase tracking-wide mb-1">📝 Observações do cliente</div>
+                <div className="text-sm whitespace-pre-wrap">{order.notes}</div>
+              </div>
+            )}
             <hr className="border-border" />
             <ul className="space-y-2">
               {order.items.map(it => (

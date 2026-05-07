@@ -40,6 +40,7 @@ export type Order = {
   createdAt: string;
   address: string;
   couponCode?: string;
+  notes?: string;
 };
 
 export type Affiliate = {
@@ -208,7 +209,7 @@ type AppState = {
 
   placeOrder: (data: {
     customerName: string; customerEmail: string; customerPhone: string;
-    address: string; paymentMethod: "pix" | "card" | "cash";
+    address: string; paymentMethod: "pix" | "card" | "cash"; notes?: string;
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
@@ -466,6 +467,7 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
           address: data.address,
           couponCode: state.appliedCoupon || undefined,
+          notes: data.notes?.trim() || undefined,
         };
         set((s) => ({
           orders: [order, ...s.orders],
