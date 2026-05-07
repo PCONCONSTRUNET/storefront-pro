@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl, formatDate } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, Copy, QrCode } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Copy, QrCode, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/pedido/$id")({
