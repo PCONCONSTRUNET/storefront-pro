@@ -182,6 +182,7 @@ type AppState = {
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
   transactions: Transaction[];
+  reviews: Review[];
   adminPasswordOverride: Record<string, string>;
   sessions: {
     admin: SessionToken | null;
