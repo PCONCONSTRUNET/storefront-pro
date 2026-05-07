@@ -24,15 +24,8 @@ function CartHeader() {
         <h1 className="flex-1 text-center font-bold text-base">
           Carrinho {count > 0 && <span className="opacity-90 font-semibold">({count})</span>}
         </h1>
-        <a
-          href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Chat"
-          className="w-10 h-10 grid place-items-center rounded-full hover:bg-white/15 transition-colors"
-        >
-          <MessageCircle className="h-5 w-5" />
-        </a>
+        <span className="w-10 h-10" />
+
       </div>
     </header>
   );
