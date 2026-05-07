@@ -530,20 +530,43 @@ function AffiliateReport({ from, to, onFromChange, onToChange }: {
     return { rows, totals };
   }, [affiliates, affiliateSales, transactions, from, to]);
 
+  const head = ["Afiliada", "Vendas", "Confirmadas", "Pendentes", "Canceladas", "Faturamento (R$)", "Comissão (R$)", "Paga (R$)", "A pagar (R$)"];
   const exportCsv = () => {
-    const header = ["Afiliada", "Vendas", "Confirmadas", "Pendentes", "Faturamento (confirmado)", "Comissão (confirmada)", "Comissão paga", "A pagar"];
-    const lines = report.rows.map(r => [
-      r.name, r.salesCount, r.confirmedCount, r.pendingCount,
-      r.revenueConfirmed.toFixed(2), r.commissionConfirmed.toFixed(2),
-      r.commissionPaid.toFixed(2), r.commissionToPay.toFixed(2),
-    ].join(";"));
-    const csv = [header.join(";"), ...lines].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `relatorio-afiliadas-${from}-a-${to}.csv`; a.click();
-    URL.revokeObjectURL(url);
-    toast.success("CSV baixado!");
+    if (report.rows.length === 0) { toast.error("Sem dados no período"); return; }
+    const body = report.rows.map(r => [
+      r.name, r.salesCount, r.confirmedCount, r.pendingCount, r.canceledCount,
+      r.revenueConfirmed.toFixed(2).replace(".", ","),
+      r.commissionConfirmed.toFixed(2).replace(".", ","),
+      r.commissionPaid.toFixed(2).replace(".", ","),
+      r.commissionToPay.toFixed(2).replace(".", ","),
+    ]);
+    const totals = ["TOTAIS", report.totals.sales, "", "", "",
+      report.totals.revenue.toFixed(2).replace(".", ","),
+      report.totals.commission.toFixed(2).replace(".", ","),
+      report.totals.paid.toFixed(2).replace(".", ","),
+      report.totals.toPay.toFixed(2).replace(".", ","),
+    ];
+    downloadCSV(`afiliadas-${from}-a-${to}.csv`, [head, ...body, totals]);
+    toast.success("CSV baixado");
+  };
+
+  const exportPdf = () => {
+    if (report.rows.length === 0) { toast.error("Sem dados no período"); return; }
+    downloadPDF({
+      filename: `afiliadas-${from}-a-${to}.pdf`,
+      title: "Relatório por Afiliada",
+      subtitle: `Período: ${new Date(from).toLocaleDateString("pt-BR")} a ${new Date(to).toLocaleDateString("pt-BR")}`,
+      head,
+      body: report.rows.map(r => [
+        r.name, r.salesCount, r.confirmedCount, r.pendingCount, r.canceledCount,
+        brl(r.revenueConfirmed), brl(r.commissionConfirmed),
+        brl(r.commissionPaid), brl(r.commissionToPay),
+      ]),
+      foot: ["TOTAIS", report.totals.sales, "", "", "",
+        brl(report.totals.revenue), brl(report.totals.commission),
+        brl(report.totals.paid), brl(report.totals.toPay)],
+    });
+    toast.success("PDF baixado");
   };
 
   return (
@@ -559,7 +582,12 @@ function AffiliateReport({ from, to, onFromChange, onToChange }: {
             <span className="text-muted-foreground">Até</span>
             <input type="date" value={to} onChange={e => onToChange(e.target.value)} className="h-8 px-2 rounded-lg bg-background border border-border text-xs" />
           </label>
-          <button onClick={exportCsv} className="text-xs bg-foreground text-background px-3 py-1.5 rounded-full font-semibold">CSV</button>
+          <button onClick={exportCsv} className="text-xs flex items-center gap-1 bg-muted hover:bg-muted/70 px-3 py-1.5 rounded-full font-semibold">
+            <Download className="h-3.5 w-3.5" /> CSV
+          </button>
+          <button onClick={exportPdf} className="text-xs flex items-center gap-1 bg-foreground text-background px-3 py-1.5 rounded-full font-semibold">
+            <FileText className="h-3.5 w-3.5" /> PDF
+          </button>
         </div>
       </div>
 
