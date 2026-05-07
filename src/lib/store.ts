@@ -170,12 +170,15 @@ type AppState = {
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
   transactions: Transaction[];
+  adminPasswordOverride: Record<string, string>;
   sessions: {
     admin: SessionToken | null;
     customer: SessionToken | null;
     affiliate: SessionToken | null;
   };
   refreshSession: (kind: SessionKind) => void;
+  findAccountByEmail: (email: string) => { kind: SessionKind; email: string; phone?: string } | null;
+  resetPasswordFor: (kind: SessionKind, email: string, newPassword: string) => { ok: boolean; message: string };
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
