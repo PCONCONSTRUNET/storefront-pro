@@ -150,21 +150,26 @@ function Page() {
               ))}
             </div>
           )}
-          {step === 3 && (
-            <div className="space-y-3">
-              <h2 className="font-semibold">Revise seu pedido</h2>
-              <Row label="Cliente" value={form.name} />
-              <Row label="Contato" value={`${form.email} · ${form.phone}`} />
-              <Row label="Endereço" value={form.address} />
-              {form.notes.trim() && <Row label="Observações" value={form.notes} />}
-              <Row label="Pagamento" value={paymentOptions.find(p => p.id === form.payment)?.label || ""} />
-              <hr className="border-border" />
-              <Row label="Subtotal" value={brl(totals.subtotal)} />
-              {totals.discount > 0 && <Row label="Desconto" value={`− ${brl(totals.discount)}`} />}
-              <Row label="Frete" value={brl(totals.shipping)} />
-              <div className="flex justify-between font-bold text-lg pt-1"><span>Total</span><span className="text-primary">{brl(totals.total)}</span></div>
-            </div>
-          )}
+          {step === 3 && (() => {
+            const shipping = form.delivery === "retirada" ? 0 : totals.shipping;
+            const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+            return (
+              <div className="space-y-3">
+                <h2 className="font-semibold">Revise seu pedido</h2>
+                <Row label="Cliente" value={form.name} />
+                <Row label="Contato" value={`${form.email} · ${form.phone}`} />
+                <Row label="Entrega" value={form.delivery === "retirada" ? "Retirar no ateliê" : "Entrega no endereço"} />
+                <Row label={form.delivery === "retirada" ? "Local" : "Endereço"} value={form.delivery === "retirada" ? settings.address : form.address} />
+                {form.notes.trim() && <Row label="Observações" value={form.notes} />}
+                <Row label="Pagamento" value={paymentOptions.find(p => p.id === form.payment)?.label || ""} />
+                <hr className="border-border" />
+                <Row label="Subtotal" value={brl(totals.subtotal)} />
+                {totals.discount > 0 && <Row label="Desconto" value={`− ${brl(totals.discount)}`} />}
+                <Row label="Frete" value={shipping === 0 ? "Grátis" : brl(shipping)} />
+                <div className="flex justify-between font-bold text-lg pt-1"><span>Total</span><span className="text-primary">{brl(total)}</span></div>
+              </div>
+            );
+          })()}
         </div>
 
         <div className="flex gap-3 mt-4">
