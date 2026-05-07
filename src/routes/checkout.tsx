@@ -12,7 +12,7 @@ export const Route = createFileRoute("/checkout")({
   component: Page,
 });
 
-const steps = ["Seus dados", "Endereço", "Pagamento", "Revisão"];
+const steps = ["Seus dados", "Entrega", "Pagamento", "Revisão"];
 
 function Page() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ function Page() {
   const [form, setForm] = useState({
     name: customer?.name || "", email: customer?.email || "", phone: customer?.phone || "",
     address: customer?.address || "", payment: "pix" as "pix" | "card" | "cash",
+    delivery: "entrega" as "entrega" | "retirada",
     notes: "",
   });
 
@@ -37,14 +38,15 @@ function Page() {
 
   const next = () => {
     if (step === 0 && (!form.name || !form.email || !form.phone)) return toast.error("Preencha todos os campos");
-    if (step === 1 && !form.address) return toast.error("Informe o endereço");
+    if (step === 1 && form.delivery === "entrega" && !form.address) return toast.error("Informe o endereço de entrega");
     setStep(s => s + 1);
   };
 
   const finish = () => {
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
-      address: form.address, paymentMethod: form.payment, notes: form.notes,
+      address: form.address, paymentMethod: form.payment,
+      deliveryMethod: form.delivery, notes: form.notes,
     });
     toast.success("Pedido realizado!");
     navigate({ to: "/pedido/$id", params: { id: order.id } });
