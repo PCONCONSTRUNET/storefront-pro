@@ -1,11 +1,43 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore, selectCartTotals } from "@/lib/store";
+import { useStore, selectCartTotals, selectCartCount } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl } from "@/lib/format";
-import { Minus, Plus, Trash2, Tag, ShoppingBag, ChevronLeft } from "lucide-react";
+import { Minus, Plus, Trash2, Tag, ShoppingBag, ChevronLeft, MessageCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+
+function CartHeader() {
+  const router = useRouter();
+  const count = useStore(selectCartCount);
+  const settings = useStore((s) => s.settings);
+  return (
+    <header className="sticky top-0 z-30 gradient-primary text-primary-foreground shadow-soft">
+      <div className="max-w-6xl mx-auto px-3 md:px-4 h-14 flex items-center gap-2">
+        <button
+          onClick={() => router.history.back()}
+          aria-label="Voltar"
+          className="w-10 h-10 grid place-items-center rounded-full hover:bg-white/15 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <h1 className="flex-1 text-center font-bold text-base">
+          Carrinho {count > 0 && <span className="opacity-90 font-semibold">({count})</span>}
+        </h1>
+        <a
+          href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Chat"
+          className="w-10 h-10 grid place-items-center rounded-full hover:bg-white/15 transition-colors"
+        >
+          <MessageCircle className="h-5 w-5" />
+        </a>
+      </div>
+    </header>
+  );
+}
+
 
 export const Route = createFileRoute("/carrinho")({
   head: () => ({ meta: [{ title: "Carrinho — Princesa de Laços" }] }),
