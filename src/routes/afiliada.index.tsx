@@ -2,8 +2,9 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { brl } from "@/lib/format";
-import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles, Trash2 } from "lucide-react";
+import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles, Trash2, Instagram, Store, Globe, QrCode, CreditCard, Banknote, TrendingUp, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { playBeep } from "@/lib/sound";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
@@ -103,7 +104,8 @@ function Page() {
               {items.find(i => i.id === view)?.title}
             </h1>
           </header>
-          <main className="flex-1 p-4 max-w-4xl w-full mx-auto">
+          <main className="flex-1 p-4 max-w-4xl w-full mx-auto space-y-4">
+            <AffiliateHero name={me.name} commissionLabel={commissionLabel} sales={mySales} />
             {view === "registrar" && (
               <RegisterSale
                 affiliateId={me.id}
@@ -130,7 +132,11 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
   registerSale: ReturnType<typeof useStore.getState>["registerAffiliateSale"];
 }) {
   const { setOpenMobile } = useSidebar();
-  const [form, setForm] = useState({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "" });
+  const [form, setForm] = useState({
+    customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "",
+    channel: "WhatsApp" as "WhatsApp" | "Instagram" | "Presencial" | "Outro",
+    payment: "Pix" as "Pix" | "Cartão" | "Dinheiro" | "Outro",
+  });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,24 +145,40 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
+    const meta = `[${form.channel} · ${form.payment}]`;
+    const fullNotes = form.notes ? `${meta} ${form.notes}` : meta;
     const r = registerSale({
       affiliateId,
       customerName: form.customerName,
       customerPhone: form.customerPhone || undefined,
       productDescription: form.productDescription,
       saleValue: value,
-      notes: form.notes || undefined,
+      notes: fullNotes,
     });
     if (r) {
+      playBeep();
       toast.success(`Venda registrada! Comissão: ${brl(r.commissionEarned)}`);
-      setForm({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "" });
+      setForm({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "", channel: form.channel, payment: form.payment });
       setOpenMobile(false);
       onDone();
     }
   };
 
+  const channels: { id: typeof form.channel; icon: React.ElementType }[] = [
+    { id: "WhatsApp", icon: MessageCircle },
+    { id: "Instagram", icon: Instagram },
+    { id: "Presencial", icon: Store },
+    { id: "Outro", icon: Globe },
+  ];
+  const payments: { id: typeof form.payment; icon: React.ElementType }[] = [
+    { id: "Pix", icon: QrCode },
+    { id: "Cartão", icon: CreditCard },
+    { id: "Dinheiro", icon: Banknote },
+    { id: "Outro", icon: DollarSign },
+  ];
+
   return (
-    <div className="relative overflow-hidden rounded-3xl p-[1.5px] gradient-primary shadow-soft">
+    <div className="relative overflow-hidden rounded-3xl p-[1.5px] gradient-primary shadow-soft animate-fade-in">
       <div className="relative bg-card rounded-[calc(1.5rem-1.5px)] p-5">
         <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full bg-accent/40 blur-3xl pointer-events-none" />
@@ -187,6 +209,30 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
           <Field label="Observações" icon={MessageCircle}>
             <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input" placeholder="Opcional" />
           </Field>
+
+          <div className="sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Canal de venda</span>
+            <div className="grid grid-cols-4 gap-2 mt-1.5">
+              {channels.map(c => (
+                <button key={c.id} type="button" onClick={() => setForm(f => ({ ...f, channel: c.id }))}
+                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.channel === c.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
+                  <c.icon className="h-4 w-4" />{c.id}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Forma de pagamento</span>
+            <div className="grid grid-cols-4 gap-2 mt-1.5">
+              {payments.map(p => (
+                <button key={p.id} type="button" onClick={() => setForm(f => ({ ...f, payment: p.id }))}
+                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.payment === p.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
+                  <p.icon className="h-4 w-4" />{p.id}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button className="sm:col-span-2 group relative h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 shadow-soft hover:scale-[1.02] active:scale-[0.98] transition-transform overflow-hidden">
             <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
             <Plus className="h-5 w-5" /> Registrar venda
@@ -268,3 +314,84 @@ function StatusBadge({ status }: { status: "pendente" | "confirmada" | "cancelad
     </span>
   );
 }
+
+function AffiliateHero({ name, commissionLabel, sales }: {
+  name: string;
+  commissionLabel: string;
+  sales: ReturnType<typeof useStore.getState>["affiliateSales"];
+}) {
+  const stats = useMemo(() => {
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const monthKey = new Date().toISOString().slice(0, 7);
+    const today = sales.filter(s => s.createdAt.slice(0, 10) === todayKey && s.status !== "cancelada");
+    const month = sales.filter(s => s.createdAt.slice(0, 7) === monthKey && s.status !== "cancelada");
+    const paid = sales.filter(s => s.status === "confirmada");
+    return {
+      todayCount: today.length,
+      todayCommission: today.reduce((a, s) => a + s.commissionEarned, 0),
+      monthRevenue: month.reduce((a, s) => a + s.saleValue, 0),
+      monthCommission: month.reduce((a, s) => a + s.commissionEarned, 0),
+      lifetimeCommission: paid.reduce((a, s) => a + s.commissionEarned, 0),
+    };
+  }, [sales]);
+
+  const monthCount = sales.filter(s => s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) && s.status !== "cancelada").length;
+  const goal = Math.max(10, Math.ceil(Math.max(monthCount, 1) / 10) * 10);
+  const progress = Math.min(100, Math.round((monthCount / goal) * 100));
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl gradient-primary text-primary-foreground shadow-soft animate-fade-in">
+      <div className="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-white/15 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-gold/30 blur-3xl pointer-events-none" />
+      <div className="relative p-5 md:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider opacity-80">{greeting}, princesa ✨</div>
+            <h2 className="font-display text-2xl md:text-3xl leading-tight">{name}</h2>
+            <div className="text-xs opacity-90 mt-0.5 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" /> {commissionLabel}
+            </div>
+          </div>
+          <div className="hidden sm:grid w-14 h-14 rounded-2xl bg-white/15 backdrop-blur place-items-center">
+            <Trophy className="h-6 w-6 text-gold" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
+          <HeroStat icon={ShoppingBag} label="Hoje" value={String(stats.todayCount)} sub="vendas" />
+          <HeroStat icon={DollarSign} label="Comissão hoje" value={brl(stats.todayCommission)} sub="" highlight />
+          <HeroStat icon={TrendingUp} label="No mês" value={brl(stats.monthRevenue)} sub="faturado" />
+          <HeroStat icon={Trophy} label="Comissão total" value={brl(stats.lifetimeCommission)} sub="acumulada" />
+        </div>
+
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-[11px] opacity-90 mb-1.5">
+            <span className="flex items-center gap-1"><Target className="h-3 w-3" /> Meta do mês: {monthCount}/{goal} vendas</span>
+            <span className="font-semibold">{progress}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/20 overflow-hidden">
+            <div className="h-full bg-gold transition-[width] duration-700 ease-out" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroStat({ icon: Icon, label, value, sub, highlight }: {
+  icon: React.ElementType; label: string; value: string; sub: string; highlight?: boolean;
+}) {
+  return (
+    <div className={`rounded-2xl px-3 py-2.5 backdrop-blur ${highlight ? "bg-gold text-gold-foreground" : "bg-white/15"}`}>
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide opacity-90">
+        <Icon className="h-3 w-3" /> {label}
+      </div>
+      <div className="font-bold text-base mt-0.5 leading-tight">{value}</div>
+      {sub && <div className="text-[10px] opacity-80">{sub}</div>}
+    </div>
+  );
+}
+

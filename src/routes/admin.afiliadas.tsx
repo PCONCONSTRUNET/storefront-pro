@@ -6,6 +6,7 @@ import { brl } from "@/lib/format";
 import { Plus, Pencil, Trash2, Check, X, Clock, Users, DollarSign, ShoppingBag, Search, Eye, Mail, Phone, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCSV, downloadPDF } from "@/lib/export";
+import { playBeep } from "@/lib/sound";
 
 export const Route = createFileRoute("/admin/afiliadas")({
   component: Page,
@@ -276,7 +277,7 @@ function Page() {
                       <StatusBadge status={s.status} />
                     </div>
                     <div className="flex gap-1 w-full sm:w-auto justify-end">
-                      <ActionBtn onClick={() => updateStatus(s.id, "confirmada")} title="Confirmar" cls="text-success hover:bg-success/10"><Check className="h-4 w-4" /></ActionBtn>
+                      <ActionBtn onClick={() => { updateStatus(s.id, "confirmada"); playBeep(); toast.success("Venda confirmada"); }} title="Confirmar" cls="text-success hover:bg-success/10"><Check className="h-4 w-4" /></ActionBtn>
                       <ActionBtn onClick={() => updateStatus(s.id, "pendente")} title="Pendente" cls="text-gold hover:bg-gold/10"><Clock className="h-4 w-4" /></ActionBtn>
                       <ActionBtn onClick={() => updateStatus(s.id, "cancelada")} title="Cancelar" cls="text-destructive hover:bg-destructive/10"><X className="h-4 w-4" /></ActionBtn>
                       <ActionBtn onClick={() => { if (confirm("Excluir esta venda?")) deleteSale(s.id); }} title="Excluir" cls="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></ActionBtn>
@@ -300,8 +301,8 @@ function Page() {
       )}
 
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4" onClick={() => setEditing(null)}>
-          <form onSubmit={save} onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-md space-y-3">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-fade-in" onClick={() => setEditing(null)}>
+          <form onSubmit={save} onClick={e => e.stopPropagation()} className="bg-card rounded-3xl p-5 w-full max-w-md space-y-3 shadow-soft animate-scale-in">
             <h3 className="font-bold text-lg">{editing.id ? "Editar afiliada" : "Nova afiliada"}</h3>
             <Field label="Nome *"><input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} className="input" required /></Field>
             <Field label="E-mail *"><input type="email" value={editing.email} onChange={e => setEditing({ ...editing, email: e.target.value })} className="input" required /></Field>
@@ -397,76 +398,107 @@ function AffiliateDetailsModal({
   const recent = [...sales].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-lg max-h-[85vh] overflow-y-auto">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className="font-bold text-lg">{affiliate.name}</h3>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full ${affiliate.active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}>
-              {affiliate.active ? "Ativa" : "Inativa"}
-            </span>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-fade-in" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-card rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-soft animate-scale-in">
+        {/* Hero header */}
+        <div className="relative gradient-primary text-primary-foreground p-5 overflow-hidden">
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-gold/30 blur-3xl pointer-events-none" />
+          <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 grid place-items-center rounded-full bg-white/15 hover:bg-white/25 transition-colors" aria-label="Fechar">
+            <X className="h-4 w-4" />
+          </button>
+          <div className="relative flex items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-white/20 grid place-items-center text-2xl font-bold backdrop-blur">
+              {affiliate.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-display text-2xl leading-tight truncate">{affiliate.name}</h3>
+              <div className="flex items-center gap-2 mt-1 text-[11px]">
+                <span className={`px-2 py-0.5 rounded-full ${affiliate.active ? "bg-success text-success-foreground" : "bg-white/20"}`}>
+                  {affiliate.active ? "● Ativa" : "Inativa"}
+                </span>
+                <span className="opacity-90">{affiliate.commissionType === "percent" ? `${affiliate.commissionValue}% por venda` : `${brl(affiliate.commissionValue)} por venda`}</span>
+              </div>
+            </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="h-4 w-4" /></button>
-        </div>
-
-        <div className="space-y-2 text-sm mb-4">
-          <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> {affiliate.email}</div>
-          {affiliate.phone && <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> {affiliate.phone}</div>}
-          <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-muted-foreground" /> Comissão: {affiliate.commissionType === "percent" ? `${affiliate.commissionValue}%` : brl(affiliate.commissionValue)}</div>
-          <div className="text-xs text-muted-foreground">Cadastrada em {new Date(affiliate.createdAt).toLocaleDateString("pt-BR")}</div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-success/10 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-success">{paid.length}</div>
-            <div className="text-[10px] text-muted-foreground">Pagas</div>
-          </div>
-          <div className="bg-gold/10 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-gold">{pending.length}</div>
-            <div className="text-[10px] text-muted-foreground">Pendentes</div>
-          </div>
-          <div className="bg-destructive/10 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-destructive">{cancelled.length}</div>
-            <div className="text-[10px] text-muted-foreground">Canceladas</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="bg-muted/50 rounded-xl p-3">
-            <div className="text-xs text-muted-foreground">Faturado (pago)</div>
-            <div className="font-bold">{brl(totalPaid)}</div>
-          </div>
-          <div className="bg-muted/50 rounded-xl p-3">
-            <div className="text-xs text-muted-foreground">Comissão paga</div>
-            <div className="font-bold text-gold">{brl(totalCommission)}</div>
+          <div className="relative grid grid-cols-2 gap-2 mt-4">
+            <div className="rounded-xl bg-white/15 backdrop-blur px-3 py-2">
+              <div className="text-[10px] uppercase opacity-80">Faturado (pago)</div>
+              <div className="font-bold">{brl(totalPaid)}</div>
+            </div>
+            <div className="rounded-xl bg-gold text-gold-foreground px-3 py-2">
+              <div className="text-[10px] uppercase opacity-80">Comissão paga</div>
+              <div className="font-bold">{brl(totalCommission)}</div>
+            </div>
           </div>
         </div>
 
-        <div className="mb-4">
-          <div className="text-xs font-semibold text-muted-foreground mb-2">Últimas vendas</div>
-          {recent.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-2">Nenhuma venda ainda.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {recent.map(s => (
-                <li key={s.id} className="py-2 flex justify-between items-center text-sm">
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{s.customerName}</div>
-                    <div className="text-[11px] text-muted-foreground truncate">{s.productDescription}</div>
-                  </div>
-                  <div className="text-right ml-2">
-                    <div className="font-semibold">{brl(s.saleValue)}</div>
-                    <StatusBadge status={s.status} />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <div className="p-5 overflow-y-auto">
+          {/* Quick actions */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {affiliate.phone && (
+              <a href={`https://wa.me/${affiliate.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="h-10 rounded-xl bg-success/10 text-success text-xs font-semibold flex items-center justify-center gap-1 hover:bg-success/20 transition-colors">
+                <Phone className="h-3.5 w-3.5" /> WhatsApp
+              </a>
+            )}
+            <a href={`mailto:${affiliate.email}`} className="h-10 rounded-xl bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center gap-1 hover:bg-primary/20 transition-colors">
+              <Mail className="h-3.5 w-3.5" /> E-mail
+            </a>
+            <button
+              onClick={() => {
+                const link = `${window.location.origin}/afiliada/login`;
+                navigator.clipboard?.writeText(link);
+                toast.success("Link de login copiado!");
+              }}
+              className="h-10 rounded-xl bg-muted text-foreground text-xs font-semibold flex items-center justify-center gap-1 hover:bg-muted/70 transition-colors"
+            >
+              <FileText className="h-3.5 w-3.5" /> Copiar link
+            </button>
+          </div>
 
-        <div className="flex gap-2">
-          <button onClick={onViewSales} className="flex-1 h-10 rounded-full border border-border text-sm font-semibold">Ver todas as vendas</button>
-          <button onClick={onEdit} className="flex-1 h-10 rounded-full gradient-primary text-primary-foreground text-sm font-semibold">Editar</button>
+          <div className="text-xs text-muted-foreground mb-3">Cadastrada em {new Date(affiliate.createdAt).toLocaleDateString("pt-BR")}</div>
+
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="bg-success/10 rounded-xl p-3 text-center">
+              <div className="text-lg font-bold text-success">{paid.length}</div>
+              <div className="text-[10px] text-muted-foreground">Pagas</div>
+            </div>
+            <div className="bg-gold/10 rounded-xl p-3 text-center">
+              <div className="text-lg font-bold text-gold">{pending.length}</div>
+              <div className="text-[10px] text-muted-foreground">Pendentes</div>
+            </div>
+            <div className="bg-destructive/10 rounded-xl p-3 text-center">
+              <div className="text-lg font-bold text-destructive">{cancelled.length}</div>
+              <div className="text-[10px] text-muted-foreground">Canceladas</div>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="text-xs font-semibold text-muted-foreground mb-2">Últimas vendas</div>
+            {recent.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-2">Nenhuma venda ainda.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {recent.map(s => (
+                  <li key={s.id} className="py-2 flex justify-between items-center text-sm">
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{s.customerName}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{s.productDescription}</div>
+                    </div>
+                    <div className="text-right ml-2">
+                      <div className="font-semibold">{brl(s.saleValue)}</div>
+                      <StatusBadge status={s.status} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={onViewSales} className="flex-1 h-10 rounded-full border border-border text-sm font-semibold hover:bg-muted/40 transition-colors">Ver todas as vendas</button>
+            <button onClick={onEdit} className="flex-1 h-10 rounded-full gradient-primary text-primary-foreground text-sm font-semibold hover:scale-[1.02] active:scale-[0.98] transition-transform">Editar</button>
+          </div>
         </div>
       </div>
     </div>
