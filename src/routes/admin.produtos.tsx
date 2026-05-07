@@ -46,7 +46,14 @@ function Page() {
                 <div className="text-xs text-muted-foreground">SKU {p.sku}</div>
               </div>
               <div className="hidden md:block text-sm font-semibold text-primary">{brl(p.price)}</div>
-              <div className="hidden md:block text-sm">{p.stock}</div>
+              <div className="hidden md:flex items-center gap-1.5 text-sm">
+                <span>{p.stock}</span>
+                {p.stock <= 0 ? (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive font-semibold">Esgotado</span>
+                ) : p.stock <= (p.minStock ?? 5) ? (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/15 text-gold font-semibold">Baixo</span>
+                ) : null}
+              </div>
               <div className="hidden md:block">
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${p.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
                   {p.active ? "Ativo" : "Inativo"}
