@@ -152,7 +152,7 @@ function GlobalSearch() {
                 <div>
                   <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase text-muted-foreground tracking-wide">Pedidos</div>
                   {results.orders.map(o => (
-                    <button key={o.id} onClick={() => { setOpen(false); setQ(""); navigate({ to: "/admin/pedidos", search: { q: o.id } as never }); }}
+                    <button key={o.id} onClick={() => { setOpen(false); setQ(""); navigate({ to: "/admin/pedidos", search: { q: o.id } }); }}
                       className="w-full text-left px-3 py-2 hover:bg-muted text-sm">
                       <div className="font-semibold">#{o.id}</div>
                       <div className="text-xs text-muted-foreground">{o.customerName} · {o.customerPhone}</div>
