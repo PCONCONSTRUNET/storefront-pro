@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
 import { Modal } from "./admin.produtos";
+import { Search, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/pedidos")({
+  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : "" }),
   component: Page,
 });
 
@@ -13,9 +15,21 @@ const statuses: OrderStatus[] = ["aguardando_pagamento", "pago", "em_separacao",
 
 function Page() {
   const { orders, updateOrderStatus, deleteOrder } = useStore();
+  const { q: initialQ } = Route.useSearch();
   const [filter, setFilter] = useState<OrderStatus | "todos">("todos");
   const [selected, setSelected] = useState<string | null>(null);
-  const list = filter === "todos" ? orders : orders.filter(o => o.status === filter);
+  const [query, setQuery] = useState(initialQ);
+  useEffect(() => { setQuery(initialQ); if (initialQ) setFilter("todos"); }, [initialQ]);
+  const term = query.trim().toLowerCase();
+  const digits = term.replace(/\D/g, "");
+  const list = orders.filter(o => {
+    if (filter !== "todos" && o.status !== filter) return false;
+    if (!term) return true;
+    return o.id.toLowerCase().includes(term)
+      || o.customerName.toLowerCase().includes(term)
+      || o.customerEmail.toLowerCase().includes(term)
+      || (digits && o.customerPhone.replace(/\D/g, "").includes(digits));
+  });
   const order = orders.find(o => o.id === selected);
 
   return (
