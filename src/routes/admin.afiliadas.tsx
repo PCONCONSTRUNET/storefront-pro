@@ -277,7 +277,7 @@ function Page() {
                       <StatusBadge status={s.status} />
                     </div>
                     <div className="flex gap-1 w-full sm:w-auto justify-end">
-                      <ActionBtn onClick={() => updateStatus(s.id, "confirmada")} title="Confirmar" cls="text-success hover:bg-success/10"><Check className="h-4 w-4" /></ActionBtn>
+                      <ActionBtn onClick={() => { updateStatus(s.id, "confirmada"); playBeep(); toast.success("Venda confirmada"); }} title="Confirmar" cls="text-success hover:bg-success/10"><Check className="h-4 w-4" /></ActionBtn>
                       <ActionBtn onClick={() => updateStatus(s.id, "pendente")} title="Pendente" cls="text-gold hover:bg-gold/10"><Clock className="h-4 w-4" /></ActionBtn>
                       <ActionBtn onClick={() => updateStatus(s.id, "cancelada")} title="Cancelar" cls="text-destructive hover:bg-destructive/10"><X className="h-4 w-4" /></ActionBtn>
                       <ActionBtn onClick={() => { if (confirm("Excluir esta venda?")) deleteSale(s.id); }} title="Excluir" cls="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></ActionBtn>
