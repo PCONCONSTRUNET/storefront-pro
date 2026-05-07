@@ -11,7 +11,8 @@ export function ProductCard({ product }: { product: Product }) {
   const toggleFavorite = useStore(s => s.toggleFavorite);
   const isFav = !!customer?.favorites?.includes(product.id);
   const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
-  const productReviews = useStore(s => s.reviews.filter(r => r.productId === product.id));
+  const reviews = useStore(s => s.reviews);
+  const productReviews = reviews.filter(r => r.productId === product.id);
   // Pseudo-random but stable based on id, for the demo
   const seed = product.id.charCodeAt(1) || 3;
   const sold = 50 + (seed * 37) % 950;
