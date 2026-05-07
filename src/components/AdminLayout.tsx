@@ -88,7 +88,7 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
           <h1 className="text-lg font-bold truncate">{title}</h1>
           <div className="ml-auto"><GlobalSearch /></div>
         </header>
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main key={path} className="flex-1 p-4 md:p-6 animate-page-in">{children}</main>
       </div>
     </div>
   );
