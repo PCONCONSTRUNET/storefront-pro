@@ -49,7 +49,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_password_reset_token: {
+        Args: { _token: string }
+        Returns: {
+          subject_email: string
+          subject_type: Database["public"]["Enums"]["reset_subject"]
+        }[]
+      }
     }
     Enums: {
       reset_subject: "admin" | "customer" | "affiliate"
