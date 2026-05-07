@@ -38,9 +38,9 @@ function Page() {
 
   return (
     <StoreLayout>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={close}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-overlay-in" onClick={close}>
         <div
-          className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl"
+          className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl animate-modal-in"
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
