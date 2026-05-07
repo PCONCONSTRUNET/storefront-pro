@@ -31,7 +31,8 @@ export function Stars({ value, size = 14, onChange }: { value: number; size?: nu
 }
 
 export function ProductReviews({ productId }: { productId: string }) {
-  const reviews = useStore(s => s.reviews.filter(r => r.productId === productId));
+  const allReviews = useStore(s => s.reviews);
+  const reviews = allReviews.filter(r => r.productId === productId);
   const orders = useStore(s => s.orders);
   const currentCustomerId = useStore(s => s.currentCustomerId);
   const isAdmin = useStore(s => s.isAdmin);
