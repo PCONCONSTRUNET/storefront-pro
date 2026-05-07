@@ -23,6 +23,7 @@ function Page() {
   const [form, setForm] = useState({
     name: customer?.name || "", email: customer?.email || "", phone: customer?.phone || "",
     address: customer?.address || "", payment: "pix" as "pix" | "card" | "cash",
+    notes: "",
   });
 
   if (cart.length === 0 && step < 4) {
