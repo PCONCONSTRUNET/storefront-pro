@@ -161,6 +161,10 @@ function Page() {
           </div>
         </div>
 
+        <div id="avaliacoes">
+          <ProductReviews productId={product.id} />
+        </div>
+
         {related.length > 0 && (
           <section className="mt-12">
             <h2 className="text-lg font-bold mb-3">Você também vai amar</h2>
