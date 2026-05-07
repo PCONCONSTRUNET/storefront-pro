@@ -57,7 +57,9 @@ function Page() {
     <StoreLayout>
       <div className="max-w-3xl mx-auto px-4 py-5">
         <h1 className="text-2xl font-bold mb-4">Meus pedidos</h1>
-        {orders.length === 0 ? (
+        {!hydrated ? (
+          <OrderListSkeleton />
+        ) : orders.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">Você ainda não tem pedidos.</div>
         ) : (
           <ul className="space-y-3">
