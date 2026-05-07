@@ -114,11 +114,13 @@ function ProductForm({ product, categories, onSave }: { product: Product; catego
           <Field label="Promocional" type="number" value={String(p.oldPrice ?? "")} onChange={v => setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })} />
           <div className="col-span-2 flex gap-2">
             <Field label="Estoque" type="number" value={String(p.stock)} onChange={v => setP({ ...p, stock: parseInt(v) || 0 })} className="flex-1" required />
+            <Field label="Estoque mínimo" type="number" value={String(p.minStock ?? 5)} onChange={v => setP({ ...p, minStock: parseInt(v) || 0 })} className="flex-1" />
             <button type="button" onClick={() => setP({ ...p, stock: 0 })}
               className="self-end h-11 px-3 rounded-xl bg-destructive/10 text-destructive text-xs font-semibold whitespace-nowrap">
-              Marcar sem estoque
+              Sem estoque
             </button>
           </div>
+          <p className="col-span-2 text-[11px] text-muted-foreground -mt-1">Você receberá um alerta quando o estoque ficar igual ou abaixo do mínimo.</p>
           <label className="col-span-2 flex items-center gap-2 p-3 rounded-xl bg-muted/50">
             <input type="checkbox" checked={p.active} onChange={e => setP({ ...p, active: e.target.checked })} />
             <span className="text-sm">Ativo</span>
