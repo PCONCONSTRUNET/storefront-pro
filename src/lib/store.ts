@@ -371,8 +371,9 @@ export const useStore = create<AppState>()(
           "lucaspereirabn10@gmail.com": "admin123",
         };
         const normalized = email.trim().toLowerCase();
-        const expected = AUTHORIZED_ADMINS[normalized];
-        if (!expected) return { ok: false, message: "E-mail não autorizado" };
+        const override = get().adminPasswordOverride?.[normalized];
+        const expected = override || AUTHORIZED_ADMINS[normalized];
+        if (!AUTHORIZED_ADMINS[normalized]) return { ok: false, message: "E-mail não autorizado" };
         if (expected !== password) return { ok: false, message: "Senha incorreta" };
         set(s => ({ isAdmin: true, sessions: { ...s.sessions, admin: makeSession(normalized) } }));
         return { ok: true, message: "Bem-vindo!" };
