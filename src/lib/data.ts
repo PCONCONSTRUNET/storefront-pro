@@ -8,6 +8,7 @@ export type Product = {
   gallery?: string[];
   category: string;
   stock: number;
+  minStock?: number;
   sku: string;
   active: boolean;
   hidden?: boolean;
