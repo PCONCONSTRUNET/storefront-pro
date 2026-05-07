@@ -132,7 +132,11 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
   registerSale: ReturnType<typeof useStore.getState>["registerAffiliateSale"];
 }) {
   const { setOpenMobile } = useSidebar();
-  const [form, setForm] = useState({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "" });
+  const [form, setForm] = useState({
+    customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "",
+    channel: "WhatsApp" as "WhatsApp" | "Instagram" | "Presencial" | "Outro",
+    payment: "Pix" as "Pix" | "Cartão" | "Dinheiro" | "Outro",
+  });
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,25 +145,40 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
+    const meta = `[${form.channel} · ${form.payment}]`;
+    const fullNotes = form.notes ? `${meta} ${form.notes}` : meta;
     const r = registerSale({
       affiliateId,
       customerName: form.customerName,
       customerPhone: form.customerPhone || undefined,
       productDescription: form.productDescription,
       saleValue: value,
-      notes: form.notes || undefined,
+      notes: fullNotes,
     });
     if (r) {
       playBeep();
       toast.success(`Venda registrada! Comissão: ${brl(r.commissionEarned)}`);
-      setForm({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "" });
+      setForm({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "", channel: form.channel, payment: form.payment });
       setOpenMobile(false);
       onDone();
     }
   };
 
+  const channels: { id: typeof form.channel; icon: React.ElementType }[] = [
+    { id: "WhatsApp", icon: MessageCircle },
+    { id: "Instagram", icon: Instagram },
+    { id: "Presencial", icon: Store },
+    { id: "Outro", icon: Globe },
+  ];
+  const payments: { id: typeof form.payment; icon: React.ElementType }[] = [
+    { id: "Pix", icon: QrCode },
+    { id: "Cartão", icon: CreditCard },
+    { id: "Dinheiro", icon: Banknote },
+    { id: "Outro", icon: DollarSign },
+  ];
+
   return (
-    <div className="relative overflow-hidden rounded-3xl p-[1.5px] gradient-primary shadow-soft">
+    <div className="relative overflow-hidden rounded-3xl p-[1.5px] gradient-primary shadow-soft animate-fade-in">
       <div className="relative bg-card rounded-[calc(1.5rem-1.5px)] p-5">
         <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-20 w-56 h-56 rounded-full bg-accent/40 blur-3xl pointer-events-none" />
@@ -190,6 +209,30 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
           <Field label="Observações" icon={MessageCircle}>
             <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input" placeholder="Opcional" />
           </Field>
+
+          <div className="sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Canal de venda</span>
+            <div className="grid grid-cols-4 gap-2 mt-1.5">
+              {channels.map(c => (
+                <button key={c.id} type="button" onClick={() => setForm(f => ({ ...f, channel: c.id }))}
+                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.channel === c.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
+                  <c.icon className="h-4 w-4" />{c.id}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Forma de pagamento</span>
+            <div className="grid grid-cols-4 gap-2 mt-1.5">
+              {payments.map(p => (
+                <button key={p.id} type="button" onClick={() => setForm(f => ({ ...f, payment: p.id }))}
+                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.payment === p.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
+                  <p.icon className="h-4 w-4" />{p.id}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button className="sm:col-span-2 group relative h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 shadow-soft hover:scale-[1.02] active:scale-[0.98] transition-transform overflow-hidden">
             <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
             <Plus className="h-5 w-5" /> Registrar venda
