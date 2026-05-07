@@ -301,8 +301,8 @@ function Page() {
       )}
 
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-fade-in" onClick={() => setEditing(null)}>
-          <form onSubmit={save} onClick={e => e.stopPropagation()} className="bg-card rounded-3xl p-5 w-full max-w-md space-y-3 shadow-soft animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in" onClick={() => setEditing(null)}>
+          <form onSubmit={save} onClick={e => e.stopPropagation()} className="bg-card rounded-3xl p-5 w-full max-w-md space-y-3 shadow-soft animate-modal-in">
             <h3 className="font-bold text-lg">{editing.id ? "Editar afiliada" : "Nova afiliada"}</h3>
             <Field label="Nome *"><input value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })} className="input" required /></Field>
             <Field label="E-mail *"><input type="email" value={editing.email} onChange={e => setEditing({ ...editing, email: e.target.value })} className="input" required /></Field>
@@ -398,8 +398,8 @@ function AffiliateDetailsModal({
   const recent = [...sales].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-fade-in" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="bg-card rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-soft animate-scale-in">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-card rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-soft animate-modal-in">
         {/* Hero header */}
         <div className="relative gradient-primary text-primary-foreground p-5 overflow-hidden">
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/15 blur-3xl pointer-events-none" />

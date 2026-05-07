@@ -134,8 +134,8 @@ function AuthModal({ mode, setMode, onClose }: { mode: "login" | "cadastro"; set
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-sm animate-overlay-in" onClick={onClose}>
+      <div className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl animate-modal-in" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="gradient-primary text-primary-foreground px-4 pt-4 pb-5 relative text-left">
           <button onClick={onClose} className="absolute right-3 top-3 w-7 h-7 grid place-items-center rounded-full bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors" aria-label="Fechar" type="button">
             <X className="h-3.5 w-3.5" />

@@ -182,4 +182,29 @@
     0% { opacity: 0; transform: translateY(6px); }
     100% { opacity: 1; transform: translateY(0); }
   }
+
+  /* Unified modal animations (mobile = slide up sheet, desktop = scale fade) */
+  .animate-overlay-in {
+    animation: overlay-in 0.2s ease-out both;
+  }
+  @keyframes overlay-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .animate-modal-in {
+    animation: modal-sheet-in 0.32s cubic-bezier(0.32, 0.72, 0.24, 1) both;
+  }
+  @keyframes modal-sheet-in {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @media (min-width: 640px) {
+    .animate-modal-in {
+      animation: modal-scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes modal-scale-in {
+      0% { opacity: 0; transform: scale(0.96) translateY(4px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  }
 }

@@ -354,8 +354,8 @@ function TransactionForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4" onClick={onClose}>
-      <form onSubmit={submit} onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-lg max-h-[90vh] overflow-y-auto space-y-3">
+    <div className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4 animate-overlay-in" onClick={onClose}>
+      <form onSubmit={submit} onClick={e => e.stopPropagation()} className="bg-card rounded-2xl p-5 w-full max-w-lg max-h-[90vh] overflow-y-auto space-y-3 animate-modal-in">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-lg">{editing ? "Editar lançamento" : "Novo lançamento"}</h3>
           <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted"><X className="h-4 w-4" /></button>
