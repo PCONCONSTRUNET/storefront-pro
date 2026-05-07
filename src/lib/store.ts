@@ -498,7 +498,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 3,
+      version: 4,
       skipHydration: typeof window === "undefined",
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
@@ -508,6 +508,9 @@ export const useStore = create<AppState>()(
         }
         if (version < 3) {
           persisted.sessions = { admin: null, customer: null, affiliate: null };
+        }
+        if (version < 4) {
+          persisted.adminPasswordOverride = {};
         }
         return persisted;
       },
