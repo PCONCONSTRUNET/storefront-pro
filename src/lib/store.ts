@@ -243,9 +243,41 @@ export const useStore = create<AppState>()(
       affiliateSales: [],
       currentAffiliateId: null,
       transactions: [],
+      adminPasswordOverride: {},
       sessions: { admin: null, customer: null, affiliate: null },
 
       refreshSession: (kind) => {
+
+      findAccountByEmail: (email) => {
+        const e = email.trim().toLowerCase();
+        if (!e) return null;
+        const ADMIN_EMAILS = ["lucaspereirabn10@gmail.com"];
+        if (ADMIN_EMAILS.includes(e)) return { kind: "admin", email: e };
+        const aff = get().affiliates.find(a => a.email.toLowerCase() === e);
+        if (aff) return { kind: "affiliate", email: aff.email, phone: aff.phone };
+        const cust = get().customers.find(c => c.email.toLowerCase() === e);
+        if (cust) return { kind: "customer", email: cust.email, phone: cust.phone };
+        return null;
+      },
+      resetPasswordFor: (kind, email, newPassword) => {
+        const e = email.trim().toLowerCase();
+        if (!newPassword || newPassword.length < 4) return { ok: false, message: "Senha muito curta (mín. 4)" };
+        if (kind === "admin") {
+          set(s => ({ adminPasswordOverride: { ...s.adminPasswordOverride, [e]: newPassword } }));
+          return { ok: true, message: "Senha redefinida com sucesso" };
+        }
+        if (kind === "affiliate") {
+          const exists = get().affiliates.find(a => a.email.toLowerCase() === e);
+          if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
+          set(s => ({ affiliates: s.affiliates.map(a => a.email.toLowerCase() === e ? { ...a, password: newPassword } : a) }));
+          return { ok: true, message: "Senha redefinida com sucesso" };
+        }
+        const exists = get().customers.find(c => c.email.toLowerCase() === e);
+        if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
+        set(s => ({ customers: s.customers.map(c => c.email.toLowerCase() === e ? { ...c, password: newPassword } : c) }));
+        return { ok: true, message: "Senha redefinida com sucesso" };
+      },
+
         const sess = get().sessions[kind];
         if (!isSessionValid(sess)) return;
         const remaining = new Date(sess.expiresAt).getTime() - Date.now();
