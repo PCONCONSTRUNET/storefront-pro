@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useStore, selectCurrentCustomer, ORDER_STATUS_LABEL } from "@/lib/store";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useStore, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl, formatDate } from "@/lib/format";
-import { Package } from "lucide-react";
+import { Package, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/pedidos")({
   head: () => ({ meta: [{ title: "Meus pedidos — Princesa de Laços" }] }),
