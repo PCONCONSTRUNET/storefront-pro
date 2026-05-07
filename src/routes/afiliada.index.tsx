@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { brl } from "@/lib/format";
-import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles, Trash2 } from "lucide-react";
+import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles, Trash2, Instagram, Store, Globe, QrCode, CreditCard, Banknote, TrendingUp, Target, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
 import {
