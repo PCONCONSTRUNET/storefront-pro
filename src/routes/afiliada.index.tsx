@@ -292,9 +292,8 @@ function AffiliateHero({ name, commissionLabel, sales }: {
     };
   }, [sales]);
 
-  // Goal: next 10 commission tier
-  const goal = Math.max(10, Math.ceil((stats.monthCount || stats.todayCount || 1) / 10) * 10);
   const monthCount = sales.filter(s => s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) && s.status !== "cancelada").length;
+  const goal = Math.max(10, Math.ceil(Math.max(monthCount, 1) / 10) * 10);
   const progress = Math.min(100, Math.round((monthCount / goal) * 100));
 
   const hour = new Date().getHours();
