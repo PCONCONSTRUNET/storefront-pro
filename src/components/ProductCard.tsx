@@ -80,6 +80,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-0.5">
           <span className="flex items-center gap-0.5">
             <Star className="h-3 w-3 fill-gold text-gold" /> {rating}
+            {realCount > 0 && <span className="text-muted-foreground/70">({realCount})</span>}
           </span>
           <span>{sold} vendidos</span>
         </div>
