@@ -316,6 +316,33 @@ export const useStore = create<AppState>()(
       })),
       deleteTransaction: (id) => set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })),
 
+      addReview: (data) => {
+        const state = get();
+        const customer = state.customers.find(c => c.id === state.currentCustomerId);
+        if (!customer) return { ok: false, message: "Faça login para avaliar" };
+        if (!data.rating || data.rating < 1 || data.rating > 5) return { ok: false, message: "Selecione uma nota" };
+        if (!data.comment.trim() && data.photos.length === 0) return { ok: false, message: "Escreva um comentário ou envie uma foto" };
+        const review: Review = {
+          id: `rev_${Date.now()}`,
+          productId: data.productId,
+          customerId: customer.id,
+          customerName: customer.name,
+          rating: data.rating,
+          comment: data.comment.trim(),
+          photos: data.photos,
+          createdAt: new Date().toISOString(),
+        };
+        set(s => ({ reviews: [review, ...s.reviews] }));
+        return { ok: true, message: "Avaliação publicada!" };
+      },
+      deleteReview: (id) => set(s => ({
+        reviews: s.reviews.filter(r => {
+          if (r.id !== id) return true;
+          // allow author or admin
+          return !(s.isAdmin || r.customerId === s.currentCustomerId);
+        }),
+      })),
+
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
           const existing = s.cart.find((i) => i.productId === productId && i.variation === variation);
