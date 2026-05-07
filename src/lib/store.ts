@@ -5,6 +5,17 @@ import { initialProducts, initialCategories, initialCoupons, type Product, type 
 
 export type CartItem = { productId: string; quantity: number; variation?: string };
 
+export type Review = {
+  id: string;
+  productId: string;
+  customerId: string;
+  customerName: string;
+  rating: number; // 1-5
+  comment: string;
+  photos: string[]; // data URLs
+  createdAt: string;
+};
+
 export type OrderStatus =
   | "aguardando_pagamento"
   | "pago"
