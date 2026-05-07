@@ -44,7 +44,7 @@ function Page() {
   const finish = () => {
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
-      address: form.address, paymentMethod: form.payment,
+      address: form.address, paymentMethod: form.payment, notes: form.notes,
     });
     toast.success("Pedido realizado!");
     navigate({ to: "/pedido/$id", params: { id: order.id } });
