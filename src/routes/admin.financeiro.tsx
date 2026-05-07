@@ -3,8 +3,9 @@ import { useMemo, useState } from "react";
 import { useStore, type Transaction, type TransactionCategory, type TransactionKind } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
-import { TrendingUp, TrendingDown, Wallet, Plus, Trash2, X, Filter, Users, ShoppingBag, Pencil } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Plus, Trash2, X, Filter, Users, ShoppingBag, Pencil, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { downloadCSV, downloadPDF } from "@/lib/export";
 
 export const Route = createFileRoute("/admin/financeiro")({
   component: Page,
@@ -171,9 +172,52 @@ function Page() {
       </div>
 
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
-        <div className="px-4 py-3 border-b border-border font-bold flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-border font-bold flex items-center justify-between gap-2 flex-wrap">
           <span>Movimentações</span>
-          <span className="text-xs text-muted-foreground font-normal">{filteredRows.length} lançamento{filteredRows.length === 1 ? "" : "s"}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-normal">{filteredRows.length} lançamento{filteredRows.length === 1 ? "" : "s"}</span>
+            <button
+              onClick={() => {
+                if (filteredRows.length === 0) { toast.error("Sem dados para exportar"); return; }
+                const head = ["Data", "Descrição", "Categoria/Detalhes", "Tipo", "Valor (R$)"];
+                const body = filteredRows.map(r => [
+                  new Date(r.date).toLocaleDateString("pt-BR"),
+                  r.description,
+                  r.meta || "",
+                  r.isOut ? "Saída" : "Entrada",
+                  (r.isOut ? -r.amount : r.amount).toFixed(2).replace(".", ","),
+                ]);
+                downloadCSV(`financeiro-${new Date().toISOString().slice(0,10)}.csv`, [head, ...body]);
+                toast.success("CSV baixado");
+              }}
+              className="text-xs flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/70 font-semibold"
+            >
+              <Download className="h-3.5 w-3.5" /> CSV
+            </button>
+            <button
+              onClick={() => {
+                if (filteredRows.length === 0) { toast.error("Sem dados para exportar"); return; }
+                downloadPDF({
+                  filename: `financeiro-${new Date().toISOString().slice(0,10)}.pdf`,
+                  title: "Relatório Financeiro — Movimentações",
+                  subtitle: `${filteredRows.length} lançamento(s) · Entradas ${brl(totals.entradas)} · Saídas ${brl(totals.saidas)} · Caixa ${brl(totals.caixa)}`,
+                  head: ["Data", "Descrição", "Detalhes", "Tipo", "Valor"],
+                  body: filteredRows.map(r => [
+                    new Date(r.date).toLocaleDateString("pt-BR"),
+                    r.description,
+                    r.meta || "—",
+                    r.isOut ? "Saída" : "Entrada",
+                    `${r.isOut ? "− " : "+ "}${brl(r.amount)}`,
+                  ]),
+                  foot: ["", "", "", "Caixa", brl(totals.caixa)],
+                });
+                toast.success("PDF baixado");
+              }}
+              className="text-xs flex items-center gap-1 px-3 py-1.5 rounded-full bg-foreground text-background font-semibold"
+            >
+              <FileText className="h-3.5 w-3.5" /> PDF
+            </button>
+          </div>
         </div>
         {filteredRows.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">Sem movimentações.</div>
@@ -486,20 +530,43 @@ function AffiliateReport({ from, to, onFromChange, onToChange }: {
     return { rows, totals };
   }, [affiliates, affiliateSales, transactions, from, to]);
 
+  const head = ["Afiliada", "Vendas", "Confirmadas", "Pendentes", "Canceladas", "Faturamento (R$)", "Comissão (R$)", "Paga (R$)", "A pagar (R$)"];
   const exportCsv = () => {
-    const header = ["Afiliada", "Vendas", "Confirmadas", "Pendentes", "Faturamento (confirmado)", "Comissão (confirmada)", "Comissão paga", "A pagar"];
-    const lines = report.rows.map(r => [
-      r.name, r.salesCount, r.confirmedCount, r.pendingCount,
-      r.revenueConfirmed.toFixed(2), r.commissionConfirmed.toFixed(2),
-      r.commissionPaid.toFixed(2), r.commissionToPay.toFixed(2),
-    ].join(";"));
-    const csv = [header.join(";"), ...lines].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `relatorio-afiliadas-${from}-a-${to}.csv`; a.click();
-    URL.revokeObjectURL(url);
-    toast.success("CSV baixado!");
+    if (report.rows.length === 0) { toast.error("Sem dados no período"); return; }
+    const body = report.rows.map(r => [
+      r.name, r.salesCount, r.confirmedCount, r.pendingCount, r.canceledCount,
+      r.revenueConfirmed.toFixed(2).replace(".", ","),
+      r.commissionConfirmed.toFixed(2).replace(".", ","),
+      r.commissionPaid.toFixed(2).replace(".", ","),
+      r.commissionToPay.toFixed(2).replace(".", ","),
+    ]);
+    const totals = ["TOTAIS", report.totals.sales, "", "", "",
+      report.totals.revenue.toFixed(2).replace(".", ","),
+      report.totals.commission.toFixed(2).replace(".", ","),
+      report.totals.paid.toFixed(2).replace(".", ","),
+      report.totals.toPay.toFixed(2).replace(".", ","),
+    ];
+    downloadCSV(`afiliadas-${from}-a-${to}.csv`, [head, ...body, totals]);
+    toast.success("CSV baixado");
+  };
+
+  const exportPdf = () => {
+    if (report.rows.length === 0) { toast.error("Sem dados no período"); return; }
+    downloadPDF({
+      filename: `afiliadas-${from}-a-${to}.pdf`,
+      title: "Relatório por Afiliada",
+      subtitle: `Período: ${new Date(from).toLocaleDateString("pt-BR")} a ${new Date(to).toLocaleDateString("pt-BR")}`,
+      head,
+      body: report.rows.map(r => [
+        r.name, r.salesCount, r.confirmedCount, r.pendingCount, r.canceledCount,
+        brl(r.revenueConfirmed), brl(r.commissionConfirmed),
+        brl(r.commissionPaid), brl(r.commissionToPay),
+      ]),
+      foot: ["TOTAIS", report.totals.sales, "", "", "",
+        brl(report.totals.revenue), brl(report.totals.commission),
+        brl(report.totals.paid), brl(report.totals.toPay)],
+    });
+    toast.success("PDF baixado");
   };
 
   return (
@@ -515,7 +582,12 @@ function AffiliateReport({ from, to, onFromChange, onToChange }: {
             <span className="text-muted-foreground">Até</span>
             <input type="date" value={to} onChange={e => onToChange(e.target.value)} className="h-8 px-2 rounded-lg bg-background border border-border text-xs" />
           </label>
-          <button onClick={exportCsv} className="text-xs bg-foreground text-background px-3 py-1.5 rounded-full font-semibold">CSV</button>
+          <button onClick={exportCsv} className="text-xs flex items-center gap-1 bg-muted hover:bg-muted/70 px-3 py-1.5 rounded-full font-semibold">
+            <Download className="h-3.5 w-3.5" /> CSV
+          </button>
+          <button onClick={exportPdf} className="text-xs flex items-center gap-1 bg-foreground text-background px-3 py-1.5 rounded-full font-semibold">
+            <FileText className="h-3.5 w-3.5" /> PDF
+          </button>
         </div>
       </div>
 
