@@ -37,6 +37,7 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Princesa de Laços" },
       { name: "mobile-web-app-capable", content: "yes" },
+      { title: "Princesa de Laços — Catálogo encantado" },
       { name: "description", content: "A responsive web application for creating a professional digital storefront, akin to a marketplace." },
       { property: "og:title", content: "Princesa de Laços — Catálogo encantado" },
       { property: "og:description", content: "A responsive web application for creating a professional digital storefront, akin to a marketplace." },
