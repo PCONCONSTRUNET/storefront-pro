@@ -260,6 +260,7 @@ export const useStore = create<AppState>()(
       currentAffiliateId: null,
       transactions: [],
       adminPasswordOverride: {},
+      reviews: [],
       sessions: { admin: null, customer: null, affiliate: null },
 
       refreshSession: (kind) => {
