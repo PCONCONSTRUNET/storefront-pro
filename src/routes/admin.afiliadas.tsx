@@ -6,6 +6,7 @@ import { brl } from "@/lib/format";
 import { Plus, Pencil, Trash2, Check, X, Clock, Users, DollarSign, ShoppingBag, Search, Eye, Mail, Phone, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { downloadCSV, downloadPDF } from "@/lib/export";
+import { playBeep } from "@/lib/sound";
 
 export const Route = createFileRoute("/admin/afiliadas")({
   component: Page,

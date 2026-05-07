@@ -7,6 +7,8 @@ import { brl } from "@/lib/format";
 import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode, Truck, Store } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { playBeep } from "@/lib/sound";
+
 
 export const Route = createFileRoute("/checkout")({
   component: Page,
@@ -48,6 +50,7 @@ function Page() {
       address: form.address, paymentMethod: form.payment,
       deliveryMethod: form.delivery, notes: form.notes,
     });
+    playBeep();
     toast.success("Pedido realizado!");
     navigate({ to: "/pedido/$id", params: { id: order.id } });
   };

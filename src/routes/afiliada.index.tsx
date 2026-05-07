@@ -4,6 +4,7 @@ import { useStore, useStoreHydrated } from "@/lib/store";
 import { brl } from "@/lib/format";
 import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { playBeep } from "@/lib/sound";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
@@ -148,6 +149,7 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
       notes: form.notes || undefined,
     });
     if (r) {
+      playBeep();
       toast.success(`Venda registrada! Comissão: ${brl(r.commissionEarned)}`);
       setForm({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "" });
       setOpenMobile(false);
