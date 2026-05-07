@@ -6,6 +6,7 @@ import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/Skeleton";
 import { ChevronRight, ChevronLeft, Zap, Truck, ShieldCheck, Tag, Crown, Sparkles, Gift, Flame, Pause, Play } from "lucide-react";
+import bannerEncantada from "@/assets/banner-encantada-2026.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,18 +53,15 @@ function Home() {
       {/* Hero carousel mock */}
       <section className="px-3 md:px-4 pt-3 md:pt-5 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-          <div className="md:col-span-2 relative overflow-hidden rounded-lg gradient-primary text-primary-foreground p-5 md:p-10 shadow-card min-h-[140px] md:min-h-[260px]">
-            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
-            <div className="absolute -left-6 -bottom-6 w-36 h-36 rounded-full bg-gold/30 blur-2xl" />
-            <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur px-2 py-0.5 rounded-sm text-[10px] md:text-xs font-semibold uppercase tracking-wide">
-              <Sparkles className="h-3 w-3" /> Novidades
-            </span>
-            <h1 className="font-display text-2xl md:text-4xl mt-2 leading-tight max-w-md">{settings.bannerTitle}</h1>
-            <p className="mt-1 text-xs md:text-sm text-primary-foreground/90 max-w-md">{settings.bannerSubtitle}</p>
-            <Link to="/categorias" className="mt-3 inline-flex items-center gap-1 bg-white text-primary font-bold rounded-sm px-4 py-2 text-xs md:text-sm hover:opacity-95 active:scale-95 transition-all">
-              Comprar agora <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
+          <Link to="/categorias" className="md:col-span-2 relative overflow-hidden rounded-lg shadow-card block group">
+            <img
+              src={bannerEncantada}
+              alt={settings.bannerTitle || "Coleção Encantada 2026"}
+              className="w-full h-full object-cover aspect-[16/7] md:aspect-[16/7] group-hover:scale-[1.02] transition-transform duration-500"
+              loading="eager"
+            />
+            <h1 className="sr-only">{settings.bannerTitle}</h1>
+          </Link>
           <div className="hidden md:flex flex-col gap-3">
             {banners.slice(0, 2).map((b) => (
               <Link key={b.title} to="/categorias" className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${b.color} text-white p-4 flex-1 group`}>
