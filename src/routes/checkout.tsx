@@ -128,6 +128,7 @@ function Page() {
               <Row label="Cliente" value={form.name} />
               <Row label="Contato" value={`${form.email} · ${form.phone}`} />
               <Row label="Endereço" value={form.address} />
+              {form.notes.trim() && <Row label="Observações" value={form.notes} />}
               <Row label="Pagamento" value={paymentOptions.find(p => p.id === form.payment)?.label || ""} />
               <hr className="border-border" />
               <Row label="Subtotal" value={brl(totals.subtotal)} />
