@@ -398,8 +398,8 @@ function AffiliateDetailsModal({
   const recent = [...sales].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)).slice(0, 5);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-fade-in" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="bg-card rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-soft animate-scale-in">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-card rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-soft animate-modal-in">
         {/* Hero header */}
         <div className="relative gradient-primary text-primary-foreground p-5 overflow-hidden">
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/15 blur-3xl pointer-events-none" />
