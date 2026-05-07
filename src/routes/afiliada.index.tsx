@@ -104,7 +104,8 @@ function Page() {
               {items.find(i => i.id === view)?.title}
             </h1>
           </header>
-          <main className="flex-1 p-4 max-w-4xl w-full mx-auto">
+          <main className="flex-1 p-4 max-w-4xl w-full mx-auto space-y-4">
+            <AffiliateHero name={me.name} commissionLabel={commissionLabel} sales={mySales} />
             {view === "registrar" && (
               <RegisterSale
                 affiliateId={me.id}
