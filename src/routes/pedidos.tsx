@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useStore, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
+import { useStore, useStoreHydrated, selectCurrentCustomer, ORDER_STATUS_LABEL, type Order } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
+import { OrderListSkeleton } from "@/components/Skeleton";
 import { brl, formatDate } from "@/lib/format";
 import { Package, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -12,13 +13,14 @@ export const Route = createFileRoute("/pedidos")({
 
 function Page() {
   const customer = useStore(selectCurrentCustomer);
+  const hydrated = useStoreHydrated();
   const allOrders = useStore(s => s.orders);
   const products = useStore(s => s.products);
   const addToCart = useStore(s => s.addToCart);
   const navigate = useNavigate();
   const orders = customer ? allOrders.filter(o => o.customerId === customer.id) : [];
 
-  if (!customer) {
+  if (hydrated && !customer) {
     return (
       <StoreLayout>
         <div className="max-w-md mx-auto text-center py-20 px-4">
@@ -55,7 +57,9 @@ function Page() {
     <StoreLayout>
       <div className="max-w-3xl mx-auto px-4 py-5">
         <h1 className="text-2xl font-bold mb-4">Meus pedidos</h1>
-        {orders.length === 0 ? (
+        {!hydrated ? (
+          <OrderListSkeleton />
+        ) : orders.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">Você ainda não tem pedidos.</div>
         ) : (
           <ul className="space-y-3">
