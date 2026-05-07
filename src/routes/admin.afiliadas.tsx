@@ -199,6 +199,60 @@ function Page() {
                 <option value="">Todas as afiliadas</option>
                 {affiliates.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
+              <button
+                onClick={() => {
+                  if (filteredSales.length === 0) { toast.error("Sem dados para exportar"); return; }
+                  const head = ["Data", "Afiliada", "Cliente", "Telefone", "Produto/Descrição", "Valor (R$)", "Comissão (R$)", "Status"];
+                  const body = filteredSales.map(s => {
+                    const aff = affiliates.find(a => a.id === s.affiliateId);
+                    return [
+                      new Date(s.createdAt).toLocaleDateString("pt-BR"),
+                      aff?.name || "—",
+                      s.customerName,
+                      s.customerPhone || "",
+                      s.productDescription,
+                      s.saleValue.toFixed(2).replace(".", ","),
+                      s.commissionEarned.toFixed(2).replace(".", ","),
+                      s.status,
+                    ];
+                  });
+                  downloadCSV(`vendas-afiliadas-${new Date().toISOString().slice(0,10)}.csv`, [head, ...body]);
+                  toast.success("CSV baixado");
+                }}
+                className="h-9 px-3 rounded-lg bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1"
+              >
+                <Download className="h-3.5 w-3.5" /> CSV
+              </button>
+              <button
+                onClick={() => {
+                  if (filteredSales.length === 0) { toast.error("Sem dados para exportar"); return; }
+                  const totalRev = filteredSales.reduce((a, s) => a + s.saleValue, 0);
+                  const totalCom = filteredSales.reduce((a, s) => a + s.commissionEarned, 0);
+                  downloadPDF({
+                    filename: `vendas-afiliadas-${new Date().toISOString().slice(0,10)}.pdf`,
+                    title: "Vendas de Afiliadas",
+                    subtitle: `${filteredSales.length} venda(s) · Faturamento ${brl(totalRev)} · Comissão ${brl(totalCom)}`,
+                    head: ["Data", "Afiliada", "Cliente", "Produto", "Valor", "Comissão", "Status"],
+                    body: filteredSales.map(s => {
+                      const aff = affiliates.find(a => a.id === s.affiliateId);
+                      return [
+                        new Date(s.createdAt).toLocaleDateString("pt-BR"),
+                        aff?.name || "—",
+                        s.customerName,
+                        s.productDescription,
+                        brl(s.saleValue),
+                        brl(s.commissionEarned),
+                        s.status,
+                      ];
+                    }),
+                    foot: ["", "", "", "TOTAIS", brl(totalRev), brl(totalCom), ""],
+                  });
+                  toast.success("PDF baixado");
+                }}
+                className="h-9 px-3 rounded-lg bg-foreground text-background text-xs font-semibold flex items-center gap-1"
+              >
+                <FileText className="h-3.5 w-3.5" /> PDF
+              </button>
             </div>
           </div>
 
