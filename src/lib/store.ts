@@ -247,6 +247,17 @@ export const useStore = create<AppState>()(
       sessions: { admin: null, customer: null, affiliate: null },
 
       refreshSession: (kind) => {
+        const sess = get().sessions[kind];
+        if (!isSessionValid(sess)) return;
+        const remaining = new Date(sess.expiresAt).getTime() - Date.now();
+        // Slide forward only if more than the threshold has been used.
+        if (SESSION_TTL_MS - remaining < SESSION_REFRESH_THRESHOLD_MS) return;
+        const next: SessionToken = {
+          ...sess,
+          expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+        };
+        set(s => ({ sessions: { ...s.sessions, [kind]: next } }));
+      },
 
       findAccountByEmail: (email) => {
         const e = email.trim().toLowerCase();
@@ -276,18 +287,6 @@ export const useStore = create<AppState>()(
         if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
         set(s => ({ customers: s.customers.map(c => c.email.toLowerCase() === e ? { ...c, password: newPassword } : c) }));
         return { ok: true, message: "Senha redefinida com sucesso" };
-      },
-
-        const sess = get().sessions[kind];
-        if (!isSessionValid(sess)) return;
-        const remaining = new Date(sess.expiresAt).getTime() - Date.now();
-        // Slide forward only if more than the threshold has been used.
-        if (SESSION_TTL_MS - remaining < SESSION_REFRESH_THRESHOLD_MS) return;
-        const next: SessionToken = {
-          ...sess,
-          expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
-        };
-        set(s => ({ sessions: { ...s.sessions, [kind]: next } }));
       },
 
       addTransaction: (t) => {
