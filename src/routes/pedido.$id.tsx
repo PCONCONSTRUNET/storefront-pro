@@ -85,6 +85,12 @@ function Page() {
         <div className="mt-4 bg-card rounded-2xl p-4 shadow-card text-sm">
           <h2 className="font-semibold mb-2">Entrega</h2>
           <p className="text-muted-foreground">{order.address}</p>
+          {order.notes && (
+            <div className="mt-3 p-3 rounded-xl bg-gold/10 border border-gold/30">
+              <div className="text-[11px] font-bold text-gold uppercase tracking-wide mb-1">📝 Observações</div>
+              <div className="whitespace-pre-wrap">{order.notes}</div>
+            </div>
+          )}
         </div>
       </div>
     </StoreLayout>
