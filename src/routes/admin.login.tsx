@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { Crown, Loader2 } from "lucide-react";
@@ -75,6 +75,9 @@ function Page() {
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "Entrando..." : "Entrar"}
           </button>
+          <p className="text-[11px] text-muted-foreground text-center pt-2">
+            <Link to="/esqueci-senha" className="text-primary underline">Esqueci minha senha</Link>
+          </p>
         </form>
       </div>
     </div>

@@ -170,12 +170,15 @@ type AppState = {
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
   transactions: Transaction[];
+  adminPasswordOverride: Record<string, string>;
   sessions: {
     admin: SessionToken | null;
     customer: SessionToken | null;
     affiliate: SessionToken | null;
   };
   refreshSession: (kind: SessionKind) => void;
+  findAccountByEmail: (email: string) => { kind: SessionKind; email: string; phone?: string } | null;
+  resetPasswordFor: (kind: SessionKind, email: string, newPassword: string) => { ok: boolean; message: string };
 
   addToCart: (productId: string, quantity?: number, variation?: string) => void;
   removeFromCart: (productId: string) => void;
@@ -240,6 +243,7 @@ export const useStore = create<AppState>()(
       affiliateSales: [],
       currentAffiliateId: null,
       transactions: [],
+      adminPasswordOverride: {},
       sessions: { admin: null, customer: null, affiliate: null },
 
       refreshSession: (kind) => {
@@ -253,6 +257,36 @@ export const useStore = create<AppState>()(
           expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
         };
         set(s => ({ sessions: { ...s.sessions, [kind]: next } }));
+      },
+
+      findAccountByEmail: (email) => {
+        const e = email.trim().toLowerCase();
+        if (!e) return null;
+        const ADMIN_EMAILS = ["lucaspereirabn10@gmail.com"];
+        if (ADMIN_EMAILS.includes(e)) return { kind: "admin", email: e };
+        const aff = get().affiliates.find(a => a.email.toLowerCase() === e);
+        if (aff) return { kind: "affiliate", email: aff.email, phone: aff.phone };
+        const cust = get().customers.find(c => c.email.toLowerCase() === e);
+        if (cust) return { kind: "customer", email: cust.email, phone: cust.phone };
+        return null;
+      },
+      resetPasswordFor: (kind, email, newPassword) => {
+        const e = email.trim().toLowerCase();
+        if (!newPassword || newPassword.length < 4) return { ok: false, message: "Senha muito curta (mín. 4)" };
+        if (kind === "admin") {
+          set(s => ({ adminPasswordOverride: { ...s.adminPasswordOverride, [e]: newPassword } }));
+          return { ok: true, message: "Senha redefinida com sucesso" };
+        }
+        if (kind === "affiliate") {
+          const exists = get().affiliates.find(a => a.email.toLowerCase() === e);
+          if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
+          set(s => ({ affiliates: s.affiliates.map(a => a.email.toLowerCase() === e ? { ...a, password: newPassword } : a) }));
+          return { ok: true, message: "Senha redefinida com sucesso" };
+        }
+        const exists = get().customers.find(c => c.email.toLowerCase() === e);
+        if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
+        set(s => ({ customers: s.customers.map(c => c.email.toLowerCase() === e ? { ...c, password: newPassword } : c) }));
+        return { ok: true, message: "Senha redefinida com sucesso" };
       },
 
       addTransaction: (t) => {
@@ -337,8 +371,9 @@ export const useStore = create<AppState>()(
           "lucaspereirabn10@gmail.com": "admin123",
         };
         const normalized = email.trim().toLowerCase();
-        const expected = AUTHORIZED_ADMINS[normalized];
-        if (!expected) return { ok: false, message: "E-mail não autorizado" };
+        const override = get().adminPasswordOverride?.[normalized];
+        const expected = override || AUTHORIZED_ADMINS[normalized];
+        if (!AUTHORIZED_ADMINS[normalized]) return { ok: false, message: "E-mail não autorizado" };
         if (expected !== password) return { ok: false, message: "Senha incorreta" };
         set(s => ({ isAdmin: true, sessions: { ...s.sessions, admin: makeSession(normalized) } }));
         return { ok: true, message: "Bem-vindo!" };
@@ -463,7 +498,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 3,
+      version: 4,
       skipHydration: typeof window === "undefined",
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
@@ -473,6 +508,9 @@ export const useStore = create<AppState>()(
         }
         if (version < 3) {
           persisted.sessions = { admin: null, customer: null, affiliate: null };
+        }
+        if (version < 4) {
+          persisted.adminPasswordOverride = {};
         }
         return persisted;
       },
