@@ -50,8 +50,8 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div className="bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl shadow-soft max-h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-overlay-in" onClick={onClose}>
+      <div className="bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl shadow-soft max-h-[92vh] flex flex-col animate-modal-in" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
             <h2 className="font-serif text-lg font-semibold">Comprar de novo</h2>
