@@ -13,13 +13,14 @@ export const Route = createFileRoute("/pedidos")({
 
 function Page() {
   const customer = useStore(selectCurrentCustomer);
+  const hydrated = useStoreHydrated();
   const allOrders = useStore(s => s.orders);
   const products = useStore(s => s.products);
   const addToCart = useStore(s => s.addToCart);
   const navigate = useNavigate();
   const orders = customer ? allOrders.filter(o => o.customerId === customer.id) : [];
 
-  if (!customer) {
+  if (hydrated && !customer) {
     return (
       <StoreLayout>
         <div className="max-w-md mx-auto text-center py-20 px-4">
