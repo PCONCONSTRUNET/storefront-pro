@@ -1,6 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
+import { ReorderModal } from "@/components/ReorderModal";
 import { brl, formatDate } from "@/lib/format";
 import { CheckCircle2, ChevronLeft, Copy, QrCode, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -14,29 +16,13 @@ const flow: OrderStatus[] = ["aguardando_pagamento", "pago", "em_separacao", "sa
 function Page() {
   const { id } = Route.useParams();
   const order = useStore(s => s.orders.find(o => o.id === id));
-  const products = useStore(s => s.products);
-  const addToCart = useStore(s => s.addToCart);
-  const navigate = useNavigate();
+  const [reorderOpen, setReorderOpen] = useState(false);
 
   if (!order) {
     return <StoreLayout><div className="text-center py-20"><p>Pedido não encontrado.</p><Link to="/pedidos" className="text-primary font-semibold">Voltar</Link></div></StoreLayout>;
   }
 
   const currentIdx = flow.indexOf(order.status);
-
-  const reorder = () => {
-    let added = 0, unavailable = 0;
-    order.items.forEach(it => {
-      const p = products.find(x => x.id === it.productId);
-      if (!p || p.stock <= 0) { unavailable++; return; }
-      addToCart(p.id, Math.min(it.quantity, p.stock));
-      added++;
-    });
-    if (added === 0) { toast.error("Nenhum item disponível para recompra"); return; }
-    if (unavailable > 0) toast.warning(`${unavailable} item(s) indisponível(is) foram ignorados`);
-    toast.success("Itens adicionados ao carrinho");
-    navigate({ to: "/carrinho" });
-  };
 
   return (
     <StoreLayout>
