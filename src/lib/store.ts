@@ -5,6 +5,17 @@ import { initialProducts, initialCategories, initialCoupons, type Product, type 
 
 export type CartItem = { productId: string; quantity: number; variation?: string };
 
+export type Review = {
+  id: string;
+  productId: string;
+  customerId: string;
+  customerName: string;
+  rating: number; // 1-5
+  comment: string;
+  photos: string[]; // data URLs
+  createdAt: string;
+};
+
 export type OrderStatus =
   | "aguardando_pagamento"
   | "pago"
@@ -171,6 +182,7 @@ type AppState = {
   affiliateSales: AffiliateSale[];
   currentAffiliateId: string | null;
   transactions: Transaction[];
+  reviews: Review[];
   adminPasswordOverride: Record<string, string>;
   sessions: {
     admin: SessionToken | null;
@@ -225,6 +237,9 @@ type AppState = {
   addTransaction: (t: Omit<Transaction, "id" | "createdAt">) => Transaction;
   updateTransaction: (id: string, patch: Partial<Omit<Transaction, "id" | "createdAt">>) => void;
   deleteTransaction: (id: string) => void;
+
+  addReview: (r: Omit<Review, "id" | "createdAt" | "customerId" | "customerName">) => { ok: boolean; message: string };
+  deleteReview: (id: string) => void;
 };
 
 export const useStore = create<AppState>()(
@@ -245,6 +260,7 @@ export const useStore = create<AppState>()(
       currentAffiliateId: null,
       transactions: [],
       adminPasswordOverride: {},
+      reviews: [],
       sessions: { admin: null, customer: null, affiliate: null },
 
       refreshSession: (kind) => {
@@ -299,6 +315,33 @@ export const useStore = create<AppState>()(
         transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t),
       })),
       deleteTransaction: (id) => set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })),
+
+      addReview: (data) => {
+        const state = get();
+        const customer = state.customers.find(c => c.id === state.currentCustomerId);
+        if (!customer) return { ok: false, message: "Faça login para avaliar" };
+        if (!data.rating || data.rating < 1 || data.rating > 5) return { ok: false, message: "Selecione uma nota" };
+        if (!data.comment.trim() && data.photos.length === 0) return { ok: false, message: "Escreva um comentário ou envie uma foto" };
+        const review: Review = {
+          id: `rev_${Date.now()}`,
+          productId: data.productId,
+          customerId: customer.id,
+          customerName: customer.name,
+          rating: data.rating,
+          comment: data.comment.trim(),
+          photos: data.photos,
+          createdAt: new Date().toISOString(),
+        };
+        set(s => ({ reviews: [review, ...s.reviews] }));
+        return { ok: true, message: "Avaliação publicada!" };
+      },
+      deleteReview: (id) => set(s => ({
+        reviews: s.reviews.filter(r => {
+          if (r.id !== id) return true;
+          // allow author or admin
+          return !(s.isAdmin || r.customerId === s.currentCustomerId);
+        }),
+      })),
 
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
@@ -500,7 +543,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 4,
+      version: 5,
       skipHydration: typeof window === "undefined",
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
@@ -513,6 +556,9 @@ export const useStore = create<AppState>()(
         }
         if (version < 4) {
           persisted.adminPasswordOverride = {};
+        }
+        if (version < 5) {
+          persisted.reviews = [];
         }
         return persisted;
       },
