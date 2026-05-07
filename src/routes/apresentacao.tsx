@@ -8,6 +8,12 @@ import imgCategoriaLacos from "@/assets/slides/categoria-lacos.png";
 import imgProduto from "@/assets/slides/produto.png";
 import imgCarrinho from "@/assets/slides/carrinho-vazio.png";
 import imgAfiliadaLogin from "@/assets/slides/afiliada-login.png";
+import imgAfiliadaCadastro from "@/assets/slides/afiliada-cadastro.png";
+import imgAfiliadaRegistrar from "@/assets/slides/afiliada-registrar.png";
+import imgAfiliadaVendas from "@/assets/slides/afiliada-vendas.png";
+import imgAfiliadaResumo from "@/assets/slides/afiliada-resumo.png";
+import imgAdminAfiliadas from "@/assets/slides/admin-afiliadas.png";
+import imgAdminAfiliadasVendas from "@/assets/slides/admin-afiliadas-vendas.png";
 import imgAdminDash from "@/assets/slides/admin-dashboard.png";
 import imgAdminProdutos from "@/assets/slides/admin-produtos.png";
 import imgAdminPedidos from "@/assets/slides/admin-pedidos.png";
@@ -40,13 +46,19 @@ const slides: Slide[] = [
   { kind: "image", tag: "Compra", title: "Carrinho", description: "Sacola limpa, com mensagem amigável quando vazio e CTA para explorar produtos.", bullets: ["Aplicação de cupons", "Resumo do pedido", "Animação suave ao abrir"], image: imgCarrinho },
 
   { kind: "section", icon: Crown, color: "from-amber-500 to-yellow-400", title: "Área da afiliada", subtitle: "Painel exclusivo das revendedoras." },
-  { kind: "image", tag: "Login", title: "Acesso da afiliada", description: "Tela limpa de login para a revendedora entrar no painel próprio.", bullets: ["Login com e-mail e senha", "Recuperação de senha", "Cadastro próprio (com aprovação da admin)"], image: imgAfiliadaLogin },
+  { kind: "image", tag: "Login", title: "Acesso da afiliada", description: "Tela limpa de login para a revendedora entrar no painel próprio.", bullets: ["Login com e-mail e senha", "Recuperação de senha", "Link para autocadastro"], image: imgAfiliadaLogin },
+  { kind: "image", tag: "Login", title: "Autocadastro de afiliada", description: "Formulário simples para a revendedora criar sua conta. A administradora aprova e define a comissão depois.", bullets: ["Nome, e-mail, WhatsApp e senha", "Comissão definida pela admin após o cadastro", "Acesso imediato ao painel"], image: imgAfiliadaCadastro },
+  { kind: "image", tag: "Painel", title: "Registrar nova venda", description: "Formulário rápido onde a afiliada registra cada venda. A comissão é calculada automaticamente conforme o percentual definido.", bullets: ["Cliente, WhatsApp, produto e valor", "Canal de venda: WhatsApp, Instagram, Presencial", "Forma de pagamento: Pix, Cartão, Dinheiro", "Comissão calculada na hora"], image: imgAfiliadaRegistrar },
+  { kind: "image", tag: "Painel", title: "Minhas vendas", description: "Listagem das vendas registradas pela afiliada com status (pendente, confirmada ou cancelada) e comissão de cada uma.", bullets: ["Histórico completo da afiliada", "Status visível por venda", "Comissão acumulada em destaque", "Meta do mês com barra de progresso"], image: imgAfiliadaVendas },
+  { kind: "image", tag: "Painel", title: "Resumo da afiliada", description: "Visão geral de desempenho: vendas, faturamento, comissão e gráfico de evolução do período.", bullets: ["Filtros: diário, semanal, mensal, personalizado", "KPIs de faturamento e comissão", "Gráfico de faturamento ao longo do tempo", "Exportação em PDF"], image: imgAfiliadaResumo },
 
   { kind: "section", icon: LayoutDashboard, color: "from-violet-500 to-purple-400", title: "Painel administrativo", subtitle: "Centro de comando completo do negócio." },
   { kind: "image", tag: "Dashboard", title: "Visão geral do negócio", description: "Métricas-chave do dia, gráfico semanal de faturamento, mais vendidos e estoque crítico — tudo em uma tela.", bullets: ["Faturamento, pedidos, ticket médio e clientes", "Gráfico dos últimos 7 dias", "Ranking de mais vendidos", "Alerta de estoque crítico"], image: imgAdminDash },
   { kind: "image", tag: "Catálogo", title: "Gestão de produtos", description: "Lista completa do catálogo com foto, SKU, preço, estoque e status. Edição e exclusão em um clique.", bullets: ["Tabela com foto, SKU, preço e estoque", "Status Ativo/Inativo", "Editar ou excluir direto da lista", "Botão + Novo para cadastro rápido"], image: imgAdminProdutos },
   { kind: "image", tag: "Operação", title: "Pedidos", description: "Fluxo de pedidos com filtros por status: do pagamento até a entrega.", bullets: ["Filtros: aguardando, pago, em separação, saiu para entrega…", "Busca por ID, nome ou telefone", "Reembolso e cancelamento controlados"], image: imgAdminPedidos },
   { kind: "image", tag: "Marketing", title: "Cupons de desconto", description: "Crie cupons percentuais ou em valor, com mínimo de compra, limite de usos e validade.", bullets: ["3 cupons já configurados", "Controle de uso (12/100, 7/50…)", "Validade e valor mínimo", "Ativação/desativação rápida"], image: imgAdminCupons },
+  { kind: "image", tag: "Afiliadas", title: "Gestão de afiliadas", description: "Cadastro e controle das revendedoras: status, percentual de comissão e indicadores de cada uma.", bullets: ["Cadastro de novas afiliadas", "Comissão e status (Ativa/Inativa)", "Vendas pagas e comissões pagas em destaque", "Acesso direto ao link da afiliada"], image: imgAdminAfiliadas },
+  { kind: "image", tag: "Afiliadas", title: "Vendas das afiliadas", description: "Vendas registradas por todas as afiliadas em um só lugar. A admin confirma, cancela ou exclui.", bullets: ["Filtro por status e por afiliada", "Confirmar ou cancelar venda em 1 clique", "Exportação CSV e PDF", "Comissão calculada por venda"], image: imgAdminAfiliadasVendas },
 
   { kind: "outro", title: "Pronta para encantar 💖", subtitle: "Loja, afiliadas e admin em uma única plataforma — feita sob medida para o Princesa de Laços." },
 ];
@@ -191,7 +203,7 @@ function TagIcon({ kind }: { kind: string }) {
   const map: Record<string, React.ElementType> = {
     "Página inicial": Sparkles, "Catálogo": Package, "Produto": ShoppingBag,
     "Compra": ShoppingCart, "Login": Crown, "Dashboard": LayoutDashboard,
-    "Operação": Package, "Marketing": Tag,
+    "Operação": Package, "Marketing": Tag, "Afiliadas": Crown, "Painel": LayoutDashboard,
   };
   const Icon = map[kind] || Sparkles;
   return <Icon className="h-3 w-3" />;
