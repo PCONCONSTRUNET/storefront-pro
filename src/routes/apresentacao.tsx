@@ -203,7 +203,7 @@ function TagIcon({ kind }: { kind: string }) {
   const map: Record<string, React.ElementType> = {
     "Página inicial": Sparkles, "Catálogo": Package, "Produto": ShoppingBag,
     "Compra": ShoppingCart, "Login": Crown, "Dashboard": LayoutDashboard,
-    "Operação": Package, "Marketing": Tag,
+    "Operação": Package, "Marketing": Tag, "Afiliadas": Crown, "Painel": LayoutDashboard,
   };
   const Icon = map[kind] || Sparkles;
   return <Icon className="h-3 w-3" />;
