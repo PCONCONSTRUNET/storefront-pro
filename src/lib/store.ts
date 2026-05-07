@@ -40,6 +40,7 @@ export type Order = {
   createdAt: string;
   address: string;
   couponCode?: string;
+  notes?: string;
 };
 
 export type Affiliate = {
