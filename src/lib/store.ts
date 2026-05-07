@@ -237,6 +237,9 @@ type AppState = {
   addTransaction: (t: Omit<Transaction, "id" | "createdAt">) => Transaction;
   updateTransaction: (id: string, patch: Partial<Omit<Transaction, "id" | "createdAt">>) => void;
   deleteTransaction: (id: string) => void;
+
+  addReview: (r: Omit<Review, "id" | "createdAt" | "customerId" | "customerName">) => { ok: boolean; message: string };
+  deleteReview: (id: string) => void;
 };
 
 export const useStore = create<AppState>()(
