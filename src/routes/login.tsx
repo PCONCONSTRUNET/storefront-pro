@@ -53,6 +53,9 @@ function Page() {
               Entrar
             </button>
             <p className="text-center text-xs text-muted-foreground pt-0.5">
+              <Link to="/esqueci-senha" className="text-primary font-semibold">Esqueci minha senha</Link>
+            </p>
+            <p className="text-center text-xs text-muted-foreground pt-0.5">
               Não tem conta? <Link to="/cadastro" className="text-primary font-semibold">Cadastre-se</Link>
             </p>
           </form>
