@@ -91,6 +91,7 @@ function Page() {
         isOut: false,
         kind: "comissao",
         affiliateName: aff?.name,
+        affiliateSaleId: s.id,
       });
       if (s.commissionEarned > 0) {
         list.push({
@@ -102,6 +103,7 @@ function Page() {
           isOut: true,
           kind: "comissao",
           affiliateName: aff?.name,
+          affiliateSaleId: s.id,
         });
       }
     });
