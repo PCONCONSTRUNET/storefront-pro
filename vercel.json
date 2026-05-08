@@ -7,6 +7,6 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/", "destination": "/_shell.html" },
-    { "source": "/((?!assets/|_shell|favicon\\.ico|manifest\\.json|icon-512\\.png|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/_shell.html" }
+    { "source": "/((?!api/|assets/|_shell|favicon\\.ico|manifest\\.json|icon-512\\.png|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/_shell.html" }
   ]
 }
