@@ -602,12 +602,45 @@ export const useStore = create<AppState>()(
             }
           });
         } catch { /* ignore */ }
+        // Cloud persistence: order + sales transaction (if paid) + stock + coupon
+        try {
+          const ordRow = {
+            id: order.id, customer_name: order.customerName, customer_email: order.customerEmail,
+            customer_phone: order.customerPhone, delivery_method: order.deliveryMethod,
+            address: order.address || null, notes: order.notes || null,
+            items: order.items as any, subtotal: order.subtotal, discount: order.discount,
+            shipping: order.shipping, total: order.total, payment_method: order.paymentMethod,
+            payment_status: order.status === "pago" ? "paid" : "pending",
+          };
+          import("@/integrations/supabase/client").then(({ supabase }) => {
+            supabase.from("orders").upsert(ordRow as any, { onConflict: "id" }).then(({ error }) => {
+              if (error) console.warn("[cloud:placeOrder]", error);
+            });
+          });
+          if (order.status === "pago") {
+            const tx: Transaction = {
+              id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `tx_${Date.now()}`),
+              kind: "entrada", category: "venda",
+              description: `Pedido ${order.id} — ${order.customerName}`,
+              amount: order.total, date: order.createdAt,
+              productSummary: order.items.map(i => `${i.quantity}x ${i.name}`).join(", "),
+              createdAt: order.createdAt,
+            };
+            set(s => ({ transactions: [tx, ...s.transactions] }));
+            cloud.upsertTransaction(tx);
+          }
+          // sync affected products (stock) and coupon
+          const updated = get();
+          items.forEach(it => { const p = updated.products.find(x => x.id === it.productId); if (p) cloud.upsertProduct(p); });
+          if (coupon) { const c2 = updated.coupons.find(c => c.code === coupon.code); if (c2) cloud.upsertCoupon(c2); }
+        } catch { /* ignore */ }
         return order;
       },
       updateOrderStatus: (id, status) => {
         const order = get().orders.find(o => o.id === id);
         set((s) => ({ orders: s.orders.map(o => o.id === id ? { ...o, status } : o) }));
         if (!order) return;
+        cloud.updateOrderStatus(id, status === "pago" ? "paid" : status);
         const map: Record<string, "pagamento_aprovado" | "pedido_em_separacao" | "pedido_enviado" | "pedido_entregue" | "pedido_cancelado" | null> = {
           pago: "pagamento_aprovado",
           em_separacao: "pedido_em_separacao",
@@ -625,6 +658,20 @@ export const useStore = create<AppState>()(
           } catch { /* ignore */ }
         }
         if (status === "pago") {
+          // record sale transaction once
+          const exists = get().transactions.find(t => t.description.includes(order.id) && t.category === "venda");
+          if (!exists) {
+            const tx: Transaction = {
+              id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `tx_${Date.now()}`),
+              kind: "entrada", category: "venda",
+              description: `Pedido ${order.id} — ${order.customerName}`,
+              amount: order.total, date: new Date().toISOString(),
+              productSummary: order.items.map(i => `${i.quantity}x ${i.name}`).join(", "),
+              createdAt: new Date().toISOString(),
+            };
+            set(s => ({ transactions: [tx, ...s.transactions] }));
+            cloud.upsertTransaction(tx);
+          }
           import("./emails").then(m => m.sendOrderConfirmationEmail({
             email: order.customerEmail, customerName: order.customerName, orderId: order.id,
             items: order.items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
@@ -632,21 +679,27 @@ export const useStore = create<AppState>()(
           })).catch(() => {});
         }
       },
-      deleteOrder: (id) => set((s) => ({ orders: s.orders.filter(o => o.id !== id) })),
+      deleteOrder: (id) => { set((s) => ({ orders: s.orders.filter(o => o.id !== id) })); cloud.deleteOrder(id); },
 
-      upsertProduct: (p) => set((s) => ({
-        products: s.products.find(x => x.id === p.id) ? s.products.map(x => x.id === p.id ? p : x) : [...s.products, p],
-      })),
-      deleteProduct: (id) => set((s) => ({ products: s.products.filter(p => p.id !== id) })),
-      upsertCategory: (c) => set((s) => ({
-        categories: s.categories.find(x => x.id === c.id) ? s.categories.map(x => x.id === c.id ? c : x) : [...s.categories, c],
-      })),
-      deleteCategory: (id) => set((s) => ({ categories: s.categories.filter(c => c.id !== id) })),
-      upsertCoupon: (c) => set((s) => ({
-        coupons: s.coupons.find(x => x.code === c.code) ? s.coupons.map(x => x.code === c.code ? c : x) : [...s.coupons, c],
-      })),
-      deleteCoupon: (code) => set((s) => ({ coupons: s.coupons.filter(c => c.code !== code) })),
-      updateSettings: (s2) => set((s) => ({ settings: { ...s.settings, ...s2 } })),
+      upsertProduct: (p) => {
+        set((s) => ({ products: s.products.find(x => x.id === p.id) ? s.products.map(x => x.id === p.id ? p : x) : [...s.products, p] }));
+        cloud.upsertProduct(p);
+      },
+      deleteProduct: (id) => { set((s) => ({ products: s.products.filter(p => p.id !== id) })); cloud.deleteProduct(id); },
+      upsertCategory: (c) => {
+        set((s) => ({ categories: s.categories.find(x => x.id === c.id) ? s.categories.map(x => x.id === c.id ? c : x) : [...s.categories, c] }));
+        cloud.upsertCategory(c);
+      },
+      deleteCategory: (id) => { set((s) => ({ categories: s.categories.filter(c => c.id !== id) })); cloud.deleteCategory(id); },
+      upsertCoupon: (c) => {
+        set((s) => ({ coupons: s.coupons.find(x => x.code === c.code) ? s.coupons.map(x => x.code === c.code ? c : x) : [...s.coupons, c] }));
+        cloud.upsertCoupon(c);
+      },
+      deleteCoupon: (code) => { set((s) => ({ coupons: s.coupons.filter(c => c.code !== code) })); cloud.deleteCoupon(code); },
+      updateSettings: (s2) => {
+        set((s) => ({ settings: { ...s.settings, ...s2 } }));
+        cloud.upsertSettings(get().settings);
+      },
     }),
     {
       name: "princesa-store-v1",
