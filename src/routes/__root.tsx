@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useStore } from "@/lib/store";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 
 import appCss from "../styles.css?url";
 
@@ -122,5 +123,5 @@ function RootComponent() {
       window.clearInterval(interval);
     };
   }, [refreshSession]);
-  return <Outlet />;
+  return <><Outlet /><PwaInstallPrompt /></>;
 }
