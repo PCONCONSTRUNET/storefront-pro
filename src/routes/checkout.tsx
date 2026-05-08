@@ -20,7 +20,7 @@ const steps = ["Seus dados", "Entrega", "Pagamento", "Revisão"];
 
 function Page() {
   const navigate = useNavigate();
-  const { cart, settings, placeOrder } = useStore();
+  const { cart, settings, placeOrder, products } = useStore();
   const customer = useStore(selectCurrentCustomer);
   const totals = useStore(useShallow(selectCartTotals));
   const [step, setStep] = useState(0);
