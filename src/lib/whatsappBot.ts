@@ -3,6 +3,15 @@
 
 export const WHATSAPP_BOT_BASE_URL = "http://178.105.54.230:3005"; // exibido na UI (VPS Princesa de Laços)
 
+function getBotProxyPath(path: string) {
+  if (typeof window === "undefined") return path;
+  const isLovableHost =
+    window.location.hostname.endsWith(".lovable.app") ||
+    window.location.hostname.endsWith(".lovableproject.com");
+
+  return isLovableHost ? path.replace("/api/bot/", "/api/lovable-bot/") : path;
+}
+
 export type BotStatus = "QR_READY" | "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "UNKNOWN";
 
 export type BotStatusResponse = {
@@ -12,7 +21,7 @@ export type BotStatusResponse = {
 };
 
 export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusResponse> {
-  const res = await fetch(`/api/bot/status`, { method: "GET", signal });
+  const res = await fetch(getBotProxyPath(`/api/bot/status`), { method: "GET", signal });
   if (!res.ok && res.status !== 502) throw new Error(`Status ${res.status}`);
   const data = await res.json();
   if (data.error && !data.status) throw new Error(data.error);
@@ -24,7 +33,7 @@ export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusRes
 }
 
 export async function logoutBot(): Promise<void> {
-  const res = await fetch(`/api/bot/logout`, { method: "POST" });
+  const res = await fetch(getBotProxyPath(`/api/bot/logout`), { method: "POST" });
   if (!res.ok) {
     let msg = `Logout falhou (${res.status})`;
     try { const j = await res.json(); if (j.error) msg = j.error; } catch {}
@@ -35,7 +44,7 @@ export async function logoutBot(): Promise<void> {
 export type SendNotificationPayload = { numero: string; mensagem: string };
 
 export async function sendBotNotification(payload: SendNotificationPayload): Promise<{ ok: boolean; status: number; body?: string }> {
-  const res = await fetch(`/api/bot/notify`, {
+  const res = await fetch(getBotProxyPath(`/api/bot/notify`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

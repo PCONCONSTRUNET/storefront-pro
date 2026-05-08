@@ -43,6 +43,9 @@ import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
+import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
+import { Route as ApiLovableBotNotifyRouteImport } from './routes/api/lovable-bot/notify'
+import { Route as ApiLovableBotLogoutRouteImport } from './routes/api/lovable-bot/logout'
 import { Route as ApiBotStatusRouteImport } from './routes/api/bot/status'
 import { Route as ApiBotNotifyRouteImport } from './routes/api/bot/notify'
 import { Route as ApiBotLogoutRouteImport } from './routes/api/bot/logout'
@@ -217,6 +220,21 @@ const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
   path: '/admin/afiliadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLovableBotStatusRoute = ApiLovableBotStatusRouteImport.update({
+  id: '/api/lovable-bot/status',
+  path: '/api/lovable-bot/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLovableBotNotifyRoute = ApiLovableBotNotifyRouteImport.update({
+  id: '/api/lovable-bot/notify',
+  path: '/api/lovable-bot/notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLovableBotLogoutRoute = ApiLovableBotLogoutRouteImport.update({
+  id: '/api/lovable-bot/logout',
+  path: '/api/lovable-bot/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiBotStatusRoute = ApiBotStatusRouteImport.update({
   id: '/api/bot/status',
   path: '/api/bot/status',
@@ -271,6 +289,9 @@ export interface FileRoutesByFullPath {
   '/api/bot/logout': typeof ApiBotLogoutRoute
   '/api/bot/notify': typeof ApiBotNotifyRoute
   '/api/bot/status': typeof ApiBotStatusRoute
+  '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
+  '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
+  '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -310,6 +331,9 @@ export interface FileRoutesByTo {
   '/api/bot/logout': typeof ApiBotLogoutRoute
   '/api/bot/notify': typeof ApiBotNotifyRoute
   '/api/bot/status': typeof ApiBotStatusRoute
+  '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
+  '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
+  '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -350,6 +374,9 @@ export interface FileRoutesById {
   '/api/bot/logout': typeof ApiBotLogoutRoute
   '/api/bot/notify': typeof ApiBotNotifyRoute
   '/api/bot/status': typeof ApiBotStatusRoute
+  '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
+  '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
+  '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -391,6 +418,9 @@ export interface FileRouteTypes {
     | '/api/bot/logout'
     | '/api/bot/notify'
     | '/api/bot/status'
+    | '/api/lovable-bot/logout'
+    | '/api/lovable-bot/notify'
+    | '/api/lovable-bot/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -430,6 +460,9 @@ export interface FileRouteTypes {
     | '/api/bot/logout'
     | '/api/bot/notify'
     | '/api/bot/status'
+    | '/api/lovable-bot/logout'
+    | '/api/lovable-bot/notify'
+    | '/api/lovable-bot/status'
   id:
     | '__root__'
     | '/'
@@ -469,6 +502,9 @@ export interface FileRouteTypes {
     | '/api/bot/logout'
     | '/api/bot/notify'
     | '/api/bot/status'
+    | '/api/lovable-bot/logout'
+    | '/api/lovable-bot/notify'
+    | '/api/lovable-bot/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -509,6 +545,9 @@ export interface RootRouteChildren {
   ApiBotLogoutRoute: typeof ApiBotLogoutRoute
   ApiBotNotifyRoute: typeof ApiBotNotifyRoute
   ApiBotStatusRoute: typeof ApiBotStatusRoute
+  ApiLovableBotLogoutRoute: typeof ApiLovableBotLogoutRoute
+  ApiLovableBotNotifyRoute: typeof ApiLovableBotNotifyRoute
+  ApiLovableBotStatusRoute: typeof ApiLovableBotStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -751,6 +790,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAfiliadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/lovable-bot/status': {
+      id: '/api/lovable-bot/status'
+      path: '/api/lovable-bot/status'
+      fullPath: '/api/lovable-bot/status'
+      preLoaderRoute: typeof ApiLovableBotStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/lovable-bot/notify': {
+      id: '/api/lovable-bot/notify'
+      path: '/api/lovable-bot/notify'
+      fullPath: '/api/lovable-bot/notify'
+      preLoaderRoute: typeof ApiLovableBotNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/lovable-bot/logout': {
+      id: '/api/lovable-bot/logout'
+      path: '/api/lovable-bot/logout'
+      fullPath: '/api/lovable-bot/logout'
+      preLoaderRoute: typeof ApiLovableBotLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/bot/status': {
       id: '/api/bot/status'
       path: '/api/bot/status'
@@ -813,6 +873,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBotLogoutRoute: ApiBotLogoutRoute,
   ApiBotNotifyRoute: ApiBotNotifyRoute,
   ApiBotStatusRoute: ApiBotStatusRoute,
+  ApiLovableBotLogoutRoute: ApiLovableBotLogoutRoute,
+  ApiLovableBotNotifyRoute: ApiLovableBotNotifyRoute,
+  ApiLovableBotStatusRoute: ApiLovableBotStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

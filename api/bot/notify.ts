@@ -1,15 +1,39 @@
-import { BOT_BASE, BOT_TOKEN, handleOptions, setBotHeaders, type VercelRequest, type VercelResponse } from "../_botProxy";
+const BOT_BASE = "http://178.105.54.230:3005";
+const BOT_TOKEN = "princesa_secret_123";
+
+type VercelRequest = { method?: string; headers: { origin?: string }; body?: unknown };
+type VercelResponse = {
+  setHeader: (name: string, value: string) => void;
+  status: (code: number) => VercelResponse;
+  json: (body: unknown) => void;
+  end: () => void;
+};
+
+function setHeaders(req: VercelRequest, res: VercelResponse) {
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  res.setHeader("Vary", "Origin");
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (handleOptions(req, res)) return;
-  setBotHeaders(req, res);
+  setHeaders(req, res);
+  if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
   if (req.method !== "POST") {
     res.status(405).json({ ok: false, error: "Método não permitido" });
     return;
   }
 
-  const payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body ?? {};
+  let payload: any = {};
+  try {
+    payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body ?? {};
+  } catch {
+    res.status(400).json({ ok: false, error: "JSON inválido" });
+    return;
+  }
   const numero = String(payload.numero ?? "").replace(/\D/g, "");
   const mensagem = String(payload.mensagem ?? "").trim();
 
