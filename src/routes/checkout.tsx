@@ -17,7 +17,7 @@ export const Route = createFileRoute("/checkout")({
   component: Page,
 });
 
-const steps = ["Seus dados", "Entrega", "Pagamento", "Revisão"];
+const steps = ["Seus dados", "Pagamento", "Revisão"];
 
 function Page() {
   const navigate = useNavigate();
