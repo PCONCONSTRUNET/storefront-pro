@@ -8,6 +8,7 @@ import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode, Truck, Store }
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
+import mpIcon from "@/assets/mercadopago-icon.png";
 
 
 export const Route = createFileRoute("/checkout")({
