@@ -263,6 +263,20 @@ function Page() {
                       </button>
                     </div>
                   )}
+                  {r.affiliateSaleId && (
+                    <button
+                      onClick={() => {
+                        if (confirm("Excluir esta venda de afiliada? A comissão correspondente também será removida.")) {
+                          deleteAffiliateSale(r.affiliateSaleId!);
+                          toast.success("Venda removida");
+                        }
+                      }}
+                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                      title="Excluir venda de afiliada"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
               </li>
             ))}
