@@ -26,9 +26,9 @@ export const corsHeaders = {
 
 const LOGO_URL = Deno.env.get("EMAIL_LOGO_URL") ?? "https://amostrasistema.lovable.app/email-logo.png";
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://amostrasistema.lovable.app";
-const WHATSAPP_NUMBER = Deno.env.get("STORE_WHATSAPP") ?? "5511999999999"; // formato wa.me
-const WHATSAPP_DISPLAY = Deno.env.get("STORE_WHATSAPP_DISPLAY") ?? "(11) 99999-9999";
-const INSTAGRAM_USER = Deno.env.get("STORE_INSTAGRAM") ?? "princesadelacos";
+const WHATSAPP_NUMBER = Deno.env.get("STORE_WHATSAPP") ?? "554888644474"; // formato wa.me
+const WHATSAPP_DISPLAY = Deno.env.get("STORE_WHATSAPP_DISPLAY") ?? "(48) 8864-4474";
+const INSTAGRAM_USER = Deno.env.get("STORE_INSTAGRAM") ?? "princesadelacos58";
 const FACEBOOK_USER = Deno.env.get("STORE_FACEBOOK") ?? "princesadelacos";
 const STORE_EMAIL = Deno.env.get("STORE_EMAIL") ?? "princesadelacos@proton.me";
 
