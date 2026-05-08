@@ -1,5 +1,17 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouter, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
+
+const PWA_ALLOWED_ROUTES = ["/afiliada/login", "/afiliada", "/admin"];
+const PWA_LAUNCH_KEY = "pwa_launch_route";
+
+function isStandaloneMode() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+}
+
+function matchAllowedRoute(path: string): string | null {
+  return PWA_ALLOWED_ROUTES.find(r => path === r || path.startsWith(r + "/")) ?? null;
+}
 import { Toaster } from "@/components/ui/sonner";
 import { useStore } from "@/lib/store";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
@@ -107,6 +119,32 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const refreshSession = useStore(s => s.refreshSession);
+  const router = useRouter();
+  const location = useLocation();
+
+  // Track allowed routes for PWA launch memory
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const matched = matchAllowedRoute(location.pathname);
+    if (matched) {
+      try { localStorage.setItem(PWA_LAUNCH_KEY, location.pathname); } catch {}
+    }
+  }, [location.pathname]);
+
+  // On PWA launch at "/", redirect to last allowed route if any
+  useEffect(() => {
+    if (!isStandaloneMode()) return;
+    if (location.pathname !== "/") return;
+    try {
+      const saved = localStorage.getItem(PWA_LAUNCH_KEY);
+      if (saved && matchAllowedRoute(saved)) {
+        router.navigate({ to: saved, replace: true });
+      }
+    } catch {}
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     // Sliding session: any user activity refreshes the active sessions.
     const tick = () => {
