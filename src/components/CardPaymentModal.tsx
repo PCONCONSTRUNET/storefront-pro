@@ -53,6 +53,7 @@ type Props = {
 
 export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const total = payload.totals.total;
+  const SANDBOX = !MP_PUBLIC_KEY;
   const [mp, setMp] = useState<any>(null);
   const [sdkErr, setSdkErr] = useState<string | null>(null);
 
@@ -73,14 +74,13 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
   const lastBin = useRef<string>("");
 
-  // Load SDK
+  // Load SDK (somente fora do sandbox)
   useEffect(() => {
-    if (!open) return;
-    if (!MP_PUBLIC_KEY) { setSdkErr("VITE_MERCADOPAGO_PUBLIC_KEY não configurada."); return; }
+    if (!open || SANDBOX) return;
     loadMpSdk()
-      .then(() => setMp(new window.MercadoPago!(MP_PUBLIC_KEY, { locale: "pt-BR" })))
+      .then(() => setMp(new window.MercadoPago!(MP_PUBLIC_KEY!, { locale: "pt-BR" })))
       .catch((e) => setSdkErr(e.message));
-  }, [open]);
+  }, [open, SANDBOX]);
 
   // Detect brand + installments by BIN
   useEffect(() => {
