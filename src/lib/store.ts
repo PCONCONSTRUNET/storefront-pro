@@ -382,12 +382,13 @@ export const useStore = create<AppState>()(
       registerCustomer: (c) => {
         const exists = get().customers.find((x) => x.email === c.email);
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
-        const newC: Customer = { ...c, id: `c_${Date.now()}`, createdAt: new Date().toISOString() };
+        const newC: Customer = { ...c, id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `c_${Date.now()}`), createdAt: new Date().toISOString() };
         set((s) => ({
           customers: [...s.customers, newC],
           currentCustomerId: newC.id,
           sessions: { ...s.sessions, customer: makeSession(newC.id) },
         }));
+        cloud.upsertCustomer(newC);
         import("./emails").then(m => m.sendWelcomeEmail({ email: newC.email, name: newC.name })).catch(() => {});
         return { ok: true, message: "Cadastro realizado!" };
       },
@@ -402,17 +403,23 @@ export const useStore = create<AppState>()(
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
         set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, ...data } : c) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
         return { ok: true, message: "Dados atualizados" };
       },
       addAddress: (address) => {
         const id = get().currentCustomerId;
         if (!id || !address.trim()) return;
         set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, addresses: [...(c.addresses || []), address.trim()] } : c) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
       },
       removeAddress: (index) => {
         const id = get().currentCustomerId;
         if (!id) return;
         set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, addresses: (c.addresses || []).filter((_, i) => i !== index) } : c) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
       },
       toggleFavorite: (productId) => {
         const id = get().currentCustomerId;
@@ -422,6 +429,8 @@ export const useStore = create<AppState>()(
           const favs = c.favorites || [];
           return { ...c, favorites: favs.includes(productId) ? favs.filter(p => p !== productId) : [...favs, productId] };
         }) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
       },
       loginAdmin: (email, password) => {
         const AUTHORIZED_ADMINS: Record<string, string> = {
