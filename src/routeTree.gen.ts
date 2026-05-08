@@ -43,6 +43,7 @@ import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
+import { Route as CheckoutPixIdRouteImport } from './routes/checkout.pix.$id'
 import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
 import { Route as ApiLovableBotNotifyRouteImport } from './routes/api/lovable-bot/notify'
 import { Route as ApiLovableBotLogoutRouteImport } from './routes/api/lovable-bot/logout'
@@ -220,6 +221,11 @@ const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
   path: '/admin/afiliadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutPixIdRoute = CheckoutPixIdRouteImport.update({
+  id: '/pix/$id',
+  path: '/pix/$id',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const ApiLovableBotStatusRoute = ApiLovableBotStatusRouteImport.update({
   id: '/api/lovable-bot/status',
   path: '/api/lovable-bot/status',
@@ -258,7 +264,7 @@ export interface FileRoutesByFullPath {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
@@ -292,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
   '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
   '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
+  '/checkout/pix/$id': typeof CheckoutPixIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -300,7 +307,7 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
   '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
   '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
+  '/checkout/pix/$id': typeof CheckoutPixIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -343,7 +351,7 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
@@ -377,6 +385,7 @@ export interface FileRoutesById {
   '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
   '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
   '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
+  '/checkout/pix/$id': typeof CheckoutPixIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -421,6 +430,7 @@ export interface FileRouteTypes {
     | '/api/lovable-bot/logout'
     | '/api/lovable-bot/notify'
     | '/api/lovable-bot/status'
+    | '/checkout/pix/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/api/lovable-bot/logout'
     | '/api/lovable-bot/notify'
     | '/api/lovable-bot/status'
+    | '/checkout/pix/$id'
   id:
     | '__root__'
     | '/'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/api/lovable-bot/logout'
     | '/api/lovable-bot/notify'
     | '/api/lovable-bot/status'
+    | '/checkout/pix/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -514,7 +526,7 @@ export interface RootRouteChildren {
   CadastroRoute: typeof CadastroRoute
   CarrinhoRoute: typeof CarrinhoRoute
   CategoriasRoute: typeof CategoriasRoute
-  CheckoutRoute: typeof CheckoutRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   PedidosRoute: typeof PedidosRoute
@@ -790,6 +802,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAfiliadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/pix/$id': {
+      id: '/checkout/pix/$id'
+      path: '/pix/$id'
+      fullPath: '/checkout/pix/$id'
+      preLoaderRoute: typeof CheckoutPixIdRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/api/lovable-bot/status': {
       id: '/api/lovable-bot/status'
       path: '/api/lovable-bot/status'
@@ -835,6 +854,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CheckoutRouteChildren {
+  CheckoutPixIdRoute: typeof CheckoutPixIdRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutPixIdRoute: CheckoutPixIdRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApresentacaoRoute: ApresentacaoRoute,
@@ -842,7 +873,7 @@ const rootRouteChildren: RootRouteChildren = {
   CadastroRoute: CadastroRoute,
   CarrinhoRoute: CarrinhoRoute,
   CategoriasRoute: CategoriasRoute,
-  CheckoutRoute: CheckoutRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   PedidosRoute: PedidosRoute,

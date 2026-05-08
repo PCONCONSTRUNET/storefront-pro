@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.send-order-confirmation-email]
 verify_jwt = false
+
+[functions.mp-create-pix]
+verify_jwt = false
+
+[functions.mp-webhook]
+verify_jwt = false
