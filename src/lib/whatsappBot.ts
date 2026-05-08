@@ -51,7 +51,21 @@ export async function sendBotNotification(payload: SendNotificationPayload): Pro
   });
   try {
     const j = await res.json();
-    return { ok: !!j.ok, status: j.status ?? res.status, body: j.body ?? j.error };
+    const rawBody: string | undefined = j.body ?? j.error;
+    // O bot da VPS pode retornar HTTP 200 com aviso (ex.: "Mensagem de teste ignorada").
+    // Nesse caso a mensagem NÃO é entregue — tratamos como falha pra UI.
+    let ok = !!j.ok;
+    let body = rawBody;
+    if (ok && typeof rawBody === "string") {
+      try {
+        const inner = JSON.parse(rawBody);
+        if (inner && typeof inner === "object" && typeof inner.aviso === "string") {
+          ok = false;
+          body = `Bot ignorou: ${inner.aviso}`;
+        }
+      } catch { /* body não é JSON, ignora */ }
+    }
+    return { ok, status: j.status ?? res.status, body };
   } catch {
     return { ok: false, status: res.status };
   }
