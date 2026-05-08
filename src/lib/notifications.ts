@@ -86,6 +86,9 @@ const DEFAULT_TEMPLATES: NotificationTemplate[] = [
   { id: "t_afiliada_nova_venda_admin", category: "afiliada_nova_venda", audience: "admin",
     title: "💼 Venda de afiliada", body: "{afiliada} registrou uma venda de {total} para {cliente}.",
     icon: "💼", enabled: true, sendPush: true, sendEmail: false, sendInApp: true },
+  { id: "t_pagamento_aprovado_admin", category: "pagamento_aprovado", audience: "admin",
+    title: "Pagamento aprovado ✨", body: "Pagamento do pedido #{pedido} de {cliente} ({total}) foi confirmado.",
+    icon: "💳", enabled: true, sendPush: true, sendEmail: false, sendInApp: true },
 
   // Afiliada
   { id: "t_afiliada_venda_confirmada", category: "afiliada_venda_confirmada", audience: "afiliada",
@@ -135,35 +138,39 @@ export const useNotifications = create<NotificationState>()(
       resetTemplates: () => set({ templates: DEFAULT_TEMPLATES }),
 
       trigger: (category, vars, opts) => {
-        const tpl = get().templates.find(t => t.category === category && t.enabled);
-        if (!tpl) return null;
-        const channels: ("push" | "email" | "inapp")[] = [];
-        if (tpl.sendPush) channels.push("push");
-        if (tpl.sendEmail) channels.push("email");
-        if (tpl.sendInApp) channels.push("inapp");
+        const tpls = get().templates.filter(t => t.category === category && t.enabled
+          && (opts?.audience ? t.audience === opts.audience : true));
+        if (tpls.length === 0) return null;
+        let firstLog: NotificationLog | null = null;
+        for (const tpl of tpls) {
+          const channels: ("push" | "email" | "inapp")[] = [];
+          if (tpl.sendPush) channels.push("push");
+          if (tpl.sendEmail) channels.push("email");
+          if (tpl.sendInApp) channels.push("inapp");
 
-        const log: NotificationLog = {
-          id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-          category,
-          title: applyVars(tpl.title, vars),
-          body: applyVars(tpl.body, vars),
-          audience: opts?.audience ?? tpl.audience,
-          recipientId: opts?.recipientId,
-          channels,
-          sentAt: new Date().toISOString(),
-          read: false,
-          data: vars,
-        };
-        set(s => ({ logs: [log, ...s.logs].slice(0, 200) }));
+          const log: NotificationLog = {
+            id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            category,
+            title: applyVars(tpl.title, vars),
+            body: applyVars(tpl.body, vars),
+            audience: tpl.audience,
+            recipientId: opts?.recipientId,
+            channels,
+            sentAt: new Date().toISOString(),
+            read: false,
+            data: vars,
+          };
+          set(s => ({ logs: [log, ...s.logs].slice(0, 200) }));
 
-        // Native browser notification (best-effort, only if push enabled & permitted)
-        if (tpl.sendPush && typeof window !== "undefined" && "Notification" in window
-            && Notification.permission === "granted") {
-          try {
-            new Notification(log.title, { body: log.body, icon: "/icon-512.png", tag: category });
-          } catch { /* ignore */ }
+          if (tpl.sendPush && typeof window !== "undefined" && "Notification" in window
+              && Notification.permission === "granted") {
+            try {
+              new Notification(log.title, { body: log.body, icon: "/icon-512.png", tag: `${category}_${tpl.audience}` });
+            } catch { /* ignore */ }
+          }
+          if (!firstLog) firstLog = log;
         }
-        return log;
+        return firstLog;
       },
 
       sendManual: (data) => {
@@ -201,7 +208,7 @@ export const useNotifications = create<NotificationState>()(
       },
     }),
     {
-      name: "princesa-notifications-v1",
+      name: "princesa-notifications-v2",
       partialize: (s) => ({ templates: s.templates, logs: s.logs }),
     }
   )
