@@ -18,8 +18,8 @@ Deno.serve(async (req) => {
       </tr>`).join("");
 
     const html = baseLayout(
-      "Pagamento aprovado! 🎉",
-      `<p>Oi${customerName ? ` ${customerName}` : ""}, recebemos seu pagamento e seu pedido já está em preparação!</p>
+      "Pagamento e pedido aprovados! 🎉",
+      `<p>Oi${customerName ? ` ${customerName}` : ""}, recebemos seu pagamento e seu pedido já está confirmado! 💖</p>
        <p style="margin:16px 0;color:#555"><strong>Pedido:</strong> #${orderId}${paymentMethod ? `<br><strong>Pagamento:</strong> ${paymentMethod}` : ""}</p>
        <table style="width:100%;border-collapse:collapse;margin-top:8px">
          ${rows}
@@ -29,12 +29,12 @@ Deno.serve(async (req) => {
          </tr>
        </table>
        <div style="margin-top:24px;padding:14px 16px;background:#fff5f8;border:1px solid #fce7f3;border-radius:12px">
-         <p style="margin:0;font-size:14px;color:#be185d;font-weight:600">📍 Retirada no ateliê</p>
-         <p style="margin:6px 0 0;font-size:13px;color:#555">Avisaremos pelo WhatsApp assim que seu pedido estiver pronto para retirada. 💖</p>
+         <p style="margin:0;font-size:14px;color:#be185d;font-weight:600">📍 Aguardando retirada no ateliê</p>
+         <p style="margin:6px 0 0;font-size:13px;color:#555">Como nossos produtos já são prontos, seu pedido está disponível para retirada no ateliê. Te avisaremos pelo WhatsApp para combinar o melhor horário. ✨</p>
        </div>
        <p style="margin-top:18px">Obrigada pela compra!</p>`
     );
-    await sendEmail({ to: email, subject: `Pagamento aprovado — Pedido #${orderId}`, html });
+    await sendEmail({ to: email, subject: `Pedido aprovado #${orderId} — pronto para retirada`, html });
     return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e instanceof Error ? e.message : e) }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
