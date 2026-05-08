@@ -25,7 +25,7 @@ function Page() {
 
   // Test sender
   const [testNumber, setTestNumber] = useState("");
-  const [testMessage, setTestMessage] = useState("Olá! Esta é uma mensagem de teste da Princesa de Laços 💖");
+  const [testMessage, setTestMessage] = useState("Olá! Mensagem de validação da Princesa de Laços 💖");
   const [sending, setSending] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
