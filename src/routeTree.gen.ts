@@ -43,6 +43,9 @@ import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
+import { Route as ApiBotStatusRouteImport } from './routes/api/bot/status'
+import { Route as ApiBotNotifyRouteImport } from './routes/api/bot/notify'
+import { Route as ApiBotLogoutRouteImport } from './routes/api/bot/logout'
 
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
@@ -214,6 +217,21 @@ const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
   path: '/admin/afiliadas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBotStatusRoute = ApiBotStatusRouteImport.update({
+  id: '/api/bot/status',
+  path: '/api/bot/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotNotifyRoute = ApiBotNotifyRouteImport.update({
+  id: '/api/bot/notify',
+  path: '/api/bot/notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotLogoutRoute = ApiBotLogoutRouteImport.update({
+  id: '/api/bot/logout',
+  path: '/api/bot/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -250,6 +268,9 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
   '/perfil/': typeof PerfilIndexRoute
+  '/api/bot/logout': typeof ApiBotLogoutRoute
+  '/api/bot/notify': typeof ApiBotNotifyRoute
+  '/api/bot/status': typeof ApiBotStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -286,6 +307,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/afiliada': typeof AfiliadaIndexRoute
   '/perfil': typeof PerfilIndexRoute
+  '/api/bot/logout': typeof ApiBotLogoutRoute
+  '/api/bot/notify': typeof ApiBotNotifyRoute
+  '/api/bot/status': typeof ApiBotStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -323,6 +347,9 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
   '/perfil/': typeof PerfilIndexRoute
+  '/api/bot/logout': typeof ApiBotLogoutRoute
+  '/api/bot/notify': typeof ApiBotNotifyRoute
+  '/api/bot/status': typeof ApiBotStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -361,6 +388,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/afiliada/'
     | '/perfil/'
+    | '/api/bot/logout'
+    | '/api/bot/notify'
+    | '/api/bot/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -397,6 +427,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/afiliada'
     | '/perfil'
+    | '/api/bot/logout'
+    | '/api/bot/notify'
+    | '/api/bot/status'
   id:
     | '__root__'
     | '/'
@@ -433,6 +466,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/afiliada/'
     | '/perfil/'
+    | '/api/bot/logout'
+    | '/api/bot/notify'
+    | '/api/bot/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -470,6 +506,9 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AfiliadaIndexRoute: typeof AfiliadaIndexRoute
   PerfilIndexRoute: typeof PerfilIndexRoute
+  ApiBotLogoutRoute: typeof ApiBotLogoutRoute
+  ApiBotNotifyRoute: typeof ApiBotNotifyRoute
+  ApiBotStatusRoute: typeof ApiBotStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -712,6 +751,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAfiliadasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bot/status': {
+      id: '/api/bot/status'
+      path: '/api/bot/status'
+      fullPath: '/api/bot/status'
+      preLoaderRoute: typeof ApiBotStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot/notify': {
+      id: '/api/bot/notify'
+      path: '/api/bot/notify'
+      fullPath: '/api/bot/notify'
+      preLoaderRoute: typeof ApiBotNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot/logout': {
+      id: '/api/bot/logout'
+      path: '/api/bot/logout'
+      fullPath: '/api/bot/logout'
+      preLoaderRoute: typeof ApiBotLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -750,6 +810,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AfiliadaIndexRoute: AfiliadaIndexRoute,
   PerfilIndexRoute: PerfilIndexRoute,
+  ApiBotLogoutRoute: ApiBotLogoutRoute,
+  ApiBotNotifyRoute: ApiBotNotifyRoute,
+  ApiBotStatusRoute: ApiBotStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

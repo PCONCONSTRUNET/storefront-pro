@@ -1,25 +1,21 @@
-// Cliente da API do bot WhatsApp "Princesa de Laços"
-// VPS: 167.250.155.178:3005
+// Cliente do bot WhatsApp "Princesa de Laços"
+// Chama proxy server-side (/api/bot/*) para evitar Mixed Content (HTTPS->HTTP).
 
-export const WHATSAPP_BOT_BASE_URL = "http://167.250.155.178:3005";
-export const WHATSAPP_BOT_TOKEN = "princesa_secret_123";
+export const WHATSAPP_BOT_BASE_URL = "http://167.250.155.178:3005"; // exibido na UI
 
 export type BotStatus = "QR_READY" | "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "UNKNOWN";
 
 export type BotStatusResponse = {
   status: BotStatus;
-  qrcode?: string; // base64 (data:image/png;base64,... ou apenas base64)
+  qrcode?: string;
   message?: string;
 };
 
 export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusResponse> {
-  const res = await fetch(`${WHATSAPP_BOT_BASE_URL}/api/status`, {
-    method: "GET",
-    signal,
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) throw new Error(`Status ${res.status}`);
+  const res = await fetch(`/api/bot/status`, { method: "GET", signal });
+  if (!res.ok && res.status !== 502) throw new Error(`Status ${res.status}`);
   const data = await res.json();
+  if (data.error && !data.status) throw new Error(data.error);
   return {
     status: (data.status ?? "UNKNOWN") as BotStatus,
     qrcode: data.qrcode ?? data.qr ?? undefined,
@@ -28,31 +24,31 @@ export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusRes
 }
 
 export async function logoutBot(): Promise<void> {
-  const res = await fetch(`${WHATSAPP_BOT_BASE_URL}/api/logout`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: WHATSAPP_BOT_TOKEN }),
-  });
-  if (!res.ok) throw new Error(`Logout falhou (${res.status})`);
+  const res = await fetch(`/api/bot/logout`, { method: "POST" });
+  if (!res.ok) {
+    let msg = `Logout falhou (${res.status})`;
+    try { const j = await res.json(); if (j.error) msg = j.error; } catch {}
+    throw new Error(msg);
+  }
 }
 
-export type SendNotificationPayload = {
-  numero: string;
-  mensagem: string;
-};
+export type SendNotificationPayload = { numero: string; mensagem: string };
 
 export async function sendBotNotification(payload: SendNotificationPayload): Promise<{ ok: boolean; status: number; body?: string }> {
-  const res = await fetch(`${WHATSAPP_BOT_BASE_URL}/webhook/notificacao`, {
+  const res = await fetch(`/api/bot/notify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...payload, token: WHATSAPP_BOT_TOKEN }),
+    body: JSON.stringify(payload),
   });
-  let body: string | undefined;
-  try { body = await res.text(); } catch {}
-  return { ok: res.ok, status: res.status, body };
+  try {
+    const j = await res.json();
+    return { ok: !!j.ok, status: j.status ?? res.status, body: j.body ?? j.error };
+  } catch {
+    return { ok: false, status: res.status };
+  }
 }
 
-// Log simples em memória + localStorage
+// Histórico em memória + localStorage
 export type BotNotificationLog = {
   id: string;
   numero: string;
