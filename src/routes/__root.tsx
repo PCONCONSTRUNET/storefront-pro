@@ -127,12 +127,24 @@ function RootComponent() {
   const router = useRouter();
   const location = useLocation();
 
-  // Track allowed routes for PWA launch memory
+  // Track allowed routes for PWA launch memory + swap manifest dynamically
+  // so installing from /afiliada or /admin pins the start_url to that area.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const matched = matchAllowedRoute(location.pathname);
+    const path = location.pathname;
+    const matched = matchAllowedRoute(path);
     if (matched) {
-      try { localStorage.setItem(PWA_LAUNCH_KEY, location.pathname); } catch {}
+      try { localStorage.setItem(PWA_LAUNCH_KEY, path); } catch {}
+    }
+
+    // Swap <link rel="manifest"> based on current area
+    let manifestHref = "/manifest.json";
+    if (path === "/admin" || path.startsWith("/admin/")) manifestHref = "/manifest-admin.json";
+    else if (path === "/afiliada" || path.startsWith("/afiliada/")) manifestHref = "/manifest-afiliada.json";
+
+    const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    if (link && link.getAttribute("href") !== manifestHref) {
+      link.setAttribute("href", manifestHref);
     }
   }, [location.pathname]);
 
