@@ -548,7 +548,7 @@ export const useStore = create<AppState>()(
         const shipping = 0;
         const total = Math.max(0, subtotal - discount) + shipping;
         const order: Order = {
-          id: `PED${Date.now().toString().slice(-6)}`,
+          id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `PED${Date.now().toString().slice(-6)}`),
           customerId: state.currentCustomerId || "guest",
           customerName: data.customerName,
           customerEmail: data.customerEmail,
