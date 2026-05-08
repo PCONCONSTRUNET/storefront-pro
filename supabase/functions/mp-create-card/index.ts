@@ -1,6 +1,7 @@
 // Cria um pagamento com Cartão (token gerado no front via SDK MP) e salva o pedido.
 // POST /functions/v1/mp-create-card
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { notifyOrderApproved } from "../_shared/notify-approval.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +20,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  if (!MP_TOKEN) return json({ error: "MERCADOPAGO_ACCESS_TOKEN não configurado" }, 500);
+  const SANDBOX = !MP_TOKEN;
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
@@ -33,7 +34,7 @@ Deno.serve(async (req) => {
   if (!customer.name || !customer.email || !customer.phone) {
     return json({ error: "Dados do cliente incompletos" }, 400);
   }
-  if (!card.token || !card.payment_method_id) {
+  if (!SANDBOX && (!card.token || !card.payment_method_id)) {
     return json({ error: "Dados do cartão incompletos" }, 400);
   }
   if (total <= 0) return json({ error: "Total inválido" }, 400);
@@ -68,6 +69,36 @@ Deno.serve(async (req) => {
   if (insErr || !order) {
     console.error("[mp-create-card] insert order:", insErr);
     return json({ error: "Falha ao criar pedido" }, 500);
+  }
+
+  // Sandbox: aprova automaticamente e dispara notificações
+  if (SANDBOX) {
+    const sandboxId = `SANDBOX-${order.id.slice(0, 8)}-${Date.now()}`;
+    await supabase.from("orders").update({
+      mp_payment_id: sandboxId,
+      payment_status: "approved",
+      paid_at: new Date().toISOString(),
+    }).eq("id", order.id);
+
+    await supabase.from("payment_events").insert({
+      mp_event_id: `sandbox-${order.id}-${Date.now()}`,
+      mp_payment_id: sandboxId,
+      order_id: order.id,
+      event_type: "approved",
+      raw_payload: { simulated: true, card: { last4: "0000" } },
+    });
+
+    await notifyOrderApproved(supabase, { ...order, payment_status: "approved" });
+
+    return json({
+      order_id: order.id,
+      mp_payment_id: sandboxId,
+      status: "approved",
+      mp_status: "approved",
+      status_detail: "sandbox_simulated",
+      total,
+      sandbox: true,
+    });
   }
 
   const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`;

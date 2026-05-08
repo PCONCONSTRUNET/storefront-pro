@@ -10,7 +10,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204 });
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  if (!MP_TOKEN) return new Response("config", { status: 500 });
+  if (!MP_TOKEN) {
+    console.warn("[mp-webhook] sem MERCADOPAGO_ACCESS_TOKEN — ignorando (modo sandbox)");
+    return new Response("sandbox", { status: 200 });
+  }
 
   // MP envia ?type=payment&data.id=XXX (e/ou body com {type, data:{id}})
   const url = new URL(req.url);

@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  if (!MP_TOKEN) return json({ error: "MERCADOPAGO_ACCESS_TOKEN não configurado" }, 500);
+  const SANDBOX = !MP_TOKEN;
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
@@ -65,6 +65,29 @@ Deno.serve(async (req) => {
   if (insErr || !order) {
     console.error("[mp-create-pix] insert order:", insErr);
     return json({ error: "Falha ao criar pedido" }, 500);
+  }
+
+  // 2) Sandbox: gera QR fake e retorna sem chamar MP
+  if (SANDBOX) {
+    const sandboxId = `SANDBOX-${order.id.slice(0, 8)}-${Date.now()}`;
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    // Pequeno PNG 1x1 transparente em base64 (placeholder)
+    const fakeQr = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+    await supabase.from("orders").update({
+      mp_payment_id: sandboxId,
+      pix_qr_code: "SANDBOX_PIX_CODE_TESTE",
+      pix_qr_code_base64: fakeQr,
+      pix_expires_at: expiresAt,
+    }).eq("id", order.id);
+    return json({
+      order_id: order.id,
+      mp_payment_id: sandboxId,
+      qr_code: "SANDBOX_PIX_CODE_TESTE",
+      qr_code_base64: fakeQr,
+      expires_at: expiresAt,
+      total,
+      sandbox: true,
+    });
   }
 
   // 2) Chama Mercado Pago

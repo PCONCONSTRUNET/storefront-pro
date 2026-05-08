@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { StoreLayout } from "@/components/StoreLayout";
-import { fetchOrder, type OrderRow } from "@/lib/mercadopago";
+import { fetchOrder, isSandboxOrder, simulateApprove, type OrderRow } from "@/lib/mercadopago";
 import { brl } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, Copy, Loader2, QrCode } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Copy, FlaskConical, Loader2, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
 
@@ -17,6 +17,22 @@ function PixPage() {
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [simulating, setSimulating] = useState(false);
+
+  const sandbox = isSandboxOrder(order);
+
+  const handleSimulate = async () => {
+    if (!order) return;
+    setSimulating(true);
+    try {
+      await simulateApprove(order.id);
+      toast.success("Pagamento simulado! Aguardando confirmação...");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSimulating(false);
+    }
+  };
 
   // Polling do status a cada 4s até aprovar/expirar
   useEffect(() => {
@@ -87,6 +103,24 @@ function PixPage() {
           </div>
         ) : (
           <>
+            {sandbox && (
+              <div className="mb-3 rounded-2xl border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-4">
+                <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-bold text-sm">
+                  <FlaskConical className="h-4 w-4" /> MODO SANDBOX (TESTE)
+                </div>
+                <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">
+                  Mercado Pago não configurado. Clique abaixo para simular a aprovação e testar as notificações por WhatsApp e e-mail.
+                </p>
+                <button
+                  onClick={handleSimulate}
+                  disabled={simulating}
+                  className="mt-3 w-full h-11 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {simulating ? <><Loader2 className="h-4 w-4 animate-spin" /> Simulando...</> : <><CheckCircle2 className="h-4 w-4" /> Simular pagamento aprovado</>}
+                </button>
+              </div>
+            )}
+
             <div className="bg-gradient-to-br from-primary to-rose text-primary-foreground rounded-2xl p-5 shadow-soft">
               <div className="flex items-center gap-2"><QrCode className="h-5 w-5" /><span className="font-semibold">Pague com Pix</span></div>
               <p className="text-sm opacity-90 mt-1">Escaneie o QR Code ou copie o código abaixo. A confirmação é automática.</p>

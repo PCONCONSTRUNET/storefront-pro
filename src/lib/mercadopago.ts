@@ -73,3 +73,14 @@ export async function fetchOrder(id: string): Promise<OrderRow | null> {
   if (error) throw error;
   return data as OrderRow | null;
 }
+
+export async function simulateApprove(orderId: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke("mp-simulate-approve", {
+    body: { order_id: orderId },
+  });
+  if (error) throw new Error(error.message || "Falha ao simular aprovação");
+  if ((data as any)?.error) throw new Error((data as any).error);
+}
+
+export const isSandboxOrder = (o: Pick<OrderRow, "pix_qr_code"> | null) =>
+  !!o && o.pix_qr_code === "SANDBOX_PIX_CODE_TESTE";

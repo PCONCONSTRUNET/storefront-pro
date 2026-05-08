@@ -53,6 +53,7 @@ type Props = {
 
 export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const total = payload.totals.total;
+  const SANDBOX = !MP_PUBLIC_KEY;
   const [mp, setMp] = useState<any>(null);
   const [sdkErr, setSdkErr] = useState<string | null>(null);
 
@@ -73,14 +74,13 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
   const lastBin = useRef<string>("");
 
-  // Load SDK
+  // Load SDK (somente fora do sandbox)
   useEffect(() => {
-    if (!open) return;
-    if (!MP_PUBLIC_KEY) { setSdkErr("VITE_MERCADOPAGO_PUBLIC_KEY não configurada."); return; }
+    if (!open || SANDBOX) return;
     loadMpSdk()
-      .then(() => setMp(new window.MercadoPago!(MP_PUBLIC_KEY, { locale: "pt-BR" })))
+      .then(() => setMp(new window.MercadoPago!(MP_PUBLIC_KEY!, { locale: "pt-BR" })))
       .catch((e) => setSdkErr(e.message));
-  }, [open]);
+  }, [open, SANDBOX]);
 
   // Detect brand + installments by BIN
   useEffect(() => {
@@ -118,24 +118,38 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   }, [card.number, mp, total]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canSubmit = useMemo(() => {
-    return (
-      mp &&
-      pmId &&
+    const baseFilled =
       onlyDigits(card.number).length >= 13 &&
       card.name.trim().length >= 2 &&
       onlyDigits(card.exp).length === 4 &&
       onlyDigits(card.cvv).length >= 3 &&
-      onlyDigits(card.doc).length === 11 &&
-      !submitting
-    );
-  }, [mp, pmId, card, submitting]);
+      onlyDigits(card.doc).length === 11;
+    if (SANDBOX) return baseFilled && !submitting;
+    return mp && pmId && baseFilled && !submitting;
+  }, [SANDBOX, mp, pmId, card, submitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit || !mp) return;
+    if (!canSubmit) return;
     setSubmitting(true);
     setErrorMsg(null);
     try {
+      // SANDBOX: pula geração de token, manda direto pro backend que aprova auto
+      if (SANDBOX) {
+        const result = await createCardPayment({
+          ...payload,
+          card: {
+            token: "SANDBOX_TOKEN",
+            payment_method_id: "sandbox",
+            installments: card.installments,
+            payer: { identification: { type: "CPF", number: onlyDigits(card.doc) } },
+          },
+        });
+        toast.success("Pagamento simulado com sucesso! 🎉");
+        onSuccess(result);
+        return;
+      }
+
       const [mm, yy] = card.exp.split("/");
       const tokenRes = await mp.createCardToken({
         cardNumber: onlyDigits(card.number),
@@ -196,8 +210,15 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
           <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-muted grid place-items-center"><X className="h-4 w-4" /></button>
         </div>
 
-        {sdkErr && (
+        {sdkErr && !SANDBOX && (
           <div className="m-5 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2"><AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />{sdkErr}</div>
+        )}
+
+        {SANDBOX && (
+          <div className="mx-5 mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 text-xs text-amber-900 dark:text-amber-200">
+            <div className="font-bold flex items-center gap-1">🧪 MODO SANDBOX (TESTE)</div>
+            <div className="mt-1">Mercado Pago não configurado. Qualquer cartão será aceito e o pagamento será aprovado automaticamente para testar as notificações.</div>
+          </div>
         )}
 
         {/* Card preview */}
