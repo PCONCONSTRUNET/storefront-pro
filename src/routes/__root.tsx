@@ -1,5 +1,17 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouter, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
+
+const PWA_ALLOWED_ROUTES = ["/afiliada/login", "/afiliada", "/admin"];
+const PWA_LAUNCH_KEY = "pwa_launch_route";
+
+function isStandaloneMode() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+}
+
+function matchAllowedRoute(path: string): string | null {
+  return PWA_ALLOWED_ROUTES.find(r => path === r || path.startsWith(r + "/")) ?? null;
+}
 import { Toaster } from "@/components/ui/sonner";
 import { useStore } from "@/lib/store";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
