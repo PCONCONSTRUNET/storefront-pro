@@ -342,15 +342,18 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ reviews: [review, ...s.reviews] }));
+        cloud.upsertReview(review);
         return { ok: true, message: "Avaliação publicada!" };
       },
-      deleteReview: (id) => set(s => ({
-        reviews: s.reviews.filter(r => {
-          if (r.id !== id) return true;
-          // allow author or admin
-          return !(s.isAdmin || r.customerId === s.currentCustomerId);
-        }),
-      })),
+      deleteReview: (id) => {
+        set(s => ({
+          reviews: s.reviews.filter(r => {
+            if (r.id !== id) return true;
+            return !(s.isAdmin || r.customerId === s.currentCustomerId);
+          }),
+        }));
+        cloud.deleteReview(id);
+      },
 
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
