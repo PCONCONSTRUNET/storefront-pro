@@ -222,7 +222,7 @@ function Page() {
           {step < 3 ? (
             <button onClick={next} className="flex-1 h-12 rounded-full gradient-primary text-primary-foreground font-semibold active:scale-95 transition-all">Continuar</button>
           ) : (
-            <button onClick={finish} className="flex-1 h-12 rounded-full gradient-primary text-primary-foreground font-semibold active:scale-95 transition-all">Confirmar pedido</button>
+            <button onClick={finish} disabled={submitting} className="flex-1 h-12 rounded-full gradient-primary text-primary-foreground font-semibold active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">{submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Gerando Pix...</> : (form.payment === "pix" ? "Pagar com Pix" : "Confirmar pedido")}</button>
           )}
         </div>
       </div>
