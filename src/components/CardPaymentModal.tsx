@@ -118,24 +118,38 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   }, [card.number, mp, total]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canSubmit = useMemo(() => {
-    return (
-      mp &&
-      pmId &&
+    const baseFilled =
       onlyDigits(card.number).length >= 13 &&
       card.name.trim().length >= 2 &&
       onlyDigits(card.exp).length === 4 &&
       onlyDigits(card.cvv).length >= 3 &&
-      onlyDigits(card.doc).length === 11 &&
-      !submitting
-    );
-  }, [mp, pmId, card, submitting]);
+      onlyDigits(card.doc).length === 11;
+    if (SANDBOX) return baseFilled && !submitting;
+    return mp && pmId && baseFilled && !submitting;
+  }, [SANDBOX, mp, pmId, card, submitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit || !mp) return;
+    if (!canSubmit) return;
     setSubmitting(true);
     setErrorMsg(null);
     try {
+      // SANDBOX: pula geração de token, manda direto pro backend que aprova auto
+      if (SANDBOX) {
+        const result = await createCardPayment({
+          ...payload,
+          card: {
+            token: "SANDBOX_TOKEN",
+            payment_method_id: "sandbox",
+            installments: card.installments,
+            payer: { identification: { type: "CPF", number: onlyDigits(card.doc) } },
+          },
+        });
+        toast.success("Pagamento simulado com sucesso! 🎉");
+        onSuccess(result);
+        return;
+      }
+
       const [mm, yy] = card.exp.split("/");
       const tokenRes = await mp.createCardToken({
         cardNumber: onlyDigits(card.number),
