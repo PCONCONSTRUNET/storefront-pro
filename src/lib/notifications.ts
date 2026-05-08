@@ -208,7 +208,7 @@ export const useNotifications = create<NotificationState>()(
       },
     }),
     {
-      name: "princesa-notifications-v1",
+      name: "princesa-notifications-v2",
       partialize: (s) => ({ templates: s.templates, logs: s.logs }),
     }
   )
