@@ -463,7 +463,7 @@ export const useStore = create<AppState>()(
         const exists = get().affiliates.find(a => a.email.toLowerCase() === email);
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
         const newA: Affiliate = {
-          id: `aff_${Date.now()}`,
+          id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `aff_${Date.now()}`),
           name,
           email,
           password: data.password,
@@ -474,15 +474,22 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id, sessions: { ...s.sessions, affiliate: makeSession(newA.id) } }));
+        cloud.upsertAffiliate(newA);
         return { ok: true, message: "Cadastro realizado! Aguarde a administradora definir sua comissão." };
       },
-      upsertAffiliate: (a) => set((s) => ({
-        affiliates: s.affiliates.find(x => x.id === a.id) ? s.affiliates.map(x => x.id === a.id ? a : x) : [...s.affiliates, a],
-      })),
-      deleteAffiliate: (id) => set((s) => ({
-        affiliates: s.affiliates.filter(a => a.id !== id),
-        affiliateSales: s.affiliateSales.filter(v => v.affiliateId !== id),
-      })),
+      upsertAffiliate: (a) => {
+        set((s) => ({
+          affiliates: s.affiliates.find(x => x.id === a.id) ? s.affiliates.map(x => x.id === a.id ? a : x) : [...s.affiliates, a],
+        }));
+        cloud.upsertAffiliate(a);
+      },
+      deleteAffiliate: (id) => {
+        set((s) => ({
+          affiliates: s.affiliates.filter(a => a.id !== id),
+          affiliateSales: s.affiliateSales.filter(v => v.affiliateId !== id),
+        }));
+        cloud.deleteAffiliate(id);
+      },
       registerAffiliateSale: (data) => {
         const aff = get().affiliates.find(a => a.id === data.affiliateId);
         if (!aff) return null;
