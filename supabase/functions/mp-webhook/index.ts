@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
           orderId: order.id.slice(0, 8),
           items: order.items,
           total: Number(order.total),
-          paymentMethod: "Pix",
+          paymentMethod: order.payment_method === "card" ? "Cartão de crédito" : "Pix",
         },
       });
     } catch (e) {

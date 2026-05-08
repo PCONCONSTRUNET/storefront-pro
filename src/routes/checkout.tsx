@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
 import { createPixPayment } from "@/lib/mercadopago";
+import { CardPaymentModal } from "@/components/CardPaymentModal";
 import mpIcon from "@/assets/mercadopago-icon.png";
 
 
@@ -25,6 +26,7 @@ function Page() {
   const totals = useStore(useShallow(selectCartTotals));
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [cardModal, setCardModal] = useState<null | Parameters<typeof CardPaymentModal>[0]["payload"]>(null);
   const [form, setForm] = useState({
     name: customer?.name || "", email: customer?.email || "", phone: customer?.phone || "",
     address: customer?.address || "", payment: "pix" as "pix" | "card" | "cash",
@@ -82,7 +84,33 @@ function Page() {
       return;
     }
 
-    // Cartão / Dinheiro → fluxo local (futuro: integrar)
+    const shipping = form.delivery === "retirada" ? 0 : totals.shipping;
+    const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+    const sharedPayload = {
+      customer: { name: form.name, email: form.email, phone: form.phone },
+      items: cart.map(it => {
+        const p = products.find(x => x.id === it.productId);
+        return {
+          productId: it.productId,
+          name: p?.name ?? "Produto",
+          price: p?.price ?? 0,
+          quantity: it.quantity,
+          image: (p as any)?.image,
+        };
+      }),
+      totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
+      delivery: form.delivery,
+      address: form.delivery === "entrega" ? form.address : settings.address,
+      notes: form.notes,
+    };
+
+    // Cartão → abre modal próprio (Checkout Transparente Mercado Pago)
+    if (form.payment === "card") {
+      setCardModal(sharedPayload);
+      return;
+    }
+
+    // Dinheiro → fluxo local
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
       address: form.address, paymentMethod: form.payment,
@@ -226,6 +254,19 @@ function Page() {
           )}
         </div>
       </div>
+
+      {cardModal && (
+        <CardPaymentModal
+          open={!!cardModal}
+          payload={cardModal}
+          onClose={() => setCardModal(null)}
+          onSuccess={(result) => {
+            setCardModal(null);
+            playBeep();
+            navigate({ to: "/pedido/$id", params: { id: result.order_id } });
+          }}
+        />
+      )}
     </StoreLayout>
   );
 }

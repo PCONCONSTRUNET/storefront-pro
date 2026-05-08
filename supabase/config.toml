@@ -12,5 +12,8 @@ verify_jwt = false
 [functions.mp-create-pix]
 verify_jwt = false
 
+[functions.mp-create-card]
+verify_jwt = false
+
 [functions.mp-webhook]
 verify_jwt = false

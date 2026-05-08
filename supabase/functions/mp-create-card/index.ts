@@ -1,0 +1,138 @@
+// Cria um pagamento com Cartão (token gerado no front via SDK MP) e salva o pedido.
+// POST /functions/v1/mp-create-card
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const json = (data: unknown, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
+
+  const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
+  if (!MP_TOKEN) return json({ error: "MERCADOPAGO_ACCESS_TOKEN não configurado" }, 500);
+
+  let body: any;
+  try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
+
+  const customer = body.customer ?? {};
+  const items = Array.isArray(body.items) ? body.items : [];
+  const totals = body.totals ?? {};
+  const card = body.card ?? {};
+  const total = Number(totals.total ?? 0);
+
+  if (!customer.name || !customer.email || !customer.phone) {
+    return json({ error: "Dados do cliente incompletos" }, 400);
+  }
+  if (!card.token || !card.payment_method_id) {
+    return json({ error: "Dados do cartão incompletos" }, 400);
+  }
+  if (total <= 0) return json({ error: "Total inválido" }, 400);
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
+  // 1) Cria pedido
+  const { data: order, error: insErr } = await supabase
+    .from("orders")
+    .insert({
+      customer_name: customer.name,
+      customer_email: customer.email,
+      customer_phone: String(customer.phone).replace(/\D/g, ""),
+      customer_document: card.payer?.identification?.number ?? null,
+      delivery_method: body.delivery ?? "entrega",
+      address: body.address ?? null,
+      notes: body.notes ?? null,
+      items,
+      subtotal: Number(totals.subtotal ?? 0),
+      discount: Number(totals.discount ?? 0),
+      shipping: Number(totals.shipping ?? 0),
+      total,
+      payment_method: "card",
+      payment_status: "pending",
+    })
+    .select()
+    .single();
+
+  if (insErr || !order) {
+    console.error("[mp-create-card] insert order:", insErr);
+    return json({ error: "Falha ao criar pedido" }, 500);
+  }
+
+  const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`;
+
+  const mpPayload: Record<string, unknown> = {
+    transaction_amount: Number(total.toFixed(2)),
+    token: card.token,
+    description: `Pedido Princesa de Laços #${order.id.slice(0, 8)}`,
+    installments: Number(card.installments ?? 1),
+    payment_method_id: card.payment_method_id,
+    notification_url: webhookUrl,
+    external_reference: order.id,
+    payer: {
+      email: customer.email,
+      ...(card.payer?.identification ? { identification: card.payer.identification } : {}),
+    },
+    statement_descriptor: "PRINCESA LACOS",
+  };
+  if (card.issuer_id) mpPayload.issuer_id = card.issuer_id;
+
+  const idempotencyKey = `${order.id}-${Date.now()}`;
+
+  const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${MP_TOKEN}`,
+      "X-Idempotency-Key": idempotencyKey,
+    },
+    body: JSON.stringify(mpPayload),
+  });
+
+  const mpData = await mpRes.json();
+
+  if (!mpRes.ok) {
+    console.error("[mp-create-card] MP error:", mpRes.status, mpData);
+    await supabase.from("orders").update({ payment_status: "rejected" }).eq("id", order.id);
+    return json({
+      error: mpData?.message || "Mercado Pago recusou o pagamento",
+      details: mpData,
+    }, 502);
+  }
+
+  // status: approved | in_process | rejected | pending
+  const statusMap: Record<string, string> = {
+    approved: "approved",
+    pending: "pending",
+    in_process: "pending",
+    rejected: "rejected",
+    cancelled: "cancelled",
+  };
+  const newStatus = statusMap[mpData.status] ?? "pending";
+
+  await supabase.from("orders").update({
+    mp_payment_id: String(mpData.id),
+    payment_status: newStatus,
+    paid_at: newStatus === "approved" ? (mpData.date_approved ?? new Date().toISOString()) : null,
+  }).eq("id", order.id);
+
+  return json({
+    order_id: order.id,
+    mp_payment_id: mpData.id,
+    status: newStatus,
+    mp_status: mpData.status,
+    status_detail: mpData.status_detail,
+    total,
+  });
+});
