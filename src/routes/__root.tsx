@@ -90,15 +90,27 @@ OneSignalDeferred.push(async function(OneSignal) {
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (!isStandalone) return;
     var perm = (typeof Notification !== 'undefined') ? Notification.permission : 'denied';
-    if (perm === 'default') {
-      var key = 'os_native_prompt_shown';
-      if (!localStorage.getItem(key)) {
-        localStorage.setItem(key, '1');
-        setTimeout(function(){ OneSignal.Notifications.requestPermission(); }, 1500);
-      }
-    }
+    if (perm !== 'default') return;
+    var asked = false;
+    var ask = function(){
+      if (asked) return;
+      asked = true;
+      try { OneSignal.Notifications.requestPermission(); } catch(e) {}
+    };
+    setTimeout(ask, 1200);
+    var onGesture = function(){
+      ask();
+      window.removeEventListener('pointerdown', onGesture, true);
+      window.removeEventListener('touchstart', onGesture, true);
+      window.removeEventListener('click', onGesture, true);
+      window.removeEventListener('keydown', onGesture, true);
+    };
+    window.addEventListener('pointerdown', onGesture, true);
+    window.addEventListener('touchstart', onGesture, true);
+    window.addEventListener('click', onGesture, true);
+    window.addEventListener('keydown', onGesture, true);
   } catch(e) {}
-});`,
+});` ,
       },
     ],
   }),
