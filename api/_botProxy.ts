@@ -1,4 +1,15 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+export type VercelRequest = {
+  method?: string;
+  headers: { origin?: string };
+  body?: unknown;
+};
+
+export type VercelResponse = {
+  setHeader: (name: string, value: string) => void;
+  status: (code: number) => VercelResponse;
+  json: (body: unknown) => void;
+  end: () => void;
+};
 
 export const BOT_BASE = "http://178.105.54.230:3005";
 export const BOT_TOKEN = "princesa_secret_123";
