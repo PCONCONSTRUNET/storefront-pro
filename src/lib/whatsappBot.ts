@@ -1,7 +1,7 @@
 // Cliente do bot WhatsApp "Princesa de Laços"
 // Chama proxy server-side (/api/bot/*) para evitar Mixed Content (HTTPS->HTTP).
 
-export const WHATSAPP_BOT_BASE_URL = "http://178.105.54.230:3005"; // exibido na UI
+export const WHATSAPP_BOT_BASE_URL = "http://178.105.54.230:3005"; // exibido na UI (VPS Princesa de Laços)
 
 export type BotStatus = "QR_READY" | "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "UNKNOWN";
 
