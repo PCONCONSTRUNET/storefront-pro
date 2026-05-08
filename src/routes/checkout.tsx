@@ -58,10 +58,16 @@ function Page() {
         const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
         const result = await createPixPayment({
           customer: { name: form.name, email: form.email, phone: form.phone },
-          items: cart.map(it => ({
-            productId: it.productId, name: it.name, price: it.price,
-            quantity: it.quantity, image: it.image,
-          })),
+          items: cart.map(it => {
+            const p = products.find(x => x.id === it.productId);
+            return {
+              productId: it.productId,
+              name: p?.name ?? "Produto",
+              price: p?.price ?? 0,
+              quantity: it.quantity,
+              image: p?.images?.[0],
+            };
+          }),
           totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
           delivery: form.delivery,
           address: form.delivery === "entrega" ? form.address : settings.address,
