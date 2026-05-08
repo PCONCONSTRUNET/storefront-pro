@@ -23,6 +23,7 @@ type Row = {
   status?: string;
   affiliateName?: string;
   txRef?: Transaction;
+  affiliateSaleId?: string;
 };
 
 const CATEGORY_LABEL: Record<TransactionCategory, string> = {
