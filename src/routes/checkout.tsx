@@ -65,7 +65,7 @@ function Page() {
               name: p?.name ?? "Produto",
               price: p?.price ?? 0,
               quantity: it.quantity,
-              image: p?.images?.[0],
+              image: (p as any)?.image,
             };
           }),
           totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
