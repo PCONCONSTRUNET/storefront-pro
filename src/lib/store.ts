@@ -315,12 +315,15 @@ export const useStore = create<AppState>()(
       addTransaction: (t) => {
         const tx: Transaction = { ...t, id: `tx_${Date.now()}`, createdAt: new Date().toISOString() };
         set(s => ({ transactions: [tx, ...s.transactions] }));
+        cloud.upsertTransaction(tx);
         return tx;
       },
-      updateTransaction: (id, patch) => set(s => ({
-        transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t),
-      })),
-      deleteTransaction: (id) => set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })),
+      updateTransaction: (id, patch) => {
+        set(s => ({ transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t) }));
+        const tx = get().transactions.find(t => t.id === id);
+        if (tx) cloud.upsertTransaction(tx);
+      },
+      deleteTransaction: (id) => { set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })); cloud.deleteTransaction(id); },
 
       addReview: (data) => {
         const state = get();
