@@ -40,6 +40,7 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
 
@@ -198,6 +199,11 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
   path: '/admin/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminChatbotRoute = AdminChatbotRouteImport.update({
+  id: '/admin/chatbot',
+  path: '/admin/chatbot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   id: '/admin/categorias',
   path: '/admin/categorias',
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
@@ -331,6 +340,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/afiliadas'
     | '/admin/categorias'
+    | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/cupons'
@@ -366,6 +376,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/afiliadas'
     | '/admin/categorias'
+    | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/cupons'
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/afiliadas'
     | '/admin/categorias'
+    | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/cupons'
@@ -437,6 +449,7 @@ export interface RootRouteChildren {
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   AdminAfiliadasRoute: typeof AdminAfiliadasRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
+  AdminChatbotRoute: typeof AdminChatbotRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminCuponsRoute: typeof AdminCuponsRoute
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/chatbot': {
+      id: '/admin/chatbot'
+      path: '/admin/chatbot'
+      fullPath: '/admin/chatbot'
+      preLoaderRoute: typeof AdminChatbotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/categorias': {
       id: '/admin/categorias'
       path: '/admin/categorias'
@@ -709,6 +729,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   AdminAfiliadasRoute: AdminAfiliadasRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
+  AdminChatbotRoute: AdminChatbotRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminCuponsRoute: AdminCuponsRoute,
