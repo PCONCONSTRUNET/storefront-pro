@@ -26,6 +26,32 @@ export async function createPixPayment(input: CreatePixInput): Promise<CreatePix
   return data as CreatePixResult;
 }
 
+export type CardPayload = {
+  token: string;
+  payment_method_id: string;
+  issuer_id?: string;
+  installments: number;
+  payer?: { identification?: { type: string; number: string } };
+};
+
+export type CreateCardInput = Omit<CreatePixInput, never> & { card: CardPayload };
+
+export type CreateCardResult = {
+  order_id: string;
+  mp_payment_id: number;
+  status: "approved" | "pending" | "rejected" | "cancelled";
+  mp_status: string;
+  status_detail: string;
+  total: number;
+};
+
+export async function createCardPayment(input: CreateCardInput): Promise<CreateCardResult> {
+  const { data, error } = await supabase.functions.invoke("mp-create-card", { body: input });
+  if (error) throw new Error(error.message || "Falha ao processar cartão");
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as CreateCardResult;
+}
+
 export type OrderRow = {
   id: string;
   payment_status: "pending" | "approved" | "rejected" | "cancelled" | "refunded" | "expired";
