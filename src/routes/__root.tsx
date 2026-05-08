@@ -190,5 +190,10 @@ function RootComponent() {
       window.clearInterval(interval);
     };
   }, [refreshSession]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    hydrateFromCloud();
+  }, []);
   return <><Outlet /><PwaInstallPrompt /></>;
 }
