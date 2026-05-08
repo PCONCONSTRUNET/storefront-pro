@@ -1,5 +1,5 @@
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM = Deno.env.get("RESEND_FROM_EMAIL") ?? "Princesa de Laços <onboarding@resend.dev>";
+const FROM = Deno.env.get("RESEND_FROM_EMAIL") ?? "Princesa de Laços <nao-responda@xn--princesadelaos-rjb.com.br>";
 
 export async function sendEmail(opts: { to: string; subject: string; html: string }) {
   if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY não configurada");
