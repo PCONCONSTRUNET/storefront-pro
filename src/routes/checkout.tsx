@@ -152,6 +152,10 @@ function Page() {
                   <div className={cn("w-5 h-5 rounded-full border-2", form.payment === p.id ? "border-primary bg-primary" : "border-border")} />
                 </button>
               ))}
+              <div className="mt-2 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-muted/50 border border-border/50">
+                <img src={mpIcon} alt="Mercado Pago" className="h-5 w-5 object-contain" />
+                <span className="text-[11px] text-muted-foreground">Pagamentos processados por <span className="font-semibold text-foreground">Mercado Pago</span> · 100% seguro</span>
+              </div>
             </div>
           )}
           {step === 3 && (() => {
