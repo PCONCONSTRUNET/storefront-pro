@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const Summary = lazy(() => import("@/components/afiliada/Summary"));
+import pixIconSrc from "@/assets/pix-icon.png";
 
 export const Route = createFileRoute("/afiliada/")({
   component: Page,
@@ -176,10 +177,8 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
     { id: "Presencial", icon: Store },
     { id: "Outro", icon: Globe },
   ];
-  const PixIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M18.92 16.13a3.05 3.05 0 0 1-2.17-.9l-3.13-3.13a.59.59 0 0 0-.82 0l-3.14 3.14a3.05 3.05 0 0 1-2.17.9H6.87l3.97 3.97a3.06 3.06 0 0 0 4.32 0l3.98-3.98zM7.49 7.86c.82 0 1.59.32 2.17.9l3.14 3.14c.22.22.6.22.82 0l3.13-3.13a3.05 3.05 0 0 1 2.17-.9h.38l-3.98-3.98a3.06 3.06 0 0 0-4.32 0L6.87 7.86h.62zm13.6 2.98-2.4-2.4a.46.46 0 0 1-.17.04h-.6a2.16 2.16 0 0 0-1.52.63l-3.14 3.13a1.51 1.51 0 0 1-2.13 0L8.39 9.1a2.16 2.16 0 0 0-1.52-.63h-.74a.46.46 0 0 1-.16-.04l-2.41 2.4a3.06 3.06 0 0 0 0 4.33l2.41 2.4a.46.46 0 0 1 .16-.03h.74c.57 0 1.12-.23 1.52-.63l3.14-3.14a1.55 1.55 0 0 1 2.13 0l3.13 3.13c.4.4.95.63 1.53.63h.59a.46.46 0 0 1 .17.04l2.4-2.4a3.06 3.06 0 0 0 0-4.33z"/>
-    </svg>
+  const PixIcon = (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img src={pixIconSrc} alt="Pix" {...props} />
   );
 
   const payments: { id: typeof form.payment; icon: React.ElementType }[] = [
