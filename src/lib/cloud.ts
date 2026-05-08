@@ -110,6 +110,7 @@ const toTransaction = (r: any): Transaction => ({
   affiliateId: r.affiliate_id || undefined,
   productSummary: r.product_summary || undefined,
   notes: r.notes || undefined,
+  createdAt: r.created_at,
 });
 
 const toReview = (r: any): Review => ({
