@@ -1,6 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X, Sparkles, Search, MessageCircle } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, DollarSign, Tag, Settings, Bell, LogOut, Menu, X, Sparkles, Search } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ const nav = [
   { to: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
-  { to: "/admin/chatbot", label: "Chatbot", icon: MessageCircle },
+  { to: "/admin/chatbot", label: "Chatbot", icon: WhatsAppIcon },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
