@@ -27,6 +27,10 @@ function Page() {
     setSubmitting(true);
     const r = registerCustomer(form);
     if (r.ok) {
+      // Dispara e-mail de boas-vindas (não bloqueia o fluxo se falhar)
+      supabase.functions
+        .invoke("send-welcome-email", { body: { email: form.email, name: form.name } })
+        .catch(err => console.warn("welcome email failed", err));
       navigate({ to: "/perfil" });
       toast.success(r.message);
     } else {
