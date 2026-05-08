@@ -1,5 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { BOT_BASE, BOT_TOKEN, handleOptions, parseProxyJson, setBotHeaders } from "../_botProxy";
+import { BOT_BASE, BOT_TOKEN, handleOptions, parseProxyJson, setBotHeaders, type VercelRequest, type VercelResponse } from "../_botProxy";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
