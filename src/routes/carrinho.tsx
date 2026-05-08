@@ -120,15 +120,15 @@ function Page() {
             <dl className="text-sm space-y-1.5">
               <div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd>{brl(totals.subtotal)}</dd></div>
               {totals.discount > 0 && <div className="flex justify-between text-success"><dt>Desconto</dt><dd>− {brl(totals.discount)}</dd></div>}
-              <div className="flex justify-between"><dt className="text-muted-foreground">Frete</dt><dd>{brl(totals.shipping)}</dd></div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t border-border mt-2"><dt>Total</dt><dd className="text-primary">{brl(totals.total)}</dd></div>
+              <div className="flex justify-between text-xs text-muted-foreground"><dt>Retirada</dt><dd>No ateliê · sem custo</dd></div>
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-border mt-2"><dt>Total</dt><dd className="text-primary">{brl(Math.max(0, totals.subtotal - totals.discount))}</dd></div>
             </dl>
 
             <Link to="/checkout" className="mt-4 w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center active:scale-95 transition-all">
               Finalizar compra
             </Link>
 
-            <div className="mt-3 text-[11px] text-muted-foreground text-center">Cupons disponíveis: PRIMEIRA10, PRINCESA20, FRETE15</div>
+            <div className="mt-3 text-[11px] text-muted-foreground text-center">Cupons disponíveis: PRIMEIRA10, PRINCESA20</div>
           </aside>
         </div>
       </div>

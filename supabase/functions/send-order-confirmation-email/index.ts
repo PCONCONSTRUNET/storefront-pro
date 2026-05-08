@@ -28,7 +28,11 @@ Deno.serve(async (req) => {
            <td style="padding:14px 0;font-weight:bold;font-size:16px;text-align:right;color:#be185d">${fmt(total)}</td>
          </tr>
        </table>
-       <p style="margin-top:24px">Vamos te avisar quando o pedido for enviado. Obrigada pela compra! 💖</p>`
+       <div style="margin-top:24px;padding:14px 16px;background:#fff5f8;border:1px solid #fce7f3;border-radius:12px">
+         <p style="margin:0;font-size:14px;color:#be185d;font-weight:600">📍 Retirada no ateliê</p>
+         <p style="margin:6px 0 0;font-size:13px;color:#555">Avisaremos pelo WhatsApp assim que seu pedido estiver pronto para retirada. 💖</p>
+       </div>
+       <p style="margin-top:18px">Obrigada pela compra!</p>`
     );
     await sendEmail({ to: email, subject: `Pagamento aprovado — Pedido #${orderId}`, html });
     return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
