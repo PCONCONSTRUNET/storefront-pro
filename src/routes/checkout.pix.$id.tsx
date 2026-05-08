@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { StoreLayout } from "@/components/StoreLayout";
-import { fetchOrder, type OrderRow } from "@/lib/mercadopago";
+import { fetchOrder, isSandboxOrder, simulateApprove, type OrderRow } from "@/lib/mercadopago";
 import { brl } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, Copy, Loader2, QrCode } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Copy, FlaskConical, Loader2, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
 
