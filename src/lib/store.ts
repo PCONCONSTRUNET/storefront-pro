@@ -692,8 +692,8 @@ export const selectCartTotals = (s: AppState) => {
   const subtotal = computeSubtotal(s);
   const coupon = s.coupons.find(c => c.code === s.appliedCoupon);
   const discount = coupon ? (coupon.type === "percent" ? subtotal * coupon.value / 100 : coupon.value) : 0;
-  const shipping = s.cart.length > 0 ? s.settings.shippingFee : 0;
-  const total = Math.max(0, subtotal - discount) + shipping;
+  const shipping = 0;
+  const total = Math.max(0, subtotal - discount);
   return { subtotal, discount, shipping, total, coupon };
 };
 
