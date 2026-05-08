@@ -14,6 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
+      orders: {
+        Row: {
+          address: string | null
+          created_at: string
+          customer_document: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_method: string
+          discount: number
+          id: string
+          items: Json
+          mp_payment_id: string | null
+          notes: string | null
+          paid_at: string | null
+          payment_method: string
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          pix_expires_at: string | null
+          pix_qr_code: string | null
+          pix_qr_code_base64: string | null
+          shipping: number
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          customer_document?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_method?: string
+          discount?: number
+          id?: string
+          items?: Json
+          mp_payment_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_base64?: string | null
+          shipping?: number
+          subtotal?: number
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          customer_document?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          delivery_method?: string
+          discount?: number
+          id?: string
+          items?: Json
+          mp_payment_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_base64?: string | null
+          shipping?: number
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       password_reset_tokens: {
         Row: {
           created_at: string
@@ -44,6 +119,44 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          event_type: string
+          id: string
+          mp_event_id: string
+          mp_payment_id: string | null
+          order_id: string | null
+          processed_at: string
+          raw_payload: Json
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          mp_event_id: string
+          mp_payment_id?: string | null
+          order_id?: string | null
+          processed_at?: string
+          raw_payload: Json
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          mp_event_id?: string
+          mp_payment_id?: string | null
+          order_id?: string | null
+          processed_at?: string
+          raw_payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -58,6 +171,13 @@ export type Database = {
       }
     }
     Enums: {
+      payment_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "cancelled"
+        | "refunded"
+        | "expired"
       reset_subject: "admin" | "customer" | "affiliate"
     }
     CompositeTypes: {
@@ -186,6 +306,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      payment_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled",
+        "refunded",
+        "expired",
+      ],
       reset_subject: ["admin", "customer", "affiliate"],
     },
   },
