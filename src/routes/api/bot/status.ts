@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const BOT_BASE = "http://167.250.155.178:3005";
+const BOT_BASE = "http://178.105.54.230:3005";
 
 export const Route = createFileRoute("/api/bot/status")({
   server: {
