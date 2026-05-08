@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.mp-webhook]
 verify_jwt = false
+
+[functions.mp-simulate-approve]
+verify_jwt = false
