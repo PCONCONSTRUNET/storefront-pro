@@ -254,6 +254,19 @@ function Page() {
           )}
         </div>
       </div>
+
+      {cardModal && (
+        <CardPaymentModal
+          open={!!cardModal}
+          payload={cardModal}
+          onClose={() => setCardModal(null)}
+          onSuccess={(result) => {
+            setCardModal(null);
+            playBeep();
+            navigate({ to: "/pedido/$id", params: { id: result.order_id } });
+          }}
+        />
+      )}
     </StoreLayout>
   );
 }
