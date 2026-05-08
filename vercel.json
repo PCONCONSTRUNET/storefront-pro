@@ -3,7 +3,10 @@
   "framework": null,
   "buildCommand": "vite build",
   "outputDirectory": "dist/client",
+  "cleanUrls": false,
+  "trailingSlash": false,
   "rewrites": [
-    { "source": "/((?!assets/|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/_shell" }
+    { "source": "/", "destination": "/_shell.html" },
+    { "source": "/((?!assets/|_shell|favicon\\.ico|manifest\\.json|icon-512\\.png|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/_shell.html" }
   ]
 }
