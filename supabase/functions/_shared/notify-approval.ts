@@ -11,7 +11,7 @@ export async function notifyOrderApproved(supabase: SupabaseClient, order: any) 
   const firstName = String(order.customer_name ?? "Cliente").split(" ")[0];
   const method = order.payment_method === "card" ? "Cartão de crédito" : "Pix";
 
-  const mensagem = `Olá ${firstName}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${String(order.id).slice(0, 8)}\n💳 Forma: ${method}\n💰 Valor: ${total}\n\nJá estamos preparando tudo com muito carinho. Em breve avisaremos quando sair para entrega! ✨`;
+  const mensagem = `Olá ${firstName}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${String(order.id).slice(0, 8)}\n💳 Forma: ${method}\n💰 Valor: ${total}\n\n📍 Como nossos produtos já são prontos, seu pedido está *aguardando retirada no ateliê*. Vamos te chamar por aqui para combinar o melhor horário! ✨`;
 
   // WhatsApp via VPS
   if (phone) {
