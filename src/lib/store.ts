@@ -520,7 +520,7 @@ export const useStore = create<AppState>()(
         const subtotal = items.reduce((a, b) => a + b.price * b.quantity, 0);
         const coupon = state.coupons.find((c) => c.code === state.appliedCoupon);
         const discount = coupon ? (coupon.type === "percent" ? subtotal * coupon.value / 100 : coupon.value) : 0;
-        const shipping = data.deliveryMethod === "retirada" ? 0 : state.settings.shippingFee;
+        const shipping = 0;
         const total = Math.max(0, subtotal - discount) + shipping;
         const order: Order = {
           id: `PED${Date.now().toString().slice(-6)}`,
