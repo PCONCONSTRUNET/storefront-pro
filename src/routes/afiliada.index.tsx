@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const Summary = lazy(() => import("@/components/afiliada/Summary"));
+import pixIconSrc from "@/assets/pix-icon.png";
 
 export const Route = createFileRoute("/afiliada/")({
   component: Page,
