@@ -44,6 +44,7 @@ function Page() {
   const addTransaction = useStore(s => s.addTransaction);
   const deleteTransaction = useStore(s => s.deleteTransaction);
   const updateTransaction = useStore(s => s.updateTransaction);
+  const deleteAffiliateSale = useStore(s => s.deleteAffiliateSale);
 
   const [filter, setFilter] = useState<"todos" | "entrada" | "saida">("todos");
   const [showForm, setShowForm] = useState(false);
