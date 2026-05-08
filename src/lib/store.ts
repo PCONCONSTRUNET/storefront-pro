@@ -759,6 +759,60 @@ export function useStoreHydrated() {
   return hydrated;
 }
 
+let _hydratingFromCloud: Promise<void> | null = null;
+export function hydrateFromCloud(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (_hydratingFromCloud) return _hydratingFromCloud;
+  _hydratingFromCloud = (async () => {
+    try {
+      const snap = await fetchCloudSnapshot();
+      const cur = useStore.getState();
+      // Merge by id: prefer cloud rows, keep any local-only items the cloud doesn't know yet.
+      const mergeById = <T extends { id: string }>(local: T[], remote: T[]) => {
+        const map = new Map<string, T>();
+        local.forEach(x => map.set(x.id, x));
+        remote.forEach(x => map.set(x.id, x));
+        return Array.from(map.values());
+      };
+      const mergeByCode = (local: any[], remote: any[]) => {
+        const map = new Map<string, any>();
+        local.forEach(x => map.set(x.code, x));
+        remote.forEach(x => map.set(x.code, x));
+        return Array.from(map.values());
+      };
+      useStore.setState({
+        customers: mergeById(cur.customers, snap.customers),
+        products: snap.products.length ? mergeById(cur.products, snap.products) : cur.products,
+        categories: snap.categories.length ? mergeById(cur.categories, snap.categories) : cur.categories,
+        coupons: snap.coupons.length ? mergeByCode(cur.coupons, snap.coupons) : cur.coupons,
+        affiliates: mergeById(cur.affiliates, snap.affiliates),
+        affiliateSales: mergeById(cur.affiliateSales, snap.affiliateSales),
+        transactions: mergeById(cur.transactions, snap.transactions),
+        reviews: mergeById(cur.reviews, snap.reviews),
+        orders: mergeById(cur.orders, snap.orders),
+        settings: snap.settings ? { ...cur.settings, ...snap.settings } as StoreSettings : cur.settings,
+      });
+      // One-shot push of any local-only items so legacy localStorage data lands in the cloud.
+      const pushed = "cloud_initial_push_v1";
+      if (!localStorage.getItem(pushed)) {
+        cur.customers.filter(c => !snap.customers.find(x => x.id === c.id)).forEach(c => cloud.upsertCustomer(c));
+        cur.products.filter(p => !snap.products.find(x => x.id === p.id)).forEach(p => cloud.upsertProduct(p));
+        cur.categories.filter(c => !snap.categories.find(x => x.id === c.id)).forEach(c => cloud.upsertCategory(c));
+        cur.coupons.filter(c => !snap.coupons.find(x => x.code === c.code)).forEach(c => cloud.upsertCoupon(c));
+        cur.affiliates.filter(a => !snap.affiliates.find(x => x.id === a.id)).forEach(a => cloud.upsertAffiliate(a));
+        cur.affiliateSales.filter(s => !snap.affiliateSales.find(x => x.id === s.id)).forEach(s => cloud.upsertAffiliateSale(s));
+        cur.transactions.filter(t => !snap.transactions.find(x => x.id === t.id)).forEach(t => cloud.upsertTransaction(t));
+        cur.reviews.filter(r => !snap.reviews.find(x => x.id === r.id)).forEach(r => cloud.upsertReview(r));
+        if (!snap.settings) cloud.upsertSettings(cur.settings);
+        localStorage.setItem(pushed, "1");
+      }
+    } catch (e) {
+      console.warn("[hydrateFromCloud] failed", e);
+    }
+  })();
+  return _hydratingFromCloud;
+}
+
 function computeSubtotal(s: AppState) {
   return s.cart.reduce((a, ci) => {
     const p = s.products.find(x => x.id === ci.productId);
