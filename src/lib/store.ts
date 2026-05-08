@@ -497,7 +497,7 @@ export const useStore = create<AppState>()(
           ? data.saleValue * aff.commissionValue / 100
           : aff.commissionValue;
         const sale: AffiliateSale = {
-          id: `vaf_${Date.now()}`,
+          id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `vaf_${Date.now()}`),
           affiliateId: data.affiliateId,
           customerName: data.customerName,
           customerPhone: data.customerPhone,
@@ -509,7 +509,7 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ affiliateSales: [sale, ...s.affiliateSales] }));
-        // Notifica admin sobre nova venda de afiliada
+        cloud.upsertAffiliateSale(sale);
         try {
           useNotifications.getState().trigger("afiliada_nova_venda", {
             afiliada: aff.name,
@@ -522,6 +522,8 @@ export const useStore = create<AppState>()(
       updateAffiliateSaleStatus: (id, status) => {
         const sale = get().affiliateSales.find(v => v.id === id);
         set(s => ({ affiliateSales: s.affiliateSales.map(v => v.id === id ? { ...v, status } : v) }));
+        const updated = get().affiliateSales.find(v => v.id === id);
+        if (updated) cloud.upsertAffiliateSale(updated);
         if (sale && status === "confirmada") {
           const aff = get().affiliates.find(a => a.id === sale.affiliateId);
           try {
@@ -532,7 +534,7 @@ export const useStore = create<AppState>()(
           } catch { /* ignore */ }
         }
       },
-      deleteAffiliateSale: (id) => set(s => ({ affiliateSales: s.affiliateSales.filter(v => v.id !== id) })),
+      deleteAffiliateSale: (id) => { set(s => ({ affiliateSales: s.affiliateSales.filter(v => v.id !== id) })); cloud.deleteAffiliateSale(id); },
 
       placeOrder: (data) => {
         const state = get();
