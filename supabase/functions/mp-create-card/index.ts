@@ -1,6 +1,7 @@
 // Cria um pagamento com Cartão (token gerado no front via SDK MP) e salva o pedido.
 // POST /functions/v1/mp-create-card
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { notifyOrderApproved } from "../_shared/notify-approval.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
