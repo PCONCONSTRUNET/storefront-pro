@@ -4,10 +4,11 @@ import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode, Truck, Store } from "lucide-react";
+import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode, Truck, Store, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
+import { createPixPayment } from "@/lib/mercadopago";
 import mpIcon from "@/assets/mercadopago-icon.png";
 
 
