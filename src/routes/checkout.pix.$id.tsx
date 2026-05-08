@@ -17,6 +17,22 @@ function PixPage() {
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [simulating, setSimulating] = useState(false);
+
+  const sandbox = isSandboxOrder(order);
+
+  const handleSimulate = async () => {
+    if (!order) return;
+    setSimulating(true);
+    try {
+      await simulateApprove(order.id);
+      toast.success("Pagamento simulado! Aguardando confirmação...");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSimulating(false);
+    }
+  };
 
   // Polling do status a cada 4s até aprovar/expirar
   useEffect(() => {
