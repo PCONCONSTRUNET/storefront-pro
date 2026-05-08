@@ -3,6 +3,21 @@
 
 export const WHATSAPP_BOT_BASE_URL = "http://178.105.54.230:3005"; // exibido na UI (VPS Princesa de Laços)
 
+const LOVABLE_PROXY_ORIGIN = "https://amostrasistema.lovable.app";
+
+function getBotProxyUrl(path: string) {
+  if (typeof window === "undefined") return path;
+
+  const host = window.location.hostname;
+  const isOriginalDomain =
+    host === "princesadelacos.com.br" ||
+    host === "www.princesadelacos.com.br" ||
+    host === "xn--princesadelaos-rjb.com.br" ||
+    host === "www.xn--princesadelaos-rjb.com.br";
+
+  return isOriginalDomain ? `${LOVABLE_PROXY_ORIGIN}${path}` : path;
+}
+
 export type BotStatus = "QR_READY" | "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "UNKNOWN";
 
 export type BotStatusResponse = {
@@ -12,7 +27,7 @@ export type BotStatusResponse = {
 };
 
 export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusResponse> {
-  const res = await fetch(`/api/bot/status`, { method: "GET", signal });
+  const res = await fetch(getBotProxyUrl(`/api/bot/status`), { method: "GET", signal });
   if (!res.ok && res.status !== 502) throw new Error(`Status ${res.status}`);
   const data = await res.json();
   if (data.error && !data.status) throw new Error(data.error);
@@ -24,7 +39,7 @@ export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusRes
 }
 
 export async function logoutBot(): Promise<void> {
-  const res = await fetch(`/api/bot/logout`, { method: "POST" });
+  const res = await fetch(getBotProxyUrl(`/api/bot/logout`), { method: "POST" });
   if (!res.ok) {
     let msg = `Logout falhou (${res.status})`;
     try { const j = await res.json(); if (j.error) msg = j.error; } catch {}
@@ -35,7 +50,7 @@ export async function logoutBot(): Promise<void> {
 export type SendNotificationPayload = { numero: string; mensagem: string };
 
 export async function sendBotNotification(payload: SendNotificationPayload): Promise<{ ok: boolean; status: number; body?: string }> {
-  const res = await fetch(`/api/bot/notify`, {
+  const res = await fetch(getBotProxyUrl(`/api/bot/notify`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
