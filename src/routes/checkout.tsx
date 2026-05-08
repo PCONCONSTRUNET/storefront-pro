@@ -84,7 +84,33 @@ function Page() {
       return;
     }
 
-    // Cartão / Dinheiro → fluxo local (futuro: integrar)
+    const shipping = form.delivery === "retirada" ? 0 : totals.shipping;
+    const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+    const sharedPayload = {
+      customer: { name: form.name, email: form.email, phone: form.phone },
+      items: cart.map(it => {
+        const p = products.find(x => x.id === it.productId);
+        return {
+          productId: it.productId,
+          name: p?.name ?? "Produto",
+          price: p?.price ?? 0,
+          quantity: it.quantity,
+          image: (p as any)?.image,
+        };
+      }),
+      totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
+      delivery: form.delivery,
+      address: form.delivery === "entrega" ? form.address : settings.address,
+      notes: form.notes,
+    };
+
+    // Cartão → abre modal próprio (Checkout Transparente Mercado Pago)
+    if (form.payment === "card") {
+      setCardModal(sharedPayload);
+      return;
+    }
+
+    // Dinheiro → fluxo local
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
       address: form.address, paymentMethod: form.payment,
