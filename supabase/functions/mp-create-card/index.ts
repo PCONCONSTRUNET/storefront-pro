@@ -71,6 +71,36 @@ Deno.serve(async (req) => {
     return json({ error: "Falha ao criar pedido" }, 500);
   }
 
+  // Sandbox: aprova automaticamente e dispara notificações
+  if (SANDBOX) {
+    const sandboxId = `SANDBOX-${order.id.slice(0, 8)}-${Date.now()}`;
+    await supabase.from("orders").update({
+      mp_payment_id: sandboxId,
+      payment_status: "approved",
+      paid_at: new Date().toISOString(),
+    }).eq("id", order.id);
+
+    await supabase.from("payment_events").insert({
+      mp_event_id: `sandbox-${order.id}-${Date.now()}`,
+      mp_payment_id: sandboxId,
+      order_id: order.id,
+      event_type: "approved",
+      raw_payload: { simulated: true, card: { last4: "0000" } },
+    });
+
+    await notifyOrderApproved(supabase, { ...order, payment_status: "approved" });
+
+    return json({
+      order_id: order.id,
+      mp_payment_id: sandboxId,
+      status: "approved",
+      mp_status: "approved",
+      status_detail: "sandbox_simulated",
+      total,
+      sandbox: true,
+    });
+  }
+
   const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`;
 
   const mpPayload: Record<string, unknown> = {
