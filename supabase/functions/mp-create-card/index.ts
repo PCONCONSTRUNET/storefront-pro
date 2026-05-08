@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  if (!MP_TOKEN) return json({ error: "MERCADOPAGO_ACCESS_TOKEN não configurado" }, 500);
+  const SANDBOX = !MP_TOKEN;
 
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
