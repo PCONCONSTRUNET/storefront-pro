@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { X } from "lucide-react";
 
 export const Route = createFileRoute("/cadastro")({
