@@ -23,6 +23,7 @@ type Row = {
   status?: string;
   affiliateName?: string;
   txRef?: Transaction;
+  affiliateSaleId?: string;
 };
 
 const CATEGORY_LABEL: Record<TransactionCategory, string> = {
@@ -43,6 +44,7 @@ function Page() {
   const addTransaction = useStore(s => s.addTransaction);
   const deleteTransaction = useStore(s => s.deleteTransaction);
   const updateTransaction = useStore(s => s.updateTransaction);
+  const deleteAffiliateSale = useStore(s => s.deleteAffiliateSale);
 
   const [filter, setFilter] = useState<"todos" | "entrada" | "saida">("todos");
   const [showForm, setShowForm] = useState(false);
@@ -89,6 +91,7 @@ function Page() {
         isOut: false,
         kind: "comissao",
         affiliateName: aff?.name,
+        affiliateSaleId: s.id,
       });
       if (s.commissionEarned > 0) {
         list.push({
@@ -100,6 +103,7 @@ function Page() {
           isOut: true,
           kind: "comissao",
           affiliateName: aff?.name,
+          affiliateSaleId: s.id,
         });
       }
     });
@@ -258,6 +262,20 @@ function Page() {
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
+                  )}
+                  {r.affiliateSaleId && (
+                    <button
+                      onClick={() => {
+                        if (confirm("Excluir esta venda de afiliada? A comissão correspondente também será removida.")) {
+                          deleteAffiliateSale(r.affiliateSaleId!);
+                          toast.success("Venda removida");
+                        }
+                      }}
+                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                      title="Excluir venda de afiliada"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   )}
                 </div>
               </li>
