@@ -33,7 +33,13 @@ function Page() {
       const url = buildResetUrl(token);
       setLink(url);
       setAccountPhone(account.phone);
-      toast.success("Link de recuperação gerado! Válido por 30 minutos.");
+      try {
+        const { sendPasswordResetEmail } = await import("@/lib/emails");
+        await sendPasswordResetEmail({ email: account.email, resetUrl: url });
+        toast.success("Link enviado para seu e-mail! Válido por 30 minutos.");
+      } catch {
+        toast.success("Link de recuperação gerado! Válido por 30 minutos.");
+      }
     } catch (err: any) {
       toast.error(err?.message || "Erro ao gerar link de recuperação");
     } finally {

@@ -381,6 +381,7 @@ export const useStore = create<AppState>()(
           currentCustomerId: newC.id,
           sessions: { ...s.sessions, customer: makeSession(newC.id) },
         }));
+        import("./emails").then(m => m.sendWelcomeEmail({ email: newC.email, name: newC.name })).catch(() => {});
         return { ok: true, message: "Cadastro realizado!" };
       },
       loginCustomer: (email, password) => {
@@ -563,6 +564,11 @@ export const useStore = create<AppState>()(
             notif.trigger("pagamento_aprovado", {
               cliente: order.customerName, pedido: order.id, total: brlFmt(order.total),
             }, { audience: "cliente", recipientId: order.customerId });
+            import("./emails").then(m => m.sendOrderConfirmationEmail({
+              email: order.customerEmail, customerName: order.customerName, orderId: order.id,
+              items: order.items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
+              total: order.total, paymentMethod: order.paymentMethod,
+            })).catch(() => {});
           }
           // Estoque baixo
           get().products.forEach(p => {
@@ -592,6 +598,13 @@ export const useStore = create<AppState>()(
               cliente: order.customerName, pedido: order.id, total: brlFmt(order.total),
             }, { audience: "cliente", recipientId: order.customerId });
           } catch { /* ignore */ }
+        }
+        if (status === "pago") {
+          import("./emails").then(m => m.sendOrderConfirmationEmail({
+            email: order.customerEmail, customerName: order.customerName, orderId: order.id,
+            items: order.items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
+            total: order.total, paymentMethod: order.paymentMethod,
+          })).catch(() => {});
         }
       },
       deleteOrder: (id) => set((s) => ({ orders: s.orders.filter(o => o.id !== id) })),
