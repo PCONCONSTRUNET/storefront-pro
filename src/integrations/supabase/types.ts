@@ -14,6 +14,183 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_sales: {
+        Row: {
+          affiliate_id: string
+          commission_earned: number
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          product_description: string
+          sale_value: number
+          status: string
+        }
+        Insert: {
+          affiliate_id: string
+          commission_earned?: number
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          product_description: string
+          sale_value?: number
+          status?: string
+        }
+        Update: {
+          affiliate_id?: string
+          commission_earned?: number
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          product_description?: string
+          sale_value?: number
+          status?: string
+        }
+        Relationships: []
+      }
+      affiliates: {
+        Row: {
+          active: boolean
+          commission_type: string
+          commission_value: number
+          created_at: string
+          email: string
+          id: string
+          name: string
+          password_hash: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          commission_type?: string
+          commission_value?: number
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          password_hash: string
+          phone?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          commission_type?: string
+          commission_value?: number
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          password_hash?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          image: string | null
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          image?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          expires_at: string | null
+          extra: Json
+          kind: string
+          min_subtotal: number
+          value: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          extra?: Json
+          kind?: string
+          min_subtotal?: number
+          value?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          extra?: Json
+          kind?: string
+          min_subtotal?: number
+          value?: number
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          address: string | null
+          addresses: Json
+          created_at: string
+          email: string
+          favorites: Json
+          id: string
+          name: string
+          password_hash: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          addresses?: Json
+          created_at?: string
+          email: string
+          favorites?: Json
+          id?: string
+          name: string
+          password_hash: string
+          phone?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          addresses?: Json
+          created_at?: string
+          email?: string
+          favorites?: Json
+          id?: string
+          name?: string
+          password_hash?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address: string | null
@@ -156,6 +333,150 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          created_at: string
+          description: string | null
+          extra: Json
+          featured: boolean
+          id: string
+          images: Json
+          name: string
+          original_price: number | null
+          price: number
+          slug: string | null
+          stock: number
+          updated_at: string
+          variations: Json
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          extra?: Json
+          featured?: boolean
+          id: string
+          images?: Json
+          name: string
+          original_price?: number | null
+          price?: number
+          slug?: string | null
+          stock?: number
+          updated_at?: string
+          variations?: Json
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          extra?: Json
+          featured?: boolean
+          id?: string
+          images?: Json
+          name?: string
+          original_price?: number | null
+          price?: number
+          slug?: string | null
+          stock?: number
+          updated_at?: string
+          variations?: Json
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name: string
+          id: string
+          photos: Json
+          product_id: string
+          rating: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name: string
+          id?: string
+          photos?: Json
+          product_id: string
+          rating?: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string
+          id?: string
+          photos?: Json
+          product_id?: string
+          rating?: number
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          data: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          data?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          affiliate_id: string | null
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          kind: string
+          notes: string | null
+          product_summary: string | null
+        }
+        Insert: {
+          affiliate_id?: string | null
+          amount?: number
+          category: string
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          kind: string
+          notes?: string | null
+          product_summary?: string | null
+        }
+        Update: {
+          affiliate_id?: string | null
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          product_summary?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

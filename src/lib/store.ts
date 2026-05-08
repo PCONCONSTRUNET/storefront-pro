@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { useEffect, useState } from "react";
 import { initialProducts, initialCategories, initialCoupons, type Product, type Category, type Coupon } from "./data";
 import { useNotifications } from "./notifications";
+import { cloud, fetchCloudSnapshot } from "./cloud";
 
 const brlFmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -314,12 +315,15 @@ export const useStore = create<AppState>()(
       addTransaction: (t) => {
         const tx: Transaction = { ...t, id: `tx_${Date.now()}`, createdAt: new Date().toISOString() };
         set(s => ({ transactions: [tx, ...s.transactions] }));
+        cloud.upsertTransaction(tx);
         return tx;
       },
-      updateTransaction: (id, patch) => set(s => ({
-        transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t),
-      })),
-      deleteTransaction: (id) => set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })),
+      updateTransaction: (id, patch) => {
+        set(s => ({ transactions: s.transactions.map(t => t.id === id ? { ...t, ...patch } : t) }));
+        const tx = get().transactions.find(t => t.id === id);
+        if (tx) cloud.upsertTransaction(tx);
+      },
+      deleteTransaction: (id) => { set(s => ({ transactions: s.transactions.filter(t => t.id !== id) })); cloud.deleteTransaction(id); },
 
       addReview: (data) => {
         const state = get();
@@ -338,15 +342,18 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ reviews: [review, ...s.reviews] }));
+        cloud.upsertReview(review);
         return { ok: true, message: "Avaliação publicada!" };
       },
-      deleteReview: (id) => set(s => ({
-        reviews: s.reviews.filter(r => {
-          if (r.id !== id) return true;
-          // allow author or admin
-          return !(s.isAdmin || r.customerId === s.currentCustomerId);
-        }),
-      })),
+      deleteReview: (id) => {
+        set(s => ({
+          reviews: s.reviews.filter(r => {
+            if (r.id !== id) return true;
+            return !(s.isAdmin || r.customerId === s.currentCustomerId);
+          }),
+        }));
+        cloud.deleteReview(id);
+      },
 
       addToCart: (productId, quantity = 1, variation) =>
         set((s) => {
@@ -375,12 +382,13 @@ export const useStore = create<AppState>()(
       registerCustomer: (c) => {
         const exists = get().customers.find((x) => x.email === c.email);
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
-        const newC: Customer = { ...c, id: `c_${Date.now()}`, createdAt: new Date().toISOString() };
+        const newC: Customer = { ...c, id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `c_${Date.now()}`), createdAt: new Date().toISOString() };
         set((s) => ({
           customers: [...s.customers, newC],
           currentCustomerId: newC.id,
           sessions: { ...s.sessions, customer: makeSession(newC.id) },
         }));
+        cloud.upsertCustomer(newC);
         import("./emails").then(m => m.sendWelcomeEmail({ email: newC.email, name: newC.name })).catch(() => {});
         return { ok: true, message: "Cadastro realizado!" };
       },
@@ -395,17 +403,23 @@ export const useStore = create<AppState>()(
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
         set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, ...data } : c) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
         return { ok: true, message: "Dados atualizados" };
       },
       addAddress: (address) => {
         const id = get().currentCustomerId;
         if (!id || !address.trim()) return;
         set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, addresses: [...(c.addresses || []), address.trim()] } : c) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
       },
       removeAddress: (index) => {
         const id = get().currentCustomerId;
         if (!id) return;
         set(s => ({ customers: s.customers.map(c => c.id === id ? { ...c, addresses: (c.addresses || []).filter((_, i) => i !== index) } : c) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
       },
       toggleFavorite: (productId) => {
         const id = get().currentCustomerId;
@@ -415,6 +429,8 @@ export const useStore = create<AppState>()(
           const favs = c.favorites || [];
           return { ...c, favorites: favs.includes(productId) ? favs.filter(p => p !== productId) : [...favs, productId] };
         }) }));
+        const c = get().customers.find(x => x.id === id);
+        if (c) cloud.upsertCustomer(c);
       },
       loginAdmin: (email, password) => {
         const AUTHORIZED_ADMINS: Record<string, string> = {
@@ -447,7 +463,7 @@ export const useStore = create<AppState>()(
         const exists = get().affiliates.find(a => a.email.toLowerCase() === email);
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
         const newA: Affiliate = {
-          id: `aff_${Date.now()}`,
+          id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `aff_${Date.now()}`),
           name,
           email,
           password: data.password,
@@ -458,15 +474,22 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ affiliates: [...s.affiliates, newA], currentAffiliateId: newA.id, sessions: { ...s.sessions, affiliate: makeSession(newA.id) } }));
+        cloud.upsertAffiliate(newA);
         return { ok: true, message: "Cadastro realizado! Aguarde a administradora definir sua comissão." };
       },
-      upsertAffiliate: (a) => set((s) => ({
-        affiliates: s.affiliates.find(x => x.id === a.id) ? s.affiliates.map(x => x.id === a.id ? a : x) : [...s.affiliates, a],
-      })),
-      deleteAffiliate: (id) => set((s) => ({
-        affiliates: s.affiliates.filter(a => a.id !== id),
-        affiliateSales: s.affiliateSales.filter(v => v.affiliateId !== id),
-      })),
+      upsertAffiliate: (a) => {
+        set((s) => ({
+          affiliates: s.affiliates.find(x => x.id === a.id) ? s.affiliates.map(x => x.id === a.id ? a : x) : [...s.affiliates, a],
+        }));
+        cloud.upsertAffiliate(a);
+      },
+      deleteAffiliate: (id) => {
+        set((s) => ({
+          affiliates: s.affiliates.filter(a => a.id !== id),
+          affiliateSales: s.affiliateSales.filter(v => v.affiliateId !== id),
+        }));
+        cloud.deleteAffiliate(id);
+      },
       registerAffiliateSale: (data) => {
         const aff = get().affiliates.find(a => a.id === data.affiliateId);
         if (!aff) return null;
@@ -474,7 +497,7 @@ export const useStore = create<AppState>()(
           ? data.saleValue * aff.commissionValue / 100
           : aff.commissionValue;
         const sale: AffiliateSale = {
-          id: `vaf_${Date.now()}`,
+          id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `vaf_${Date.now()}`),
           affiliateId: data.affiliateId,
           customerName: data.customerName,
           customerPhone: data.customerPhone,
@@ -486,7 +509,7 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set(s => ({ affiliateSales: [sale, ...s.affiliateSales] }));
-        // Notifica admin sobre nova venda de afiliada
+        cloud.upsertAffiliateSale(sale);
         try {
           useNotifications.getState().trigger("afiliada_nova_venda", {
             afiliada: aff.name,
@@ -499,6 +522,8 @@ export const useStore = create<AppState>()(
       updateAffiliateSaleStatus: (id, status) => {
         const sale = get().affiliateSales.find(v => v.id === id);
         set(s => ({ affiliateSales: s.affiliateSales.map(v => v.id === id ? { ...v, status } : v) }));
+        const updated = get().affiliateSales.find(v => v.id === id);
+        if (updated) cloud.upsertAffiliateSale(updated);
         if (sale && status === "confirmada") {
           const aff = get().affiliates.find(a => a.id === sale.affiliateId);
           try {
@@ -509,7 +534,7 @@ export const useStore = create<AppState>()(
           } catch { /* ignore */ }
         }
       },
-      deleteAffiliateSale: (id) => set(s => ({ affiliateSales: s.affiliateSales.filter(v => v.id !== id) })),
+      deleteAffiliateSale: (id) => { set(s => ({ affiliateSales: s.affiliateSales.filter(v => v.id !== id) })); cloud.deleteAffiliateSale(id); },
 
       placeOrder: (data) => {
         const state = get();
@@ -523,7 +548,7 @@ export const useStore = create<AppState>()(
         const shipping = 0;
         const total = Math.max(0, subtotal - discount) + shipping;
         const order: Order = {
-          id: `PED${Date.now().toString().slice(-6)}`,
+          id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `PED${Date.now().toString().slice(-6)}`),
           customerId: state.currentCustomerId || "guest",
           customerName: data.customerName,
           customerEmail: data.customerEmail,
@@ -577,12 +602,45 @@ export const useStore = create<AppState>()(
             }
           });
         } catch { /* ignore */ }
+        // Cloud persistence: order + sales transaction (if paid) + stock + coupon
+        try {
+          const ordRow = {
+            id: order.id, customer_name: order.customerName, customer_email: order.customerEmail,
+            customer_phone: order.customerPhone, delivery_method: order.deliveryMethod,
+            address: order.address || null, notes: order.notes || null,
+            items: order.items as any, subtotal: order.subtotal, discount: order.discount,
+            shipping: order.shipping, total: order.total, payment_method: order.paymentMethod,
+            payment_status: order.status === "pago" ? "paid" : "pending",
+          };
+          import("@/integrations/supabase/client").then(({ supabase }) => {
+            supabase.from("orders").upsert(ordRow as any, { onConflict: "id" }).then(({ error }) => {
+              if (error) console.warn("[cloud:placeOrder]", error);
+            });
+          });
+          if (order.status === "pago") {
+            const tx: Transaction = {
+              id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `tx_${Date.now()}`),
+              kind: "entrada", category: "venda",
+              description: `Pedido ${order.id} — ${order.customerName}`,
+              amount: order.total, date: order.createdAt,
+              productSummary: order.items.map(i => `${i.quantity}x ${i.name}`).join(", "),
+              createdAt: order.createdAt,
+            };
+            set(s => ({ transactions: [tx, ...s.transactions] }));
+            cloud.upsertTransaction(tx);
+          }
+          // sync affected products (stock) and coupon
+          const updated = get();
+          items.forEach(it => { const p = updated.products.find(x => x.id === it.productId); if (p) cloud.upsertProduct(p); });
+          if (coupon) { const c2 = updated.coupons.find(c => c.code === coupon.code); if (c2) cloud.upsertCoupon(c2); }
+        } catch { /* ignore */ }
         return order;
       },
       updateOrderStatus: (id, status) => {
         const order = get().orders.find(o => o.id === id);
         set((s) => ({ orders: s.orders.map(o => o.id === id ? { ...o, status } : o) }));
         if (!order) return;
+        cloud.updateOrderStatus(id, status === "pago" ? "paid" : status);
         const map: Record<string, "pagamento_aprovado" | "pedido_em_separacao" | "pedido_enviado" | "pedido_entregue" | "pedido_cancelado" | null> = {
           pago: "pagamento_aprovado",
           em_separacao: "pedido_em_separacao",
@@ -600,6 +658,20 @@ export const useStore = create<AppState>()(
           } catch { /* ignore */ }
         }
         if (status === "pago") {
+          // record sale transaction once
+          const exists = get().transactions.find(t => t.description.includes(order.id) && t.category === "venda");
+          if (!exists) {
+            const tx: Transaction = {
+              id: (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `tx_${Date.now()}`),
+              kind: "entrada", category: "venda",
+              description: `Pedido ${order.id} — ${order.customerName}`,
+              amount: order.total, date: new Date().toISOString(),
+              productSummary: order.items.map(i => `${i.quantity}x ${i.name}`).join(", "),
+              createdAt: new Date().toISOString(),
+            };
+            set(s => ({ transactions: [tx, ...s.transactions] }));
+            cloud.upsertTransaction(tx);
+          }
           import("./emails").then(m => m.sendOrderConfirmationEmail({
             email: order.customerEmail, customerName: order.customerName, orderId: order.id,
             items: order.items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
@@ -607,21 +679,27 @@ export const useStore = create<AppState>()(
           })).catch(() => {});
         }
       },
-      deleteOrder: (id) => set((s) => ({ orders: s.orders.filter(o => o.id !== id) })),
+      deleteOrder: (id) => { set((s) => ({ orders: s.orders.filter(o => o.id !== id) })); cloud.deleteOrder(id); },
 
-      upsertProduct: (p) => set((s) => ({
-        products: s.products.find(x => x.id === p.id) ? s.products.map(x => x.id === p.id ? p : x) : [...s.products, p],
-      })),
-      deleteProduct: (id) => set((s) => ({ products: s.products.filter(p => p.id !== id) })),
-      upsertCategory: (c) => set((s) => ({
-        categories: s.categories.find(x => x.id === c.id) ? s.categories.map(x => x.id === c.id ? c : x) : [...s.categories, c],
-      })),
-      deleteCategory: (id) => set((s) => ({ categories: s.categories.filter(c => c.id !== id) })),
-      upsertCoupon: (c) => set((s) => ({
-        coupons: s.coupons.find(x => x.code === c.code) ? s.coupons.map(x => x.code === c.code ? c : x) : [...s.coupons, c],
-      })),
-      deleteCoupon: (code) => set((s) => ({ coupons: s.coupons.filter(c => c.code !== code) })),
-      updateSettings: (s2) => set((s) => ({ settings: { ...s.settings, ...s2 } })),
+      upsertProduct: (p) => {
+        set((s) => ({ products: s.products.find(x => x.id === p.id) ? s.products.map(x => x.id === p.id ? p : x) : [...s.products, p] }));
+        cloud.upsertProduct(p);
+      },
+      deleteProduct: (id) => { set((s) => ({ products: s.products.filter(p => p.id !== id) })); cloud.deleteProduct(id); },
+      upsertCategory: (c) => {
+        set((s) => ({ categories: s.categories.find(x => x.id === c.id) ? s.categories.map(x => x.id === c.id ? c : x) : [...s.categories, c] }));
+        cloud.upsertCategory(c);
+      },
+      deleteCategory: (id) => { set((s) => ({ categories: s.categories.filter(c => c.id !== id) })); cloud.deleteCategory(id); },
+      upsertCoupon: (c) => {
+        set((s) => ({ coupons: s.coupons.find(x => x.code === c.code) ? s.coupons.map(x => x.code === c.code ? c : x) : [...s.coupons, c] }));
+        cloud.upsertCoupon(c);
+      },
+      deleteCoupon: (code) => { set((s) => ({ coupons: s.coupons.filter(c => c.code !== code) })); cloud.deleteCoupon(code); },
+      updateSettings: (s2) => {
+        set((s) => ({ settings: { ...s.settings, ...s2 } }));
+        cloud.upsertSettings(get().settings);
+      },
     }),
     {
       name: "princesa-store-v1",
@@ -679,6 +757,60 @@ export function useStoreHydrated() {
     return () => { active = false; unsub(); };
   }, []);
   return hydrated;
+}
+
+let _hydratingFromCloud: Promise<void> | null = null;
+export function hydrateFromCloud(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (_hydratingFromCloud) return _hydratingFromCloud;
+  _hydratingFromCloud = (async () => {
+    try {
+      const snap = await fetchCloudSnapshot();
+      const cur = useStore.getState();
+      // Merge by id: prefer cloud rows, keep any local-only items the cloud doesn't know yet.
+      const mergeById = <T extends { id: string }>(local: T[], remote: T[]) => {
+        const map = new Map<string, T>();
+        local.forEach(x => map.set(x.id, x));
+        remote.forEach(x => map.set(x.id, x));
+        return Array.from(map.values());
+      };
+      const mergeByCode = (local: any[], remote: any[]) => {
+        const map = new Map<string, any>();
+        local.forEach(x => map.set(x.code, x));
+        remote.forEach(x => map.set(x.code, x));
+        return Array.from(map.values());
+      };
+      useStore.setState({
+        customers: mergeById(cur.customers, snap.customers),
+        products: snap.products.length ? mergeById(cur.products, snap.products) : cur.products,
+        categories: snap.categories.length ? mergeById(cur.categories, snap.categories) : cur.categories,
+        coupons: snap.coupons.length ? mergeByCode(cur.coupons, snap.coupons) : cur.coupons,
+        affiliates: mergeById(cur.affiliates, snap.affiliates),
+        affiliateSales: mergeById(cur.affiliateSales, snap.affiliateSales),
+        transactions: mergeById(cur.transactions, snap.transactions),
+        reviews: mergeById(cur.reviews, snap.reviews),
+        orders: mergeById(cur.orders, snap.orders),
+        settings: snap.settings ? { ...cur.settings, ...snap.settings } as StoreSettings : cur.settings,
+      });
+      // One-shot push of any local-only items so legacy localStorage data lands in the cloud.
+      const pushed = "cloud_initial_push_v1";
+      if (!localStorage.getItem(pushed)) {
+        cur.customers.filter(c => !snap.customers.find(x => x.id === c.id)).forEach(c => cloud.upsertCustomer(c));
+        cur.products.filter(p => !snap.products.find(x => x.id === p.id)).forEach(p => cloud.upsertProduct(p));
+        cur.categories.filter(c => !snap.categories.find(x => x.id === c.id)).forEach(c => cloud.upsertCategory(c));
+        cur.coupons.filter(c => !snap.coupons.find(x => x.code === c.code)).forEach(c => cloud.upsertCoupon(c));
+        cur.affiliates.filter(a => !snap.affiliates.find(x => x.id === a.id)).forEach(a => cloud.upsertAffiliate(a));
+        cur.affiliateSales.filter(s => !snap.affiliateSales.find(x => x.id === s.id)).forEach(s => cloud.upsertAffiliateSale(s));
+        cur.transactions.filter(t => !snap.transactions.find(x => x.id === t.id)).forEach(t => cloud.upsertTransaction(t));
+        cur.reviews.filter(r => !snap.reviews.find(x => x.id === r.id)).forEach(r => cloud.upsertReview(r));
+        if (!snap.settings) cloud.upsertSettings(cur.settings);
+        localStorage.setItem(pushed, "1");
+      }
+    } catch (e) {
+      console.warn("[hydrateFromCloud] failed", e);
+    }
+  })();
+  return _hydratingFromCloud;
 }
 
 function computeSubtotal(s: AppState) {

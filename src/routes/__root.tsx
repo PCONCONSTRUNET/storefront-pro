@@ -13,7 +13,7 @@ function matchAllowedRoute(path: string): string | null {
   return PWA_ALLOWED_ROUTES.find(r => path === r || path.startsWith(r + "/")) ?? null;
 }
 import { Toaster } from "@/components/ui/sonner";
-import { useStore } from "@/lib/store";
+import { useStore, hydrateFromCloud } from "@/lib/store";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 
 import appCss from "../styles.css?url";
@@ -190,5 +190,10 @@ function RootComponent() {
       window.clearInterval(interval);
     };
   }, [refreshSession]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    hydrateFromCloud();
+  }, []);
   return <><Outlet /><PwaInstallPrompt /></>;
 }
