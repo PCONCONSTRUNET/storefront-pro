@@ -24,6 +24,7 @@ import { Route as PerfilIndexRouteImport } from './routes/perfil.index'
 import { Route as AfiliadaIndexRouteImport } from './routes/afiliada.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
+import { Route as PerfilTransacoesRouteImport } from './routes/perfil.transacoes'
 import { Route as PerfilFavoritosRouteImport } from './routes/perfil.favoritos'
 import { Route as PerfilEnderecosRouteImport } from './routes/perfil.enderecos'
 import { Route as PerfilConfiguracoesRouteImport } from './routes/perfil.configuracoes'
@@ -124,6 +125,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const ProdutoIdRoute = ProdutoIdRouteImport.update({
   id: '/produto/$id',
   path: '/produto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilTransacoesRoute = PerfilTransacoesRouteImport.update({
+  id: '/perfil/transacoes',
+  path: '/perfil/transacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilFavoritosRoute = PerfilFavoritosRouteImport.update({
@@ -288,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
   '/perfil/enderecos': typeof PerfilEnderecosRoute
   '/perfil/favoritos': typeof PerfilFavoritosRoute
+  '/perfil/transacoes': typeof PerfilTransacoesRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
@@ -331,6 +338,7 @@ export interface FileRoutesByTo {
   '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
   '/perfil/enderecos': typeof PerfilEnderecosRoute
   '/perfil/favoritos': typeof PerfilFavoritosRoute
+  '/perfil/transacoes': typeof PerfilTransacoesRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin': typeof AdminIndexRoute
   '/afiliada': typeof AfiliadaIndexRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
   '/perfil/enderecos': typeof PerfilEnderecosRoute
   '/perfil/favoritos': typeof PerfilFavoritosRoute
+  '/perfil/transacoes': typeof PerfilTransacoesRoute
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/perfil/configuracoes'
     | '/perfil/enderecos'
     | '/perfil/favoritos'
+    | '/perfil/transacoes'
     | '/produto/$id'
     | '/admin/'
     | '/afiliada/'
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/perfil/configuracoes'
     | '/perfil/enderecos'
     | '/perfil/favoritos'
+    | '/perfil/transacoes'
     | '/produto/$id'
     | '/admin'
     | '/afiliada'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/perfil/configuracoes'
     | '/perfil/enderecos'
     | '/perfil/favoritos'
+    | '/perfil/transacoes'
     | '/produto/$id'
     | '/admin/'
     | '/afiliada/'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   PerfilConfiguracoesRoute: typeof PerfilConfiguracoesRoute
   PerfilEnderecosRoute: typeof PerfilEnderecosRoute
   PerfilFavoritosRoute: typeof PerfilFavoritosRoute
+  PerfilTransacoesRoute: typeof PerfilTransacoesRoute
   ProdutoIdRoute: typeof ProdutoIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AfiliadaIndexRoute: typeof AfiliadaIndexRoute
@@ -667,6 +680,13 @@ declare module '@tanstack/react-router' {
       path: '/produto/$id'
       fullPath: '/produto/$id'
       preLoaderRoute: typeof ProdutoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil/transacoes': {
+      id: '/perfil/transacoes'
+      path: '/perfil/transacoes'
+      fullPath: '/perfil/transacoes'
+      preLoaderRoute: typeof PerfilTransacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil/favoritos': {
@@ -897,6 +917,7 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilConfiguracoesRoute: PerfilConfiguracoesRoute,
   PerfilEnderecosRoute: PerfilEnderecosRoute,
   PerfilFavoritosRoute: PerfilFavoritosRoute,
+  PerfilTransacoesRoute: PerfilTransacoesRoute,
   ProdutoIdRoute: ProdutoIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   AfiliadaIndexRoute: AfiliadaIndexRoute,

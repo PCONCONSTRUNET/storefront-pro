@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram, X } from "lucide-react";
+import { User, LogOut, Package, Settings, Heart, MapPin, ChevronRight, Instagram, X, Receipt } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/perfil/")({
@@ -35,6 +35,7 @@ function Page() {
 
   const items = [
     { to: "/pedidos", icon: Package, label: "Meus pedidos" },
+    { to: "/perfil/transacoes", icon: Receipt, label: "Histórico de transações" },
     { to: "/perfil/enderecos", icon: MapPin, label: "Endereços" },
     { to: "/perfil/favoritos", icon: Heart, label: "Favoritos" },
     { to: "/perfil/configuracoes", icon: Settings, label: "Configurações" },
