@@ -12,7 +12,7 @@ type OrderPayload = {
   paymentMethod?: string;
 };
 
-async function safeInvoke(fn: string, body: unknown) {
+async function safeInvoke(fn: string, body: Record<string, unknown>) {
   try {
     const { error } = await supabase.functions.invoke(fn, { body });
     if (error) console.warn(`[email] ${fn}:`, error.message);
