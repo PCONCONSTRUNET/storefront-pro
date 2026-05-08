@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   if (!customer.name || !customer.email || !customer.phone) {
     return json({ error: "Dados do cliente incompletos" }, 400);
   }
-  if (!card.token || !card.payment_method_id) {
+  if (!SANDBOX && (!card.token || !card.payment_method_id)) {
     return json({ error: "Dados do cartão incompletos" }, 400);
   }
   if (total <= 0) return json({ error: "Total inválido" }, 400);
