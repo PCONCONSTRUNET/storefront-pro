@@ -47,7 +47,36 @@ function Page() {
     setStep(s => s + 1);
   };
 
-  const finish = () => {
+  const finish = async () => {
+    if (submitting) return;
+
+    // Pix → Mercado Pago (gera QR Code real)
+    if (form.payment === "pix") {
+      setSubmitting(true);
+      try {
+        const shipping = form.delivery === "retirada" ? 0 : totals.shipping;
+        const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+        const result = await createPixPayment({
+          customer: { name: form.name, email: form.email, phone: form.phone },
+          items: cart.map(it => ({
+            productId: it.productId, name: it.name, price: it.price,
+            quantity: it.quantity, image: it.image,
+          })),
+          totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
+          delivery: form.delivery,
+          address: form.delivery === "entrega" ? form.address : settings.address,
+          notes: form.notes,
+        });
+        playBeep();
+        navigate({ to: "/checkout/pix/$id", params: { id: result.order_id } });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Falha ao gerar Pix");
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // Cartão / Dinheiro → fluxo local (futuro: integrar)
     const order = placeOrder({
       customerName: form.name, customerEmail: form.email, customerPhone: form.phone,
       address: form.address, paymentMethod: form.payment,
