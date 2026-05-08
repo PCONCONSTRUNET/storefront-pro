@@ -86,6 +86,9 @@ const DEFAULT_TEMPLATES: NotificationTemplate[] = [
   { id: "t_afiliada_nova_venda_admin", category: "afiliada_nova_venda", audience: "admin",
     title: "💼 Venda de afiliada", body: "{afiliada} registrou uma venda de {total} para {cliente}.",
     icon: "💼", enabled: true, sendPush: true, sendEmail: false, sendInApp: true },
+  { id: "t_pagamento_aprovado_admin", category: "pagamento_aprovado", audience: "admin",
+    title: "Pagamento aprovado ✨", body: "Pagamento do pedido #{pedido} de {cliente} ({total}) foi confirmado.",
+    icon: "💳", enabled: true, sendPush: true, sendEmail: false, sendInApp: true },
 
   // Afiliada
   { id: "t_afiliada_venda_confirmada", category: "afiliada_venda_confirmada", audience: "afiliada",
