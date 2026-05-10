@@ -149,7 +149,7 @@ function Page() {
             <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.98] transition-transform">
               <Send className="h-4 w-4" /> Enviar agora
             </button>
-            <p className="text-[11px] text-muted-foreground text-center">Push real depende de integração com FCM/OneSignal — a estrutura já está pronta.</p>
+            <p className="text-[11px] text-muted-foreground text-center">Push via OneSignal ativo ✅ — notificações serão entregues aos dispositivos cadastrados.</p>
           </form>
 
           {/* Preview */}

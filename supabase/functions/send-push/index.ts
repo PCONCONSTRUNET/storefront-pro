@@ -22,7 +22,9 @@ Deno.serve(async (req) => {
     };
 
     if (Array.isArray(externalUserIds) && externalUserIds.length > 0) {
-      payload.include_external_user_ids = externalUserIds;
+      // OneSignal v16+: use include_aliases instead of deprecated include_external_user_ids
+      payload.include_aliases = { external_id: externalUserIds };
+      payload.target_channel = "push";
     } else if (audience && audience !== "all") {
       // segmenta por tag "audience" (admin / affiliate / customer)
       payload.filters = [{ field: "tag", key: "audience", relation: "=", value: audience }];
@@ -35,6 +37,7 @@ Deno.serve(async (req) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Key ${ONESIGNAL_REST_API_KEY}`,
+        "Accept": "application/json",
       },
       body: JSON.stringify(payload),
     });

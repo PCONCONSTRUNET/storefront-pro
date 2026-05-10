@@ -1,7 +1,6 @@
-// Notification system — local structure ready for future push integration
-// (FCM / OneSignal / Web Push). Right now persists locally and emits
-// in-app toasts. The shape mirrors what a server-side push payload would
-// look like, so the swap later is trivial.
+// Notification system — integrated with OneSignal for real push delivery.
+// Persists templates/logs locally and dispatches push via Supabase edge
+// function → OneSignal REST API. In-app toasts are shown in parallel.
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -227,7 +226,21 @@ export const useNotifications = create<NotificationState>()(
           set({ pushPermission: "unsupported" });
           return "unsupported";
         }
-        const result = await Notification.requestPermission();
+        try {
+          // Use OneSignal SDK to request permission — this both asks the
+          // browser AND registers the push subscription with OneSignal.
+          const OS = (window as any).OneSignal;
+          if (OS?.Notifications?.requestPermission) {
+            await OS.Notifications.requestPermission();
+          } else {
+            // Fallback to native API if OneSignal not yet loaded
+            await Notification.requestPermission();
+          }
+        } catch (e) {
+          console.warn("[push] requestPermission falhou:", e);
+          try { await Notification.requestPermission(); } catch {}
+        }
+        const result = Notification.permission;
         set({ pushPermission: result });
         return result;
       },

@@ -84,8 +84,10 @@ OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "eceb417e-8a33-4d57-9a0f-0cdfe8f8c7e6",
     safari_web_id: "web.onesignal.auto.18c6dc90-7633-4ce6-8875-ae2763214094",
+    serviceWorkerPath: "/OneSignalSDKWorker.js",
     notifyButton: { enable: false },
     promptOptions: { slidedown: { prompts: [] } },
+    allowLocalhostAsSecureOrigin: true,
   });
   try {
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -219,9 +221,13 @@ function RootComponent() {
     const OS = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
     OS.push(async (OneSignal: any) => {
       try {
-        if (externalId) await OneSignal.login(externalId);
-        await OneSignal.User.addTag("audience", audience);
-      } catch (e) { console.warn("OneSignal tag failed", e); }
+        if (externalId) {
+          await OneSignal.login(externalId);
+          await OneSignal.User.addTag("audience", audience);
+        } else {
+          await OneSignal.logout();
+        }
+      } catch (e) { console.warn("OneSignal tag/login failed", e); }
     });
   }, [isAdmin, currentCustomerId, currentAffiliateId, location.pathname]);
 
