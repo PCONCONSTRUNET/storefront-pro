@@ -1138,9 +1138,17 @@ export const useStore = create<AppState>()(
       },
       sync: async () => {
         const snap = await fetchCloudSnapshot();
+        const cur = get();
+        // Smart merge products specifically to keep images if cloud lacks them
+        const mergedProducts = cur.products.map(p => {
+          const remote = snap.products.find(rp => rp.id === p.id);
+          if (!remote) return p;
+          return { ...remote, image: remote.image || p.image };
+        });
+
         set((s) => ({
           customers: snap.customers,
-          products: snap.products,
+          products: mergedProducts,
           categories: snap.categories,
           coupons: snap.coupons,
           affiliates: snap.affiliates,
@@ -1193,7 +1201,14 @@ export function hydrateFromCloud(): Promise<void> {
       const mergeById = <T extends { id: string }>(local: T[], remote: T[]) => {
         const map = new Map<string, T>();
         local.forEach((x) => map.set(x.id, x));
-        remote.forEach((x) => map.set(x.id, x));
+        remote.forEach((x) => {
+          const loc = map.get(x.id);
+          // If it's a product and remote has no image, keep local image
+          if (loc && (x as any).image === "" && (loc as any).image) {
+            (x as any).image = (loc as any).image;
+          }
+          map.set(x.id, x);
+        });
         return Array.from(map.values());
       };
       const mergeByCode = <T extends { code: string }>(local: T[], remote: T[]) => {
