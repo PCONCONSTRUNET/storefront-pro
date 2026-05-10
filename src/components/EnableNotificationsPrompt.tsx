@@ -17,6 +17,7 @@ function isStandalone() {
 export function EnableNotificationsPrompt() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const currentCustomerId = useStore(s => s.currentCustomerId);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
