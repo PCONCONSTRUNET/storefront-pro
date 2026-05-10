@@ -81,14 +81,15 @@ export const Route = createRootRoute({
       {
         children: `window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
+  console.log("[OneSignal] Initializing...");
   await OneSignal.init({
     appId: "eceb417e-8a33-4d57-9a0f-0cdfe8f8c7e6",
     safari_web_id: "web.onesignal.auto.18c6dc90-7633-4ce6-8875-ae2763214094",
     serviceWorkerPath: "/OneSignalSDKWorker.js",
     notifyButton: { enable: false },
-    promptOptions: { slidedown: { prompts: [] } },
     allowLocalhostAsSecureOrigin: true,
   });
+  console.log("[OneSignal] Ready. Permission:", Notification.permission);
 });` ,
       },
     ],
