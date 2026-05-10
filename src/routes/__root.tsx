@@ -130,15 +130,12 @@ function RootComponent() {
 
     // Swap <link rel="manifest"> based on current area
     let manifestHref = "/manifest.json";
-    if (path === "/admin" || path.startsWith("/admin/")) manifestHref = "/manifest-admin.json";
-    else if (path === "/afiliada" || path.startsWith("/afiliada/")) manifestHref = "/manifest-afiliada.json";
-
-    // Adiciona timestamp para evitar cache do navegador na troca de manifestos
-    const finalHref = `${manifestHref}?v=${Date.now()}`;
+    if (path === "/admin" || path.startsWith("/admin/")) manifestHref = "/admin/manifest.json";
+    else if (path === "/afiliada" || path.startsWith("/afiliada/")) manifestHref = "/afiliada/manifest.json";
 
     const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
     if (link) {
-      link.setAttribute("href", finalHref);
+      link.setAttribute("href", manifestHref);
       console.log("[PWA] Manifest swapped to:", manifestHref);
     }
   }, [location.pathname]);

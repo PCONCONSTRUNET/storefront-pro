@@ -2,7 +2,7 @@
   "name": "Admin — Princesa de Laços",
   "short_name": "Admin Princesa",
   "start_url": "/admin/login",
-  "scope": "/",
+  "scope": "/admin",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fff5f8",

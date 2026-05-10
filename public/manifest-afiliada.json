@@ -2,7 +2,7 @@
   "name": "Afiliada — Princesa de Laços",
   "short_name": "Afiliada Princesa",
   "start_url": "/afiliada/login",
-  "scope": "/",
+  "scope": "/afiliada",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#fff5f8",
