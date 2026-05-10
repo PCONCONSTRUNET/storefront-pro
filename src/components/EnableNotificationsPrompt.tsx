@@ -40,6 +40,7 @@ export function EnableNotificationsPrompt() {
 
   const enable = async () => {
     setBusy(true);
+    let granted = false;
     try {
       const OneSignal = (window as any).OneSignal;
       if (OneSignal?.Notifications?.requestPermission) {
@@ -47,11 +48,34 @@ export function EnableNotificationsPrompt() {
       } else if ("Notification" in window) {
         await Notification.requestPermission();
       }
+      granted = typeof Notification !== "undefined" && Notification.permission === "granted";
     } catch {
-      try { await Notification.requestPermission(); } catch {}
+      try {
+        await Notification.requestPermission();
+        granted = Notification.permission === "granted";
+      } catch {}
     } finally {
       setBusy(false);
       dismiss();
+    }
+
+    if (granted) {
+      // Aguarda OneSignal registrar a subscription antes de enviar boas-vindas
+      const sendWelcome = async () => {
+        try {
+          await supabase.functions.invoke("send-push", {
+            body: {
+              title: "Notificações ativadas! 🔔",
+              message: "Pronto! Você vai receber avisos de pedidos, pagamentos e novidades 💖",
+              externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
+              audience: currentCustomerId ? undefined : "customer",
+            },
+          });
+        } catch (e) {
+          console.warn("[push] welcome falhou", e);
+        }
+      };
+      window.setTimeout(sendWelcome, 3500);
     }
   };
 
