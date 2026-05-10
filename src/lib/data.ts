@@ -44,6 +44,7 @@ import demoLaco1 from "@/assets/products/demo-laco-rosa-1.png";
 import demoTiara1 from "@/assets/products/demo-tiara-coroa-1.png";
 import demoKit1 from "@/assets/products/demo-kit-lacos-1.png";
 import demoPresilha1 from "@/assets/products/demo-presilha-borboleta-1.png";
+import demoBico1 from "@/assets/products/demo-bico-pato-1.png";
 
 export const initialProducts: Product[] = [
   {
@@ -94,6 +95,7 @@ export const initialProducts: Product[] = [
     description: "Bico de pato com flor de cetim feita à mão. Antialérgico.",
     price: 18.9,
     image: bicoPatoFloral,
+    gallery: [bicoPatoFloral, demoBico1],
     category: "bicos",
     stock: 40,
     sku: "BP-004",
@@ -118,6 +120,7 @@ export const initialProducts: Product[] = [
     description: "Conjunto de 3 elásticos de veludo macio que não marcam o cabelo.",
     price: 14.9,
     image: elasticoVeludo,
+    gallery: [elasticoVeludo],
     category: "elasticos",
     stock: 60,
     sku: "EL-006",
@@ -130,6 +133,7 @@ export const initialProducts: Product[] = [
       "Laço grande estilo maxi em cetim com brilho dourado, ideal para ocasiões especiais.",
     price: 34.9,
     image: lacoMaxiDourado,
+    gallery: [lacoMaxiDourado],
     category: "lacos",
     stock: 15,
     sku: "LC-007",
@@ -141,6 +145,7 @@ export const initialProducts: Product[] = [
     description: "Tiara delicada com aplique de flor rosa em tecido.",
     price: 29.9,
     image: tiaraFlorCerejeira,
+    gallery: [tiaraFlorCerejeira],
     category: "tiaras",
     stock: 22,
     sku: "TR-008",
