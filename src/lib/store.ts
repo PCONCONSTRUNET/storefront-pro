@@ -1100,13 +1100,16 @@ export const useStore = create<AppState>()(
         const mergedProducts = cur.products.map((p) => {
           const remote = snap.products.find((rp) => rp.id === p.id);
           if (!remote) return p;
+          
+          // CRITICAL: If local has a valid illustration, KEEP IT.
+          // The database doesn't have real photos yet, so we prioritize the AI-generated ones.
+          const localIsIllustration = p.image?.startsWith("/products/");
+          const remoteIsRealImage = remote.image?.startsWith("http");
+
           return {
             ...remote,
-            image: isPlaceholder(remote.image) ? p.image : remote.image,
-            gallery:
-              remote.gallery && remote.gallery.length > 0 && !isPlaceholder(remote.gallery[0])
-                ? remote.gallery
-                : p.gallery,
+            image: (localIsIllustration && !remoteIsRealImage) ? p.image : (remote.image || p.image),
+            gallery: (localIsIllustration && !remoteIsRealImage) ? p.gallery : (remote.gallery && remote.gallery.length > 0 ? remote.gallery : p.gallery)
           };
         });
         set((s) => ({
@@ -1128,7 +1131,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 9,
+      version: 10,
       skipHydration: typeof window === "undefined",
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
@@ -1146,8 +1149,8 @@ export const useStore = create<AppState>()(
         if (version < 5) {
           persisted.reviews = [];
         }
-        if (version < 9) {
-          // Force clear to use new strict fallback logic
+        if (version < 10) {
+          // Force clear to use new illustration priority logic
           persisted.products = initialProducts;
         }
         return persisted;
@@ -1215,17 +1218,27 @@ export function hydrateFromCloud(): Promise<void> {
           const loc = map.get(x.id);
           if (loc) {
             // Product specific fallback
-            const isPlaceholder = (url: string) => 
-              !url || 
-              url === "" || 
-              url === "null" || 
-              (!url.startsWith("http") && !url.startsWith("/") && !url.startsWith("data:"));
-            
-            if (isPlaceholder((x as any).image)) {
+            // CRITICAL: Prioritize local illustrations
+            const localIsIllustration = (loc as any).image?.startsWith("/products/");
+            const remoteIsRealImage = (x as any).image?.startsWith("http");
+
+            if (localIsIllustration && !remoteIsRealImage) {
               (x as any).image = (loc as any).image;
-            }
-            if (!(x as any).gallery || (x as any).gallery.length === 0 || isPlaceholder((x as any).gallery[0])) {
               (x as any).gallery = (loc as any).gallery;
+            } else {
+              // Standard fallback
+              const isPlaceholder = (url: string) => 
+                !url || 
+                url === "" || 
+                url === "null" || 
+                (!url.startsWith("http") && !url.startsWith("/") && !url.startsWith("data:"));
+              
+              if (isPlaceholder((x as any).image)) {
+                (x as any).image = (loc as any).image;
+              }
+              if (!(x as any).gallery || (x as any).gallery.length === 0 || isPlaceholder((x as any).gallery[0])) {
+                (x as any).gallery = (loc as any).gallery;
+              }
             }
           }
           map.set(x.id, x);
