@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Bell } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useStore } from "@/lib/store";
 
 const DISMISS_KEY = "push_prompt_dismissed_at";
 const DISMISS_DAYS = 3;
@@ -15,6 +17,7 @@ function isStandalone() {
 export function EnableNotificationsPrompt() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const currentCustomerId = useStore(s => s.currentCustomerId);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -37,6 +40,7 @@ export function EnableNotificationsPrompt() {
 
   const enable = async () => {
     setBusy(true);
+    let granted = false;
     try {
       const OneSignal = (window as any).OneSignal;
       if (OneSignal?.Notifications?.requestPermission) {
@@ -44,11 +48,34 @@ export function EnableNotificationsPrompt() {
       } else if ("Notification" in window) {
         await Notification.requestPermission();
       }
+      granted = typeof Notification !== "undefined" && Notification.permission === "granted";
     } catch {
-      try { await Notification.requestPermission(); } catch {}
+      try {
+        await Notification.requestPermission();
+        granted = Notification.permission === "granted";
+      } catch {}
     } finally {
       setBusy(false);
       dismiss();
+    }
+
+    if (granted) {
+      // Aguarda OneSignal registrar a subscription antes de enviar boas-vindas
+      const sendWelcome = async () => {
+        try {
+          await supabase.functions.invoke("send-push", {
+            body: {
+              title: "Notificações ativadas! 🔔",
+              message: "Pronto! Você vai receber avisos de pedidos, pagamentos e novidades 💖",
+              externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
+              audience: currentCustomerId ? undefined : "customer",
+            },
+          });
+        } catch (e) {
+          console.warn("[push] welcome falhou", e);
+        }
+      };
+      window.setTimeout(sendWelcome, 3500);
     }
   };
 
