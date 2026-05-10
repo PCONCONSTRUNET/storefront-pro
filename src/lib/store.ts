@@ -1096,7 +1096,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 6,
+      version: 7,
       skipHydration: typeof window === "undefined",
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
@@ -1114,8 +1114,8 @@ export const useStore = create<AppState>()(
         if (version < 5) {
           persisted.reviews = [];
         }
-        if (version < 6) {
-          // Clear products to force a clean merge with the new aggressive fallback logic
+        if (version < 7) {
+          // Force clear to use new static /products/ paths
           persisted.products = initialProducts;
         }
         return persisted;

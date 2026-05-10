@@ -32,20 +32,6 @@ export const initialCategories: Category[] = [
   { id: "presilhas", name: "Presilhas", image: "✨", order: 6 },
 ];
 
-import lacoRosaGlitter from "@/assets/products/laco-rosa-glitter.jpg";
-import tiaraCoroaDourada from "@/assets/products/tiara-coroa-dourada.jpg";
-import kit5Lacos from "@/assets/products/kit-5-lacos.jpg";
-import bicoPatoFloral from "@/assets/products/bico-pato-floral.jpg";
-import presilhaBorboleta from "@/assets/products/presilha-borboleta-perola.jpg";
-import elasticoVeludo from "@/assets/products/elastico-veludo-rosa.jpg";
-import lacoMaxiDourado from "@/assets/products/laco-maxi-dourado.jpg";
-import tiaraFlorCerejeira from "@/assets/products/tiara-flor-cerejeira.jpg";
-import demoLaco1 from "@/assets/products/demo-laco-rosa-1.png";
-import demoTiara1 from "@/assets/products/demo-tiara-coroa-1.png";
-import demoKit1 from "@/assets/products/demo-kit-lacos-1.png";
-import demoPresilha1 from "@/assets/products/demo-presilha-borboleta-1.png";
-import demoBico1 from "@/assets/products/demo-bico-pato-1.png";
-
 export const initialProducts: Product[] = [
   {
     id: "p1",
@@ -54,8 +40,8 @@ export const initialProducts: Product[] = [
       "Laço artesanal em fita de cetim com detalhes em glitter dourado. Perfeito para princesas de todas as idades. Acompanha bico de pato resistente.",
     price: 24.9,
     oldPrice: 34.9,
-    image: lacoRosaGlitter,
-    gallery: [lacoRosaGlitter, demoLaco1, lacoMaxiDourado],
+    image: "/products/laco-rosa-glitter.jpg",
+    gallery: ["/products/laco-rosa-glitter.jpg", "/products/demo-laco-rosa-1.png", "/products/laco-maxi-dourado.jpg"],
     category: "lacos",
     stock: 25,
     sku: "LC-001",
@@ -69,8 +55,8 @@ export const initialProducts: Product[] = [
       "Tiara estilo coroa banhada a ouro com strass. Ideal para festas, ensaios e momentos especiais.",
     price: 49.9,
     oldPrice: 69.9,
-    image: tiaraCoroaDourada,
-    gallery: [tiaraCoroaDourada, demoTiara1],
+    image: "/products/tiara-coroa-dourada.jpg",
+    gallery: ["/products/tiara-coroa-dourada.jpg", "/products/demo-tiara-coroa-1.png"],
     category: "tiaras",
     stock: 12,
     sku: "TR-002",
@@ -82,8 +68,8 @@ export const initialProducts: Product[] = [
     description: "Kit promocional com 5 laços de cores variadas. Embalagem presenteável.",
     price: 79.9,
     oldPrice: 119.9,
-    image: kit5Lacos,
-    gallery: [kit5Lacos, demoKit1],
+    image: "/products/kit-5-lacos.jpg",
+    gallery: ["/products/kit-5-lacos.jpg", "/products/demo-kit-lacos-1.png"],
     category: "kits",
     stock: 8,
     sku: "KT-003",
@@ -94,8 +80,8 @@ export const initialProducts: Product[] = [
     name: "Bico de Pato Floral",
     description: "Bico de pato com flor de cetim feita à mão. Antialérgico.",
     price: 18.9,
-    image: bicoPatoFloral,
-    gallery: [bicoPatoFloral, demoBico1],
+    image: "/products/bico-pato-floral.jpg",
+    gallery: ["/products/bico-pato-floral.jpg", "/products/demo-bico-pato-1.png"],
     category: "bicos",
     stock: 40,
     sku: "BP-004",
@@ -107,8 +93,8 @@ export const initialProducts: Product[] = [
     description: "Presilha em formato de borboleta com pérolas delicadas.",
     price: 22.5,
     oldPrice: 29.9,
-    image: presilhaBorboleta,
-    gallery: [presilhaBorboleta, demoPresilha1],
+    image: "/products/presilha-borboleta-perola.jpg",
+    gallery: ["/products/presilha-borboleta-perola.jpg", "/products/demo-presilha-borboleta-1.png"],
     category: "presilhas",
     stock: 18,
     sku: "PR-005",
@@ -119,8 +105,8 @@ export const initialProducts: Product[] = [
     name: "Elástico Veludo Rosa",
     description: "Conjunto de 3 elásticos de veludo macio que não marcam o cabelo.",
     price: 14.9,
-    image: elasticoVeludo,
-    gallery: [elasticoVeludo],
+    image: "/products/elastico-veludo-rosa.jpg",
+    gallery: ["/products/elastico-veludo-rosa.jpg"],
     category: "elasticos",
     stock: 60,
     sku: "EL-006",
@@ -132,8 +118,8 @@ export const initialProducts: Product[] = [
     description:
       "Laço grande estilo maxi em cetim com brilho dourado, ideal para ocasiões especiais.",
     price: 34.9,
-    image: lacoMaxiDourado,
-    gallery: [lacoMaxiDourado],
+    image: "/products/laco-maxi-dourado.jpg",
+    gallery: ["/products/laco-maxi-dourado.jpg"],
     category: "lacos",
     stock: 15,
     sku: "LC-007",
@@ -144,8 +130,8 @@ export const initialProducts: Product[] = [
     name: "Tiara Flor de Cerejeira",
     description: "Tiara delicada com aplique de flor rosa em tecido.",
     price: 29.9,
-    image: tiaraFlorCerejeira,
-    gallery: [tiaraFlorCerejeira],
+    image: "/products/tiara-flor-cerejeira.jpg",
+    gallery: ["/products/tiara-flor-cerejeira.jpg"],
     category: "tiaras",
     stock: 22,
     sku: "TR-008",
