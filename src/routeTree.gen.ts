@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as LoginRouteImport } from './routes/login'
@@ -35,6 +36,7 @@ import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
+import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -43,6 +45,7 @@ import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configura
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
+import { Route as AdminBiRouteImport } from './routes/admin.bi'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
 import { Route as CheckoutPixIdRouteImport } from './routes/checkout.pix.$id'
 import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
@@ -52,6 +55,11 @@ import { Route as ApiBotStatusRouteImport } from './routes/api/bot/status'
 import { Route as ApiBotNotifyRouteImport } from './routes/api/bot/notify'
 import { Route as ApiBotLogoutRouteImport } from './routes/api/bot/logout'
 
+const SuporteRoute = SuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
@@ -182,6 +190,11 @@ const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
   path: '/admin/notificacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/admin/logs',
+  path: '/admin/logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -220,6 +233,11 @@ const AdminChatbotRoute = AdminChatbotRouteImport.update({
 const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   id: '/admin/categorias',
   path: '/admin/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBiRoute = AdminBiRouteImport.update({
+  id: '/admin/bi',
+  path: '/admin/bi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
@@ -275,7 +293,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/suporte': typeof SuporteRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
+  '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -284,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -319,7 +340,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/suporte': typeof SuporteRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
+  '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -328,6 +351,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -364,7 +388,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/suporte': typeof SuporteRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
+  '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
@@ -373,6 +399,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
@@ -410,7 +437,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedidos'
     | '/redefinir-senha'
+    | '/suporte'
     | '/admin/afiliadas'
+    | '/admin/bi'
     | '/admin/categorias'
     | '/admin/chatbot'
     | '/admin/clientes'
@@ -419,6 +448,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/login'
+    | '/admin/logs'
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -454,7 +484,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedidos'
     | '/redefinir-senha'
+    | '/suporte'
     | '/admin/afiliadas'
+    | '/admin/bi'
     | '/admin/categorias'
     | '/admin/chatbot'
     | '/admin/clientes'
@@ -463,6 +495,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/login'
+    | '/admin/logs'
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -498,7 +531,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/pedidos'
     | '/redefinir-senha'
+    | '/suporte'
     | '/admin/afiliadas'
+    | '/admin/bi'
     | '/admin/categorias'
     | '/admin/chatbot'
     | '/admin/clientes'
@@ -507,6 +542,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/login'
+    | '/admin/logs'
     | '/admin/notificacoes'
     | '/admin/pedidos'
     | '/admin/produtos'
@@ -543,7 +579,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PedidosRoute: typeof PedidosRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  SuporteRoute: typeof SuporteRoute
   AdminAfiliadasRoute: typeof AdminAfiliadasRoute
+  AdminBiRoute: typeof AdminBiRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminChatbotRoute: typeof AdminChatbotRoute
   AdminClientesRoute: typeof AdminClientesRoute
@@ -552,6 +590,7 @@ export interface RootRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminLogsRoute: typeof AdminLogsRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
@@ -577,6 +616,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/suporte': {
+      id: '/suporte'
+      path: '/suporte'
+      fullPath: '/suporte'
+      preLoaderRoute: typeof SuporteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/redefinir-senha': {
       id: '/redefinir-senha'
       path: '/redefinir-senha'
@@ -759,6 +805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNotificacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/admin/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -813,6 +866,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/categorias'
       fullPath: '/admin/categorias'
       preLoaderRoute: typeof AdminCategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bi': {
+      id: '/admin/bi'
+      path: '/admin/bi'
+      fullPath: '/admin/bi'
+      preLoaderRoute: typeof AdminBiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/afiliadas': {
@@ -898,7 +958,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PedidosRoute: PedidosRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
+  SuporteRoute: SuporteRoute,
   AdminAfiliadasRoute: AdminAfiliadasRoute,
+  AdminBiRoute: AdminBiRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminChatbotRoute: AdminChatbotRoute,
   AdminClientesRoute: AdminClientesRoute,
@@ -907,6 +969,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminLogsRoute: AdminLogsRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
