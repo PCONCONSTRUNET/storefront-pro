@@ -1,7 +1,7 @@
 {
   "name": "Afiliada — Princesa de Laços",
   "short_name": "Afiliada Princesa",
-  "start_url": "/afiliada",
+  "start_url": "/afiliada/login",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

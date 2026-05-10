@@ -1,7 +1,7 @@
 {
   "name": "Admin — Princesa de Laços",
   "short_name": "Admin Princesa",
-  "start_url": "/admin",
+  "start_url": "/admin/login",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
