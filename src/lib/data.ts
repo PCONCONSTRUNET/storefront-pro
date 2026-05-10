@@ -41,7 +41,7 @@ export const initialProducts: Product[] = [
     price: 24.9,
     oldPrice: 34.9,
     image: "/products/laco-rosa-glitter.jpg",
-    gallery: ["/products/laco-rosa-glitter.jpg", "/products/demo-laco-rosa-1.png", "/products/laco-maxi-dourado.jpg"],
+    gallery: ["/products/laco-rosa-glitter.jpg", "/products/demo-laco-rosa-1.png"],
     category: "lacos",
     stock: 25,
     sku: "LC-001",
