@@ -5,6 +5,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { supabase } from "@/integrations/supabase/client";
 
 export type NotificationCategory =
   | "pedido_realizado"      // cliente fez um pedido
@@ -22,6 +23,30 @@ export type NotificationCategory =
   | "manual";               // disparado pelo painel
 
 export type NotificationAudience = "cliente" | "admin" | "afiliada";
+
+const AUDIENCE_TAG: Record<NotificationAudience, "customer" | "admin" | "affiliate"> = {
+  cliente: "customer",
+  admin: "admin",
+  afiliada: "affiliate",
+};
+
+async function dispatchPush(args: {
+  title: string; body: string; audience: NotificationAudience; externalUserIds?: string[];
+}) {
+  try {
+    const payload: Record<string, unknown> = { title: args.title, message: args.body };
+    if (args.externalUserIds && args.externalUserIds.length > 0) {
+      payload.externalUserIds = args.externalUserIds;
+    } else {
+      payload.audience = AUDIENCE_TAG[args.audience];
+    }
+    const { data, error } = await supabase.functions.invoke("send-push", { body: payload });
+    if (error) console.warn("[push] send-push erro:", error.message);
+    else console.log("[push] enviado:", data);
+  } catch (e) {
+    console.warn("[push] falhou", e);
+  }
+}
 
 export interface NotificationTemplate {
   id: string;
@@ -162,11 +187,13 @@ export const useNotifications = create<NotificationState>()(
           };
           set(s => ({ logs: [log, ...s.logs].slice(0, 200) }));
 
-          if (tpl.sendPush && typeof window !== "undefined" && "Notification" in window
-              && Notification.permission === "granted") {
-            try {
-              new Notification(log.title, { body: log.body, icon: "/icon-512.png", tag: `${category}_${tpl.audience}` });
-            } catch { /* ignore */ }
+          if (tpl.sendPush) {
+            void dispatchPush({
+              title: log.title,
+              body: log.body,
+              audience: tpl.audience,
+              externalUserIds: opts?.recipientId ? [opts.recipientId] : undefined,
+            });
           }
           if (!firstLog) firstLog = log;
         }
@@ -185,10 +212,8 @@ export const useNotifications = create<NotificationState>()(
           read: false,
         };
         set(s => ({ logs: [log, ...s.logs].slice(0, 200) }));
-        if (data.channels.includes("push")
-            && typeof window !== "undefined" && "Notification" in window
-            && Notification.permission === "granted") {
-          try { new Notification(log.title, { body: log.body, icon: "/icon-512.png" }); } catch { /* */ }
+        if (data.channels.includes("push")) {
+          void dispatchPush({ title: data.title, body: data.body, audience: data.audience });
         }
         return log;
       },
