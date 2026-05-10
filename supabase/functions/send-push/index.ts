@@ -25,9 +25,14 @@ Deno.serve(async (req) => {
       // OneSignal v16+: use include_aliases instead of deprecated include_external_user_ids
       payload.include_aliases = { external_id: externalUserIds };
       payload.target_channel = "push";
-    } else if (audience && audience !== "all") {
-      // segmenta por tag "audience" (admin / affiliate / customer)
-      payload.filters = [{ field: "tag", key: "audience", relation: "=", value: audience }];
+    } else if (audience === "all") {
+      payload.included_segments = ["All"];
+    } else if (audience === "admin") {
+      payload.filters = [{ field: "tag", key: "role", relation: "=", value: "admin" }];
+    } else if (audience === "customer") {
+      payload.filters = [{ field: "tag", key: "role", relation: "=", value: "customer" }];
+    } else if (audience === "affiliate") {
+      payload.filters = [{ field: "tag", key: "role", relation: "=", value: "affiliate" }];
     } else {
       payload.included_segments = ["Subscribed Users"];
     }

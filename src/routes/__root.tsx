@@ -1,5 +1,10 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouter, useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { useStore, hydrateFromCloud } from "@/lib/store";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
+import appCss from "../styles.css?url";
 
 const PWA_ALLOWED_ROUTES = ["/afiliada/login", "/afiliada", "/admin"];
 const PWA_LAUNCH_KEY = "pwa_launch_route";
@@ -12,12 +17,6 @@ function isStandaloneMode() {
 function matchAllowedRoute(path: string): string | null {
   return PWA_ALLOWED_ROUTES.find(r => path === r || path.startsWith(r + "/")) ?? null;
 }
-import { Toaster } from "@/components/ui/sonner";
-import { useStore, hydrateFromCloud } from "@/lib/store";
-import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
-import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
-
-import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
@@ -52,13 +51,13 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-title", content: "Princesa de Laços" },
       { name: "mobile-web-app-capable", content: "yes" },
       { title: "Princesa de Laços — Catálogo encantado" },
-      { name: "description", content: "A responsive web application for creating a professional digital storefront, akin to a marketplace." },
+      { name: "description", content: "Catálogo encantado de laços, tiaras e acessórios." },
       { property: "og:title", content: "Princesa de Laços — Catálogo encantado" },
-      { property: "og:description", content: "A responsive web application for creating a professional digital storefront, akin to a marketplace." },
+      { property: "og:description", content: "Catálogo encantado de laços, tiaras e acessórios." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Princesa de Laços — Catálogo encantado" },
-      { name: "twitter:description", content: "A responsive web application for creating a professional digital storefront, akin to a marketplace." },
+      { name: "twitter:description", content: "Catálogo encantado de laços, tiaras e acessórios." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp" },
     ],
@@ -116,11 +115,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const refreshSession = useStore(s => s.refreshSession);
+  const session = useStore(s => s.session);
   const router = useRouter();
   const location = useLocation();
 
-  // Track allowed routes for PWA launch memory + swap manifest dynamically
-  // so installing from /afiliada or /admin pins the start_url to that area.
+  // Track allowed routes for PWA launch memory
   useEffect(() => {
     if (typeof window === "undefined") return;
     const path = location.pathname;
@@ -150,12 +149,9 @@ function RootComponent() {
         router.navigate({ to: saved, replace: true });
       }
     } catch {}
-    // run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.pathname, router]);
 
   useEffect(() => {
-    // Sliding session: any user activity refreshes the active sessions.
     const tick = () => {
       refreshSession("admin");
       refreshSession("customer");
@@ -164,7 +160,7 @@ function RootComponent() {
     tick();
     const events = ["click", "keydown", "visibilitychange", "focus"] as const;
     events.forEach(e => window.addEventListener(e, tick));
-    const interval = window.setInterval(tick, 1000 * 60 * 15); // every 15 min
+    const interval = window.setInterval(tick, 1000 * 60 * 15);
     return () => {
       events.forEach(e => window.removeEventListener(e, tick));
       window.clearInterval(interval);
@@ -176,37 +172,42 @@ function RootComponent() {
     hydrateFromCloud();
   }, []);
 
-  // Identifica usuário no OneSignal (login/logout) e marca tag de audience
-  const isAdmin = useStore(s => s.isAdmin);
-  const currentCustomerId = useStore(s => s.currentCustomerId);
-  const currentAffiliateId = useStore(s => s.currentAffiliateId);
+  // OneSignal Tagging & Role Management
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const path = location.pathname;
-    let audience: "admin" | "affiliate" | "customer" = "customer";
-    let externalId: string | null = null;
-    if (path.startsWith("/admin") && isAdmin) {
-      audience = "admin";
-      externalId = "admin";
-    } else if (path.startsWith("/afiliada") && currentAffiliateId) {
-      audience = "affiliate";
-      externalId = `aff_${currentAffiliateId}`;
-    } else if (currentCustomerId) {
-      audience = "customer";
-      externalId = currentCustomerId;
-    }
+    
     const OS = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
     OS.push(async (OneSignal: any) => {
       try {
-        if (externalId) {
-          await OneSignal.login(externalId);
-          await OneSignal.User.addTag("audience", audience);
+        if (session?.user) {
+          const path = location.pathname;
+          let role = "customer";
+          if (path.startsWith("/admin")) role = "admin";
+          else if (path.startsWith("/afiliada")) role = "affiliate";
+
+          console.log("[OneSignal] User role identified:", role);
+          
+          await OneSignal.login(session.user.id);
+          await OneSignal.User.addTags({
+            role: role,
+            email: session.user.email || '',
+            full_name: session.user.user_metadata?.full_name || ''
+          });
         } else {
+          console.log("[OneSignal] Logging out (no session)");
           await OneSignal.logout();
         }
-      } catch (e) { console.warn("OneSignal tag/login failed", e); }
+      } catch (e) {
+        console.warn("[OneSignal] Role sync failed", e);
+      }
     });
-  }, [isAdmin, currentCustomerId, currentAffiliateId, location.pathname]);
+  }, [session, location.pathname]);
 
-  return <><Outlet /><PwaInstallPrompt /><EnableNotificationsPrompt /></>;
+  return (
+    <>
+      <Outlet />
+      <PwaInstallPrompt />
+      <EnableNotificationsPrompt />
+    </>
+  );
 }
