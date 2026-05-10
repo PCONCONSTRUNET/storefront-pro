@@ -379,7 +379,7 @@ export const cloud = {
   },
 
   async upsertNotificationLog(l: any) {
-    const { error } = await supabase.from("notification_logs").upsert(
+    const { error } = await (supabase.from("notification_logs" as any) as any).upsert(
       {
         id: l.id,
         category: l.category,

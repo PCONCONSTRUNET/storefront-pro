@@ -1093,6 +1093,38 @@ export const useStore = create<AppState>()(
         set((s) => ({ settings: { ...s.settings, ...s2 } }));
         cloud.upsertSettings(get().settings);
       },
+      sync: async () => {
+        const snap = await fetchCloudSnapshot();
+        const cur = get();
+        const isPlaceholder = (url: string) => !url || url === "" || url === "null" || url.length < 5;
+        const mergedProducts = cur.products.map((p) => {
+          const remote = snap.products.find((rp) => rp.id === p.id);
+          if (!remote) return p;
+          return {
+            ...remote,
+            image: isPlaceholder(remote.image) ? p.image : remote.image,
+            gallery:
+              remote.gallery && remote.gallery.length > 0 && !isPlaceholder(remote.gallery[0])
+                ? remote.gallery
+                : p.gallery,
+          };
+        });
+        set((s) => ({
+          customers: snap.customers,
+          products: mergedProducts,
+          categories: snap.categories,
+          coupons: snap.coupons,
+          affiliates: snap.affiliates,
+          affiliateSales: snap.affiliateSales,
+          transactions: snap.transactions,
+          reviews: snap.reviews,
+          orders: snap.orders,
+          faq: snap.faq,
+          waitlist: snap.waitlist,
+          activityLogs: snap.activityLogs,
+          settings: snap.settings ? { ...s.settings, ...snap.settings } : s.settings,
+        }));
+      },
     }),
     {
       name: "princesa-store-v1",
@@ -1139,37 +1171,6 @@ export const useStore = create<AppState>()(
           nextSessions.affiliate = null;
         }
         useStore.setState({ ...patch, sessions: nextSessions });
-      },
-      sync: async () => {
-        const snap = await fetchCloudSnapshot();
-        const cur = get();
-        // Smart merge products specifically to keep images if cloud lacks them
-        const isPlaceholder = (url: string) => !url || url === "" || url === "null" || url.length < 5;
-        const mergedProducts = cur.products.map(p => {
-          const remote = snap.products.find(rp => rp.id === p.id);
-          if (!remote) return p;
-          return { 
-            ...remote, 
-            image: isPlaceholder(remote.image) ? p.image : remote.image,
-            gallery: (remote.gallery && remote.gallery.length > 0 && !isPlaceholder(remote.gallery[0])) ? remote.gallery : p.gallery
-          };
-        });
-
-        set((s) => ({
-          customers: snap.customers,
-          products: mergedProducts,
-          categories: snap.categories,
-          coupons: snap.coupons,
-          affiliates: snap.affiliates,
-          affiliateSales: snap.affiliateSales,
-          transactions: snap.transactions,
-          reviews: snap.reviews,
-          orders: snap.orders,
-          faq: snap.faq,
-          waitlist: snap.waitlist,
-          activityLogs: snap.activityLogs,
-          settings: snap.settings ? { ...s.settings, ...snap.settings } : s.settings,
-        }));
       },
     },
   ),
