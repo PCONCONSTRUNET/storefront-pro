@@ -15,6 +15,7 @@ function matchAllowedRoute(path: string): string | null {
 import { Toaster } from "@/components/ui/sonner";
 import { useStore, hydrateFromCloud } from "@/lib/store";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
 
 import appCss from "../styles.css?url";
 
@@ -195,5 +196,5 @@ function RootComponent() {
     if (typeof window === "undefined") return;
     hydrateFromCloud();
   }, []);
-  return <><Outlet /><PwaInstallPrompt /></>;
+  return <><Outlet /><PwaInstallPrompt /><EnableNotificationsPrompt /></>;
 }
