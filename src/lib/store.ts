@@ -1128,7 +1128,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 8,
+      version: 9,
       skipHydration: typeof window === "undefined",
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
@@ -1146,8 +1146,8 @@ export const useStore = create<AppState>()(
         if (version < 5) {
           persisted.reviews = [];
         }
-        if (version < 8) {
-          // Force clear to use new static /products/ paths and realistic illustrations
+        if (version < 9) {
+          // Force clear to use new strict fallback logic
           persisted.products = initialProducts;
         }
         return persisted;
@@ -1215,7 +1215,11 @@ export function hydrateFromCloud(): Promise<void> {
           const loc = map.get(x.id);
           if (loc) {
             // Product specific fallback
-            const isPlaceholder = (url: string) => !url || url === "" || url === "null" || url.length < 5;
+            const isPlaceholder = (url: string) => 
+              !url || 
+              url === "" || 
+              url === "null" || 
+              (!url.startsWith("http") && !url.startsWith("/") && !url.startsWith("data:"));
             
             if (isPlaceholder((x as any).image)) {
               (x as any).image = (loc as any).image;
