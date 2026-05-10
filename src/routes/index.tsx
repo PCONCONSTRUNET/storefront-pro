@@ -92,23 +92,11 @@ function Home() {
           >
             <img
               src={bannerEncantada}
-              alt="Coleção Princesa de Laços"
-              className="w-full h-full object-cover aspect-[16/7] md:aspect-[16/7] group-hover:scale-[1.02] transition-transform duration-700"
+              alt={settings.bannerTitle || "Coleção Encantada 2026"}
+              className="w-full h-full object-cover aspect-[16/7] md:aspect-[16/7] group-hover:scale-[1.02] transition-transform duration-500"
               loading="eager"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
-            <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 text-white">
-              <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2 inline-block">
-                Nova Coleção
-              </div>
-              <h1 className="font-display text-2xl md:text-5xl drop-shadow-lg">Encanto de Laços</h1>
-              <p className="text-sm md:text-lg opacity-90 mt-1 md:mt-2 font-medium">Artesanato com alma de princesa</p>
-            </div>
-            {all.length <= 8 && (
-              <div className="absolute top-4 right-4 bg-gold/90 backdrop-blur-md text-gold-foreground text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg animate-bounce">
-                ✨ MODO DEMONSTRAÇÃO
-              </div>
-            )}
+            <h1 className="sr-only">{settings.bannerTitle}</h1>
           </Link>
           <div className="hidden md:flex flex-col gap-3">
             {banners.slice(0, 2).map((b) => (

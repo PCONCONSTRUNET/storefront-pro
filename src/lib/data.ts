@@ -40,6 +40,10 @@ import presilhaBorboleta from "@/assets/products/presilha-borboleta-perola.jpg";
 import elasticoVeludo from "@/assets/products/elastico-veludo-rosa.jpg";
 import lacoMaxiDourado from "@/assets/products/laco-maxi-dourado.jpg";
 import tiaraFlorCerejeira from "@/assets/products/tiara-flor-cerejeira.jpg";
+import demoLaco1 from "@/assets/products/demo-laco-rosa-1.png";
+import demoTiara1 from "@/assets/products/demo-tiara-coroa-1.png";
+import demoKit1 from "@/assets/products/demo-kit-lacos-1.png";
+import demoPresilha1 from "@/assets/products/demo-presilha-borboleta-1.png";
 
 export const initialProducts: Product[] = [
   {
@@ -50,7 +54,7 @@ export const initialProducts: Product[] = [
     price: 24.9,
     oldPrice: 34.9,
     image: lacoRosaGlitter,
-    gallery: [lacoRosaGlitter, lacoMaxiDourado],
+    gallery: [lacoRosaGlitter, demoLaco1, lacoMaxiDourado],
     category: "lacos",
     stock: 25,
     sku: "LC-001",
@@ -65,6 +69,7 @@ export const initialProducts: Product[] = [
     price: 49.9,
     oldPrice: 69.9,
     image: tiaraCoroaDourada,
+    gallery: [tiaraCoroaDourada, demoTiara1],
     category: "tiaras",
     stock: 12,
     sku: "TR-002",
@@ -77,6 +82,7 @@ export const initialProducts: Product[] = [
     price: 79.9,
     oldPrice: 119.9,
     image: kit5Lacos,
+    gallery: [kit5Lacos, demoKit1],
     category: "kits",
     stock: 8,
     sku: "KT-003",
@@ -100,6 +106,7 @@ export const initialProducts: Product[] = [
     price: 22.5,
     oldPrice: 29.9,
     image: presilhaBorboleta,
+    gallery: [presilhaBorboleta, demoPresilha1],
     category: "presilhas",
     stock: 18,
     sku: "PR-005",
