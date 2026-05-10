@@ -212,10 +212,8 @@ export const useNotifications = create<NotificationState>()(
           read: false,
         };
         set(s => ({ logs: [log, ...s.logs].slice(0, 200) }));
-        if (data.channels.includes("push")
-            && typeof window !== "undefined" && "Notification" in window
-            && Notification.permission === "granted") {
-          try { new Notification(log.title, { body: log.body, icon: "/icon-512.png" }); } catch { /* */ }
+        if (data.channels.includes("push")) {
+          void dispatchPush({ title: data.title, body: data.body, audience: data.audience });
         }
         return log;
       },
