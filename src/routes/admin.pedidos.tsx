@@ -22,7 +22,11 @@ const statuses: OrderStatus[] = [
 ];
 
 function Page() {
-  const { orders, updateOrderStatus, deleteOrder } = useStore();
+  const { orders, updateOrderStatus, deleteOrder, sync } = useStore();
+
+  useEffect(() => {
+    sync();
+  }, [sync]);
   const { q: initialQ } = Route.useSearch();
   const [filter, setFilter] = useState<OrderStatus | "todos">("todos");
   const [selected, setSelected] = useState<string | null>(null);

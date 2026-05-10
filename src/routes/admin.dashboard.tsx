@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
@@ -21,7 +21,11 @@ export const Route = createFileRoute("/admin/dashboard")({
 });
 
 function Page() {
-  const { orders, customers, products } = useStore();
+  const { orders, customers, products, sync } = useStore();
+
+  useEffect(() => {
+    sync();
+  }, [sync]);
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();

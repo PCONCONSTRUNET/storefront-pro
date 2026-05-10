@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useStore,
   type Transaction,
@@ -63,6 +63,11 @@ function Page() {
   const deleteTransaction = useStore((s) => s.deleteTransaction);
   const updateTransaction = useStore((s) => s.updateTransaction);
   const deleteAffiliateSale = useStore((s) => s.deleteAffiliateSale);
+  const sync = useStore((s) => s.sync);
+
+  useEffect(() => {
+    sync();
+  }, [sync]);
 
   const [filter, setFilter] = useState<"todos" | "entrada" | "saida">("todos");
   const [showForm, setShowForm] = useState(false);
