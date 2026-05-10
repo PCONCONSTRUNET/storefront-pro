@@ -2,14 +2,28 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import {
-  Bell, Send, Settings2, History, Smartphone, Mail, MessageSquare,
-  Check, X, RefreshCw, Trash2, BellRing, Sparkles,
+  Bell,
+  Send,
+  Settings2,
+  History,
+  Smartphone,
+  Mail,
+  MessageSquare,
+  Check,
+  X,
+  RefreshCw,
+  Trash2,
+  BellRing,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import {
-  useNotifications, CATEGORY_LABELS, AUDIENCE_LABELS,
-  type NotificationAudience, type NotificationTemplate,
+  useNotifications,
+  CATEGORY_LABELS,
+  AUDIENCE_LABELS,
+  type NotificationAudience,
+  type NotificationTemplate,
 } from "@/lib/notifications";
 
 export const Route = createFileRoute("/admin/notificacoes")({
@@ -19,27 +33,37 @@ export const Route = createFileRoute("/admin/notificacoes")({
 type Tab = "enviar" | "modelos" | "historico";
 
 function Page() {
-  const customers = useStore(s => s.customers);
-  const affiliates = useStore(s => s.affiliates);
+  const customers = useStore((s) => s.customers);
+  const affiliates = useStore((s) => s.affiliates);
   const {
-    templates, logs, pushPermission,
-    updateTemplate, resetTemplates,
-    sendManual, markAllRead, clearLogs, requestPushPermission,
+    templates,
+    logs,
+    pushPermission,
+    updateTemplate,
+    resetTemplates,
+    sendManual,
+    markAllRead,
+    clearLogs,
+    requestPushPermission,
   } = useNotifications();
 
   const [tab, setTab] = useState<Tab>("enviar");
   const [form, setForm] = useState({
-    title: "", body: "",
+    title: "",
+    body: "",
     audience: "cliente" as NotificationAudience,
     channels: { push: true, email: false, inapp: true },
   });
 
-  const stats = useMemo(() => ({
-    total: logs.length,
-    unread: logs.filter(l => !l.read).length,
-    push: logs.filter(l => l.channels.includes("push")).length,
-    activeTemplates: templates.filter(t => t.enabled).length,
-  }), [logs, templates]);
+  const stats = useMemo(
+    () => ({
+      total: logs.length,
+      unread: logs.filter((l) => !l.read).length,
+      push: logs.filter((l) => l.channels.includes("push")).length,
+      activeTemplates: templates.filter((t) => t.enabled).length,
+    }),
+    [logs, templates],
+  );
 
   const audienceCount = (a: NotificationAudience) =>
     a === "cliente" ? customers.length : a === "afiliada" ? affiliates.length : 1;
@@ -60,13 +84,16 @@ function Page() {
     }
     sendManual({ title: form.title, body: form.body, audience: form.audience, channels });
     setForm({ ...form, title: "", body: "" });
-    toast.success(`Notificação enviada para ${audienceCount(form.audience)} ${form.audience === "cliente" ? "cliente(s)" : form.audience === "afiliada" ? "afiliada(s)" : "destinatário(s)"}`);
+    toast.success(
+      `Notificação enviada para ${audienceCount(form.audience)} ${form.audience === "cliente" ? "cliente(s)" : form.audience === "afiliada" ? "afiliada(s)" : "destinatário(s)"}`,
+    );
   };
 
   const askPush = async () => {
     const r = await requestPushPermission();
     if (r === "granted") toast.success("Push habilitado neste navegador!");
-    else if (r === "denied") toast.error("Permissão negada — habilite nas configurações do navegador");
+    else if (r === "denied")
+      toast.error("Permissão negada — habilite nas configurações do navegador");
     else if (r === "unsupported") toast.error("Este navegador não suporta notificações push");
     else toast("Permissão pendente");
   };
@@ -89,7 +116,10 @@ function Page() {
           </div>
           <div className="flex items-center gap-2">
             <PushBadge state={pushPermission} />
-            <button onClick={askPush} className="h-9 px-3 rounded-full bg-white/15 hover:bg-white/25 text-xs font-semibold flex items-center gap-1 backdrop-blur">
+            <button
+              onClick={askPush}
+              className="h-9 px-3 rounded-full bg-white/15 hover:bg-white/25 text-xs font-semibold flex items-center gap-1 backdrop-blur"
+            >
               <Smartphone className="h-3.5 w-3.5" /> Habilitar push
             </button>
           </div>
@@ -104,32 +134,59 @@ function Page() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-4 overflow-x-auto">
-        <TabBtn active={tab === "enviar"} onClick={() => setTab("enviar")} icon={Send}>Enviar</TabBtn>
-        <TabBtn active={tab === "modelos"} onClick={() => setTab("modelos")} icon={Settings2}>Modelos ({templates.length})</TabBtn>
-        <TabBtn active={tab === "historico"} onClick={() => setTab("historico")} icon={History}>Histórico ({logs.length})</TabBtn>
+        <TabBtn active={tab === "enviar"} onClick={() => setTab("enviar")} icon={Send}>
+          Enviar
+        </TabBtn>
+        <TabBtn active={tab === "modelos"} onClick={() => setTab("modelos")} icon={Settings2}>
+          Modelos ({templates.length})
+        </TabBtn>
+        <TabBtn active={tab === "historico"} onClick={() => setTab("historico")} icon={History}>
+          Histórico ({logs.length})
+        </TabBtn>
       </div>
 
       {tab === "enviar" && (
         <div className="grid lg:grid-cols-[1fr_360px] gap-4 animate-fade-in">
           <form onSubmit={send} className="bg-card rounded-2xl p-5 shadow-card space-y-4">
-            <h3 className="font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Notificação manual</h3>
+            <h3 className="font-bold flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Notificação manual
+            </h3>
 
             <Field label="Título">
-              <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} maxLength={60} className="input" placeholder="Ex: Promoção relâmpago 🎀" />
+              <input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                maxLength={60}
+                className="input"
+                placeholder="Ex: Promoção relâmpago 🎀"
+              />
               <span className="text-[10px] text-muted-foreground">{form.title.length}/60</span>
             </Field>
 
             <Field label="Mensagem">
-              <textarea value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} rows={4} maxLength={160} className="input min-h-[96px] py-2" placeholder="Escreva uma mensagem curta e direta..." />
+              <textarea
+                value={form.body}
+                onChange={(e) => setForm({ ...form, body: e.target.value })}
+                rows={4}
+                maxLength={160}
+                className="input min-h-[96px] py-2"
+                placeholder="Escreva uma mensagem curta e direta..."
+              />
               <span className="text-[10px] text-muted-foreground">{form.body.length}/160</span>
             </Field>
 
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Público</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Público
+              </span>
               <div className="grid grid-cols-3 gap-2 mt-1.5">
-                {(["cliente", "afiliada", "admin"] as NotificationAudience[]).map(a => (
-                  <button key={a} type="button" onClick={() => setForm({ ...form, audience: a })}
-                    className={`h-14 rounded-xl border text-xs font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.audience === a ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
+                {(["cliente", "afiliada", "admin"] as NotificationAudience[]).map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setForm({ ...form, audience: a })}
+                    className={`h-14 rounded-xl border text-xs font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.audience === a ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
+                  >
                     <span className="capitalize">{AUDIENCE_LABELS[a]}s</span>
                     <span className="text-[10px] opacity-80">{audienceCount(a)} dest.</span>
                   </button>
@@ -138,24 +195,59 @@ function Page() {
             </div>
 
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Canais</span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Canais
+              </span>
               <div className="grid grid-cols-3 gap-2 mt-1.5">
-                <ChannelToggle icon={Smartphone} label="Push" active={form.channels.push} onClick={() => setForm({ ...form, channels: { ...form.channels, push: !form.channels.push } })} />
-                <ChannelToggle icon={Mail} label="E-mail" active={form.channels.email} onClick={() => setForm({ ...form, channels: { ...form.channels, email: !form.channels.email } })} />
-                <ChannelToggle icon={MessageSquare} label="In-app" active={form.channels.inapp} onClick={() => setForm({ ...form, channels: { ...form.channels, inapp: !form.channels.inapp } })} />
+                <ChannelToggle
+                  icon={Smartphone}
+                  label="Push"
+                  active={form.channels.push}
+                  onClick={() =>
+                    setForm({ ...form, channels: { ...form.channels, push: !form.channels.push } })
+                  }
+                />
+                <ChannelToggle
+                  icon={Mail}
+                  label="E-mail"
+                  active={form.channels.email}
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      channels: { ...form.channels, email: !form.channels.email },
+                    })
+                  }
+                />
+                <ChannelToggle
+                  icon={MessageSquare}
+                  label="In-app"
+                  active={form.channels.inapp}
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      channels: { ...form.channels, inapp: !form.channels.inapp },
+                    })
+                  }
+                />
               </div>
             </div>
 
             <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.98] transition-transform">
               <Send className="h-4 w-4" /> Enviar agora
             </button>
-            <p className="text-[11px] text-muted-foreground text-center">Push via OneSignal ativo ✅ — notificações serão entregues aos dispositivos cadastrados.</p>
+            <p className="text-[11px] text-muted-foreground text-center">
+              Push via OneSignal ativo ✅ — notificações serão entregues aos dispositivos
+              cadastrados.
+            </p>
           </form>
 
           {/* Preview */}
           <div className="space-y-3">
             <h3 className="font-bold text-sm">Pré-visualização</h3>
-            <NotificationPreview title={form.title || "Título da notificação"} body={form.body || "A mensagem aparece aqui..."} />
+            <NotificationPreview
+              title={form.title || "Título da notificação"}
+              body={form.body || "A mensagem aparece aqui..."}
+            />
           </div>
         </div>
       )}
@@ -165,16 +257,29 @@ function Page() {
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div>
               <h3 className="font-bold">Modelos automáticos</h3>
-              <p className="text-xs text-muted-foreground">Disparados pelos eventos da loja. Use {"{cliente}"}, {"{pedido}"}, {"{total}"}, {"{afiliada}"}, {"{comissao}"}, {"{produto}"}, {"{estoque}"} como variáveis.</p>
+              <p className="text-xs text-muted-foreground">
+                Disparados pelos eventos da loja. Use {"{cliente}"}, {"{pedido}"}, {"{total}"},{" "}
+                {"{afiliada}"}, {"{comissao}"}, {"{produto}"}, {"{estoque}"} como variáveis.
+              </p>
             </div>
-            <button onClick={() => { resetTemplates(); toast.success("Modelos restaurados"); }} className="h-9 px-3 rounded-full bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1">
+            <button
+              onClick={() => {
+                resetTemplates();
+                toast.success("Modelos restaurados");
+              }}
+              className="h-9 px-3 rounded-full bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1"
+            >
               <RefreshCw className="h-3.5 w-3.5" /> Restaurar padrão
             </button>
           </div>
 
           <ul className="space-y-3">
-            {templates.map(t => (
-              <TemplateRow key={t.id} template={t} onChange={(patch) => updateTemplate(t.id, patch)} />
+            {templates.map((t) => (
+              <TemplateRow
+                key={t.id}
+                template={t}
+                onChange={(patch) => updateTemplate(t.id, patch)}
+              />
             ))}
           </ul>
         </div>
@@ -185,27 +290,47 @@ function Page() {
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <h3 className="font-bold">Histórico de envios</h3>
             <div className="flex gap-2">
-              <button onClick={markAllRead} className="h-9 px-3 rounded-full bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1">
+              <button
+                onClick={markAllRead}
+                className="h-9 px-3 rounded-full bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1"
+              >
                 <Check className="h-3.5 w-3.5" /> Marcar todas como lidas
               </button>
-              <button onClick={() => { if (confirm("Limpar todo o histórico?")) { clearLogs(); toast.success("Histórico limpo"); } }} className="h-9 px-3 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-semibold flex items-center gap-1">
+              <button
+                onClick={() => {
+                  if (confirm("Limpar todo o histórico?")) {
+                    clearLogs();
+                    toast.success("Histórico limpo");
+                  }
+                }}
+                className="h-9 px-3 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-semibold flex items-center gap-1"
+              >
                 <Trash2 className="h-3.5 w-3.5" /> Limpar
               </button>
             </div>
           </div>
 
           {logs.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">Nenhuma notificação enviada ainda.</p>
+            <p className="text-sm text-muted-foreground text-center py-12">
+              Nenhuma notificação enviada ainda.
+            </p>
           ) : (
             <ul className="space-y-2">
-              {logs.map(l => (
-                <li key={l.id} className={`rounded-xl p-3 border transition-colors ${l.read ? "bg-background border-border" : "bg-primary/5 border-primary/30"}`}>
+              {logs.map((l) => (
+                <li
+                  key={l.id}
+                  className={`rounded-xl p-3 border transition-colors ${l.read ? "bg-background border-border" : "bg-primary/5 border-primary/30"}`}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm">{l.title}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{CATEGORY_LABELS[l.category]}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/40 text-foreground capitalize">{AUDIENCE_LABELS[l.audience]}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          {CATEGORY_LABELS[l.category]}
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/40 text-foreground capitalize">
+                          {AUDIENCE_LABELS[l.audience]}
+                        </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{l.body}</p>
                       <div className="flex items-center gap-2 mt-1.5 text-[10px] text-muted-foreground">
@@ -232,17 +357,40 @@ function Page() {
   );
 }
 
-function TabBtn({ active, onClick, icon: Icon, children }: { active: boolean; onClick: () => void; icon: React.ElementType; children: React.ReactNode }) {
+function TabBtn({
+  active,
+  onClick,
+  icon: Icon,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ElementType;
+  children: React.ReactNode;
+}) {
   return (
-    <button onClick={onClick} className={`h-10 px-4 rounded-full text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-all ${active ? "gradient-primary text-primary-foreground shadow-soft" : "bg-card border border-border hover:bg-muted/40"}`}>
+    <button
+      onClick={onClick}
+      className={`h-10 px-4 rounded-full text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-all ${active ? "gradient-primary text-primary-foreground shadow-soft" : "bg-card border border-border hover:bg-muted/40"}`}
+    >
       <Icon className="h-4 w-4" /> {children}
     </button>
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: number | string; highlight?: boolean }) {
+function Stat({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: number | string;
+  highlight?: boolean;
+}) {
   return (
-    <div className={`rounded-xl px-3 py-2 backdrop-blur ${highlight ? "bg-gold text-gold-foreground" : "bg-white/15"}`}>
+    <div
+      className={`rounded-xl px-3 py-2 backdrop-blur ${highlight ? "bg-gold text-gold-foreground" : "bg-white/15"}`}
+    >
       <div className="text-[10px] uppercase tracking-wide opacity-90">{label}</div>
       <div className="font-bold text-base mt-0.5">{value}</div>
     </div>
@@ -257,22 +405,39 @@ function PushBadge({ state }: { state: NotificationPermission | "unsupported" })
     unsupported: { label: "Sem suporte", cls: "bg-white/15" },
   } as const;
   const m = map[state] ?? map.default;
-  return <span className={`text-[10px] px-2 py-1 rounded-full font-semibold ${m.cls}`}>{m.label}</span>;
+  return (
+    <span className={`text-[10px] px-2 py-1 rounded-full font-semibold ${m.cls}`}>{m.label}</span>
+  );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
       {children}
     </label>
   );
 }
 
-function ChannelToggle({ icon: Icon, label, active, onClick }: { icon: React.ElementType; label: string; active: boolean; onClick: () => void }) {
+function ChannelToggle({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: React.ElementType;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-    <button type="button" onClick={onClick}
-      className={`h-12 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${active ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`h-12 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${active ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
+    >
       <Icon className="h-3.5 w-3.5" /> {label}
       {active ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 opacity-50" />}
     </button>
@@ -282,7 +447,9 @@ function ChannelToggle({ icon: Icon, label, active, onClick }: { icon: React.Ele
 function NotificationPreview({ title, body }: { title: string; body: string }) {
   return (
     <div className="bg-card rounded-2xl p-4 shadow-card border border-border space-y-3">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Como aparecerá no celular</p>
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+        Como aparecerá no celular
+      </p>
       <div className="rounded-2xl bg-foreground/95 text-background p-3 shadow-lg">
         <div className="flex items-start gap-2">
           <div className="w-8 h-8 rounded-lg gradient-primary grid place-items-center shrink-0">
@@ -310,7 +477,13 @@ function NotificationPreview({ title, body }: { title: string; body: string }) {
   );
 }
 
-function TemplateRow({ template, onChange }: { template: NotificationTemplate; onChange: (p: Partial<NotificationTemplate>) => void }) {
+function TemplateRow({
+  template,
+  onChange,
+}: {
+  template: NotificationTemplate;
+  onChange: (p: Partial<NotificationTemplate>) => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <li className="rounded-xl border border-border bg-background overflow-hidden">
@@ -321,8 +494,14 @@ function TemplateRow({ template, onChange }: { template: NotificationTemplate; o
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-sm">{CATEGORY_LABELS[template.category]}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted capitalize">{AUDIENCE_LABELS[template.audience]}</span>
-            {!template.enabled && <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">Desativado</span>}
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted capitalize">
+              {AUDIENCE_LABELS[template.audience]}
+            </span>
+            {!template.enabled && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">
+                Desativado
+              </span>
+            )}
           </div>
           <p className="text-xs text-muted-foreground truncate">{template.title}</p>
         </div>
@@ -331,21 +510,47 @@ function TemplateRow({ template, onChange }: { template: NotificationTemplate; o
           <ChannelDot icon={Mail} active={template.sendEmail} title="E-mail" />
           <ChannelDot icon={MessageSquare} active={template.sendInApp} title="In-app" />
           <Switch checked={template.enabled} onChange={(v) => onChange({ enabled: v })} />
-          <button onClick={() => setOpen(o => !o)} className="text-xs font-semibold text-primary px-2">{open ? "Fechar" : "Editar"}</button>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="text-xs font-semibold text-primary px-2"
+          >
+            {open ? "Fechar" : "Editar"}
+          </button>
         </div>
       </div>
       {open && (
         <div className="border-t border-border p-3 bg-muted/30 space-y-2 animate-fade-in">
           <Field label="Título">
-            <input value={template.title} onChange={e => onChange({ title: e.target.value })} className="input" />
+            <input
+              value={template.title}
+              onChange={(e) => onChange({ title: e.target.value })}
+              className="input"
+            />
           </Field>
           <Field label="Mensagem">
-            <textarea value={template.body} onChange={e => onChange({ body: e.target.value })} rows={3} className="input min-h-[80px] py-2" />
+            <textarea
+              value={template.body}
+              onChange={(e) => onChange({ body: e.target.value })}
+              rows={3}
+              className="input min-h-[80px] py-2"
+            />
           </Field>
           <div className="flex flex-wrap gap-3 pt-1">
-            <Switch label="Push" checked={template.sendPush} onChange={v => onChange({ sendPush: v })} />
-            <Switch label="E-mail" checked={template.sendEmail} onChange={v => onChange({ sendEmail: v })} />
-            <Switch label="In-app" checked={template.sendInApp} onChange={v => onChange({ sendInApp: v })} />
+            <Switch
+              label="Push"
+              checked={template.sendPush}
+              onChange={(v) => onChange({ sendPush: v })}
+            />
+            <Switch
+              label="E-mail"
+              checked={template.sendEmail}
+              onChange={(v) => onChange({ sendEmail: v })}
+            />
+            <Switch
+              label="In-app"
+              checked={template.sendInApp}
+              onChange={(v) => onChange({ sendInApp: v })}
+            />
           </div>
         </div>
       )}
@@ -353,20 +558,48 @@ function TemplateRow({ template, onChange }: { template: NotificationTemplate; o
   );
 }
 
-function ChannelDot({ icon: Icon, active, title }: { icon: React.ElementType; active: boolean; title: string }) {
+function ChannelDot({
+  icon: Icon,
+  active,
+  title,
+}: {
+  icon: React.ElementType;
+  active: boolean;
+  title: string;
+}) {
   return (
-    <span title={title} className={`w-7 h-7 rounded-lg grid place-items-center ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground/40"}`}>
+    <span
+      title={title}
+      className={`w-7 h-7 rounded-lg grid place-items-center ${active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground/40"}`}
+    >
       <Icon className="h-3.5 w-3.5" />
     </span>
   );
 }
 
-function Switch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label?: string }) {
+function Switch({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label?: string;
+}) {
   return (
     <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium select-none">
-      <span className={`relative w-10 h-6 rounded-full transition-colors ${checked ? "bg-primary" : "bg-muted"}`}>
-        <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only" />
-        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-4" : ""}`} />
+      <span
+        className={`relative w-10 h-6 rounded-full transition-colors ${checked ? "bg-primary" : "bg-muted"}`}
+      >
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="sr-only"
+        />
+        <span
+          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-4" : ""}`}
+        />
       </span>
       {label && <span>{label}</span>}
     </label>

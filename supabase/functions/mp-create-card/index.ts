@@ -23,7 +23,11 @@ Deno.serve(async (req) => {
   const SANDBOX = !MP_TOKEN;
 
   let body: any;
-  try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "JSON inválido" }, 400);
+  }
 
   const customer = body.customer ?? {};
   const items = Array.isArray(body.items) ? body.items : [];
@@ -74,11 +78,14 @@ Deno.serve(async (req) => {
   // Sandbox: aprova automaticamente e dispara notificações
   if (SANDBOX) {
     const sandboxId = `SANDBOX-${order.id.slice(0, 8)}-${Date.now()}`;
-    await supabase.from("orders").update({
-      mp_payment_id: sandboxId,
-      payment_status: "approved",
-      paid_at: new Date().toISOString(),
-    }).eq("id", order.id);
+    await supabase
+      .from("orders")
+      .update({
+        mp_payment_id: sandboxId,
+        payment_status: "approved",
+        paid_at: new Date().toISOString(),
+      })
+      .eq("id", order.id);
 
     await supabase.from("payment_events").insert({
       mp_event_id: `sandbox-${order.id}-${Date.now()}`,
@@ -125,7 +132,7 @@ Deno.serve(async (req) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${MP_TOKEN}`,
+      Authorization: `Bearer ${MP_TOKEN}`,
       "X-Idempotency-Key": idempotencyKey,
     },
     body: JSON.stringify(mpPayload),
@@ -136,10 +143,13 @@ Deno.serve(async (req) => {
   if (!mpRes.ok) {
     console.error("[mp-create-card] MP error:", mpRes.status, mpData);
     await supabase.from("orders").update({ payment_status: "rejected" }).eq("id", order.id);
-    return json({
-      error: mpData?.message || "Mercado Pago recusou o pagamento",
-      details: mpData,
-    }, 502);
+    return json(
+      {
+        error: mpData?.message || "Mercado Pago recusou o pagamento",
+        details: mpData,
+      },
+      502,
+    );
   }
 
   // status: approved | in_process | rejected | pending
@@ -152,11 +162,14 @@ Deno.serve(async (req) => {
   };
   const newStatus = statusMap[mpData.status] ?? "pending";
 
-  await supabase.from("orders").update({
-    mp_payment_id: String(mpData.id),
-    payment_status: newStatus,
-    paid_at: newStatus === "approved" ? (mpData.date_approved ?? new Date().toISOString()) : null,
-  }).eq("id", order.id);
+  await supabase
+    .from("orders")
+    .update({
+      mp_payment_id: String(mpData.id),
+      payment_status: newStatus,
+      paid_at: newStatus === "approved" ? (mpData.date_approved ?? new Date().toISOString()) : null,
+    })
+    .eq("id", order.id);
 
   return json({
     order_id: order.id,

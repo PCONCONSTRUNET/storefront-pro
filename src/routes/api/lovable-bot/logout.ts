@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BOT_BASE, BOT_TOKEN, botJsonResponse, botOptionsResponse, parseProxyJson } from "@/lib/botProxy";
+import {
+  BOT_BASE,
+  BOT_TOKEN,
+  botJsonResponse,
+  botOptionsResponse,
+  parseProxyJson,
+} from "@/lib/botProxy";
 
 export const Route = createFileRoute("/api/lovable-bot/logout")({
   server: {
@@ -15,7 +21,11 @@ export const Route = createFileRoute("/api/lovable-bot/logout")({
           const text = await r.text();
           return botJsonResponse(request, parseProxyJson(text, { ok: r.ok, body: text }), r.status);
         } catch (e) {
-          return botJsonResponse(request, { ok: false, error: e instanceof Error ? e.message : String(e) }, 502);
+          return botJsonResponse(
+            request,
+            { ok: false, error: e instanceof Error ? e.message : String(e) },
+            502,
+          );
         }
       },
     },

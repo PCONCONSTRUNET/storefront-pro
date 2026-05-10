@@ -13,7 +13,7 @@ export const Route = createFileRoute("/cadastro")({
 function Page() {
   const navigate = useNavigate();
   const router = useRouter();
-  const registerCustomer = useStore(s => s.registerCustomer);
+  const registerCustomer = useStore((s) => s.registerCustomer);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,7 +30,7 @@ function Page() {
       // Dispara e-mail de boas-vindas (não bloqueia o fluxo se falhar)
       supabase.functions
         .invoke("send-welcome-email", { body: { email: form.email, name: form.name } })
-        .catch(err => console.warn("welcome email failed", err));
+        .catch((err) => console.warn("welcome email failed", err));
       navigate({ to: "/perfil" });
       toast.success(r.message);
     } else {
@@ -43,7 +43,10 @@ function Page() {
 
   return (
     <StoreLayout>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-overlay-in" onClick={close}>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-overlay-in"
+        onClick={close}
+      >
         <div
           className="w-full max-w-[340px] sm:max-w-sm bg-card rounded-2xl overflow-hidden shadow-2xl animate-modal-in"
           onClick={(e) => e.stopPropagation()}
@@ -64,15 +67,43 @@ function Page() {
           </div>
 
           <form onSubmit={submit} className="px-4 py-4 space-y-3">
-            <Field label="Nome completo" value={form.name} onChange={v => setForm({ ...form, name: v })} placeholder="Como devemos te chamar?" />
-            <Field label="E-mail" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="seu@email.com" />
-            <Field label="Telefone" value={form.phone} onChange={v => setForm({ ...form, phone: v })} placeholder="(11) 99999-9999" />
-            <Field label="Senha" type="password" value={form.password} onChange={v => setForm({ ...form, password: v })} placeholder="Mínimo 6 caracteres" />
-            <button disabled={submitting} className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm disabled:opacity-70">
+            <Field
+              label="Nome completo"
+              value={form.name}
+              onChange={(v) => setForm({ ...form, name: v })}
+              placeholder="Como devemos te chamar?"
+            />
+            <Field
+              label="E-mail"
+              type="email"
+              value={form.email}
+              onChange={(v) => setForm({ ...form, email: v })}
+              placeholder="seu@email.com"
+            />
+            <Field
+              label="Telefone"
+              value={form.phone}
+              onChange={(v) => setForm({ ...form, phone: v })}
+              placeholder="(11) 99999-9999"
+            />
+            <Field
+              label="Senha"
+              type="password"
+              value={form.password}
+              onChange={(v) => setForm({ ...form, password: v })}
+              placeholder="Mínimo 6 caracteres"
+            />
+            <button
+              disabled={submitting}
+              className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm disabled:opacity-70"
+            >
               {submitting ? "Criando..." : "Criar conta"}
             </button>
             <p className="text-center text-xs text-muted-foreground pt-0.5">
-              Já tem conta? <Link to="/login" className="text-primary font-semibold">Entrar</Link>
+              Já tem conta?{" "}
+              <Link to="/login" className="text-primary font-semibold">
+                Entrar
+              </Link>
             </p>
           </form>
         </div>
@@ -81,14 +112,26 @@ function Page() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", placeholder }: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
+}) {
   return (
     <label className="block">
       <span className="text-sm font-semibold text-foreground">{label}</span>
       <input
         type={type}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         required
         placeholder={placeholder}
         className="mt-1 w-full h-10 px-3 rounded-lg bg-background text-sm text-foreground placeholder:text-muted-foreground border border-border outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"

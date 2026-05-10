@@ -85,7 +85,9 @@ function Page() {
             Entrar
           </button>
           <p className="text-[11px] text-muted-foreground text-center pt-1">
-            <Link to="/esqueci-senha" className="text-primary underline">Esqueci minha senha</Link>
+            <Link to="/esqueci-senha" className="text-primary underline">
+              Esqueci minha senha
+            </Link>
           </p>
           <p className="text-[11px] text-muted-foreground text-center pt-2">
             Ainda não é afiliada?{" "}

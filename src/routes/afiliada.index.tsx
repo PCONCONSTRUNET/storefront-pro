@@ -2,13 +2,48 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { brl } from "@/lib/format";
-import { Plus, LogOut, Home, Check, X, Clock, LayoutDashboard, ListOrdered, User, Phone, ShoppingBag, DollarSign, MessageCircle, Sparkles, Trash2, Instagram, Store, Globe, QrCode, CreditCard, Banknote, TrendingUp, Target, Trophy } from "lucide-react";
+import {
+  Plus,
+  LogOut,
+  Home,
+  Check,
+  X,
+  Clock,
+  LayoutDashboard,
+  ListOrdered,
+  User,
+  Phone,
+  ShoppingBag,
+  DollarSign,
+  MessageCircle,
+  Sparkles,
+  Trash2,
+  Instagram,
+  Store,
+  Globe,
+  QrCode,
+  CreditCard,
+  Banknote,
+  TrendingUp,
+  Target,
+  Trophy,
+} from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
-  SidebarHeader, SidebarFooter, useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarHeader,
+  SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const Summary = lazy(() => import("@/components/afiliada/Summary"));
@@ -23,31 +58,45 @@ type View = "registrar" | "vendas" | "resumo";
 function Page() {
   const navigate = useNavigate();
   const hydrated = useStoreHydrated();
-  const currentId = useStore(s => s.currentAffiliateId);
-  const affiliates = useStore(s => s.affiliates);
-  const sales = useStore(s => s.affiliateSales);
-  const registerSale = useStore(s => s.registerAffiliateSale);
-  const logout = useStore(s => s.logoutAffiliate);
+  const currentId = useStore((s) => s.currentAffiliateId);
+  const affiliates = useStore((s) => s.affiliates);
+  const sales = useStore((s) => s.affiliateSales);
+  const registerSale = useStore((s) => s.registerAffiliateSale);
+  const logout = useStore((s) => s.logoutAffiliate);
 
-  const me = useMemo(() => affiliates.find(a => a.id === currentId) || null, [affiliates, currentId]);
+  const me = useMemo(
+    () => affiliates.find((a) => a.id === currentId) || null,
+    [affiliates, currentId],
+  );
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!currentId) { navigate({ to: "/afiliada/login" }); return; }
-    if (!me) { logout(); navigate({ to: "/afiliada/login" }); }
+    if (!currentId) {
+      navigate({ to: "/afiliada/login" });
+      return;
+    }
+    if (!me) {
+      logout();
+      navigate({ to: "/afiliada/login" });
+    }
   }, [hydrated, currentId, me, navigate, logout]);
 
   const [view, setView] = useState<View>("registrar");
 
   if (!me) {
-    return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Carregando...</div>;
+    return (
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
+        Carregando...
+      </div>
+    );
   }
 
-  const mySales = sales.filter(s => s.affiliateId === me.id);
+  const mySales = sales.filter((s) => s.affiliateId === me.id);
 
-  const commissionLabel = me.commissionType === "percent"
-    ? `${me.commissionValue}% por venda`
-    : `${brl(me.commissionValue)} por venda`;
+  const commissionLabel =
+    me.commissionType === "percent"
+      ? `${me.commissionValue}% por venda`
+      : `${brl(me.commissionValue)} por venda`;
 
   const items: { id: View; title: string; icon: React.ElementType }[] = [
     { id: "registrar", title: "Registrar venda", icon: Plus },
@@ -70,7 +119,7 @@ function Page() {
               <SidebarGroupLabel>Painel</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {items.map(it => (
+                  {items.map((it) => (
                     <SidebarMenuItem key={it.id}>
                       <SidebarMenuButton onClick={() => setView(it.id)} isActive={view === it.id}>
                         <it.icon className="h-4 w-4" />
@@ -86,12 +135,22 @@ function Page() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to="/"><Home className="h-4 w-4" /><span>Voltar à loja</span></Link>
+                  <Link to="/">
+                    <Home className="h-4 w-4" />
+                    <span>Voltar à loja</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => { logout(); navigate({ to: "/" }); }} className="text-destructive">
-                  <LogOut className="h-4 w-4" /><span>Sair</span>
+                <SidebarMenuButton
+                  onClick={() => {
+                    logout();
+                    navigate({ to: "/" });
+                  }}
+                  className="text-destructive"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -102,7 +161,7 @@ function Page() {
           <header className="h-12 flex items-center border-b border-border bg-card px-2 sticky top-0 z-30">
             <SidebarTrigger />
             <h1 className="ml-2 font-semibold text-sm">
-              {items.find(i => i.id === view)?.title}
+              {items.find((i) => i.id === view)?.title}
             </h1>
           </header>
           <main className="flex-1 p-4 max-w-4xl w-full mx-auto space-y-4">
@@ -110,14 +169,26 @@ function Page() {
             {view === "registrar" && (
               <RegisterSale
                 affiliateId={me.id}
-                onDone={() => { setView("vendas"); }}
+                onDone={() => {
+                  setView("vendas");
+                }}
                 registerSale={registerSale}
               />
             )}
             {view === "vendas" && <SalesList sales={mySales} />}
             {view === "resumo" && (
-              <Suspense fallback={<div className="text-sm text-muted-foreground py-10 text-center">Carregando resumo...</div>}>
-                <Summary sales={mySales} affiliateName={me.name} commissionLabel={commissionLabel} />
+              <Suspense
+                fallback={
+                  <div className="text-sm text-muted-foreground py-10 text-center">
+                    Carregando resumo...
+                  </div>
+                }
+              >
+                <Summary
+                  sales={mySales}
+                  affiliateName={me.name}
+                  commissionLabel={commissionLabel}
+                />
               </Suspense>
             )}
           </main>
@@ -127,14 +198,22 @@ function Page() {
   );
 }
 
-function RegisterSale({ affiliateId, onDone, registerSale }: {
+function RegisterSale({
+  affiliateId,
+  onDone,
+  registerSale,
+}: {
   affiliateId: string;
   onDone: () => void;
   registerSale: ReturnType<typeof useStore.getState>["registerAffiliateSale"];
 }) {
   const { setOpenMobile } = useSidebar();
   const [form, setForm] = useState({
-    customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "",
+    customerName: "",
+    customerPhone: "",
+    productDescription: "",
+    saleValue: "",
+    notes: "",
     channel: "WhatsApp" as "WhatsApp" | "Instagram" | "Presencial" | "Outro",
     payment: "Pix" as "Pix" | "Cartão" | "Dinheiro" | "Outro",
   });
@@ -159,7 +238,15 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
     if (r) {
       playBeep();
       toast.success(`Venda registrada! Comissão: ${brl(r.commissionEarned)}`);
-      setForm({ customerName: "", customerPhone: "", productDescription: "", saleValue: "", notes: "", channel: form.channel, payment: form.payment });
+      setForm({
+        customerName: "",
+        customerPhone: "",
+        productDescription: "",
+        saleValue: "",
+        notes: "",
+        channel: form.channel,
+        payment: form.payment,
+      });
       setOpenMobile(false);
       onDone();
     }
@@ -167,7 +254,7 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
 
   const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413"/>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413" />
     </svg>
   );
 
@@ -200,45 +287,91 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
           </div>
           <div>
             <h2 className="font-display text-xl text-primary leading-tight">Nova venda</h2>
-            <p className="text-[11px] text-muted-foreground">A comissão é calculada automaticamente ✨</p>
+            <p className="text-[11px] text-muted-foreground">
+              A comissão é calculada automaticamente ✨
+            </p>
           </div>
         </div>
 
         <form onSubmit={submit} className="relative grid sm:grid-cols-2 gap-3">
           <Field label="Nome da cliente" required icon={User}>
-            <input value={form.customerName} onChange={e => setForm(f => ({ ...f, customerName: e.target.value }))} required className="input" placeholder="Ex: Maria Silva" />
+            <input
+              value={form.customerName}
+              onChange={(e) => setForm((f) => ({ ...f, customerName: e.target.value }))}
+              required
+              className="input"
+              placeholder="Ex: Maria Silva"
+            />
           </Field>
           <Field label="WhatsApp" icon={Phone}>
-            <input value={form.customerPhone} onChange={e => setForm(f => ({ ...f, customerPhone: e.target.value }))} className="input" placeholder="(11) 99999-9999" />
+            <input
+              value={form.customerPhone}
+              onChange={(e) => setForm((f) => ({ ...f, customerPhone: e.target.value }))}
+              className="input"
+              placeholder="(11) 99999-9999"
+            />
           </Field>
           <Field label="Produto(s) vendido(s)" required full icon={ShoppingBag}>
-            <input value={form.productDescription} onChange={e => setForm(f => ({ ...f, productDescription: e.target.value }))} required placeholder="Ex: 2 laços rosa + 1 tiara" className="input" />
+            <input
+              value={form.productDescription}
+              onChange={(e) => setForm((f) => ({ ...f, productDescription: e.target.value }))}
+              required
+              placeholder="Ex: 2 laços rosa + 1 tiara"
+              className="input"
+            />
           </Field>
           <Field label="Valor total (R$)" required icon={DollarSign}>
-            <input type="text" inputMode="decimal" value={form.saleValue} onChange={e => setForm(f => ({ ...f, saleValue: e.target.value }))} required placeholder="0,00" className="input" />
+            <input
+              type="text"
+              inputMode="decimal"
+              value={form.saleValue}
+              onChange={(e) => setForm((f) => ({ ...f, saleValue: e.target.value }))}
+              required
+              placeholder="0,00"
+              className="input"
+            />
           </Field>
           <Field label="Observações" icon={MessageCircle}>
-            <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input" placeholder="Opcional" />
+            <input
+              value={form.notes}
+              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              className="input"
+              placeholder="Opcional"
+            />
           </Field>
 
           <div className="sm:col-span-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Canal de venda</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Canal de venda
+            </span>
             <div className="grid grid-cols-4 gap-2 mt-1.5">
-              {channels.map(c => (
-                <button key={c.id} type="button" onClick={() => setForm(f => ({ ...f, channel: c.id }))}
-                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.channel === c.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
-                  <c.icon className="h-4 w-4" />{c.id}
+              {channels.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, channel: c.id }))}
+                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.channel === c.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
+                >
+                  <c.icon className="h-4 w-4" />
+                  {c.id}
                 </button>
               ))}
             </div>
           </div>
           <div className="sm:col-span-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Forma de pagamento</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Forma de pagamento
+            </span>
             <div className="grid grid-cols-4 gap-2 mt-1.5">
-              {payments.map(p => (
-                <button key={p.id} type="button" onClick={() => setForm(f => ({ ...f, payment: p.id }))}
-                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.payment === p.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}>
-                  <p.icon className="h-4 w-4" />{p.id}
+              {payments.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, payment: p.id }))}
+                  className={`h-12 rounded-xl border text-[11px] font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.payment === p.id ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
+                >
+                  <p.icon className="h-4 w-4" />
+                  {p.id}
                 </button>
               ))}
             </div>
@@ -255,14 +388,28 @@ function RegisterSale({ affiliateId, onDone, registerSale }: {
   );
 }
 
-function Field({ label, children, full, required, icon: Icon }: { label: string; children: React.ReactNode; full?: boolean; required?: boolean; icon?: React.ElementType }) {
+function Field({
+  label,
+  children,
+  full,
+  required,
+  icon: Icon,
+}: {
+  label: string;
+  children: React.ReactNode;
+  full?: boolean;
+  required?: boolean;
+  icon?: React.ElementType;
+}) {
   return (
     <label className={`block group ${full ? "sm:col-span-2" : ""}`}>
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1">
         {label} {required && <span className="text-primary">*</span>}
       </span>
       <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 mt-[2px] h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />}
+        {Icon && (
+          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 mt-[2px] h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+        )}
         {children}
       </div>
     </label>
@@ -270,7 +417,7 @@ function Field({ label, children, full, required, icon: Icon }: { label: string;
 }
 
 function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["affiliateSales"] }) {
-  const deleteSale = useStore(s => s.deleteAffiliateSale);
+  const deleteSale = useStore((s) => s.deleteAffiliateSale);
   const handleDelete = (id: string, name: string) => {
     if (confirm(`Excluir a venda de "${name}"? Esta ação não pode ser desfeita.`)) {
       deleteSale(id);
@@ -281,15 +428,19 @@ function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["aff
     <div className="bg-card rounded-2xl p-4 shadow-card">
       <h2 className="font-bold mb-3">Minhas vendas</h2>
       {sales.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">Nenhuma venda registrada ainda.</p>
+        <p className="text-sm text-muted-foreground text-center py-8">
+          Nenhuma venda registrada ainda.
+        </p>
       ) : (
         <ul className="divide-y divide-border">
-          {sales.map(s => (
+          {sales.map((s) => (
             <li key={s.id} className="py-3 flex items-start gap-3 flex-wrap">
               <div className="flex-1 min-w-[200px]">
                 <div className="text-sm font-semibold">{s.customerName}</div>
                 <div className="text-xs text-muted-foreground">{s.productDescription}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{new Date(s.createdAt).toLocaleString("pt-BR")}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">
+                  {new Date(s.createdAt).toLocaleString("pt-BR")}
+                </div>
               </div>
               <div className="text-right">
                 <div className="text-sm font-bold">{brl(s.saleValue)}</div>
@@ -320,13 +471,19 @@ function StatusBadge({ status }: { status: "pendente" | "confirmada" | "cancelad
   } as const;
   const m = map[status];
   return (
-    <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full mt-1 ${m.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full mt-1 ${m.cls}`}
+    >
       <m.icon className="h-3 w-3" /> {m.label}
     </span>
   );
 }
 
-function AffiliateHero({ name, commissionLabel, sales }: {
+function AffiliateHero({
+  name,
+  commissionLabel,
+  sales,
+}: {
   name: string;
   commissionLabel: string;
   sales: ReturnType<typeof useStore.getState>["affiliateSales"];
@@ -334,9 +491,13 @@ function AffiliateHero({ name, commissionLabel, sales }: {
   const stats = useMemo(() => {
     const todayKey = new Date().toISOString().slice(0, 10);
     const monthKey = new Date().toISOString().slice(0, 7);
-    const today = sales.filter(s => s.createdAt.slice(0, 10) === todayKey && s.status !== "cancelada");
-    const month = sales.filter(s => s.createdAt.slice(0, 7) === monthKey && s.status !== "cancelada");
-    const paid = sales.filter(s => s.status === "confirmada");
+    const today = sales.filter(
+      (s) => s.createdAt.slice(0, 10) === todayKey && s.status !== "cancelada",
+    );
+    const month = sales.filter(
+      (s) => s.createdAt.slice(0, 7) === monthKey && s.status !== "cancelada",
+    );
+    const paid = sales.filter((s) => s.status === "confirmada");
     return {
       todayCount: today.length,
       todayCommission: today.reduce((a, s) => a + s.commissionEarned, 0),
@@ -346,7 +507,10 @@ function AffiliateHero({ name, commissionLabel, sales }: {
     };
   }, [sales]);
 
-  const monthCount = sales.filter(s => s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) && s.status !== "cancelada").length;
+  const monthCount = sales.filter(
+    (s) =>
+      s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) && s.status !== "cancelada",
+  ).length;
   const goal = Math.max(10, Math.ceil(Math.max(monthCount, 1) / 10) * 10);
   const progress = Math.min(100, Math.round((monthCount / goal) * 100));
 
@@ -360,7 +524,9 @@ function AffiliateHero({ name, commissionLabel, sales }: {
       <div className="relative p-5 md:p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-[11px] uppercase tracking-wider opacity-80">{greeting}, princesa ✨</div>
+            <div className="text-[11px] uppercase tracking-wider opacity-80">
+              {greeting}, princesa ✨
+            </div>
             <h2 className="font-display text-2xl md:text-3xl leading-tight">{name}</h2>
             <div className="text-xs opacity-90 mt-0.5 flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" /> {commissionLabel}
@@ -373,18 +539,39 @@ function AffiliateHero({ name, commissionLabel, sales }: {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
           <HeroStat icon={ShoppingBag} label="Hoje" value={String(stats.todayCount)} sub="vendas" />
-          <HeroStat icon={DollarSign} label="Comissão hoje" value={brl(stats.todayCommission)} sub="" highlight />
-          <HeroStat icon={TrendingUp} label="No mês" value={brl(stats.monthRevenue)} sub="faturado" />
-          <HeroStat icon={Trophy} label="Comissão total" value={brl(stats.lifetimeCommission)} sub="acumulada" />
+          <HeroStat
+            icon={DollarSign}
+            label="Comissão hoje"
+            value={brl(stats.todayCommission)}
+            sub=""
+            highlight
+          />
+          <HeroStat
+            icon={TrendingUp}
+            label="No mês"
+            value={brl(stats.monthRevenue)}
+            sub="faturado"
+          />
+          <HeroStat
+            icon={Trophy}
+            label="Comissão total"
+            value={brl(stats.lifetimeCommission)}
+            sub="acumulada"
+          />
         </div>
 
         <div className="mt-5">
           <div className="flex items-center justify-between text-[11px] opacity-90 mb-1.5">
-            <span className="flex items-center gap-1"><Target className="h-3 w-3" /> Meta do mês: {monthCount}/{goal} vendas</span>
+            <span className="flex items-center gap-1">
+              <Target className="h-3 w-3" /> Meta do mês: {monthCount}/{goal} vendas
+            </span>
             <span className="font-semibold">{progress}%</span>
           </div>
           <div className="h-2 rounded-full bg-white/20 overflow-hidden">
-            <div className="h-full bg-gold transition-[width] duration-700 ease-out" style={{ width: `${progress}%` }} />
+            <div
+              className="h-full bg-gold transition-[width] duration-700 ease-out"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
       </div>
@@ -392,11 +579,23 @@ function AffiliateHero({ name, commissionLabel, sales }: {
   );
 }
 
-function HeroStat({ icon: Icon, label, value, sub, highlight }: {
-  icon: React.ElementType; label: string; value: string; sub: string; highlight?: boolean;
+function HeroStat({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  highlight,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  sub: string;
+  highlight?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl px-3 py-2.5 backdrop-blur ${highlight ? "bg-gold text-gold-foreground" : "bg-white/15"}`}>
+    <div
+      className={`rounded-2xl px-3 py-2.5 backdrop-blur ${highlight ? "bg-gold text-gold-foreground" : "bg-white/15"}`}
+    >
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide opacity-90">
         <Icon className="h-3 w-3" /> {label}
       </div>
@@ -405,4 +604,3 @@ function HeroStat({ icon: Icon, label, value, sub, highlight }: {
     </div>
   );
 }
-

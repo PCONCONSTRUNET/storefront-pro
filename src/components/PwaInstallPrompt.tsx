@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import { X, Download, Share, Plus, MoreVertical, ChevronRight } from "lucide-react";
 
-type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
+type BIPEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
 
 const DISMISS_KEY = "pwa_install_dismissed_at";
 const DISMISS_DAYS = 7;
 
 function isStandalone() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true
+  );
 }
 
 function detectPlatform(): "ios" | "android" | "desktop" {
@@ -72,7 +78,11 @@ export function PwaInstallPrompt() {
       <div className="pointer-events-auto max-w-sm mx-auto bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
         {!showTutorial ? (
           <div className="relative p-4">
-            <button onClick={dismiss} aria-label="Fechar" className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground">
+            <button
+              onClick={dismiss}
+              aria-label="Fechar"
+              className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
             <div className="flex items-center gap-3">
@@ -81,35 +91,54 @@ export function PwaInstallPrompt() {
               </div>
               <div className="flex-1 min-w-0 pr-6">
                 <div className="font-bold text-sm text-foreground">Instale nosso app</div>
-                <div className="text-xs text-muted-foreground">Acesso rápido na sua tela inicial 💖</div>
+                <div className="text-xs text-muted-foreground">
+                  Acesso rápido na sua tela inicial 💖
+                </div>
               </div>
             </div>
-            <button onClick={handleInstall} className="mt-3 w-full h-10 rounded-full gradient-primary text-primary-foreground font-semibold text-sm shadow-soft active:scale-[0.98] transition-transform">
+            <button
+              onClick={handleInstall}
+              className="mt-3 w-full h-10 rounded-full gradient-primary text-primary-foreground font-semibold text-sm shadow-soft active:scale-[0.98] transition-transform"
+            >
               Instalar
             </button>
           </div>
         ) : (
           <div className="relative p-4">
-            <button onClick={dismiss} aria-label="Fechar" className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground">
+            <button
+              onClick={dismiss}
+              aria-label="Fechar"
+              className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
             <div className="font-bold text-sm text-foreground mb-2 pr-6">Como instalar</div>
 
             {platform !== "android" && (
               <div className="mb-3">
-                <div className="text-[11px] uppercase font-semibold text-primary mb-1.5">iPhone (Safari)</div>
+                <div className="text-[11px] uppercase font-semibold text-primary mb-1.5">
+                  iPhone (Safari)
+                </div>
                 <ol className="space-y-1.5 text-xs text-muted-foreground">
                   <li className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">1</span>
+                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
+                      1
+                    </span>
                     Toque em <Share className="inline h-3.5 w-3.5 text-primary" /> Compartilhar
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">2</span>
-                    "Adicionar à Tela de Início" <Plus className="inline h-3.5 w-3.5 text-primary" />
+                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
+                      2
+                    </span>
+                    "Adicionar à Tela de Início"{" "}
+                    <Plus className="inline h-3.5 w-3.5 text-primary" />
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">3</span>
-                    Toque em "Adicionar" <ChevronRight className="inline h-3.5 w-3.5 text-primary" />
+                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
+                      3
+                    </span>
+                    Toque em "Adicionar"{" "}
+                    <ChevronRight className="inline h-3.5 w-3.5 text-primary" />
                   </li>
                 </ol>
               </div>
@@ -117,25 +146,36 @@ export function PwaInstallPrompt() {
 
             {platform !== "ios" && (
               <div>
-                <div className="text-[11px] uppercase font-semibold text-primary mb-1.5">Android (Chrome)</div>
+                <div className="text-[11px] uppercase font-semibold text-primary mb-1.5">
+                  Android (Chrome)
+                </div>
                 <ol className="space-y-1.5 text-xs text-muted-foreground">
                   <li className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">1</span>
+                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
+                      1
+                    </span>
                     Toque em <MoreVertical className="inline h-3.5 w-3.5 text-primary" /> menu
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">2</span>
+                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
+                      2
+                    </span>
                     "Instalar app" ou "Adicionar à tela inicial"
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">3</span>
+                    <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
+                      3
+                    </span>
                     Confirme tocando em "Instalar"
                   </li>
                 </ol>
               </div>
             )}
 
-            <button onClick={dismiss} className="mt-3 w-full h-9 rounded-full bg-muted text-foreground font-semibold text-xs">
+            <button
+              onClick={dismiss}
+              className="mt-3 w-full h-9 rounded-full bg-muted text-foreground font-semibold text-xs"
+            >
               Entendi
             </button>
           </div>

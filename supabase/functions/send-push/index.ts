@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Key ${ONESIGNAL_REST_API_KEY}`,
-        "Accept": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
     });

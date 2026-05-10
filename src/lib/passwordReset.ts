@@ -5,7 +5,9 @@ export type ResetSubject = "admin" | "customer" | "affiliate";
 function randomToken(): string {
   const arr = new Uint8Array(24);
   crypto.getRandomValues(arr);
-  return Array.from(arr).map(b => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(arr)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export async function createResetToken(subjectType: ResetSubject, subjectEmail: string) {
@@ -24,7 +26,9 @@ export function buildResetUrl(token: string) {
   return `${origin}/redefinir-senha?token=${token}`;
 }
 
-export async function consumeResetToken(token: string): Promise<{ subjectType: ResetSubject; subjectEmail: string } | null> {
+export async function consumeResetToken(
+  token: string,
+): Promise<{ subjectType: ResetSubject; subjectEmail: string } | null> {
   const { data, error } = await supabase.rpc("consume_password_reset_token", { _token: token });
   if (error || !data || data.length === 0) return null;
   const row = data[0] as { subject_type: ResetSubject; subject_email: string };

@@ -36,14 +36,19 @@ export async function logoutBot(): Promise<void> {
   const res = await fetch(getBotProxyPath(`/api/bot/logout`), { method: "POST" });
   if (!res.ok) {
     let msg = `Logout falhou (${res.status})`;
-    try { const j = await res.json(); if (j.error) msg = j.error; } catch {}
+    try {
+      const j = await res.json();
+      if (j.error) msg = j.error;
+    } catch {}
     throw new Error(msg);
   }
 }
 
 export type SendNotificationPayload = { numero: string; mensagem: string };
 
-export async function sendBotNotification(payload: SendNotificationPayload): Promise<{ ok: boolean; status: number; body?: string }> {
+export async function sendBotNotification(
+  payload: SendNotificationPayload,
+): Promise<{ ok: boolean; status: number; body?: string }> {
   const res = await fetch(getBotProxyPath(`/api/bot/notify`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -63,7 +68,9 @@ export async function sendBotNotification(payload: SendNotificationPayload): Pro
           ok = false;
           body = `Bot ignorou: ${inner.aviso}`;
         }
-      } catch { /* body não é JSON, ignora */ }
+      } catch {
+        /* body não é JSON, ignora */
+      }
     }
     return { ok, status: j.status ?? res.status, body };
   } catch {
@@ -90,7 +97,9 @@ export function getBotLogs(): BotNotificationLog[] {
   try {
     const raw = localStorage.getItem(LOG_KEY);
     return raw ? (JSON.parse(raw) as BotNotificationLog[]) : [];
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 export function pushBotLog(entry: Omit<BotNotificationLog, "id" | "at">) {

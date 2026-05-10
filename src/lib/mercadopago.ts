@@ -2,7 +2,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type CreatePixInput = {
   customer: { name: string; email: string; phone: string; document?: string };
-  items: Array<{ productId: string; name: string; price: number; quantity: number; image?: string }>;
+  items: Array<{
+    productId: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+  }>;
   totals: { subtotal: number; discount: number; shipping: number; total: number };
   delivery: "entrega" | "retirada";
   address?: string;
@@ -67,7 +73,9 @@ export type OrderRow = {
 export async function fetchOrder(id: string): Promise<OrderRow | null> {
   const { data, error } = await supabase
     .from("orders")
-    .select("id, payment_status, pix_qr_code, pix_qr_code_base64, pix_expires_at, total, customer_name, customer_email, customer_phone")
+    .select(
+      "id, payment_status, pix_qr_code, pix_qr_code_base64, pix_expires_at, total, customer_name, customer_email, customer_phone",
+    )
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;

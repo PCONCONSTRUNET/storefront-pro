@@ -23,7 +23,11 @@ Deno.serve(async (req) => {
   const SANDBOX = !MP_TOKEN;
 
   let body: any;
-  try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "JSON inválido" }, 400);
+  }
 
   const customer = body.customer ?? {};
   const items = Array.isArray(body.items) ? body.items : [];
@@ -72,13 +76,17 @@ Deno.serve(async (req) => {
     const sandboxId = `SANDBOX-${order.id.slice(0, 8)}-${Date.now()}`;
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
     // Pequeno PNG 1x1 transparente em base64 (placeholder)
-    const fakeQr = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-    await supabase.from("orders").update({
-      mp_payment_id: sandboxId,
-      pix_qr_code: "SANDBOX_PIX_CODE_TESTE",
-      pix_qr_code_base64: fakeQr,
-      pix_expires_at: expiresAt,
-    }).eq("id", order.id);
+    const fakeQr =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+    await supabase
+      .from("orders")
+      .update({
+        mp_payment_id: sandboxId,
+        pix_qr_code: "SANDBOX_PIX_CODE_TESTE",
+        pix_qr_code_base64: fakeQr,
+        pix_expires_at: expiresAt,
+      })
+      .eq("id", order.id);
     return json({
       order_id: order.id,
       mp_payment_id: sandboxId,
@@ -106,9 +114,11 @@ Deno.serve(async (req) => {
       email: customer.email,
       first_name: firstName,
       last_name: lastName,
-      ...(customer.document ? {
-        identification: { type: "CPF", number: String(customer.document).replace(/\D/g, "") },
-      } : {}),
+      ...(customer.document
+        ? {
+            identification: { type: "CPF", number: String(customer.document).replace(/\D/g, "") },
+          }
+        : {}),
     },
   };
 
@@ -118,7 +128,7 @@ Deno.serve(async (req) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${MP_TOKEN}`,
+      Authorization: `Bearer ${MP_TOKEN}`,
       "X-Idempotency-Key": idempotencyKey,
     },
     body: JSON.stringify(mpPayload),
@@ -135,12 +145,15 @@ Deno.serve(async (req) => {
   const td = mpData.point_of_interaction?.transaction_data ?? {};
   const expiresAt = mpData.date_of_expiration ?? null;
 
-  await supabase.from("orders").update({
-    mp_payment_id: String(mpData.id),
-    pix_qr_code: td.qr_code ?? null,
-    pix_qr_code_base64: td.qr_code_base64 ?? null,
-    pix_expires_at: expiresAt,
-  }).eq("id", order.id);
+  await supabase
+    .from("orders")
+    .update({
+      mp_payment_id: String(mpData.id),
+      pix_qr_code: td.qr_code ?? null,
+      pix_qr_code_base64: td.qr_code_base64 ?? null,
+      pix_expires_at: expiresAt,
+    })
+    .eq("id", order.id);
 
   return json({
     order_id: order.id,

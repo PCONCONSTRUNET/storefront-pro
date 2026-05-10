@@ -5,16 +5,36 @@ import { useStore, useStoreHydrated } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/Skeleton";
-import { ChevronRight, ChevronLeft, Zap, Truck, ShieldCheck, Tag, Crown, Sparkles, Gift, Flame, Pause, Play } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  Zap,
+  Truck,
+  ShieldCheck,
+  Tag,
+  Crown,
+  Sparkles,
+  Gift,
+  Flame,
+  Pause,
+  Play,
+} from "lucide-react";
 import bannerEncantada from "@/assets/banner-encantada-2026.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Princesa de Laços — Laços, tiaras e acessórios" },
-      { name: "description", content: "Catálogo encantado de laços, tiaras e acessórios artesanais para princesas de todas as idades." },
+      {
+        name: "description",
+        content:
+          "Catálogo encantado de laços, tiaras e acessórios artesanais para princesas de todas as idades.",
+      },
       { property: "og:title", content: "Princesa de Laços" },
-      { property: "og:description", content: "Catálogo encantado de laços, tiaras e acessórios artesanais." },
+      {
+        property: "og:description",
+        content: "Catálogo encantado de laços, tiaras e acessórios artesanais.",
+      },
     ],
   }),
   component: Home,
@@ -38,13 +58,26 @@ function useCountdown(hours: number) {
 function Home() {
   const { products, categories, settings, coupons } = useStore();
   const hydrated = useStoreHydrated();
-  const flash = useMemo(() => products.filter(p => p.active && !p.hidden && p.oldPrice).slice(0, 8), [products]);
-  const all = useMemo(() => products.filter(p => p.active && !p.hidden), [products]);
+  const flash = useMemo(
+    () => products.filter((p) => p.active && !p.hidden && p.oldPrice).slice(0, 8),
+    [products],
+  );
+  const all = useMemo(() => products.filter((p) => p.active && !p.hidden), [products]);
   const { h, m, s } = useCountdown(8);
 
   const banners = [
-    { icon: Crown, title: "Coleção Princesa", sub: "Tiaras e coroas", color: "from-primary to-rose" },
-    { icon: Gift, title: "Kits Presente", sub: "A partir de R$ 49,90", color: "from-gold to-[oklch(0.78_0.16_55)]" },
+    {
+      icon: Crown,
+      title: "Coleção Princesa",
+      sub: "Tiaras e coroas",
+      color: "from-primary to-rose",
+    },
+    {
+      icon: Gift,
+      title: "Kits Presente",
+      sub: "A partir de R$ 49,90",
+      color: "from-gold to-[oklch(0.78_0.16_55)]",
+    },
     { icon: Sparkles, title: "Novidades", sub: "Toda semana", color: "from-rose to-accent" },
   ];
 
@@ -53,7 +86,10 @@ function Home() {
       {/* Hero carousel mock */}
       <section className="px-3 md:px-4 pt-3 md:pt-5 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
-          <Link to="/categorias" className="md:col-span-2 relative overflow-hidden rounded-lg shadow-card block group">
+          <Link
+            to="/categorias"
+            className="md:col-span-2 relative overflow-hidden rounded-lg shadow-card block group"
+          >
             <img
               src={bannerEncantada}
               alt={settings.bannerTitle || "Coleção Encantada 2026"}
@@ -64,11 +100,19 @@ function Home() {
           </Link>
           <div className="hidden md:flex flex-col gap-3">
             {banners.slice(0, 2).map((b) => (
-              <Link key={b.title} to="/categorias" className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${b.color} text-white p-4 flex-1 group`}>
+              <Link
+                key={b.title}
+                to="/categorias"
+                className={`relative overflow-hidden rounded-lg bg-gradient-to-br ${b.color} text-white p-4 flex-1 group`}
+              >
                 <b.icon className="absolute -right-2 -bottom-2 h-20 w-20 opacity-20" />
-                <div className="text-xs font-semibold uppercase tracking-wide opacity-90">{b.sub}</div>
+                <div className="text-xs font-semibold uppercase tracking-wide opacity-90">
+                  {b.sub}
+                </div>
                 <div className="font-display text-xl mt-1">{b.title}</div>
-                <span className="mt-2 inline-flex items-center text-xs opacity-90 group-hover:translate-x-1 transition-transform">Ver mais <ChevronRight className="h-3 w-3" /></span>
+                <span className="mt-2 inline-flex items-center text-xs opacity-90 group-hover:translate-x-1 transition-transform">
+                  Ver mais <ChevronRight className="h-3 w-3" />
+                </span>
               </Link>
             ))}
           </div>
@@ -82,7 +126,11 @@ function Home() {
             { icon: Truck, label: "Frete fixo", sub: `R$ ${settings.shippingFee.toFixed(2)}` },
             { icon: ShieldCheck, label: "Compra 100% segura", sub: "Pix, cartão e dinheiro" },
             { icon: Zap, label: "Envio rápido", sub: "Em até 24h" },
-            { icon: Tag, label: "Cupons", sub: `${coupons.filter(c=>c.active).length} ativos hoje` },
+            {
+              icon: Tag,
+              label: "Cupons",
+              sub: `${coupons.filter((c) => c.active).length} ativos hoje`,
+            },
           ].map((t) => (
             <div key={t.label} className="flex items-center gap-2 p-2.5 md:p-3">
               <div className="w-8 h-8 rounded-full bg-primary/10 grid place-items-center text-primary shrink-0">
@@ -90,7 +138,9 @@ function Home() {
               </div>
               <div className="min-w-0">
                 <div className="text-[11px] md:text-xs font-semibold leading-tight">{t.label}</div>
-                <div className="text-[10px] md:text-[11px] text-muted-foreground truncate">{t.sub}</div>
+                <div className="text-[10px] md:text-[11px] text-muted-foreground truncate">
+                  {t.sub}
+                </div>
               </div>
             </div>
           ))}
@@ -100,23 +150,28 @@ function Home() {
       <CategoriesScroller categories={categories} />
 
       {/* Coupons strip */}
-      {coupons.filter(c => c.active).length > 0 && (
+      {coupons.filter((c) => c.active).length > 0 && (
         <section className="mt-3 max-w-6xl mx-auto px-3 md:px-4">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {coupons.filter(c => c.active).map((c) => (
-              <div key={c.code} className="shrink-0 flex items-stretch bg-card border border-dashed border-primary/40 rounded-md overflow-hidden">
-                <div className="bg-primary text-primary-foreground px-3 grid place-items-center">
-                  <Tag className="h-4 w-4" />
-                </div>
-                <div className="px-3 py-1.5">
-                  <div className="text-[11px] font-bold text-primary leading-tight">{c.code}</div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {c.type === "percent" ? `${c.value}% OFF` : `R$ ${c.value} OFF`}
-                    {c.minOrder > 0 ? ` · acima de R$ ${c.minOrder}` : ""}
+            {coupons
+              .filter((c) => c.active)
+              .map((c) => (
+                <div
+                  key={c.code}
+                  className="shrink-0 flex items-stretch bg-card border border-dashed border-primary/40 rounded-md overflow-hidden"
+                >
+                  <div className="bg-primary text-primary-foreground px-3 grid place-items-center">
+                    <Tag className="h-4 w-4" />
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <div className="text-[11px] font-bold text-primary leading-tight">{c.code}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {c.type === "percent" ? `${c.value}% OFF` : `R$ ${c.value} OFF`}
+                      {c.minOrder > 0 ? ` · acima de R$ ${c.minOrder}` : ""}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </section>
       )}
@@ -127,21 +182,36 @@ function Home() {
           <div className="mx-3 md:mx-4 bg-card rounded-md border border-border overflow-hidden">
             <div className="bg-gradient-to-r from-destructive to-[oklch(0.7_0.2_15)] text-destructive-foreground px-3 md:px-4 py-2.5 flex items-center gap-2 md:gap-3">
               <Flame className="h-5 w-5 md:h-6 md:w-6 fill-gold text-gold" />
-              <h2 className="font-bold text-sm md:text-lg uppercase tracking-wide">Ofertas Relâmpago</h2>
+              <h2 className="font-bold text-sm md:text-lg uppercase tracking-wide">
+                Ofertas Relâmpago
+              </h2>
               <div className="flex items-center gap-1 ml-auto md:ml-2 text-xs">
                 <span className="hidden md:inline opacity-90">Termina em</span>
-                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">{h}</span>
+                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">
+                  {h}
+                </span>
                 <span className="font-bold">:</span>
-                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">{m}</span>
+                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">
+                  {m}
+                </span>
                 <span className="font-bold">:</span>
-                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">{s}</span>
+                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">
+                  {s}
+                </span>
               </div>
-              <Link to="/categorias" className="hidden md:inline-flex items-center text-xs font-semibold hover:underline ml-2">
+              <Link
+                to="/categorias"
+                className="hidden md:inline-flex items-center text-xs font-semibold hover:underline ml-2"
+              >
                 Ver todas <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 p-2 md:p-3">
-              {!hydrated ? <ProductGridSkeleton count={4} /> : flash.map((p) => <ProductCard key={p.id} product={p} />)}
+              {!hydrated ? (
+                <ProductGridSkeleton count={4} />
+              ) : (
+                flash.map((p) => <ProductCard key={p.id} product={p} />)
+              )}
             </div>
           </div>
         </section>
@@ -157,10 +227,17 @@ function Home() {
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3">
-            {!hydrated ? <ProductGridSkeleton count={10} /> : all.map((p) => <ProductCard key={p.id} product={p} />)}
+            {!hydrated ? (
+              <ProductGridSkeleton count={10} />
+            ) : (
+              all.map((p) => <ProductCard key={p.id} product={p} />)
+            )}
           </div>
           <div className="mt-6 text-center">
-            <Link to="/categorias" className="inline-flex items-center gap-1 text-sm text-primary font-semibold hover:underline">
+            <Link
+              to="/categorias"
+              className="inline-flex items-center gap-1 text-sm text-primary font-semibold hover:underline"
+            >
               Ver mais produtos <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
@@ -170,7 +247,11 @@ function Home() {
   );
 }
 
-function CategoriesScroller({ categories }: { categories: { id: string; name: string; image: string }[] }) {
+function CategoriesScroller({
+  categories,
+}: {
+  categories: { id: string; name: string; image: string }[];
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [autoplay, setAutoplay] = useState(true);
 
@@ -209,13 +290,24 @@ function CategoriesScroller({ categories }: { categories: { id: string; name: st
             >
               {autoplay ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
             </button>
-            <button onClick={() => scrollBy(-1)} aria-label="Anterior" className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 grid place-items-center transition-colors">
+            <button
+              onClick={() => scrollBy(-1)}
+              aria-label="Anterior"
+              className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 grid place-items-center transition-colors"
+            >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <button onClick={() => scrollBy(1)} aria-label="Próximo" className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 grid place-items-center transition-colors">
+            <button
+              onClick={() => scrollBy(1)}
+              aria-label="Próximo"
+              className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 grid place-items-center transition-colors"
+            >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <Link to="/categorias" className="ml-1 text-[11px] md:text-xs text-primary font-semibold flex items-center">
+            <Link
+              to="/categorias"
+              className="ml-1 text-[11px] md:text-xs text-primary font-semibold flex items-center"
+            >
               Ver todas <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
@@ -226,11 +318,18 @@ function CategoriesScroller({ categories }: { categories: { id: string; name: st
           className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide -mx-1 px-1 snap-x"
         >
           {categories.map((c) => (
-            <Link key={c.id} to="/categoria/$slug" params={{ slug: c.id }} className="shrink-0 snap-start flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors w-[72px] md:w-[88px]">
+            <Link
+              key={c.id}
+              to="/categoria/$slug"
+              params={{ slug: c.id }}
+              className="shrink-0 snap-start flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors w-[72px] md:w-[88px]"
+            >
               <div className="w-14 h-14 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform">
                 {c.image}
               </div>
-              <span className="text-[10px] md:text-xs font-medium text-foreground text-center line-clamp-1">{c.name}</span>
+              <span className="text-[10px] md:text-xs font-medium text-foreground text-center line-clamp-1">
+                {c.name}
+              </span>
             </Link>
           ))}
         </div>

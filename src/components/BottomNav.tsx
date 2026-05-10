@@ -27,11 +27,14 @@ export function BottomNav() {
                 to={it.to}
                 className={cn(
                   "flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium relative transition-colors",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div className="relative">
-                  <Icon className={cn("h-5 w-5", active && "scale-110")} strokeWidth={active ? 2.5 : 2} />
+                  <Icon
+                    className={cn("h-5 w-5", active && "scale-110")}
+                    strokeWidth={active ? 2.5 : 2}
+                  />
                   {it.badge && count > 0 && (
                     <span className="absolute -top-1.5 -right-2 bg-primary text-primary-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">
                       {count}

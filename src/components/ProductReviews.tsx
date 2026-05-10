@@ -5,16 +5,24 @@ import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 
 export function productRating(reviews: { productId: string; rating: number }[], productId: string) {
-  const list = reviews.filter(r => r.productId === productId);
+  const list = reviews.filter((r) => r.productId === productId);
   if (list.length === 0) return { avg: 0, count: 0 };
   const avg = list.reduce((a, r) => a + r.rating, 0) / list.length;
   return { avg, count: list.length };
 }
 
-export function Stars({ value, size = 14, onChange }: { value: number; size?: number; onChange?: (v: number) => void }) {
+export function Stars({
+  value,
+  size = 14,
+  onChange,
+}: {
+  value: number;
+  size?: number;
+  onChange?: (v: number) => void;
+}) {
   return (
     <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map(i => {
+      {[1, 2, 3, 4, 5].map((i) => {
         const filled = i <= Math.round(value);
         const Cls = onChange ? "cursor-pointer hover:scale-110 transition-transform" : "";
         return (
@@ -31,13 +39,13 @@ export function Stars({ value, size = 14, onChange }: { value: number; size?: nu
 }
 
 export function ProductReviews({ productId }: { productId: string }) {
-  const allReviews = useStore(s => s.reviews);
-  const reviews = allReviews.filter(r => r.productId === productId);
-  const orders = useStore(s => s.orders);
-  const currentCustomerId = useStore(s => s.currentCustomerId);
-  const isAdmin = useStore(s => s.isAdmin);
-  const addReview = useStore(s => s.addReview);
-  const deleteReview = useStore(s => s.deleteReview);
+  const allReviews = useStore((s) => s.reviews);
+  const reviews = allReviews.filter((r) => r.productId === productId);
+  const orders = useStore((s) => s.orders);
+  const currentCustomerId = useStore((s) => s.currentCustomerId);
+  const isAdmin = useStore((s) => s.isAdmin);
+  const addReview = useStore((s) => s.addReview);
+  const deleteReview = useStore((s) => s.deleteReview);
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -50,47 +58,69 @@ export function ProductReviews({ productId }: { productId: string }) {
     const total = reviews.length;
     if (!total) return { avg: 0, total: 0, dist: [0, 0, 0, 0, 0] };
     const dist = [0, 0, 0, 0, 0];
-    reviews.forEach(r => { dist[5 - r.rating]++; });
+    reviews.forEach((r) => {
+      dist[5 - r.rating]++;
+    });
     const avg = reviews.reduce((a, r) => a + r.rating, 0) / total;
     return { avg, total, dist };
   }, [reviews]);
 
-  const filtered = filterStars ? reviews.filter(r => r.rating === filterStars) : reviews;
+  const filtered = filterStars ? reviews.filter((r) => r.rating === filterStars) : reviews;
 
   const customerHasBought = useMemo(() => {
     if (!currentCustomerId) return false;
-    return orders.some(o => o.customerId === currentCustomerId && o.items.some(i => i.productId === productId));
+    return orders.some(
+      (o) => o.customerId === currentCustomerId && o.items.some((i) => i.productId === productId),
+    );
   }, [orders, currentCustomerId, productId]);
 
   const alreadyReviewed = useMemo(
-    () => !!currentCustomerId && reviews.some(r => r.customerId === currentCustomerId),
+    () => !!currentCustomerId && reviews.some((r) => r.customerId === currentCustomerId),
     [reviews, currentCustomerId],
   );
 
   const onPickFiles = async (files: FileList | null) => {
     if (!files || !files.length) return;
     const remaining = 5 - photos.length;
-    if (remaining <= 0) { toast.error("Máx. 5 fotos por avaliação"); return; }
+    if (remaining <= 0) {
+      toast.error("Máx. 5 fotos por avaliação");
+      return;
+    }
     const arr = Array.from(files).slice(0, remaining);
-    const tooBig = arr.find(f => f.size > 5 * 1024 * 1024);
-    if (tooBig) { toast.error("Cada foto deve ter no máximo 5MB"); return; }
-    const dataUrls = await Promise.all(arr.map(f => new Promise<string>((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result as string);
-      r.onerror = rej;
-      r.readAsDataURL(f);
-    })));
-    setPhotos(p => [...p, ...dataUrls]);
+    const tooBig = arr.find((f) => f.size > 5 * 1024 * 1024);
+    if (tooBig) {
+      toast.error("Cada foto deve ter no máximo 5MB");
+      return;
+    }
+    const dataUrls = await Promise.all(
+      arr.map(
+        (f) =>
+          new Promise<string>((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result as string);
+            r.onerror = rej;
+            r.readAsDataURL(f);
+          }),
+      ),
+    );
+    setPhotos((p) => [...p, ...dataUrls]);
   };
 
   const submit = () => {
     const res = addReview({ productId, rating, comment, photos });
-    if (!res.ok) { toast.error(res.message); return; }
+    if (!res.ok) {
+      toast.error(res.message);
+      return;
+    }
     toast.success(res.message);
-    setRating(0); setComment(""); setPhotos([]);
+    setRating(0);
+    setComment("");
+    setPhotos([]);
   };
 
-  const reviewPhotos = reviews.flatMap(r => r.photos.map(src => ({ src, name: r.customerName })));
+  const reviewPhotos = reviews.flatMap((r) =>
+    r.photos.map((src) => ({ src, name: r.customerName })),
+  );
 
   return (
     <section className="mt-10">
@@ -101,7 +131,9 @@ export function ProductReviews({ productId }: { productId: string }) {
         <div className="text-center md:border-r md:border-border md:pr-4">
           <div className="text-4xl font-bold text-gold">{summary.avg.toFixed(1)}</div>
           <Stars value={summary.avg} size={16} />
-          <div className="text-xs text-muted-foreground mt-1">{summary.total} avaliação{summary.total === 1 ? "" : "ões"}</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            {summary.total} avaliação{summary.total === 1 ? "" : "ões"}
+          </div>
         </div>
         <div className="space-y-1">
           {[5, 4, 3, 2, 1].map((s, i) => {
@@ -124,7 +156,10 @@ export function ProductReviews({ productId }: { productId: string }) {
             );
           })}
           {filterStars && (
-            <button onClick={() => setFilterStars(null)} className="text-[11px] text-primary font-semibold mt-1">
+            <button
+              onClick={() => setFilterStars(null)}
+              className="text-[11px] text-primary font-semibold mt-1"
+            >
               Limpar filtro
             </button>
           )}
@@ -135,7 +170,8 @@ export function ProductReviews({ productId }: { productId: string }) {
       {reviewPhotos.length > 0 && (
         <div className="mt-4">
           <div className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-            <ImageIcon className="h-4 w-4 text-primary" /> Fotos dos clientes ({reviewPhotos.length})
+            <ImageIcon className="h-4 w-4 text-primary" /> Fotos dos clientes ({reviewPhotos.length}
+            )
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {reviewPhotos.slice(0, 12).map((p, i) => (
@@ -156,10 +192,15 @@ export function ProductReviews({ productId }: { productId: string }) {
         <h3 className="font-semibold mb-2 text-sm">Compartilhe sua opinião</h3>
         {!currentCustomerId ? (
           <p className="text-sm text-muted-foreground">
-            <Link to="/login" className="text-primary font-semibold underline">Entre na sua conta</Link> para deixar uma avaliação.
+            <Link to="/login" className="text-primary font-semibold underline">
+              Entre na sua conta
+            </Link>{" "}
+            para deixar uma avaliação.
           </p>
         ) : alreadyReviewed ? (
-          <p className="text-sm text-muted-foreground">Você já avaliou este produto. Obrigada! 💕</p>
+          <p className="text-sm text-muted-foreground">
+            Você já avaliou este produto. Obrigada! 💕
+          </p>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -168,7 +209,7 @@ export function ProductReviews({ productId }: { productId: string }) {
             </div>
             <textarea
               value={comment}
-              onChange={e => setComment(e.target.value)}
+              onChange={(e) => setComment(e.target.value)}
               rows={3}
               maxLength={500}
               placeholder="Conte como foi sua experiência com o produto..."
@@ -179,7 +220,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                 <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted">
                   <img src={src} alt="" className="w-full h-full object-cover" />
                   <button
-                    onClick={() => setPhotos(p => p.filter((_, idx) => idx !== i))}
+                    onClick={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
                     className="absolute top-0.5 right-0.5 w-5 h-5 grid place-items-center rounded-full bg-destructive text-destructive-foreground"
                   >
                     <X className="h-3 w-3" />
@@ -201,12 +242,19 @@ export function ProductReviews({ productId }: { productId: string }) {
                 accept="image/*"
                 multiple
                 className="hidden"
-                onChange={e => { onPickFiles(e.target.files); e.target.value = ""; }}
+                onChange={(e) => {
+                  onPickFiles(e.target.files);
+                  e.target.value = "";
+                }}
               />
-              <span className="text-[11px] text-muted-foreground ml-auto">{photos.length}/5 fotos</span>
+              <span className="text-[11px] text-muted-foreground ml-auto">
+                {photos.length}/5 fotos
+              </span>
             </div>
             {!customerHasBought && (
-              <p className="text-[11px] text-muted-foreground">💡 Avaliações de quem já comprou ganham o selo "Compra verificada".</p>
+              <p className="text-[11px] text-muted-foreground">
+                💡 Avaliações de quem já comprou ganham o selo "Compra verificada".
+              </p>
             )}
             <button
               onClick={submit}
@@ -226,8 +274,11 @@ export function ProductReviews({ productId }: { productId: string }) {
             {filterStars ? "Nenhuma avaliação com esse filtro." : "Seja a primeira a avaliar!"}
           </p>
         ) : (
-          filtered.map(r => {
-            const verified = orders.some(o => o.customerId === r.customerId && o.items.some(i => i.productId === productId));
+          filtered.map((r) => {
+            const verified = orders.some(
+              (o) =>
+                o.customerId === r.customerId && o.items.some((i) => i.productId === productId),
+            );
             const canDelete = isAdmin || r.customerId === currentCustomerId;
             return (
               <div key={r.id} className="bg-card rounded-2xl p-4 shadow-card">
@@ -250,18 +301,29 @@ export function ProductReviews({ productId }: { productId: string }) {
                   </div>
                   {canDelete && (
                     <button
-                      onClick={() => { if (confirm("Excluir avaliação?")) { deleteReview(r.id); toast.success("Removida"); } }}
+                      onClick={() => {
+                        if (confirm("Excluir avaliação?")) {
+                          deleteReview(r.id);
+                          toast.success("Removida");
+                        }
+                      }}
                       className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
-                {r.comment && <p className="mt-2 text-sm text-foreground/90 whitespace-pre-wrap">{r.comment}</p>}
+                {r.comment && (
+                  <p className="mt-2 text-sm text-foreground/90 whitespace-pre-wrap">{r.comment}</p>
+                )}
                 {r.photos.length > 0 && (
                   <div className="mt-2 flex gap-2 flex-wrap">
                     {r.photos.map((src, i) => (
-                      <button key={i} onClick={() => setPhotoView(src)} className="w-20 h-20 rounded-lg overflow-hidden bg-muted hover:opacity-80">
+                      <button
+                        key={i}
+                        onClick={() => setPhotoView(src)}
+                        className="w-20 h-20 rounded-lg overflow-hidden bg-muted hover:opacity-80"
+                      >
                         <img src={src} alt="" className="w-full h-full object-cover" />
                       </button>
                     ))}

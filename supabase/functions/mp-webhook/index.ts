@@ -25,7 +25,9 @@ Deno.serve(async (req) => {
       const body = await req.json();
       paymentId = body?.data?.id ?? body?.id ?? null;
       topic = body?.type ?? body?.topic ?? topic;
-    } catch { /* sem body */ }
+    } catch {
+      /* sem body */
+    }
   }
 
   if (topic && topic !== "payment") {
@@ -43,7 +45,7 @@ Deno.serve(async (req) => {
 
   // Busca status atualizado direto no MP
   const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-    headers: { "Authorization": `Bearer ${MP_TOKEN}` },
+    headers: { Authorization: `Bearer ${MP_TOKEN}` },
   });
   if (!mpRes.ok) {
     console.error("[mp-webhook] MP fetch falhou:", mpRes.status);
@@ -68,18 +70,27 @@ Deno.serve(async (req) => {
 
   // Busca pedido
   const { data: order } = await supabase
-    .from("orders").select("*").eq("id", externalRef).maybeSingle();
+    .from("orders")
+    .select("*")
+    .eq("id", externalRef)
+    .maybeSingle();
   if (!order) return new Response("order not found", { status: 200 });
 
   // Já estava aprovado? não notifica de novo
   const wasApproved = order.payment_status === "approved";
 
   // Atualiza
-  await supabase.from("orders").update({
-    payment_status: newStatus,
-    mp_payment_id: String(payment.id),
-    paid_at: newStatus === "approved" ? (payment.date_approved ?? new Date().toISOString()) : order.paid_at,
-  }).eq("id", order.id);
+  await supabase
+    .from("orders")
+    .update({
+      payment_status: newStatus,
+      mp_payment_id: String(payment.id),
+      paid_at:
+        newStatus === "approved"
+          ? (payment.date_approved ?? new Date().toISOString())
+          : order.paid_at,
+    })
+    .eq("id", order.id);
 
   // Loga evento
   await supabase.from("payment_events").insert({
@@ -93,7 +104,10 @@ Deno.serve(async (req) => {
   // Notifica cliente quando aprovado (apenas 1x)
   if (newStatus === "approved" && !wasApproved) {
     const phone = String(order.customer_phone).replace(/\D/g, "");
-    const total = Number(order.total).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    const total = Number(order.total).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
     const mensagem = `Olá ${order.customer_name.split(" ")[0]}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${order.id.slice(0, 8)}\n💰 Valor: ${total}\n\nJá estamos preparando tudo com muito carinho. Em breve avisaremos quando sair para entrega! ✨`;
 
     try {

@@ -14,13 +14,19 @@ function setHeaders(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin",
+  );
   res.setHeader("Vary", "Origin");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setHeaders(req, res);
-  if (req.method === "OPTIONS") { res.status(204).end(); return; }
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
 
   if (req.method !== "POST") {
     res.status(405).json({ ok: false, error: "Método não permitido" });
@@ -29,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let payload: any = {};
   try {
-    payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body ?? {};
+    payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body ?? {});
   } catch {
     res.status(400).json({ ok: false, error: "JSON inválido" });
     return;
@@ -51,6 +57,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const text = await r.text();
     res.status(200).json({ ok: r.ok, status: r.status, body: text });
   } catch (e) {
-    res.status(502).json({ ok: false, status: 0, error: e instanceof Error ? e.message : String(e) });
+    res
+      .status(502)
+      .json({ ok: false, status: 0, error: e instanceof Error ? e.message : String(e) });
   }
 }

@@ -17,10 +17,18 @@ export function ProductCardSkeleton() {
   );
 }
 
-export function ProductGridSkeleton({ count = 8, cols = "grid-cols-2 md:grid-cols-4" }: { count?: number; cols?: string }) {
+export function ProductGridSkeleton({
+  count = 8,
+  cols = "grid-cols-2 md:grid-cols-4",
+}: {
+  count?: number;
+  cols?: string;
+}) {
   return (
     <div className={cn("grid gap-3", cols)}>
-      {Array.from({ length: count }).map((_, i) => <ProductCardSkeleton key={i} />)}
+      {Array.from({ length: count }).map((_, i) => (
+        <ProductCardSkeleton key={i} />
+      ))}
     </div>
   );
 }
@@ -43,7 +51,11 @@ export function OrderRowSkeleton() {
 export function OrderListSkeleton({ count = 4 }: { count?: number }) {
   return (
     <ul className="space-y-3">
-      {Array.from({ length: count }).map((_, i) => <li key={i}><OrderRowSkeleton /></li>)}
+      {Array.from({ length: count }).map((_, i) => (
+        <li key={i}>
+          <OrderRowSkeleton />
+        </li>
+      ))}
     </ul>
   );
 }
@@ -64,7 +76,9 @@ export function ListRowSkeleton() {
 export function ListSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="space-y-2">
-      {Array.from({ length: count }).map((_, i) => <ListRowSkeleton key={i} />)}
+      {Array.from({ length: count }).map((_, i) => (
+        <ListRowSkeleton key={i} />
+      ))}
     </div>
   );
 }
@@ -82,7 +96,9 @@ export function StatCardSkeleton() {
 export function StatsGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {Array.from({ length: count }).map((_, i) => <StatCardSkeleton key={i} />)}
+      {Array.from({ length: count }).map((_, i) => (
+        <StatCardSkeleton key={i} />
+      ))}
     </div>
   );
 }
@@ -91,11 +107,15 @@ export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: nu
   return (
     <div className="bg-card rounded-2xl shadow-card overflow-hidden">
       <div className="p-3 border-b border-border flex gap-3">
-        {Array.from({ length: cols }).map((_, i) => <Skeleton key={i} className="h-3 flex-1" />)}
+        {Array.from({ length: cols }).map((_, i) => (
+          <Skeleton key={i} className="h-3 flex-1" />
+        ))}
       </div>
       {Array.from({ length: rows }).map((_, r) => (
         <div key={r} className="p-3 border-b border-border last:border-0 flex gap-3 items-center">
-          {Array.from({ length: cols }).map((_, c) => <Skeleton key={c} className="h-4 flex-1" />)}
+          {Array.from({ length: cols }).map((_, c) => (
+            <Skeleton key={c} className="h-4 flex-1" />
+          ))}
         </div>
       ))}
     </div>
@@ -106,7 +126,10 @@ export function CategoryGridSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center gap-2">
+        <div
+          key={i}
+          className="bg-card rounded-2xl p-3 shadow-card flex flex-col items-center gap-2"
+        >
           <Skeleton className="h-12 w-12 rounded-full" />
           <Skeleton className="h-3 w-16" />
         </div>

@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import mpIcon from "@/assets/mercadopago-icon.png";
 
 declare global {
-  interface Window { MercadoPago?: any; }
+  interface Window {
+    MercadoPago?: any;
+  }
 }
 
 const MP_PUBLIC_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as string | undefined;
@@ -31,7 +33,11 @@ function loadMpSdk() {
 
 const onlyDigits = (v: string) => v.replace(/\D/g, "");
 
-const formatCard = (v: string) => onlyDigits(v).slice(0, 19).replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+const formatCard = (v: string) =>
+  onlyDigits(v)
+    .slice(0, 19)
+    .replace(/(\d{4})(?=\d)/g, "$1 ")
+    .trim();
 const formatExp = (v: string) => {
   const d = onlyDigits(v).slice(0, 4);
   return d.length <= 2 ? d : `${d.slice(0, 2)}/${d.slice(2)}`;
@@ -68,7 +74,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const [pmId, setPmId] = useState<string | null>(null);
   const [issuerId, setIssuerId] = useState<string | null>(null);
   const [brand, setBrand] = useState<{ name: string; thumb: string } | null>(null);
-  const [installmentsList, setInstallmentsList] = useState<Array<{ installments: number; recommended_message: string }>>([]);
+  const [installmentsList, setInstallmentsList] = useState<
+    Array<{ installments: number; recommended_message: string }>
+  >([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -87,7 +95,12 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
     if (!mp) return;
     const digits = onlyDigits(card.number);
     const bin = digits.slice(0, 8);
-    if (bin.length < 6) { setPmId(null); setBrand(null); setInstallmentsList([]); return; }
+    if (bin.length < 6) {
+      setPmId(null);
+      setBrand(null);
+      setInstallmentsList([]);
+      return;
+    }
     if (bin === lastBin.current) return;
     lastBin.current = bin;
 
@@ -180,7 +193,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         toast.message("Pagamento em análise. Avisaremos por WhatsApp.");
         onSuccess(result);
       } else {
-        setErrorMsg(detailMsg(result.status_detail) || "Pagamento recusado pelo emissor. Tente outro cartão.");
+        setErrorMsg(
+          detailMsg(result.status_detail) || "Pagamento recusado pelo emissor. Tente outro cartão.",
+        );
       }
     } catch (e: any) {
       const msg = e?.message || String(e);
@@ -193,7 +208,10 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in"
+      onClick={onClose}
+    >
       <div
         className="w-full sm:max-w-md bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] overflow-y-auto animate-in slide-in-from-bottom-4"
         onClick={(e) => e.stopPropagation()}
@@ -201,23 +219,38 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-card/95 backdrop-blur px-5 pt-5 pb-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full gradient-primary grid place-items-center"><CreditCard className="h-4 w-4 text-primary-foreground" /></div>
+            <div className="w-9 h-9 rounded-full gradient-primary grid place-items-center">
+              <CreditCard className="h-4 w-4 text-primary-foreground" />
+            </div>
             <div>
               <h2 className="font-bold text-sm">Pagamento com cartão</h2>
-              <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Lock className="h-3 w-3" /> Conexão segura</p>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <Lock className="h-3 w-3" /> Conexão segura
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-muted grid place-items-center"><X className="h-4 w-4" /></button>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full hover:bg-muted grid place-items-center"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
         {sdkErr && !SANDBOX && (
-          <div className="m-5 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2"><AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />{sdkErr}</div>
+          <div className="m-5 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            {sdkErr}
+          </div>
         )}
 
         {SANDBOX && (
           <div className="mx-5 mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 text-xs text-amber-900 dark:text-amber-200">
             <div className="font-bold flex items-center gap-1">🧪 MODO SANDBOX (TESTE)</div>
-            <div className="mt-1">Mercado Pago não configurado. Qualquer cartão será aceito e o pagamento será aprovado automaticamente para testar as notificações.</div>
+            <div className="mt-1">
+              Mercado Pago não configurado. Qualquer cartão será aceito e o pagamento será aprovado
+              automaticamente para testar as notificações.
+            </div>
           </div>
         )}
 
@@ -228,7 +261,13 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             <div className="absolute -left-8 -bottom-8 w-40 h-40 rounded-full bg-white/5" />
             <div className="relative flex items-start justify-between">
               <div className="w-10 h-7 rounded-md bg-yellow-300/80 border border-yellow-200/50" />
-              {brand?.thumb && <img src={brand.thumb} alt={brand.name} className="h-8 w-auto bg-white/95 rounded p-1" />}
+              {brand?.thumb && (
+                <img
+                  src={brand.thumb}
+                  alt={brand.name}
+                  className="h-8 w-auto bg-white/95 rounded p-1"
+                />
+              )}
             </div>
             <div className="relative mt-6 font-mono text-lg tracking-widest">
               {(card.number || "•••• •••• •••• ••••").padEnd(19, "•").slice(0, 19)}
@@ -236,7 +275,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             <div className="relative mt-3 flex justify-between text-[11px] uppercase opacity-90">
               <div>
                 <div className="opacity-70 text-[9px]">Titular</div>
-                <div className="font-semibold tracking-wide truncate max-w-[180px]">{card.name || "NOME NO CARTÃO"}</div>
+                <div className="font-semibold tracking-wide truncate max-w-[180px]">
+                  {card.name || "NOME NO CARTÃO"}
+                </div>
               </div>
               <div>
                 <div className="opacity-70 text-[9px]">Validade</div>
@@ -247,13 +288,46 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-3">
-          <Field label="Número do cartão" value={card.number} onChange={(v) => setCard({ ...card, number: formatCard(v) })} placeholder="0000 0000 0000 0000" inputMode="numeric" autoComplete="cc-number" />
-          <Field label="Nome impresso no cartão" value={card.name} onChange={(v) => setCard({ ...card, name: v.toUpperCase() })} placeholder="COMO ESTÁ NO CARTÃO" autoComplete="cc-name" />
+          <Field
+            label="Número do cartão"
+            value={card.number}
+            onChange={(v) => setCard({ ...card, number: formatCard(v) })}
+            placeholder="0000 0000 0000 0000"
+            inputMode="numeric"
+            autoComplete="cc-number"
+          />
+          <Field
+            label="Nome impresso no cartão"
+            value={card.name}
+            onChange={(v) => setCard({ ...card, name: v.toUpperCase() })}
+            placeholder="COMO ESTÁ NO CARTÃO"
+            autoComplete="cc-name"
+          />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Validade" value={card.exp} onChange={(v) => setCard({ ...card, exp: formatExp(v) })} placeholder="MM/AA" inputMode="numeric" autoComplete="cc-exp" />
-            <Field label="CVV" value={card.cvv} onChange={(v) => setCard({ ...card, cvv: onlyDigits(v).slice(0, 4) })} placeholder="123" inputMode="numeric" autoComplete="cc-csc" />
+            <Field
+              label="Validade"
+              value={card.exp}
+              onChange={(v) => setCard({ ...card, exp: formatExp(v) })}
+              placeholder="MM/AA"
+              inputMode="numeric"
+              autoComplete="cc-exp"
+            />
+            <Field
+              label="CVV"
+              value={card.cvv}
+              onChange={(v) => setCard({ ...card, cvv: onlyDigits(v).slice(0, 4) })}
+              placeholder="123"
+              inputMode="numeric"
+              autoComplete="cc-csc"
+            />
           </div>
-          <Field label="CPF do titular" value={card.doc} onChange={(v) => setCard({ ...card, doc: formatCpf(v) })} placeholder="000.000.000-00" inputMode="numeric" />
+          <Field
+            label="CPF do titular"
+            value={card.doc}
+            onChange={(v) => setCard({ ...card, doc: formatCpf(v) })}
+            placeholder="000.000.000-00"
+            inputMode="numeric"
+          />
 
           {installmentsList.length > 0 && (
             <label className="block">
@@ -264,28 +338,48 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
                 className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/50"
               >
                 {installmentsList.map((i) => (
-                  <option key={i.installments} value={i.installments}>{i.recommended_message}</option>
+                  <option key={i.installments} value={i.installments}>
+                    {i.recommended_message}
+                  </option>
                 ))}
               </select>
             </label>
           )}
 
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2"><AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />{errorMsg}</div>
+            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+              {errorMsg}
+            </div>
           )}
 
           <button
             type="submit"
             disabled={!canSubmit}
-            className={cn("w-full h-12 rounded-full font-semibold flex items-center justify-center gap-2 transition-all",
-              canSubmit ? "gradient-primary text-primary-foreground active:scale-95" : "bg-muted text-muted-foreground cursor-not-allowed")}
+            className={cn(
+              "w-full h-12 rounded-full font-semibold flex items-center justify-center gap-2 transition-all",
+              canSubmit
+                ? "gradient-primary text-primary-foreground active:scale-95"
+                : "bg-muted text-muted-foreground cursor-not-allowed",
+            )}
           >
-            {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processando...</> : <><CheckCircle2 className="h-4 w-4" /> Pagar {brl(total)}</>}
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Processando...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" /> Pagar {brl(total)}
+              </>
+            )}
           </button>
 
           <div className="flex items-center justify-center gap-2 pt-1">
             <img src={mpIcon} alt="Mercado Pago" className="h-4 w-4 object-contain" />
-            <span className="text-[10px] text-muted-foreground">Pagamento criptografado por <span className="font-semibold text-foreground">Mercado Pago</span></span>
+            <span className="text-[10px] text-muted-foreground">
+              Pagamento criptografado por{" "}
+              <span className="font-semibold text-foreground">Mercado Pago</span>
+            </span>
           </div>
         </form>
       </div>
@@ -293,9 +387,22 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   );
 }
 
-function Field({ label, value, onChange, placeholder, type = "text", inputMode, autoComplete }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
-  inputMode?: "numeric" | "text"; autoComplete?: string;
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  inputMode,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  inputMode?: "numeric" | "text";
+  autoComplete?: string;
 }) {
   return (
     <label className="block">

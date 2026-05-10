@@ -12,9 +12,17 @@ export const Route = createFileRoute("/api/lovable-bot/status")({
             headers: { Accept: "application/json" },
           });
           const text = await r.text();
-          return botJsonResponse(request, parseProxyJson(text, { status: "UNKNOWN", error: text || `Status ${r.status}` }), r.status);
+          return botJsonResponse(
+            request,
+            parseProxyJson(text, { status: "UNKNOWN", error: text || `Status ${r.status}` }),
+            r.status,
+          );
         } catch (e) {
-          return botJsonResponse(request, { status: "UNKNOWN", error: e instanceof Error ? e.message : String(e) }, 502);
+          return botJsonResponse(
+            request,
+            { status: "UNKNOWN", error: e instanceof Error ? e.message : String(e) },
+            502,
+          );
         }
       },
     },

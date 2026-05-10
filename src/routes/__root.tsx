@@ -1,4 +1,12 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouter, useLocation } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useRouter,
+  useLocation,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useStore, hydrateFromCloud } from "@/lib/store";
@@ -11,11 +19,14 @@ const PWA_LAUNCH_KEY = "pwa_launch_route";
 
 function isStandaloneMode() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true
+  );
 }
 
 function matchAllowedRoute(path: string): string | null {
-  return PWA_ALLOWED_ROUTES.find(r => path === r || path.startsWith(r + "/")) ?? null;
+  return PWA_ALLOWED_ROUTES.find((r) => path === r || path.startsWith(r + "/")) ?? null;
 }
 
 function NotFoundComponent() {
@@ -44,7 +55,11 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+      },
       { name: "theme-color", content: "#d177a8" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
@@ -58,8 +73,16 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Princesa de Laços — Catálogo encantado" },
       { name: "twitter:description", content: "Catálogo encantado de laços, tiaras e acessórios." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -72,7 +95,10 @@ export const Route = createRootRoute({
       { rel: "mask-icon", href: "/icon-maskable-512.png", color: "#d177a8" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Pacifico&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Pacifico&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap",
+      },
     ],
     scripts: [
       { src: "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js", defer: true },
@@ -88,7 +114,7 @@ OneSignalDeferred.push(async function(OneSignal) {
     allowLocalhostAsSecureOrigin: true,
   });
   console.log("[OneSignal] Ready. Permission:", Notification.permission);
-});` ,
+});`,
       },
     ],
   }),
@@ -113,8 +139,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const refreshSession = useStore(s => s.refreshSession);
-  const session = useStore(s => s.session);
+  const refreshSession = useStore((s) => s.refreshSession);
+  const session = useStore((s) => s.session);
   const router = useRouter();
   const location = useLocation();
 
@@ -124,23 +150,26 @@ function RootComponent() {
     const path = location.pathname;
     const matched = matchAllowedRoute(path);
     if (matched) {
-      try { localStorage.setItem(PWA_LAUNCH_KEY, path); } catch {}
+      try {
+        localStorage.setItem(PWA_LAUNCH_KEY, path);
+      } catch {}
     }
 
     // Swap <link rel="manifest"> based on current area
     let manifestHref = "/manifest.json";
     if (path === "/admin" || path.startsWith("/admin/")) manifestHref = "/admin/manifest.json";
-    else if (path === "/afiliada" || path.startsWith("/afiliada/")) manifestHref = "/afiliada/manifest.json";
+    else if (path === "/afiliada" || path.startsWith("/afiliada/"))
+      manifestHref = "/afiliada/manifest.json";
 
     const finalHref = `${manifestHref}?v=${Date.now()}`;
     let link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
-    
+
     if (!link) {
-      link = document.createElement('link');
-      link.rel = 'manifest';
+      link = document.createElement("link");
+      link.rel = "manifest";
       document.head.appendChild(link);
     }
-    
+
     link.setAttribute("href", finalHref);
     console.log("[PWA] Manifest set to:", finalHref);
   }, [location.pathname]);
@@ -165,10 +194,10 @@ function RootComponent() {
     };
     tick();
     const events = ["click", "keydown", "visibilitychange", "focus"] as const;
-    events.forEach(e => window.addEventListener(e, tick));
+    events.forEach((e) => window.addEventListener(e, tick));
     const interval = window.setInterval(tick, 1000 * 60 * 15);
     return () => {
-      events.forEach(e => window.removeEventListener(e, tick));
+      events.forEach((e) => window.removeEventListener(e, tick));
       window.clearInterval(interval);
     };
   }, [refreshSession]);
@@ -181,7 +210,7 @@ function RootComponent() {
   // OneSignal Tagging & Role Management
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     const OS = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
     OS.push(async (OneSignal: any) => {
       try {
@@ -192,12 +221,12 @@ function RootComponent() {
           else if (path.startsWith("/afiliada")) role = "affiliate";
 
           console.log("[OneSignal] User role identified:", role);
-          
+
           await OneSignal.login(session.user.id);
           await OneSignal.User.addTags({
             role: role,
-            email: session.user.email || '',
-            full_name: session.user.user_metadata?.full_name || ''
+            email: session.user.email || "",
+            full_name: session.user.user_metadata?.full_name || "",
           });
         } else {
           console.log("[OneSignal] Logging out (no session)");

@@ -14,10 +14,13 @@ export const Route = createFileRoute("/buscar")({
 function Page() {
   const { q } = Route.useSearch();
   const hydrated = useStoreHydrated();
-  const allProducts = useStore(s => s.products);
+  const allProducts = useStore((s) => s.products);
   const products = useMemo(
-    () => allProducts.filter(p => p.active && !p.hidden && p.name.toLowerCase().includes(q.toLowerCase())),
-    [allProducts, q]
+    () =>
+      allProducts.filter(
+        (p) => p.active && !p.hidden && p.name.toLowerCase().includes(q.toLowerCase()),
+      ),
+    [allProducts, q],
   );
   return (
     <StoreLayout>
@@ -35,7 +38,9 @@ function Page() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {products.map(p => <ProductCard key={p.id} product={p} />)}
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         )}
       </div>

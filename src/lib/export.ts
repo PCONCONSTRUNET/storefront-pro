@@ -7,11 +7,13 @@ export function downloadCSV(filename: string, rows: (string | number)[][]) {
     const s = String(v ?? "");
     return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const csv = "\uFEFF" + rows.map(r => r.map(escape).join(";")).join("\n");
+  const csv = "\uFEFF" + rows.map((r) => r.map(escape).join(";")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
+  a.href = url;
+  a.download = filename;
+  a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -39,8 +41,8 @@ export function downloadPDF(opts: {
   autoTable(doc, {
     startY: 32,
     head: [opts.head],
-    body: opts.body.map(r => r.map(v => String(v))),
-    foot: opts.foot ? [opts.foot.map(v => String(v))] : undefined,
+    body: opts.body.map((r) => r.map((v) => String(v))),
+    foot: opts.foot ? [opts.foot.map((v) => String(v))] : undefined,
     styles: { fontSize: 8, cellPadding: 2 },
     headStyles: { fillColor: [233, 30, 99], textColor: 255, fontStyle: "bold" },
     footStyles: { fillColor: [245, 245, 245], textColor: 40, fontStyle: "bold" },

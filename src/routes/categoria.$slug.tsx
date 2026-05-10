@@ -13,26 +13,38 @@ function Page() {
   const { slug } = Route.useParams();
   const hydrated = useStoreHydrated();
   const { products, categories } = useStore();
-  const cat = categories.find(c => c.id === slug);
-  const list = products.filter(p => p.category === slug && p.active && !p.hidden);
+  const cat = categories.find((c) => c.id === slug);
+  const list = products.filter((p) => p.category === slug && p.active && !p.hidden);
 
   return (
     <StoreLayout>
       <div className="max-w-6xl mx-auto px-4 py-5">
-        <Link to="/categorias" className="inline-flex items-center gap-1 text-sm text-muted-foreground mb-2 hover:text-foreground">
+        <Link
+          to="/categorias"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground mb-2 hover:text-foreground"
+        >
           <ChevronLeft className="h-4 w-4" /> Categorias
         </Link>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <span className="text-3xl">{cat?.image}</span>{cat?.name || "Categoria"}
+          <span className="text-3xl">{cat?.image}</span>
+          {cat?.name || "Categoria"}
         </h1>
-        <p className="text-sm text-muted-foreground mb-5">{hydrated ? `${list.length} ${list.length === 1 ? "produto" : "produtos"}` : "Carregando..."}</p>
+        <p className="text-sm text-muted-foreground mb-5">
+          {hydrated
+            ? `${list.length} ${list.length === 1 ? "produto" : "produtos"}`
+            : "Carregando..."}
+        </p>
         {!hydrated ? (
           <ProductGridSkeleton count={8} cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4" />
         ) : list.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">Nenhum produto nesta categoria.</div>
+          <div className="text-center py-16 text-muted-foreground">
+            Nenhum produto nesta categoria.
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {list.map((p) => <ProductCard key={p.id} product={p} />)}
+            {list.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         )}
       </div>

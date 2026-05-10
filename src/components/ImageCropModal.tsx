@@ -63,12 +63,23 @@ export function ImageCropModal({
       } else {
         if (mode.includes("e")) w = Math.max(min, Math.min(imgSize.w - x, w + dx));
         if (mode.includes("s")) h = Math.max(min, Math.min(imgSize.h - y, h + dy));
-        if (mode.includes("w")) { const nx = Math.max(0, Math.min(x + w - min, x + dx)); w = w + (x - nx); x = nx; }
-        if (mode.includes("n")) { const ny = Math.max(0, Math.min(y + h - min, y + dy)); h = h + (y - ny); y = ny; }
+        if (mode.includes("w")) {
+          const nx = Math.max(0, Math.min(x + w - min, x + dx));
+          w = w + (x - nx);
+          x = nx;
+        }
+        if (mode.includes("n")) {
+          const ny = Math.max(0, Math.min(y + h - min, y + dy));
+          h = h + (y - ny);
+          y = ny;
+        }
       }
       setRect({ x, y, w, h });
     };
-    const up = () => { setMode(null); startRef.current = null; };
+    const up = () => {
+      setMode(null);
+      startRef.current = null;
+    };
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
     window.addEventListener("touchmove", move, { passive: false });
@@ -83,8 +94,10 @@ export function ImageCropModal({
 
   const confirm = () => {
     const scale = natural.w / imgSize.w;
-    const sx = rect.x * scale, sy = rect.y * scale;
-    const sw = rect.w * scale, sh = rect.h * scale;
+    const sx = rect.x * scale,
+      sy = rect.y * scale;
+    const sw = rect.w * scale,
+      sh = rect.h * scale;
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(sw);
     canvas.height = Math.round(sh);
@@ -115,33 +128,68 @@ export function ImageCropModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-3" onClick={onCancel}>
-      <div className="bg-card rounded-2xl w-full max-w-2xl shadow-soft" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-3"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-card rounded-2xl w-full max-w-2xl shadow-soft"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between p-3 border-b border-border">
           <h3 className="font-semibold text-sm">Recortar imagem (livre)</h3>
-          <button onClick={onCancel} className="w-8 h-8 grid place-items-center rounded-full hover:bg-muted">
+          <button
+            onClick={onCancel}
+            className="w-8 h-8 grid place-items-center rounded-full hover:bg-muted"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div ref={containerRef} className="p-3 flex items-center justify-center bg-muted/30 select-none">
-          <div className="relative" style={{ width: imgSize.w || "auto", height: imgSize.h || "auto" }}>
-            <img ref={imgRef} src={src} onLoad={onImgLoad} alt="" className="block max-w-full pointer-events-none"
-              style={{ width: imgSize.w || undefined, height: imgSize.h || undefined }} crossOrigin="anonymous" />
+        <div
+          ref={containerRef}
+          className="p-3 flex items-center justify-center bg-muted/30 select-none"
+        >
+          <div
+            className="relative"
+            style={{ width: imgSize.w || "auto", height: imgSize.h || "auto" }}
+          >
+            <img
+              ref={imgRef}
+              src={src}
+              onLoad={onImgLoad}
+              alt=""
+              className="block max-w-full pointer-events-none"
+              style={{ width: imgSize.w || undefined, height: imgSize.h || undefined }}
+              crossOrigin="anonymous"
+            />
             {imgSize.w > 0 && (
               <>
-                <div className="absolute inset-0 pointer-events-none" style={{
-                  boxShadow: `0 0 0 9999px rgba(0,0,0,0.5) inset`,
-                  clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 ${rect.y}px, ${rect.x}px ${rect.y}px, ${rect.x}px ${rect.y + rect.h}px, ${rect.x + rect.w}px ${rect.y + rect.h}px, ${rect.x + rect.w}px ${rect.y}px, 0 ${rect.y}px)`,
-                }} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    boxShadow: `0 0 0 9999px rgba(0,0,0,0.5) inset`,
+                    clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 ${rect.y}px, ${rect.x}px ${rect.y}px, ${rect.x}px ${rect.y + rect.h}px, ${rect.x + rect.w}px ${rect.y + rect.h}px, ${rect.x + rect.w}px ${rect.y}px, 0 ${rect.y}px)`,
+                  }}
+                />
                 <div
                   className="absolute border-2 border-white cursor-move"
-                  style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)" }}
+                  style={{
+                    left: rect.x,
+                    top: rect.y,
+                    width: rect.w,
+                    height: rect.h,
+                    boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)",
+                  }}
                   onMouseDown={startDrag("move")}
                   onTouchStart={startDrag("move")}
                 >
-                  {handles.map(h => (
-                    <div key={h.m} onMouseDown={startDrag(h.m)} onTouchStart={startDrag(h.m)}
-                      className={`absolute w-3 h-3 bg-white border border-black/40 rounded-sm ${h.cls}`} />
+                  {handles.map((h) => (
+                    <div
+                      key={h.m}
+                      onMouseDown={startDrag(h.m)}
+                      onTouchStart={startDrag(h.m)}
+                      className={`absolute w-3 h-3 bg-white border border-black/40 rounded-sm ${h.cls}`}
+                    />
                   ))}
                 </div>
               </>
@@ -149,8 +197,16 @@ export function ImageCropModal({
           </div>
         </div>
         <div className="flex gap-2 p-3 border-t border-border">
-          <button onClick={onCancel} className="flex-1 h-11 rounded-xl bg-muted font-semibold text-sm">Cancelar</button>
-          <button onClick={confirm} className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">
+          <button
+            onClick={onCancel}
+            className="flex-1 h-11 rounded-xl bg-muted font-semibold text-sm"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={confirm}
+            className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2"
+          >
             <Check className="h-4 w-4" /> Aplicar recorte
           </button>
         </div>

@@ -11,8 +11,8 @@ export const Route = createFileRoute("/afiliada/cadastro")({
 function Page() {
   const navigate = useNavigate();
   const hydrated = useStoreHydrated();
-  const currentId = useStore(s => s.currentAffiliateId);
-  const register = useStore(s => s.registerAffiliate);
+  const currentId = useStore((s) => s.currentAffiliateId);
+  const register = useStore((s) => s.registerAffiliate);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
 
   useEffect(() => {
@@ -26,8 +26,7 @@ function Page() {
       window.history.replaceState(null, "", "/afiliada");
       navigate({ to: "/afiliada", replace: true });
       toast.success(r.message);
-    }
-    else toast.error(r.message);
+    } else toast.error(r.message);
   };
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -37,7 +36,9 @@ function Page() {
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-rose/30 to-accent p-4">
       <div className="w-full max-w-sm bg-card rounded-3xl shadow-soft p-6">
         <div className="text-center">
-          <div className="w-14 h-14 mx-auto rounded-full gradient-primary grid place-items-center text-primary-foreground"><Sparkles className="h-7 w-7" /></div>
+          <div className="w-14 h-14 mx-auto rounded-full gradient-primary grid place-items-center text-primary-foreground">
+            <Sparkles className="h-7 w-7" />
+          </div>
           <h1 className="font-display text-2xl text-primary mt-3">Seja uma afiliada</h1>
           <p className="text-xs text-muted-foreground">Crie sua conta para registrar suas vendas</p>
         </div>
@@ -46,17 +47,35 @@ function Page() {
             <input value={form.name} onChange={set("name")} required autoFocus className="input" />
           </Field>
           <Field label="E-mail *">
-            <input type="email" value={form.email} onChange={set("email")} required className="input" />
+            <input
+              type="email"
+              value={form.email}
+              onChange={set("email")}
+              required
+              className="input"
+            />
           </Field>
           <Field label="WhatsApp">
             <input value={form.phone} onChange={set("phone")} className="input" />
           </Field>
           <Field label="Senha *">
-            <input type="password" value={form.password} onChange={set("password")} required minLength={4} className="input" />
+            <input
+              type="password"
+              value={form.password}
+              onChange={set("password")}
+              required
+              minLength={4}
+              className="input"
+            />
           </Field>
-          <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold">Criar conta</button>
+          <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold">
+            Criar conta
+          </button>
           <p className="text-[11px] text-muted-foreground text-center pt-2">
-            Já tem cadastro? <Link to="/afiliada/login" className="text-primary underline">Entrar</Link>
+            Já tem cadastro?{" "}
+            <Link to="/afiliada/login" className="text-primary underline">
+              Entrar
+            </Link>
           </p>
           <p className="text-[10px] text-muted-foreground text-center">
             Sua comissão será definida pela administradora após o cadastro.

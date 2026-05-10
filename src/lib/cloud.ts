@@ -22,7 +22,9 @@ const log = (label: string, err: unknown) => {
 async function sha256(text: string): Promise<string> {
   if (typeof crypto !== "undefined" && crypto.subtle) {
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    return Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
   }
   return text; // fallback: store plain (dev only)
 }
@@ -44,7 +46,10 @@ const toCustomer = (r: any): Customer => ({
 });
 
 const toCategory = (r: any): Category => ({
-  id: r.id, name: r.name, image: r.image || "🎀", order: r.sort_order ?? 0,
+  id: r.id,
+  name: r.name,
+  image: r.image || "🎀",
+  order: r.sort_order ?? 0,
 });
 
 const toProduct = (r: any): Product => ({
@@ -66,7 +71,7 @@ const toProduct = (r: any): Product => ({
 
 const toCoupon = (r: any): Coupon => ({
   code: r.code,
-  type: (r.kind === "fixed" ? "fixed" : "percent"),
+  type: r.kind === "fixed" ? "fixed" : "percent",
   value: Number(r.value) || 0,
   validUntil: r.expires_at || "",
   maxUses: r.extra?.maxUses ?? 999,
@@ -137,7 +142,12 @@ const toOrder = (r: any): Order => ({
   total: Number(r.total) || 0,
   paymentMethod: r.payment_method,
   deliveryMethod: r.delivery_method,
-  status: r.payment_status === "paid" ? "pago" : (r.payment_status === "pending" ? "aguardando_pagamento" : r.payment_status),
+  status:
+    r.payment_status === "paid"
+      ? "pago"
+      : r.payment_status === "pending"
+        ? "aguardando_pagamento"
+        : r.payment_status,
   createdAt: r.created_at,
   address: r.address || "",
   notes: r.notes || undefined,
@@ -146,11 +156,19 @@ const toOrder = (r: any): Order => ({
 // ---------- writes (fire-and-forget) ----------
 export const cloud = {
   async upsertCustomer(c: Customer) {
-    const { error } = await supabase.from("customers").upsert({
-      id: c.id, name: c.name, email: c.email, phone: c.phone,
-      password_hash: c.password, address: c.address || null,
-      addresses: c.addresses || [], favorites: c.favorites || [],
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("customers").upsert(
+      {
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        password_hash: c.password,
+        address: c.address || null,
+        addresses: c.addresses || [],
+        favorites: c.favorites || [],
+      },
+      { onConflict: "id" },
+    );
     log("upsertCustomer", error);
   },
   async deleteCustomer(id: string) {
@@ -159,14 +177,24 @@ export const cloud = {
   },
 
   async upsertProduct(p: Product) {
-    const { error } = await supabase.from("products").upsert({
-      id: p.id, name: p.name, slug: p.id, price: p.price,
-      original_price: p.oldPrice ?? null, description: p.description,
-      images: [p.image, ...(p.gallery || [])].filter(Boolean),
-      category_id: p.category, stock: p.stock, active: p.active,
-      featured: false, variations: p.variations || [],
-      extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock },
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("products").upsert(
+      {
+        id: p.id,
+        name: p.name,
+        slug: p.id,
+        price: p.price,
+        original_price: p.oldPrice ?? null,
+        description: p.description,
+        images: [p.image, ...(p.gallery || [])].filter(Boolean),
+        category_id: p.category,
+        stock: p.stock,
+        active: p.active,
+        featured: false,
+        variations: p.variations || [],
+        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock },
+      },
+      { onConflict: "id" },
+    );
     log("upsertProduct", error);
   },
   async deleteProduct(id: string) {
@@ -175,9 +203,16 @@ export const cloud = {
   },
 
   async upsertCategory(c: Category) {
-    const { error } = await supabase.from("categories").upsert({
-      id: c.id, name: c.name, slug: c.id, image: c.image, sort_order: c.order,
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("categories").upsert(
+      {
+        id: c.id,
+        name: c.name,
+        slug: c.id,
+        image: c.image,
+        sort_order: c.order,
+      },
+      { onConflict: "id" },
+    );
     log("upsertCategory", error);
   },
   async deleteCategory(id: string) {
@@ -186,11 +221,18 @@ export const cloud = {
   },
 
   async upsertCoupon(c: Coupon) {
-    const { error } = await supabase.from("coupons").upsert({
-      code: c.code, kind: c.type, value: c.value, min_subtotal: c.minOrder,
-      expires_at: c.validUntil || null, active: c.active,
-      extra: { maxUses: c.maxUses, usedCount: c.usedCount },
-    }, { onConflict: "code" });
+    const { error } = await supabase.from("coupons").upsert(
+      {
+        code: c.code,
+        kind: c.type,
+        value: c.value,
+        min_subtotal: c.minOrder,
+        expires_at: c.validUntil || null,
+        active: c.active,
+        extra: { maxUses: c.maxUses, usedCount: c.usedCount },
+      },
+      { onConflict: "code" },
+    );
     log("upsertCoupon", error);
   },
   async deleteCoupon(code: string) {
@@ -199,11 +241,19 @@ export const cloud = {
   },
 
   async upsertAffiliate(a: Affiliate) {
-    const { error } = await supabase.from("affiliates").upsert({
-      id: a.id, name: a.name, email: a.email, phone: a.phone,
-      password_hash: a.password, commission_type: a.commissionType,
-      commission_value: a.commissionValue, active: a.active,
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("affiliates").upsert(
+      {
+        id: a.id,
+        name: a.name,
+        email: a.email,
+        phone: a.phone,
+        password_hash: a.password,
+        commission_type: a.commissionType,
+        commission_value: a.commissionValue,
+        active: a.active,
+      },
+      { onConflict: "id" },
+    );
     log("upsertAffiliate", error);
   },
   async deleteAffiliate(id: string) {
@@ -212,12 +262,20 @@ export const cloud = {
   },
 
   async upsertAffiliateSale(s: AffiliateSale) {
-    const { error } = await supabase.from("affiliate_sales").upsert({
-      id: s.id, affiliate_id: s.affiliateId, customer_name: s.customerName,
-      customer_phone: s.customerPhone || null, product_description: s.productDescription,
-      sale_value: s.saleValue, commission_earned: s.commissionEarned,
-      status: s.status, notes: s.notes || null,
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("affiliate_sales").upsert(
+      {
+        id: s.id,
+        affiliate_id: s.affiliateId,
+        customer_name: s.customerName,
+        customer_phone: s.customerPhone || null,
+        product_description: s.productDescription,
+        sale_value: s.saleValue,
+        commission_earned: s.commissionEarned,
+        status: s.status,
+        notes: s.notes || null,
+      },
+      { onConflict: "id" },
+    );
     log("upsertAffiliateSale", error);
   },
   async deleteAffiliateSale(id: string) {
@@ -226,11 +284,20 @@ export const cloud = {
   },
 
   async upsertTransaction(t: Transaction) {
-    const { error } = await supabase.from("transactions").upsert({
-      id: t.id, kind: t.kind, category: t.category, description: t.description,
-      amount: t.amount, date: t.date, affiliate_id: t.affiliateId || null,
-      product_summary: t.productSummary || null, notes: t.notes || null,
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("transactions").upsert(
+      {
+        id: t.id,
+        kind: t.kind,
+        category: t.category,
+        description: t.description,
+        amount: t.amount,
+        date: t.date,
+        affiliate_id: t.affiliateId || null,
+        product_summary: t.productSummary || null,
+        notes: t.notes || null,
+      },
+      { onConflict: "id" },
+    );
     log("upsertTransaction", error);
   },
   async deleteTransaction(id: string) {
@@ -239,11 +306,18 @@ export const cloud = {
   },
 
   async upsertReview(r: Review) {
-    const { error } = await supabase.from("reviews").upsert({
-      id: r.id, product_id: r.productId, customer_id: r.customerId || null,
-      customer_name: r.customerName, rating: r.rating, comment: r.comment,
-      photos: r.photos || [],
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("reviews").upsert(
+      {
+        id: r.id,
+        product_id: r.productId,
+        customer_id: r.customerId || null,
+        customer_name: r.customerName,
+        rating: r.rating,
+        comment: r.comment,
+        photos: r.photos || [],
+      },
+      { onConflict: "id" },
+    );
     log("upsertReview", error);
   },
   async deleteReview(id: string) {
@@ -252,14 +326,21 @@ export const cloud = {
   },
 
   async upsertSettings(s: StoreSettings) {
-    const { error } = await supabase.from("store_settings").upsert({
-      id: 1, data: s as any,
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("store_settings").upsert(
+      {
+        id: 1,
+        data: s as any,
+      },
+      { onConflict: "id" },
+    );
     log("upsertSettings", error);
   },
 
   async updateOrderStatus(id: string, status: string) {
-    const { error } = await supabase.from("orders").update({ payment_status: status as any }).eq("id", id);
+    const { error } = await supabase
+      .from("orders")
+      .update({ payment_status: status as any })
+      .eq("id", id);
     log("updateOrderStatus", error);
   },
   async deleteOrder(id: string) {

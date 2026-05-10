@@ -44,7 +44,8 @@ export const initialProducts: Product[] = [
   {
     id: "p1",
     name: "Laço Princesa Rosa Glitter",
-    description: "Laço artesanal em fita de cetim com detalhes em glitter dourado. Perfeito para princesas de todas as idades. Acompanha bico de pato resistente.",
+    description:
+      "Laço artesanal em fita de cetim com detalhes em glitter dourado. Perfeito para princesas de todas as idades. Acompanha bico de pato resistente.",
     price: 24.9,
     oldPrice: 34.9,
     image: lacoRosaGlitter,
@@ -58,7 +59,8 @@ export const initialProducts: Product[] = [
   {
     id: "p2",
     name: "Tiara Coroa Dourada",
-    description: "Tiara estilo coroa banhada a ouro com strass. Ideal para festas, ensaios e momentos especiais.",
+    description:
+      "Tiara estilo coroa banhada a ouro com strass. Ideal para festas, ensaios e momentos especiais.",
     price: 49.9,
     oldPrice: 69.9,
     image: tiaraCoroaDourada,
@@ -116,7 +118,8 @@ export const initialProducts: Product[] = [
   {
     id: "p7",
     name: "Laço Maxi Cetim Dourado",
-    description: "Laço grande estilo maxi em cetim com brilho dourado, ideal para ocasiões especiais.",
+    description:
+      "Laço grande estilo maxi em cetim com brilho dourado, ideal para ocasiões especiais.",
     price: 34.9,
     image: lacoMaxiDourado,
     category: "lacos",
@@ -149,7 +152,34 @@ export type Coupon = {
 };
 
 export const initialCoupons: Coupon[] = [
-  { code: "PRIMEIRA10", type: "percent", value: 10, validUntil: "2026-12-31", maxUses: 100, usedCount: 12, minOrder: 0, active: true },
-  { code: "PRINCESA20", type: "percent", value: 20, validUntil: "2026-12-31", maxUses: 50, usedCount: 7, minOrder: 100, active: true },
-  { code: "FRETE15", type: "fixed", value: 15, validUntil: "2026-12-31", maxUses: 200, usedCount: 33, minOrder: 80, active: true },
+  {
+    code: "PRIMEIRA10",
+    type: "percent",
+    value: 10,
+    validUntil: "2026-12-31",
+    maxUses: 100,
+    usedCount: 12,
+    minOrder: 0,
+    active: true,
+  },
+  {
+    code: "PRINCESA20",
+    type: "percent",
+    value: 20,
+    validUntil: "2026-12-31",
+    maxUses: 50,
+    usedCount: 7,
+    minOrder: 100,
+    active: true,
+  },
+  {
+    code: "FRETE15",
+    type: "fixed",
+    value: 15,
+    validUntil: "2026-12-31",
+    maxUses: 200,
+    usedCount: 33,
+    minOrder: 80,
+    active: true,
+  },
 ];

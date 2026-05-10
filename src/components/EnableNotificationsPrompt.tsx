@@ -17,7 +17,7 @@ function isStandalone() {
 export function EnableNotificationsPrompt() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const currentCustomerId = useStore(s => s.currentCustomerId);
+  const currentCustomerId = useStore((s) => s.currentCustomerId);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -33,7 +33,9 @@ export function EnableNotificationsPrompt() {
   }, []);
 
   const dismiss = () => {
-    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch {}
+    try {
+      localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    } catch {}
     setOpen(false);
   };
 

@@ -17,7 +17,11 @@ export const Route = createFileRoute("/api/lovable-bot/notify")({
         const mensagem = (payload.mensagem ?? "").toString().trim();
 
         if (numero.length < 10 || !mensagem) {
-          return botJsonResponse(request, { ok: false, error: "Parâmetros inválidos (numero/mensagem)" }, 400);
+          return botJsonResponse(
+            request,
+            { ok: false, error: "Parâmetros inválidos (numero/mensagem)" },
+            400,
+          );
         }
 
         try {
@@ -29,7 +33,11 @@ export const Route = createFileRoute("/api/lovable-bot/notify")({
           const text = await r.text();
           return botJsonResponse(request, { ok: r.ok, status: r.status, body: text });
         } catch (e) {
-          return botJsonResponse(request, { ok: false, status: 0, error: e instanceof Error ? e.message : String(e) }, 502);
+          return botJsonResponse(
+            request,
+            { ok: false, status: 0, error: e instanceof Error ? e.message : String(e) },
+            502,
+          );
         }
       },
     },

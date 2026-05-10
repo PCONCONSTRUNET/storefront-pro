@@ -14,17 +14,27 @@ function setHeaders(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin",
+  );
   res.setHeader("Vary", "Origin");
 }
 
 function parseJson(text: string, fallback: unknown) {
-  try { return text ? JSON.parse(text) : fallback; } catch { return fallback; }
+  try {
+    return text ? JSON.parse(text) : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setHeaders(req, res);
-  if (req.method === "OPTIONS") { res.status(204).end(); return; }
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
 
   if (req.method !== "POST") {
     res.status(405).json({ ok: false, error: "Método não permitido" });

@@ -1,5 +1,7 @@
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM = Deno.env.get("RESEND_FROM_EMAIL") ?? "Princesa de Laços <nao-responda@xn--princesadelaos-rjb.com.br>";
+const FROM =
+  Deno.env.get("RESEND_FROM_EMAIL") ??
+  "Princesa de Laços <nao-responda@xn--princesadelaos-rjb.com.br>";
 
 export async function sendEmail(opts: { to: string; subject: string; html: string }) {
   if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY não configurada");
@@ -24,7 +26,8 @@ export const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const LOGO_URL = Deno.env.get("EMAIL_LOGO_URL") ?? "https://amostrasistema.lovable.app/email-logo.png";
+const LOGO_URL =
+  Deno.env.get("EMAIL_LOGO_URL") ?? "https://amostrasistema.lovable.app/email-logo.png";
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://amostrasistema.lovable.app";
 const WHATSAPP_NUMBER = Deno.env.get("STORE_WHATSAPP") ?? "554888644474"; // formato wa.me
 const WHATSAPP_DISPLAY = Deno.env.get("STORE_WHATSAPP_DISPLAY") ?? "(48) 8864-4474";
