@@ -196,5 +196,34 @@ function RootComponent() {
     if (typeof window === "undefined") return;
     hydrateFromCloud();
   }, []);
+
+  // Identifica usuário no OneSignal (login/logout) e marca tag de audience
+  const isAdmin = useStore(s => s.isAdmin);
+  const currentCustomerId = useStore(s => s.currentCustomerId);
+  const currentAffiliateId = useStore(s => s.currentAffiliateId);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const path = location.pathname;
+    let audience: "admin" | "affiliate" | "customer" = "customer";
+    let externalId: string | null = null;
+    if (path.startsWith("/admin") && isAdmin) {
+      audience = "admin";
+      externalId = "admin";
+    } else if (path.startsWith("/afiliada") && currentAffiliateId) {
+      audience = "affiliate";
+      externalId = `aff_${currentAffiliateId}`;
+    } else if (currentCustomerId) {
+      audience = "customer";
+      externalId = currentCustomerId;
+    }
+    const OS = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
+    OS.push(async (OneSignal: any) => {
+      try {
+        if (externalId) await OneSignal.login(externalId);
+        await OneSignal.User.addTag("audience", audience);
+      } catch (e) { console.warn("OneSignal tag failed", e); }
+    });
+  }, [isAdmin, currentCustomerId, currentAffiliateId, location.pathname]);
+
   return <><Outlet /><PwaInstallPrompt /><EnableNotificationsPrompt /></>;
 }
