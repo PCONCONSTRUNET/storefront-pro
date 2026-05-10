@@ -5,6 +5,34 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { supabase } from "@/integrations/supabase/client";
+
+const AUDIENCE_TAG: Record<NotificationAudience, "customer" | "admin" | "affiliate"> = {
+  cliente: "customer",
+  admin: "admin",
+  afiliada: "affiliate",
+};
+
+async function dispatchPush(args: {
+  title: string; body: string; audience: NotificationAudience; externalUserIds?: string[];
+}) {
+  try {
+    const payload: Record<string, unknown> = {
+      title: args.title,
+      message: args.body,
+    };
+    if (args.externalUserIds && args.externalUserIds.length > 0) {
+      payload.externalUserIds = args.externalUserIds;
+    } else {
+      payload.audience = AUDIENCE_TAG[args.audience];
+    }
+    const { data, error } = await supabase.functions.invoke("send-push", { body: payload });
+    if (error) console.warn("[push] send-push erro:", error.message);
+    else console.log("[push] enviado:", data);
+  } catch (e) {
+    console.warn("[push] falhou", e);
+  }
+}
 
 export type NotificationCategory =
   | "pedido_realizado"      // cliente fez um pedido
