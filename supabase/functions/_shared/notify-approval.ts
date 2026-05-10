@@ -43,4 +43,33 @@ export async function notifyOrderApproved(supabase: SupabaseClient, order: any) 
       console.error("[notify-approval] e-mail falhou:", e);
     }
   }
+
+  // Push notification — admin (sempre) + cliente (se cadastrado com id)
+  try {
+    await supabase.functions.invoke("send-push", {
+      body: {
+        title: "Pagamento aprovado ✨",
+        message: `Pedido #${String(order.id).slice(0, 8)} de ${firstName} (${total}) confirmado.`,
+        url: "/admin/pedidos",
+        audience: "admin",
+      },
+    });
+  } catch (e) {
+    console.error("[notify-approval] push admin falhou:", e);
+  }
+
+  if (order.customer_id) {
+    try {
+      await supabase.functions.invoke("send-push", {
+        body: {
+          title: "Pagamento aprovado 💖",
+          message: `Seu pedido #${String(order.id).slice(0, 8)} foi confirmado e está aguardando retirada no ateliê.`,
+          url: `/pedido/${order.id}`,
+          externalUserIds: [String(order.customer_id)],
+        },
+      });
+    } catch (e) {
+      console.error("[notify-approval] push cliente falhou:", e);
+    }
+  }
 }
