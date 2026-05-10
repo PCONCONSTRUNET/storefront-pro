@@ -1096,7 +1096,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 5,
+      version: 6,
       skipHydration: typeof window === "undefined",
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
@@ -1113,6 +1113,10 @@ export const useStore = create<AppState>()(
         }
         if (version < 5) {
           persisted.reviews = [];
+        }
+        if (version < 6) {
+          // Clear products to force a clean merge with the new aggressive fallback logic
+          persisted.products = initialProducts;
         }
         return persisted;
       },
@@ -1140,13 +1144,14 @@ export const useStore = create<AppState>()(
         const snap = await fetchCloudSnapshot();
         const cur = get();
         // Smart merge products specifically to keep images if cloud lacks them
+        const isPlaceholder = (url: string) => !url || url === "" || url === "null" || url.length < 5;
         const mergedProducts = cur.products.map(p => {
           const remote = snap.products.find(rp => rp.id === p.id);
           if (!remote) return p;
           return { 
             ...remote, 
-            image: remote.image || p.image,
-            gallery: (remote.gallery && remote.gallery.length > 0) ? remote.gallery : p.gallery
+            image: isPlaceholder(remote.image) ? p.image : remote.image,
+            gallery: (remote.gallery && remote.gallery.length > 0 && !isPlaceholder(remote.gallery[0])) ? remote.gallery : p.gallery
           };
         });
 
@@ -1209,10 +1214,12 @@ export function hydrateFromCloud(): Promise<void> {
           const loc = map.get(x.id);
           if (loc) {
             // Product specific fallback
-            if ((x as any).image === "" || (x as any).image === null) {
+            const isPlaceholder = (url: string) => !url || url === "" || url === "null" || url.length < 5;
+            
+            if (isPlaceholder((x as any).image)) {
               (x as any).image = (loc as any).image;
             }
-            if (!(x as any).gallery || (x as any).gallery.length === 0) {
+            if (!(x as any).gallery || (x as any).gallery.length === 0 || isPlaceholder((x as any).gallery[0])) {
               (x as any).gallery = (loc as any).gallery;
             }
           }
