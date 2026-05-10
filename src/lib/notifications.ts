@@ -187,11 +187,13 @@ export const useNotifications = create<NotificationState>()(
           };
           set(s => ({ logs: [log, ...s.logs].slice(0, 200) }));
 
-          if (tpl.sendPush && typeof window !== "undefined" && "Notification" in window
-              && Notification.permission === "granted") {
-            try {
-              new Notification(log.title, { body: log.body, icon: "/icon-512.png", tag: `${category}_${tpl.audience}` });
-            } catch { /* ignore */ }
+          if (tpl.sendPush) {
+            void dispatchPush({
+              title: log.title,
+              body: log.body,
+              audience: tpl.audience,
+              externalUserIds: opts?.recipientId ? [opts.recipientId] : undefined,
+            });
           }
           if (!firstLog) firstLog = log;
         }
