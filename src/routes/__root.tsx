@@ -140,7 +140,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const refreshSession = useStore((s) => s.refreshSession);
-  const session = useStore((s) => s.session);
+  const session = useStore((s) => (s as any).session);
   const router = useRouter();
   const location = useLocation();
 

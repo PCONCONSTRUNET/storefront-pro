@@ -15,6 +15,13 @@ export type Product = {
   variations?: { name: string; options: (string | { label: string; priceDelta?: number })[] }[];
 };
 
+export type Category = {
+  id: string;
+  name: string;
+  image: string;
+  order: number;
+};
+
 export type FAQItem = {
   id: string;
   category: string;
