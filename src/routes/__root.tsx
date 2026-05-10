@@ -63,7 +63,6 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.json" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
@@ -133,11 +132,17 @@ function RootComponent() {
     if (path === "/admin" || path.startsWith("/admin/")) manifestHref = "/admin/manifest.json";
     else if (path === "/afiliada" || path.startsWith("/afiliada/")) manifestHref = "/afiliada/manifest.json";
 
-    const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
-    if (link) {
-      link.setAttribute("href", manifestHref);
-      console.log("[PWA] Manifest swapped to:", manifestHref);
+    const finalHref = `${manifestHref}?v=${Date.now()}`;
+    let link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'manifest';
+      document.head.appendChild(link);
     }
+    
+    link.setAttribute("href", finalHref);
+    console.log("[PWA] Manifest set to:", finalHref);
   }, [location.pathname]);
 
   // On PWA launch at "/", redirect to last allowed route if any
