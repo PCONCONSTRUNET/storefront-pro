@@ -32,9 +32,28 @@ function tone(freq: number, duration = 0.12, when = 0, type: OscillatorType = "s
 export function playBeep() {
   const c = getCtx();
   if (!c) return;
-  if (c.state === "suspended") c.resume().catch(() => {});
-  tone(880, 0.09, 0, "square", 0.15);
-  tone(1320, 0.14, 0.09, "square", 0.15);
+  const fire = () => {
+    tone(880, 0.12, 0, "square", 0.35);
+    tone(1320, 0.18, 0.11, "square", 0.35);
+  };
+  if (c.state === "suspended") {
+    c.resume().then(fire).catch(fire);
+  } else {
+    fire();
+  }
+}
+
+// Prime the AudioContext on the first user gesture so subsequent
+// programmatic beeps (e.g. after a successful sale registration on mobile)
+// are guaranteed to play without being blocked by the autoplay policy.
+if (typeof window !== "undefined") {
+  const prime = () => {
+    const c = getCtx();
+    if (c && c.state === "suspended") c.resume().catch(() => {});
+  };
+  window.addEventListener("pointerdown", prime, { once: false, passive: true });
+  window.addEventListener("touchstart", prime, { once: false, passive: true });
+  window.addEventListener("keydown", prime, { once: false, passive: true });
 }
 
 /** Soft error buzz. */
