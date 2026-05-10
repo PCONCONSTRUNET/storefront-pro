@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Bell } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useStore } from "@/lib/store";
 
 const DISMISS_KEY = "push_prompt_dismissed_at";
 const DISMISS_DAYS = 3;
