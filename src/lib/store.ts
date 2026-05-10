@@ -1143,7 +1143,11 @@ export const useStore = create<AppState>()(
         const mergedProducts = cur.products.map(p => {
           const remote = snap.products.find(rp => rp.id === p.id);
           if (!remote) return p;
-          return { ...remote, image: remote.image || p.image };
+          return { 
+            ...remote, 
+            image: remote.image || p.image,
+            gallery: (remote.gallery && remote.gallery.length > 0) ? remote.gallery : p.gallery
+          };
         });
 
         set((s) => ({
@@ -1203,9 +1207,14 @@ export function hydrateFromCloud(): Promise<void> {
         local.forEach((x) => map.set(x.id, x));
         remote.forEach((x) => {
           const loc = map.get(x.id);
-          // If it's a product and remote has no image, keep local image
-          if (loc && (x as any).image === "" && (loc as any).image) {
-            (x as any).image = (loc as any).image;
+          if (loc) {
+            // Product specific fallback
+            if ((x as any).image === "" || (x as any).image === null) {
+              (x as any).image = (loc as any).image;
+            }
+            if (!(x as any).gallery || (x as any).gallery.length === 0) {
+              (x as any).gallery = (loc as any).gallery;
+            }
           }
           map.set(x.id, x);
         });
