@@ -1172,6 +1172,7 @@ export const useStore = create<AppState>()(
         }
         useStore.setState({ ...patch, sessions: nextSessions });
       },
+    },
   ),
 );
 
