@@ -825,7 +825,7 @@ export const useStore = create<AppState>()(
         }
         // Cloud persistence: order + sales transaction (if paid) + stock + coupon
         try {
-          const ordRow = {
+          const ordRow: any = { // Keep this as any for Supabase upsert flexibility if needed, or use proper type if available
             id: order.id,
             customer_name: order.customerName,
             customer_email: order.customerEmail,
@@ -1008,7 +1008,8 @@ export const useStore = create<AppState>()(
       name: "princesa-store-v1",
       version: 5,
       skipHydration: typeof window === "undefined",
-      migrate: (persisted: any, version) => {
+      migrate: (persistedState: any, version: number) => {
+        const persisted = persistedState as any;
         if (!persisted) return persisted;
         if (version < 2) {
           persisted.products = initialProducts;
@@ -1102,8 +1103,8 @@ export function hydrateFromCloud(): Promise<void> {
         remote.forEach((x) => map.set(x.id, x));
         return Array.from(map.values());
       };
-      const mergeByCode = (local: any[], remote: any[]) => {
-        const map = new Map<string, any>();
+      const mergeByCode = <T extends { code: string }>(local: T[], remote: T[]) => {
+        const map = new Map<string, T>();
         local.forEach((x) => map.set(x.code, x));
         remote.forEach((x) => map.set(x.code, x));
         return Array.from(map.values());
