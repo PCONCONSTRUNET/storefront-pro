@@ -53,7 +53,7 @@ export const Route = createFileRoute("/afiliada/")({
   component: Page,
 });
 
-type View = "registrar" | "vendas" | "resumo";
+type View = "registrar" | "vendas" | "resumo" | "links";
 
 function Page() {
   const navigate = useNavigate();
@@ -101,6 +101,7 @@ function Page() {
   const items: { id: View; title: string; icon: React.ElementType }[] = [
     { id: "registrar", title: "Registrar venda", icon: Plus },
     { id: "vendas", title: "Minhas vendas", icon: ListOrdered },
+    { id: "links", title: "Meus links", icon: MessageCircle },
     { id: "resumo", title: "Resumo", icon: LayoutDashboard },
   ];
 
@@ -176,6 +177,7 @@ function Page() {
               />
             )}
             {view === "vendas" && <SalesList sales={mySales} />}
+            {view === "links" && <LinkGenerator affiliateId={me.id} />}
             {view === "resumo" && (
               <Suspense
                 fallback={
@@ -601,6 +603,77 @@ function HeroStat({
       </div>
       <div className="font-bold text-base mt-0.5 leading-tight">{value}</div>
       {sub && <div className="text-[10px] opacity-80">{sub}</div>}
+    </div>
+  );
+}
+function LinkGenerator({ affiliateId }: { affiliateId: string }) {
+  const products = useStore((s) => s.products);
+  const [selectedProduct, setSelectedProduct] = useState("");
+
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const mainLink = `${baseUrl}/?ref=${affiliateId}`;
+
+  const copy = (txt: string) => {
+    navigator.clipboard.writeText(txt);
+    toast.success("Link copiado!");
+  };
+
+  const productLink = selectedProduct ? `${baseUrl}/produto/${selectedProduct}?ref=${affiliateId}` : "";
+
+  return (
+    <div className="space-y-4 animate-fade-in">
+      <div className="bg-card rounded-2xl p-5 shadow-card">
+        <h2 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
+          <Globe className="h-5 w-5" /> Link da Loja
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Divulgue o link geral da loja. Qualquer compra feita através dele será atribuída a você.
+        </p>
+        <div className="flex gap-2">
+          <input readOnly value={mainLink} className="flex-1 h-11 px-3 rounded-xl bg-muted text-xs border border-border" />
+          <button onClick={() => copy(mainLink)} className="h-11 px-4 rounded-xl gradient-primary text-white font-semibold">
+            Copiar
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl p-5 shadow-card">
+        <h2 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
+          <ShoppingBag className="h-5 w-5" /> Deep Links (Produtos)
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Gere um link direto para um produto específico para aumentar suas conversões.
+        </p>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Selecione o produto
+            </label>
+            <select 
+              value={selectedProduct}
+              onChange={(e) => setSelectedProduct(e.target.value)}
+              className="w-full h-11 mt-1 px-3 rounded-xl bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              <option value="">Selecione um produto...</option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {productLink && (
+            <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 animate-scale-in">
+              <div className="flex gap-2 items-center">
+                <input readOnly value={productLink} className="flex-1 h-10 px-3 rounded-lg bg-white/50 text-xs border border-primary/10" />
+                <button onClick={() => copy(productLink)} className="h-10 px-4 rounded-lg bg-primary text-white text-xs font-bold">
+                  Copiar Link
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

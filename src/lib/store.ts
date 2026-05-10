@@ -5,9 +5,11 @@ import {
   initialProducts,
   initialCategories,
   initialCoupons,
+  initialFAQ,
   type Product,
   type Category,
   type Coupon,
+  type FAQItem as FAQItemData,
 } from "./data";
 import { useNotifications } from "./notifications";
 import { cloud, fetchCloudSnapshot } from "./cloud";
@@ -24,6 +26,33 @@ export type Review = {
   rating: number; // 1-5
   comment: string;
   photos: string[]; // data URLs
+  createdAt: string;
+};
+
+export type WaitlistEntry = {
+  id: string;
+  productId: string;
+  customerId?: string;
+  email: string;
+  notified: boolean;
+  createdAt: string;
+};
+
+export type FAQItem = {
+  id: string;
+  category: string;
+  question: string;
+  answer: string;
+  sortOrder: number;
+};
+
+export type ActivityLog = {
+  id: string;
+  action: string;
+  category: "auth" | "catalog" | "order" | "admin" | "error" | "affiliate";
+  description: string;
+  metadata?: any;
+  userId?: string;
   createdAt: string;
 };
 
@@ -208,6 +237,13 @@ type AppState = {
     customer: SessionToken | null;
     affiliate: SessionToken | null;
   };
+  // New features
+  faq: FAQItem[];
+  waitlist: WaitlistEntry[];
+  activityLogs: ActivityLog[];
+  referralId: string | null;
+  setReferralId: (id: string | null) => void;
+
   refreshSession: (kind: SessionKind) => void;
   findAccountByEmail: (
     email: string,
@@ -283,6 +319,11 @@ type AppState = {
     message: string;
   };
   deleteReview: (id: string) => void;
+
+  joinWaitlist: (productId: string, email: string) => { ok: boolean; message: string };
+  upsertFAQ: (f: FAQItem) => void;
+  deleteFAQ: (id: string) => void;
+
   sync: () => Promise<void>;
 };
 
@@ -305,7 +346,13 @@ export const useStore = create<AppState>()(
       transactions: [],
       adminPasswordOverride: {},
       reviews: [],
+      faq: initialFAQ,
+      waitlist: [],
+      activityLogs: [],
+      referralId: null,
       sessions: { admin: null, customer: null, affiliate: null },
+
+      setReferralId: (id) => set({ referralId: id }),
 
       refreshSession: (kind) => {
         const sess = get().sessions[kind];
@@ -411,6 +458,36 @@ export const useStore = create<AppState>()(
           }),
         }));
         cloud.deleteReview(id);
+      },
+
+      joinWaitlist: (productId, email) => {
+        const state = get();
+        const customerId = state.currentCustomerId || undefined;
+        const entry: WaitlistEntry = {
+          id: `wait_${Date.now()}`,
+          productId,
+          email,
+          customerId,
+          notified: false,
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({ waitlist: [entry, ...s.waitlist] }));
+        cloud.joinWaitlist({ productId, email, customerId });
+        return { ok: true, message: "Você será avisada assim que o estoque chegar! ✨" };
+      },
+
+      upsertFAQ: (f) => {
+        set((s) => ({
+          faq: s.faq.find((x) => x.id === f.id)
+            ? s.faq.map((x) => (x.id === f.id ? f : x))
+            : [...s.faq, f].sort((a, b) => a.sortOrder - b.sortOrder),
+        }));
+        cloud.upsertFAQ(f);
+      },
+
+      deleteFAQ: (id) => {
+        set((s) => ({ faq: s.faq.filter((f) => f.id !== id) }));
+        cloud.deleteFAQ(id);
       },
 
       addToCart: (productId, quantity = 1, variation) =>
@@ -742,6 +819,19 @@ export const useStore = create<AppState>()(
           couponCode: state.appliedCoupon || undefined,
           notes: data.notes?.trim() || undefined,
         };
+
+        // Automatic affiliate registration if referral exists
+        if (state.referralId) {
+          get().registerAffiliateSale({
+            affiliateId: state.referralId,
+            customerName: data.customerName,
+            customerPhone: data.customerPhone,
+            productDescription: items.map((i) => `${i.quantity}x ${i.name}`).join(", "),
+            saleValue: total,
+            status: order.status === "pago" ? "confirmada" : "pendente",
+          });
+        }
+
         set((s) => ({
           orders: [order, ...s.orders],
           cart: [],
@@ -1058,6 +1148,9 @@ export const useStore = create<AppState>()(
           transactions: snap.transactions,
           reviews: snap.reviews,
           orders: snap.orders,
+          faq: snap.faq,
+          waitlist: snap.waitlist,
+          activityLogs: snap.activityLogs,
           settings: snap.settings ? { ...s.settings, ...snap.settings } : s.settings,
         }));
       },
@@ -1121,6 +1214,9 @@ export function hydrateFromCloud(): Promise<void> {
         transactions: mergeById(cur.transactions, snap.transactions),
         reviews: mergeById(cur.reviews, snap.reviews),
         orders: mergeById(cur.orders, snap.orders),
+        faq: mergeById(cur.faq, snap.faq),
+        waitlist: mergeById(cur.waitlist, snap.waitlist),
+        activityLogs: mergeById(cur.activityLogs, snap.activityLogs),
         settings: snap.settings
           ? ({ ...cur.settings, ...snap.settings } as StoreSettings)
           : cur.settings,

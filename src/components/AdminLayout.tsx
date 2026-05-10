@@ -15,6 +15,9 @@ import {
   X,
   Sparkles,
   Search,
+  BarChart,
+  FileText,
+  HelpCircle,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
@@ -23,6 +26,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/bi", label: "B.I.", icon: BarChart },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
@@ -32,6 +36,7 @@ const nav = [
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { to: "/admin/chatbot", label: "Chatbot", icon: WhatsAppIcon },
+  { to: "/admin/logs", label: "Logs de Auditoria", icon: FileText },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 

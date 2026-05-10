@@ -15,11 +15,12 @@ export type Product = {
   variations?: { name: string; options: (string | { label: string; priceDelta?: number })[] }[];
 };
 
-export type Category = {
+export type FAQItem = {
   id: string;
-  name: string;
-  image: string;
-  order: number;
+  category: string;
+  question: string;
+  answer: string;
+  sortOrder: number;
 };
 
 export const initialCategories: Category[] = [
@@ -182,4 +183,35 @@ export const initialCoupons: Coupon[] = [
     minOrder: 80,
     active: true,
   },
+];
+
+export const initialFAQ: FAQItem[] = [
+  {
+    id: "f1",
+    category: "Pedidos",
+    question: "Como acompanho meu pedido?",
+    answer: "Você pode acompanhar o status do seu pedido acessando o menu 'Meus Pedidos' no seu perfil. Além disso, enviamos notificações via e-mail e push a cada atualização de status.",
+    sortOrder: 1
+  },
+  {
+    id: "f2",
+    category: "Pedidos",
+    question: "Qual o prazo de entrega?",
+    answer: "O prazo médio de entrega é de 5 a 10 dias úteis, dependendo da sua localização. Após a confirmação do pagamento, seu pedido é preparado em até 24 horas.",
+    sortOrder: 2
+  },
+  {
+    id: "f3",
+    category: "Pagamento",
+    question: "Quais as formas de pagamento aceitas?",
+    answer: "Aceitamos Pix (com 5% de desconto automático), Cartão de Crédito e Dinheiro (apenas para retiradas no local).",
+    sortOrder: 3
+  },
+  {
+    id: "f4",
+    category: "Produtos",
+    question: "Os laços são feitos à mão?",
+    answer: "Sim! Todos os nossos produtos são 100% artesanais, feitos com fita de alta qualidade e muito carinho por nossas artesãs.",
+    sortOrder: 4
+  }
 ];

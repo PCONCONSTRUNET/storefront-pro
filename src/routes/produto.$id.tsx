@@ -15,12 +15,14 @@ export const Route = createFileRoute("/produto/$id")({
 function Page() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { products, addToCart, reviews } = useStore();
+  const { products, addToCart, reviews, joinWaitlist } = useStore();
   const product = products.find((p) => p.id === id);
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
   const [imgError, setImgError] = useState(false);
   const [selected, setSelected] = useState<Record<string, number>>({});
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   const priceDelta = (() => {
     if (!product?.variations) return 0;
@@ -189,25 +191,64 @@ function Page() {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                onClick={() => {
-                  addToCart(product.id, qty);
-                  toast.success("Adicionado!");
-                }}
-                disabled={product.stock === 0}
-                className="h-12 rounded-full border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary/5 active:scale-95 transition-all disabled:opacity-50"
-              >
-                <ShoppingBag className="h-4 w-4" /> Carrinho
-              </button>
-              <button
-                onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                className="h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
-              >
-                <Zap className="h-4 w-4" /> Comprar agora
-              </button>
-            </div>
+            {product.stock === 0 ? (
+              <div className="mt-6 p-4 rounded-2xl bg-muted/40 border border-border">
+                <div className="flex items-center gap-2 text-sm font-semibold text-primary mb-2">
+                  <ShieldCheck className="h-4 w-4" /> Avise-me quando chegar
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Este produto está esgotado no momento. Deixe seu e-mail para ser avisada assim que ele voltar!
+                </p>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!waitlistEmail) return;
+                    setWaitlistLoading(true);
+                    const r = joinWaitlist(product.id, waitlistEmail);
+                    toast.success(r.message);
+                    setWaitlistEmail("");
+                    setWaitlistLoading(false);
+                  }}
+                  className="flex gap-2"
+                >
+                  <input
+                    type="email"
+                    required
+                    placeholder="Seu melhor e-mail"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    className="flex-1 h-11 px-3 rounded-xl bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={waitlistLoading}
+                    className="h-11 px-4 rounded-xl gradient-primary text-white font-bold text-xs disabled:opacity-50"
+                  >
+                    {waitlistLoading ? "..." : "Avisar-me"}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    addToCart(product.id, qty);
+                    toast.success("Adicionado!");
+                  }}
+                  disabled={product.stock === 0}
+                  className="h-12 rounded-full border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary/5 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  <ShoppingBag className="h-4 w-4" /> Carrinho
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={product.stock === 0}
+                  className="h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  <Zap className="h-4 w-4" /> Comprar agora
+                </button>
+              </div>
+            )}
 
             <div className="mt-6 grid grid-cols-2 gap-2 text-xs">
               <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-2">

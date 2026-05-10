@@ -38,6 +38,10 @@ export function StoreHeader() {
       <div className="hidden md:block border-b border-white/10 text-[11px]">
         <div className="max-w-6xl mx-auto px-4 h-7 flex items-center justify-between">
           <div className="flex items-center gap-4 opacity-90">
+            <Link to="/suporte" className="hover:underline">
+              Central de Ajuda
+            </Link>
+            <span className="opacity-50">|</span>
             <Link to="/admin/login" className="hover:underline">
               Vender na loja
             </Link>
@@ -139,6 +143,9 @@ export function StoreHeader() {
           </Link>
           <Link to="/categorias" className="hover:opacity-80">
             Categorias
+          </Link>
+          <Link to="/suporte" className="hover:opacity-80">
+            Ajuda
           </Link>
           <Link to="/pedidos" className="hover:opacity-80">
             Meus pedidos

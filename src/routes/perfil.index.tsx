@@ -13,6 +13,7 @@ import {
   Instagram,
   X,
   Receipt,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,6 +73,7 @@ function Page() {
     { to: "/perfil/transacoes", icon: Receipt, label: "Histórico de transações" },
     { to: "/perfil/enderecos", icon: MapPin, label: "Endereços" },
     { to: "/perfil/favoritos", icon: Heart, label: "Favoritos" },
+    { to: "/suporte", icon: HelpCircle, label: "Central de Ajuda" },
     { to: "/perfil/configuracoes", icon: Settings, label: "Configurações" },
   ] as const;
 

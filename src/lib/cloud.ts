@@ -11,6 +11,9 @@ import type {
   Review,
   StoreSettings,
   Transaction,
+  WaitlistEntry,
+  FAQItem,
+  ActivityLog,
 } from "./store";
 import type { Category, Coupon, Product } from "./data";
 
@@ -151,6 +154,33 @@ const toOrder = (r: any): Order => ({
   createdAt: r.created_at,
   address: r.address || "",
   notes: r.notes || undefined,
+});
+
+const toWaitlist = (r: any): WaitlistEntry => ({
+  id: r.id,
+  productId: r.product_id,
+  email: r.email,
+  customerId: r.customer_id || undefined,
+  notified: r.notified,
+  createdAt: r.created_at,
+});
+
+const toFAQ = (r: any): FAQItem => ({
+  id: r.id,
+  category: r.category,
+  question: r.question,
+  answer: r.answer,
+  sortOrder: r.sort_order,
+});
+
+const toActivityLog = (r: any): ActivityLog => ({
+  id: r.id,
+  action: r.action,
+  category: r.category as any,
+  description: r.description,
+  metadata: r.metadata,
+  userId: r.user_id || undefined,
+  createdAt: r.created_at,
 });
 
 // ---------- writes (fire-and-forget) ----------
@@ -367,22 +397,40 @@ export const cloud = {
     if (error && error.code !== "P0001") log("upsertNotificationLog", error);
   },
 
-  async logActivity(data: {
-    action: string;
-    category: "auth" | "catalog" | "order" | "admin" | "error";
-    description: string;
-    metadata?: any;
-    userId?: string;
-  }) {
+  async logActivity(data: Omit<ActivityLog, "id" | "createdAt">) {
     const { error } = await supabase.from("activity_logs").insert({
       action: data.action,
       category: data.category,
       description: data.description,
       metadata: data.metadata || {},
       user_id: data.userId || null,
-      created_at: new Date().toISOString(),
     });
     if (error && error.code !== "P0001") log("logActivity", error);
+  },
+
+  async joinWaitlist(data: Omit<WaitlistEntry, "id" | "createdAt" | "notified">) {
+    const { error } = await supabase.from("product_waitlist").insert({
+      product_id: data.productId,
+      customer_id: data.customerId || null,
+      email: data.email,
+    });
+    log("joinWaitlist", error);
+  },
+
+  async upsertFAQ(f: FAQItem) {
+    const { error } = await supabase.from("faq_items").upsert({
+      id: f.id,
+      category: f.category,
+      question: f.question,
+      answer: f.answer,
+      sort_order: f.sortOrder,
+    });
+    log("upsertFAQ", error);
+  },
+
+  async deleteFAQ(id: string) {
+    const { error } = await supabase.from("faq_items").delete().eq("id", id);
+    log("deleteFAQ", error);
   },
 };
 
@@ -398,21 +446,28 @@ export type CloudSnapshot = {
   reviews: Review[];
   settings: Partial<StoreSettings> | null;
   orders: Order[];
+  faq: FAQItem[];
+  waitlist: WaitlistEntry[];
+  activityLogs: ActivityLog[];
 };
 
 export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
-  const [cust, cats, prods, coups, affs, affSales, txs, revs, settings, ords] = await Promise.all([
-    supabase.from("customers").select("*"),
-    supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-    supabase.from("products").select("*"),
-    supabase.from("coupons").select("*"),
-    supabase.from("affiliates").select("*"),
-    supabase.from("affiliate_sales").select("*").order("created_at", { ascending: false }),
-    supabase.from("transactions").select("*").order("date", { ascending: false }),
-    supabase.from("reviews").select("*").order("created_at", { ascending: false }),
-    supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
-    supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(500),
-  ]);
+  const [cust, cats, prods, coups, affs, affSales, txs, revs, settings, ords, faq, wait, logs] =
+    await Promise.all([
+      supabase.from("customers").select("*"),
+      supabase.from("categories").select("*").order("sort_order", { ascending: true }),
+      supabase.from("products").select("*"),
+      supabase.from("coupons").select("*"),
+      supabase.from("affiliates").select("*"),
+      supabase.from("affiliate_sales").select("*").order("created_at", { ascending: false }),
+      supabase.from("transactions").select("*").order("date", { ascending: false }),
+      supabase.from("reviews").select("*").order("created_at", { ascending: false }),
+      supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
+      supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(500),
+      supabase.from("faq_items").select("*").order("sort_order", { ascending: true }),
+      supabase.from("product_waitlist").select("*"),
+      supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(200),
+    ]);
   return {
     customers: (cust.data || []).map(toCustomer),
     categories: (cats.data || []).map(toCategory),
@@ -424,5 +479,8 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
     reviews: (revs.data || []).map(toReview),
     settings: (settings.data?.data as any) || null,
     orders: (ords.data || []).map(toOrder),
+    faq: (faq.data || []).map(toFAQ),
+    waitlist: (wait.data || []).map(toWaitlist),
+    activityLogs: (logs.data || []).map(toActivityLog),
   };
 }

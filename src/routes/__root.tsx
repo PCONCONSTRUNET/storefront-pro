@@ -174,6 +174,22 @@ function RootComponent() {
     console.log("[PWA] Manifest set to:", finalHref);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      useStore.getState().setReferralId(ref);
+      try {
+        localStorage.setItem("referral_id", ref);
+      } catch {}
+      console.log("[Affiliate] Referral detected:", ref);
+    } else {
+      const saved = localStorage.getItem("referral_id");
+      if (saved) useStore.getState().setReferralId(saved);
+    }
+  }, []);
+
   // On PWA launch at "/", redirect to last allowed route if any
   useEffect(() => {
     if (!isStandaloneMode()) return;
