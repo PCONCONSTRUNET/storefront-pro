@@ -20,7 +20,6 @@ import {
   Play,
 } from "lucide-react";
 import bannerEncantada from "@/assets/banner-encantada-2026.png";
-import heroDemo from "@/assets/hero-demonstracao.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -92,7 +91,7 @@ function Home() {
             className="md:col-span-2 relative overflow-hidden rounded-2xl shadow-card block group"
           >
             <img
-              src={all.length <= 8 ? heroDemo : bannerEncantada}
+              src={bannerEncantada}
               alt="Coleção Princesa de Laços"
               className="w-full h-full object-cover aspect-[16/7] md:aspect-[16/7] group-hover:scale-[1.02] transition-transform duration-700"
               loading="eager"
