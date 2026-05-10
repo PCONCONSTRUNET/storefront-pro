@@ -481,6 +481,12 @@ export const useStore = create<AppState>()(
           currentCustomerId: c.id,
           sessions: { ...s.sessions, customer: makeSession(c.id) },
         }));
+        cloud.logActivity({
+          action: "login",
+          category: "auth",
+          description: `Cliente logou: ${c.name}`,
+          userId: c.id,
+        });
         return { ok: true, message: "Bem-vinda!" };
       },
       logoutCustomer: () =>
@@ -548,6 +554,11 @@ export const useStore = create<AppState>()(
           isAdmin: true,
           sessions: { ...s.sessions, admin: makeSession(normalized) },
         }));
+        cloud.logActivity({
+          action: "admin_login",
+          category: "auth",
+          description: `Admin logou: ${normalized}`,
+        });
         return { ok: true, message: "Bem-vindo!" };
       },
       logoutAdmin: () => set((s) => ({ isAdmin: false, sessions: { ...s.sessions, admin: null } })),
@@ -563,6 +574,12 @@ export const useStore = create<AppState>()(
           currentAffiliateId: a.id,
           sessions: { ...s.sessions, affiliate: makeSession(a.id) },
         }));
+        cloud.logActivity({
+          action: "affiliate_login",
+          category: "auth",
+          description: `Afiliada logou: ${a.name}`,
+          userId: a.id,
+        });
         return { ok: true, message: `Bem-vinda, ${a.name}!` };
       },
       logoutAffiliate: () =>
@@ -739,6 +756,12 @@ export const useStore = create<AppState>()(
             return it ? { ...p, stock: Math.max(0, p.stock - it.quantity) } : p;
           }),
         }));
+        cloud.logActivity({
+          action: "order_placed",
+          category: "order",
+          description: `Novo pedido ${order.id} de ${order.customerName}`,
+          metadata: { total: order.total, items: order.items.length },
+        });
         // Notificações automáticas
         try {
           const notif = useNotifications.getState();

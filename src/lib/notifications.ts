@@ -5,6 +5,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { supabase } from "@/integrations/supabase/client";
+import { cloud } from "./cloud";
 
 export type NotificationCategory =
   | "pedido_realizado" // cliente fez um pedido
@@ -313,6 +314,7 @@ export const useNotifications = create<NotificationState>()(
             data: vars,
           };
           set((s) => ({ logs: [log, ...s.logs].slice(0, 200) }));
+          cloud.upsertNotificationLog(log);
 
           if (tpl.sendPush) {
             void dispatchPush({
@@ -339,6 +341,7 @@ export const useNotifications = create<NotificationState>()(
           read: false,
         };
         set((s) => ({ logs: [log, ...s.logs].slice(0, 200) }));
+        cloud.upsertNotificationLog(log);
         if (data.channels.includes("push")) {
           void dispatchPush({ title: data.title, body: data.body, audience: data.audience });
         }

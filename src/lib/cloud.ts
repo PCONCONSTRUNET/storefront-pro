@@ -347,6 +347,43 @@ export const cloud = {
     const { error } = await supabase.from("orders").delete().eq("id", id);
     log("deleteOrder", error);
   },
+
+  async upsertNotificationLog(l: any) {
+    const { error } = await supabase.from("notification_logs").upsert(
+      {
+        id: l.id,
+        category: l.category,
+        title: l.title,
+        body: l.body,
+        audience: l.audience,
+        recipient_id: l.recipientId || null,
+        channels: l.channels,
+        sent_at: l.sentAt,
+        read: l.read,
+        metadata: l.data || {},
+      },
+      { onConflict: "id" },
+    );
+    if (error && error.code !== "P0001") log("upsertNotificationLog", error);
+  },
+
+  async logActivity(data: {
+    action: string;
+    category: "auth" | "catalog" | "order" | "admin" | "error";
+    description: string;
+    metadata?: any;
+    userId?: string;
+  }) {
+    const { error } = await supabase.from("activity_logs").insert({
+      action: data.action,
+      category: data.category,
+      description: data.description,
+      metadata: data.metadata || {},
+      user_id: data.userId || null,
+      created_at: new Date().toISOString(),
+    });
+    if (error && error.code !== "P0001") log("logActivity", error);
+  },
 };
 
 // ---------- hydration ----------
