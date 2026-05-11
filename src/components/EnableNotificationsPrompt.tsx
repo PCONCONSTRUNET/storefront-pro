@@ -15,6 +15,16 @@ function isStandalone() {
   );
 }
 
+// Executa uma Promise com timeout máximo
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), ms)
+    ),
+  ]);
+}
+
 export function EnableNotificationsPrompt() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -23,68 +33,54 @@ export function EnableNotificationsPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    // If permission denied — nothing we can do
     if ("Notification" in window && Notification.permission === "denied") return;
 
-    // If dismissed recently — skip
+    // Se dismissed recentemente, não mostra
     try {
       const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
       if (Date.now() - dismissedAt < DISMISS_DAYS * 24 * 60 * 60 * 1000) return;
     } catch {}
 
-    const delay = isStandalone() ? 4000 : 2500;
+    // Delay curto — 1.5s normal, 2.5s no PWA
+    const delay = isStandalone() ? 2500 : 1500;
 
     const t = window.setTimeout(async () => {
-      // If permission already granted, try silent optIn first
+      // Se permissão já concedida, tenta registrar silenciosamente (máx 3s)
       if ("Notification" in window && Notification.permission === "granted") {
         try {
           const OS = (window as any).OneSignal;
           const sub = OS?.User?.PushSubscription;
 
           if (sub?.id) {
-            // Already properly registered — mark as accepted and done
-            console.log("[push-prompt] Already registered:", sub.id);
+            // Já registrado — marca e sai sem mostrar modal
             try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
             return;
           }
 
           if (sub && !sub.id) {
-            // Permission granted but OneSignal has no subscription for this app
-            // This happens when switching App IDs — silently call optIn()
-            console.log("[push-prompt] Permission granted but no sub — calling optIn()");
-            await sub.optIn();
-
-            // Wait up to 5s for ID to appear
-            let waited = 0;
-            while (!OS?.User?.PushSubscription?.id && waited < 5000) {
-              await new Promise(r => setTimeout(r, 500));
-              waited += 500;
-            }
-
+            // Tenta optIn com timeout de 3s
+            await withTimeout(sub.optIn(), 3000);
+            // Espera 1s para o ID aparecer
+            await new Promise(r => setTimeout(r, 1000));
             if (OS?.User?.PushSubscription?.id) {
-              console.log("[push-prompt] Silent registration OK:", OS.User.PushSubscription.id);
               try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
-              return;
+              return; // Registrado com sucesso, sem precisar do modal
             }
           }
-        } catch (e) {
-          console.warn("[push-prompt] Silent optIn failed:", e);
+        } catch {
+          // optIn falhou ou timeout — vai mostrar o modal
         }
 
-        // Silent registration failed — show modal so user can try manually
-        console.log("[push-prompt] Silent optIn failed, showing modal");
+        // Permissão já dada mas OneSignal não registrou — mostra modal
         setOpen(true);
         return;
       }
 
-      // Permission not yet requested — check if already accepted before
+      // Permissão ainda não solicitada — verifica se já aceitou via nosso modal
       try {
         if (localStorage.getItem(ACCEPTED_KEY) === "1") return;
       } catch {}
 
-      // Show modal to ask for permission
-      console.log("[push-prompt] Showing notification prompt");
       setOpen(true);
     }, delay);
 
@@ -105,57 +101,54 @@ export function EnableNotificationsPrompt() {
       const OS = (window as any).OneSignal;
       const sdkReady = OS && typeof OS.Notifications !== "undefined";
 
-      if (sdkReady) {
-        // If permission not yet granted, request it
-        if (Notification.permission !== "granted") {
-          await OS.Notifications.requestPermission();
-          await new Promise(r => setTimeout(r, 1000));
+      // Pede permissão se ainda não foi concedida
+      if (Notification.permission !== "granted") {
+        if (sdkReady) {
+          await withTimeout(OS.Notifications.requestPermission(), 15000);
+        } else {
+          await withTimeout(Notification.requestPermission(), 15000);
+        }
+      }
+
+      granted = Notification.permission === "granted";
+
+      if (granted && sdkReady) {
+        try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
+
+        // Vincula ao usuário correto (admin ou cliente)
+        const osUserId = isAdmin ? "admin-user" : currentCustomerId;
+        if (osUserId) {
+          await withTimeout(OS.login(osUserId), 5000);
+          OS.User.addTag("role", isAdmin ? "admin" : "cliente");
         }
 
-        granted = Notification.permission === "granted";
-
-        if (granted) {
-          try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
-
-          // Login with correct ID
-          const osUserId = isAdmin ? "admin-user" : currentCustomerId;
-          if (osUserId) {
-            await OS.login(osUserId);
-            OS.User.addTag("role", isAdmin ? "admin" : "cliente");
-          }
-
-          // Register subscription
-          if (OS.User?.PushSubscription && !OS.User.PushSubscription.id) {
-            await OS.User.PushSubscription.optIn();
-          }
+        // Registra a assinatura (máx 5s)
+        const sub = OS.User?.PushSubscription;
+        if (sub && !sub.id) {
+          await withTimeout(sub.optIn(), 5000);
         }
-      } else if ("Notification" in window) {
-        await Notification.requestPermission();
-        granted = Notification.permission === "granted";
-        if (granted) try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
       }
     } catch (err) {
-      console.warn("[push-prompt] Error:", err);
+      console.warn("[push-prompt] Error in enable:", err);
+      // Mesmo com erro, fecha o modal e tenta enviar welcome
+      granted = Notification.permission === "granted";
     } finally {
       setBusy(false);
-      dismiss();
+      dismiss(); // Sempre fecha o modal
     }
 
-    // Send welcome push after registration
+    // Push de boas-vindas em background
     if (granted) {
-      window.setTimeout(async () => {
+      (async () => {
         try {
+          // Espera até 8s pelo subscription ID
           const OS = (window as any).OneSignal;
-
-          // Wait for subscription ID
-          let waited = 0;
-          while (!OS?.User?.PushSubscription?.id && waited < 10000) {
+          let subId: string | null = null;
+          for (let i = 0; i < 8; i++) {
+            subId = OS?.User?.PushSubscription?.id;
+            if (subId) break;
             await new Promise(r => setTimeout(r, 1000));
-            waited += 1000;
           }
-
-          const subId = OS?.User?.PushSubscription?.id;
-          console.log("[push-prompt] Sending welcome push. SubID:", subId);
 
           await supabase.functions.invoke("send-push", {
             body: {
@@ -164,21 +157,25 @@ export function EnableNotificationsPrompt() {
                 ? "Admin: você receberá avisos de pedidos e pagamentos 💰"
                 : "Pronto! Você vai receber avisos dos seus pedidos 💖",
               subscriptionIds: subId ? [subId] : undefined,
-              externalUserIds: isAdmin ? ["admin-user"] : (currentCustomerId ? [currentCustomerId] : undefined),
+              externalUserIds: isAdmin
+                ? ["admin-user"]
+                : currentCustomerId ? [currentCustomerId] : undefined,
             },
           });
-          console.log("[push-prompt] Welcome push sent!");
         } catch (e) {
           console.warn("[push-prompt] Welcome push failed:", e);
         }
-      }, 1000);
+      })();
     }
   };
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[9999] p-3 sm:p-4 pointer-events-none" style={{ marginBottom: "60px" }}>
+    <div
+      className="fixed inset-x-0 bottom-0 z-[9999] p-3 sm:p-4 pointer-events-none"
+      style={{ marginBottom: "60px" }}
+    >
       <div className="pointer-events-auto max-w-sm mx-auto bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
         <div className="relative p-4">
           <button
@@ -193,7 +190,9 @@ export function EnableNotificationsPrompt() {
               <Bell className="h-6 w-6" />
             </div>
             <div className="flex-1 min-w-0 pr-6">
-              <div className="font-bold text-sm text-foreground">Ativar notificações</div>
+              <div className="font-bold text-sm text-foreground">
+                Ativar notificações
+              </div>
               <div className="text-xs text-muted-foreground">
                 {isAdmin
                   ? "Receba avisos de pedidos, pagamentos e estoque 💰"
