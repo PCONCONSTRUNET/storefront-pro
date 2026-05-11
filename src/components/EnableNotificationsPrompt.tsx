@@ -90,6 +90,8 @@ export function EnableNotificationsPrompt() {
         if (sdkReady && currentCustomerId) {
           console.log("[push-prompt] Linking device to user:", currentCustomerId);
           await OS.login(currentCustomerId);
+          const isAdmin = window.location.pathname.includes("/admin");
+          OS.User.addTag("role", isAdmin ? "admin" : "cliente");
         }
 
         // Força o opt-in no OneSignal

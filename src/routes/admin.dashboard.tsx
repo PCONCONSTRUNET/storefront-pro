@@ -78,7 +78,7 @@ function Page() {
           title: "Teste de Push — Storefront 🚀",
           message: `O serviço está funcionando! Hora: ${new Date().toLocaleTimeString()}`,
           externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
-          audience: "admin",
+          // Removemos o audience para forçar o envio apenas para o ID específico
         },
       });
 

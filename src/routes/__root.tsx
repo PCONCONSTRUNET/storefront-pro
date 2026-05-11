@@ -179,7 +179,13 @@ function RootComponent() {
     const OS = (window as any).OneSignal;
     if (OS && currentCustomerId) {
       console.log("[OneSignal] Syncing user login:", currentCustomerId);
-      OS.login(currentCustomerId).catch((e: any) => console.warn("[OneSignal] Login error", e));
+      OS.login(currentCustomerId).then(() => {
+        // Define a tag de role para filtros no backend
+        const isAdmin = window.location.pathname.includes("/admin");
+        const role = isAdmin ? "admin" : "cliente";
+        OS.User.addTag("role", role);
+        console.log("[OneSignal] Tag sync:", role);
+      }).catch((e: any) => console.warn("[OneSignal] Login error", e));
     }
   }, [currentCustomerId]);
 
