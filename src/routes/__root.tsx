@@ -126,45 +126,28 @@ OneSignalDeferred.push(async function(OneSignal) {
       },
       {
         children: `(function(){
+  var timer;
   function nukeOneSignalUI(){
-    var sels = [
-      '#onesignal-slidedown-container',
-      '#onesignal-bell-container',
-      '.onesignal-customlink-container',
-      '[class*="onesignal"]',
-      '[id*="onesignal"]',
-      '.onesignal-reset'
-    ];
-    sels.forEach(function(s){
-      document.querySelectorAll(s).forEach(function(el){ el.remove(); });
-    });
-    
-    // Scan all divs and spans for the specific leaked text
-    var all = document.querySelectorAll('div, span, p');
-    for(var i=0; i<all.length; i++) {
-      if(all[i].textContent && all[i].textContent.indexOf('Não se trata de uma questão') !== -1) {
-        console.log("[OneSignal] Nuking leaked text element");
-        all[i].remove();
+    try {
+      var sels = ['#onesignal-slidedown-container','#onesignal-bell-container','.onesignal-customlink-container','.onesignal-slidedown-container','.onesignal-reset'];
+      for(var i=0; i<sels.length; i++){
+        var els = document.querySelectorAll(sels[i]);
+        for(var j=0; j<els.length; j++){ els[j].style.display = 'none'; els[j].remove(); }
       }
-    }
+    } catch(e) {}
   }
+  
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded', function(){ 
       nukeOneSignalUI();
-      setTimeout(nukeOneSignalUI, 500); 
-      setTimeout(nukeOneSignalUI, 2000); 
-      setTimeout(nukeOneSignalUI, 5000); 
+      timer = setInterval(nukeOneSignalUI, 2000); 
     });
   } else {
     nukeOneSignalUI();
-    setTimeout(nukeOneSignalUI, 500); 
-    setTimeout(nukeOneSignalUI, 2000); 
-    setTimeout(nukeOneSignalUI, 5000);
+    timer = setInterval(nukeOneSignalUI, 2000);
   }
-  var ob = new MutationObserver(nukeOneSignalUI);
-  var tryOb = function(){ if(document.body){ ob.observe(document.body,{childList:true,subtree:true}); } else { setTimeout(tryOb,200); } };
-  tryOb();
-  setTimeout(function(){ ob.disconnect(); }, 30000);
+  
+  setTimeout(function(){ if(timer) clearInterval(timer); }, 15000);
 })();`,
       },
     ],
