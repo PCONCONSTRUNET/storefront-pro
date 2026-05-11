@@ -123,6 +123,38 @@ function Page() {
     return () => clearInterval(interval);
   }, []);
 
+  const nukeServiceWorker = async () => {
+    if (!window.confirm("Isso vai limpar todas as configurações de notificação e recarregar a página. Continuar?")) return;
+    
+    try {
+      // Desregistra todos os Service Workers
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      
+      // Limpa dados do OneSignal no localStorage e IndexedDB
+      localStorage.removeItem("push_prompt_accepted");
+      localStorage.removeItem("push_prompt_dismissed_at");
+      
+      // Limpa bancos de dados do OneSignal (IndexedDB)
+      const dbs = await window.indexedDB.databases();
+      dbs.forEach(db => {
+        if (db.name?.includes("OneSignal")) {
+          window.indexedDB.deleteDatabase(db.name);
+        }
+      });
+
+      window.alert("Sistema limpo! A página vai recarregar. Ative as notificações novamente ao voltar.");
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao limpar:", err);
+      window.location.reload();
+    }
+  };
+
   const forceSync = async () => {
     setSyncing(true);
     try {
@@ -204,7 +236,16 @@ function Page() {
           {osId}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nukeServiceWorker();
+            }}
+            className="h-11 bg-destructive/10 text-destructive rounded-xl font-bold text-[10px] shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-destructive/20"
+          >
+            Limpar Tudo
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -216,16 +257,17 @@ function Page() {
           >
             {syncing ? "..." : "Sincronizar"}
           </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              testNotification();
-            }}
-            className="h-11 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
-          >
-            <TrendingUp className="h-4 w-4" /> Testar Push
-          </button>
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            testNotification();
+          }}
+          className="w-full h-11 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+        >
+          <TrendingUp className="h-4 w-4" /> Testar Push
+        </button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
