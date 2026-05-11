@@ -733,6 +733,23 @@ export const useStore = create<AppState>()(
         };
         set((s) => ({ affiliateSales: [sale, ...s.affiliateSales] }));
         cloud.upsertAffiliateSale(sale);
+
+        // Se a venda for registrada como confirmada, entra no financeiro
+        if (sale.status === "confirmada") {
+          const tx: Transaction = {
+            id: `tx_aff_${sale.id}`,
+            kind: "entrada",
+            category: "venda",
+            description: `Venda Afiliada: ${aff.name} — ${data.customerName}`,
+            amount: data.saleValue,
+            date: sale.createdAt,
+            productSummary: data.productDescription,
+            createdAt: sale.createdAt,
+          };
+          set((s) => ({ transactions: [tx, ...s.transactions] }));
+          cloud.upsertTransaction(tx);
+        }
+
         try {
           useNotifications.getState().trigger(
             "afiliada_nova_venda",

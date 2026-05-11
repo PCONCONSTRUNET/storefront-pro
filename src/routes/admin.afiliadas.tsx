@@ -60,6 +60,7 @@ function Page() {
   const [filterStatus, setFilterStatus] = useState<"" | AffiliateSaleStatus>("");
   const [search, setSearch] = useState("");
   const [searchAff, setSearchAff] = useState("");
+  const [registeringSale, setRegisteringSale] = useState(false);
 
   const totals = useMemo(() => {
     const totalRevenue = sales
@@ -263,9 +264,17 @@ function Page() {
       {tab === "vendas" && (
         <div className="bg-card rounded-2xl shadow-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 className="font-bold">
-              Vendas {filterStatus === "confirmada" ? "(pagas)" : "registradas"}
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold">
+                Vendas {filterStatus === "confirmada" ? "(pagas)" : "registradas"}
+              </h2>
+              <button
+                onClick={() => setRegisteringSale(true)}
+                className="flex items-center gap-1 text-[11px] bg-success text-success-foreground px-3 py-1 rounded-full font-bold hover:opacity-90 transition-opacity"
+              >
+                <Plus className="h-3 w-3" /> Registrar Venda
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
               <div className="relative">
                 <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -563,8 +572,171 @@ function Page() {
         </div>
       )}
 
+      {registeringSale && (
+        <RegisterSaleModal
+          onClose={() => setRegisteringSale(false)}
+          affiliates={affiliates}
+        />
+      )}
+
       <style>{`.input{margin-top:4px;width:100%;height:40px;padding:0 12px;border-radius:10px;background:var(--background);border:1px solid var(--border);outline:none}`}</style>
     </AdminLayout>
+  );
+}
+
+function RegisterSaleModal({
+  onClose,
+  affiliates,
+}: {
+  onClose: () => void;
+  affiliates: Affiliate[];
+}) {
+  const register = useStore((s) => s.registerAffiliateSale);
+  const [data, setData] = useState({
+    affiliateId: "",
+    customerName: "",
+    customerPhone: "",
+    productDescription: "",
+    saleValue: 0,
+    status: "confirmada" as AffiliateSaleStatus,
+  });
+
+  const selectedAff = affiliates.find((a) => a.id === data.affiliateId);
+  const estimatedCommission = useMemo(() => {
+    if (!selectedAff || !data.saleValue) return 0;
+    return selectedAff.commissionType === "percent"
+      ? (data.saleValue * selectedAff.commissionValue) / 100
+      : selectedAff.commissionValue;
+  }, [selectedAff, data.saleValue]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!data.affiliateId || !data.customerName || !data.saleValue) {
+      toast.error("Preencha os campos obrigatórios");
+      return;
+    }
+    register(data);
+    toast.success("Venda registrada e contabilizada!");
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
+      onClick={onClose}
+    >
+      <form
+        onSubmit={handleSubmit}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-card rounded-3xl p-6 w-full max-w-md space-y-4 shadow-soft animate-modal-in border border-border"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-xl flex items-center gap-2">
+            <Plus className="h-5 w-5 text-success" /> Registrar Venda Manual
+          </h3>
+          <button type="button" onClick={onClose} className="p-1 hover:bg-muted rounded-full">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <Field label="Selecione a Afiliada *">
+          <select
+            value={data.affiliateId}
+            onChange={(e) => setData({ ...data, affiliateId: e.target.value })}
+            className="input"
+            required
+          >
+            <option value="">Selecione...</option>
+            {affiliates
+              .filter((a) => a.active)
+              .map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} ({a.commissionType === "percent" ? `${a.commissionValue}%` : brl(a.commissionValue)})
+                </option>
+              ))}
+          </select>
+        </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Nome do Cliente *">
+            <input
+              value={data.customerName}
+              onChange={(e) => setData({ ...data, customerName: e.target.value })}
+              className="input"
+              placeholder="Ex: Maria Silva"
+              required
+            />
+          </Field>
+          <Field label="WhatsApp/Telefone">
+            <input
+              value={data.customerPhone}
+              onChange={(e) => setData({ ...data, customerPhone: e.target.value })}
+              className="input"
+              placeholder="(00) 00000-0000"
+            />
+          </Field>
+        </div>
+
+        <Field label="Produto ou Descrição *">
+          <input
+            value={data.productDescription}
+            onChange={(e) => setData({ ...data, productDescription: e.target.value })}
+            className="input"
+            placeholder="Ex: 2x Laços G"
+            required
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Valor da Venda (R$) *">
+            <input
+              type="number"
+              step="0.01"
+              value={data.saleValue || ""}
+              onChange={(e) => setData({ ...data, saleValue: parseFloat(e.target.value) || 0 })}
+              className="input font-bold"
+              required
+            />
+          </Field>
+          <Field label="Status">
+            <select
+              value={data.status}
+              onChange={(e) => setData({ ...data, status: e.target.value as any })}
+              className="input"
+            >
+              <option value="confirmada">Paga (Confirmada)</option>
+              <option value="pendente">Pendente</option>
+            </select>
+          </Field>
+        </div>
+
+        {selectedAff && (
+          <div className="bg-muted/40 p-3 rounded-2xl border border-border">
+            <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
+              <span>Comissão ({selectedAff.commissionType === "percent" ? `${selectedAff.commissionValue}%` : "Fixo"})</span>
+              <span className="font-bold text-gold">{brl(estimatedCommission)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm font-bold">
+              <span>Líquido para Loja</span>
+              <span className="text-success">{brl(data.saleValue - estimatedCommission)}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-11 rounded-full border border-border font-medium hover:bg-muted transition-colors"
+          >
+            Cancelar
+          </button>
+          <button className="flex-1 h-11 rounded-full gradient-primary text-primary-foreground font-bold shadow-soft active:scale-[0.98] transition-transform">
+            Registrar Venda
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
