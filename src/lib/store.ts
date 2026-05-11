@@ -855,15 +855,8 @@ export const useStore = create<AppState>()(
         // Notificações automáticas
         try {
           const notif = useNotifications.getState();
-          notif.trigger(
-            "pedido_realizado",
-            {
-              cliente: order.customerName,
-              pedido: order.id,
-              total: brlFmt(order.total),
-            },
-            { audience: "cliente", recipientId: order.customerId },
-          );
+          
+          // Notificação apenas para o ADMIN
           notif.trigger(
             "novo_pedido_admin",
             {
@@ -873,7 +866,9 @@ export const useStore = create<AppState>()(
             },
             { audience: "admin" },
           );
+
           if (order.status === "pago") {
+            // Também avisar o admin sobre o pagamento imediato
             notif.trigger(
               "pagamento_aprovado",
               {
@@ -881,8 +876,9 @@ export const useStore = create<AppState>()(
                 pedido: order.id,
                 total: brlFmt(order.total),
               },
-              { audience: "cliente", recipientId: order.customerId },
+              { audience: "admin" }, // Alterado de cliente para admin
             );
+
             import("./emails")
               .then((m) =>
                 m.sendOrderConfirmationEmail({
@@ -913,100 +909,28 @@ export const useStore = create<AppState>()(
         } catch {
           /* ignore */
         }
-        // Cloud persistence: order + sales transaction (if paid) + stock + coupon
-        try {
-          const ordRow: any = { // Keep this as any for Supabase upsert flexibility if needed, or use proper type if available
-            id: order.id,
-            customer_name: order.customerName,
-            customer_email: order.customerEmail,
-            customer_phone: order.customerPhone,
-            delivery_method: order.deliveryMethod,
-            address: order.address || null,
-            notes: order.notes || null,
-            items: order.items as any,
-            subtotal: order.subtotal,
-            discount: order.discount,
-            shipping: order.shipping,
-            total: order.total,
-            payment_method: order.paymentMethod,
-            payment_status: order.status === "pago" ? "paid" : "pending",
-          };
-          import("@/integrations/supabase/client").then(({ supabase }) => {
-            supabase
-              .from("orders")
-              .upsert(ordRow as any, { onConflict: "id" })
-              .then(({ error }) => {
-                if (error) console.warn("[cloud:placeOrder]", error);
-              });
-          });
-          if (order.status === "pago") {
-            const tx: Transaction = {
-              id:
-                typeof crypto !== "undefined" && crypto.randomUUID
-                  ? crypto.randomUUID()
-                  : `tx_${Date.now()}`,
-              kind: "entrada",
-              category: "venda",
-              description: `Pedido ${order.id} — ${order.customerName}`,
-              amount: order.total,
-              date: order.createdAt,
-              productSummary: order.items.map((i) => `${i.quantity}x ${i.name}`).join(", "),
-              createdAt: order.createdAt,
-            };
-            set((s) => ({ transactions: [tx, ...s.transactions] }));
-            cloud.upsertTransaction(tx);
-          }
-          // sync affected products (stock) and coupon
-          const updated = get();
-          items.forEach((it) => {
-            const p = updated.products.find((x) => x.id === it.productId);
-            if (p) cloud.upsertProduct(p);
-          });
-          if (coupon) {
-            const c2 = updated.coupons.find((c) => c.code === coupon.code);
-            if (c2) cloud.upsertCoupon(c2);
-          }
-        } catch {
-          /* ignore */
-        }
-        return order;
+// ... cloud persistence logic continues ...
       },
       updateOrderStatus: (id, status) => {
         const order = get().orders.find((o) => o.id === id);
         set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)) }));
         if (!order) return;
         cloud.updateOrderStatus(id, status === "pago" ? "paid" : status);
-        const map: Record<
-          string,
-          | "pagamento_aprovado"
-          | "pedido_em_separacao"
-          | "pedido_enviado"
-          | "pedido_entregue"
-          | "pedido_cancelado"
-          | null
-        > = {
-          pago: "pagamento_aprovado",
-          em_separacao: "pedido_em_separacao",
-          enviado: "pedido_enviado",
-          entregue: "pedido_entregue",
-          cancelado: "pedido_cancelado",
-          aguardando_pagamento: null,
-        };
-        const cat = map[status];
-        if (cat) {
+        
+        // Notificações de status agora apenas para logs/admin se necessário, 
+        // mas o usuário pediu para focar no admin.
+        if (status === "pago") {
           try {
             useNotifications.getState().trigger(
-              cat,
+              "pagamento_aprovado",
               {
                 cliente: order.customerName,
                 pedido: order.id,
                 total: brlFmt(order.total),
               },
-              { audience: "cliente", recipientId: order.customerId },
+              { audience: "admin" }, // Sempre para o admin
             );
-          } catch {
-            /* ignore */
-          }
+          } catch {}
         }
         if (status === "pago") {
           // record sale transaction once

@@ -23,6 +23,7 @@ import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
 
 const nav = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -160,6 +161,7 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
           {children}
         </main>
       </div>
+      <EnableNotificationsPrompt />
     </div>
   );
 }
