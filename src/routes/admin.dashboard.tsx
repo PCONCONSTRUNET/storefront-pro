@@ -159,13 +159,15 @@ function Page() {
     setSyncing(true);
     try {
       const OS = (window as any).OneSignal;
-      const currentCustomerId = useStore.getState().currentCustomerId;
-      if (!OS || !currentCustomerId) return;
+      if (!OS) return;
 
-      console.log("[Push] Forçando sincronismo...");
+      // Admin não tem currentCustomerId — usa ID fixo "admin-user"
+      const osUserId = "admin-user";
+
+      console.log("[Push] Forçando sincronismo como:", osUserId);
       await OS.logout();
       await new Promise((r) => setTimeout(r, 1000));
-      await OS.login(currentCustomerId);
+      await OS.login(osUserId);
 
       if (OS.User?.PushSubscription) {
         await OS.User.PushSubscription.optIn();
@@ -174,7 +176,7 @@ function Page() {
       OS.User.addTag("role", "admin");
 
       import("sonner").then(({ toast }) =>
-        toast.success("Dispositivo sincronizado!"),
+        toast.success("Dispositivo sincronizado como admin!"),
       );
     } catch (err) {
       console.error("[Push-Sync]", err);
@@ -189,27 +191,27 @@ function Page() {
   const testNotification = async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
-      const currentCustomerId = useStore.getState().currentCustomerId;
       const OS = (window as any).OneSignal;
       const subId = OS?.User?.PushSubscription?.id;
 
-      const { data, error } = await supabase.functions.invoke("send-push", {
+      const { error } = await supabase.functions.invoke("send-push", {
         body: {
-          title: "Teste de Push Direto 🚀",
-          message: `Enviado para ${subId ? "este aparelho" : "seu usuário"}. Hora: ${new Date().toLocaleTimeString()}`,
-          externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
+          title: "Teste Admin Push 🚀",
+          message: `Recebido! ${new Date().toLocaleTimeString()}`,
+          // Manda por ID de assinatura direta E por external_id admin
           subscriptionIds: subId ? [subId] : undefined,
+          externalUserIds: ["admin-user"],
         },
       });
 
       if (error) throw error;
       import("sonner").then(({ toast }) =>
-        toast.success(`Push enviado! (ID: ${subId?.slice(0, 8)}...)`),
+        toast.success(`Push enviado! Sub: ${subId?.slice(0, 8) || "N/A"}`),
       );
     } catch (err) {
       console.error("[push-test]", err);
       import("sonner").then(({ toast }) =>
-        toast.error(`Erro no teste: ${err.message || "Verifique o console"}`),
+        toast.error(`Erro: ${(err as Error).message || "Verifique o console"}`),
       );
     }
   };

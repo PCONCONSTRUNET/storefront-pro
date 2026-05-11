@@ -243,21 +243,23 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const currentCustomerId = useStore((s) => s.currentCustomerId);
 
+  const isAdmin = useStore((s) => s.isAdmin);
+
   useEffect(() => {
     const OS = (window as any).OneSignal;
-    if (OS && currentCustomerId) {
-      console.log("[OneSignal] Syncing user login:", currentCustomerId);
-      OS.login(currentCustomerId)
-        .then(() => {
-          // Define a tag de role para filtros no backend
-          const isAdmin = window.location.pathname.includes("/admin");
-          const role = isAdmin ? "admin" : "cliente";
-          OS.User.addTag("role", role);
-          console.log("[OneSignal] Tag sync:", role);
-        })
-        .catch((e: any) => console.warn("[OneSignal] Login error", e));
-    }
-  }, [currentCustomerId]);
+    if (!OS) return;
+
+    // Admin usa ID fixo "admin"; clientes usam seu ID de conta
+    const osUserId = isAdmin ? "admin-user" : currentCustomerId;
+    if (!osUserId) return;
+
+    console.log("[OneSignal] Syncing user:", osUserId);
+    OS.login(osUserId).then(() => {
+      const role = isAdmin ? "admin" : "cliente";
+      OS.User.addTag("role", role);
+      console.log("[OneSignal] Tag set:", role);
+    }).catch((e: any) => console.warn("[OneSignal] Login error", e));
+  }, [currentCustomerId, isAdmin]);
 
   const sessions = useStore((s) => s.sessions);
   const customers = useStore((s) => s.customers);
