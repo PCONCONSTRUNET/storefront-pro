@@ -208,3 +208,22 @@
     }
   }
 }
+
+/* ── Hide ALL OneSignal injected UI elements ── */
+/* The SDK may inject slidedowns, bell buttons, and custom-link containers.
+   We use our own EnableNotificationsPrompt component instead. */
+#onesignal-slidedown-container,
+#onesignal-bell-container,
+.onesignal-customlink-container,
+.onesignal-slidedown-container,
+.onesignal-reset,
+div[class*="onesignal"],
+div[id*="onesignal"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  opacity: 0 !important;
+}
