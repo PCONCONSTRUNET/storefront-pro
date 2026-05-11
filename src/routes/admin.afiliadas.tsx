@@ -592,6 +592,19 @@ function RegisterSaleModal({
   affiliates: Affiliate[];
 }) {
   const register = useStore((s) => s.registerAffiliateSale);
+  const upsertAffiliate = useStore((s) => s.upsertAffiliate);
+  
+  const [creatingNewAff, setCreatingNewAff] = useState(false);
+  const [newAffData, setNewAffData] = useState<Omit<Affiliate, "id" | "createdAt">>({
+    name: "",
+    email: "",
+    password: "123", // Senha padrão inicial
+    phone: "",
+    commissionType: "percent",
+    commissionValue: 10,
+    active: true,
+  });
+
   const [data, setData] = useState({
     affiliateId: "",
     customerName: "",
@@ -603,19 +616,46 @@ function RegisterSaleModal({
 
   const selectedAff = affiliates.find((a) => a.id === data.affiliateId);
   const estimatedCommission = useMemo(() => {
+    // Se estiver criando uma nova, usa os valores do form de criação
+    if (creatingNewAff) {
+      if (!data.saleValue) return 0;
+      return newAffData.commissionType === "percent"
+        ? (data.saleValue * newAffData.commissionValue) / 100
+        : newAffData.commissionValue;
+    }
+    // Se estiver selecionando existente
     if (!selectedAff || !data.saleValue) return 0;
     return selectedAff.commissionType === "percent"
       ? (data.saleValue * selectedAff.commissionValue) / 100
       : selectedAff.commissionValue;
-  }, [selectedAff, data.saleValue]);
+  }, [selectedAff, creatingNewAff, newAffData, data.saleValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!data.affiliateId || !data.customerName || !data.saleValue) {
+    
+    let finalAffId = data.affiliateId;
+
+    // Se estiver criando uma nova afiliada agora
+    if (creatingNewAff) {
+      if (!newAffData.name || !newAffData.email) {
+        toast.error("Preencha os dados da nova afiliada");
+        return;
+      }
+      const newId = `aff_${Date.now()}`;
+      upsertAffiliate({
+        ...newAffData,
+        id: newId,
+        createdAt: new Date().toISOString(),
+      });
+      finalAffId = newId;
+    }
+
+    if (!finalAffId || !data.customerName || !data.saleValue) {
       toast.error("Preencha os campos obrigatórios");
       return;
     }
-    register(data);
+
+    register({ ...data, affiliateId: finalAffId });
     toast.success("Venda registrada e contabilizada!");
     onClose();
   };
@@ -628,7 +668,7 @@ function RegisterSaleModal({
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="bg-card rounded-3xl p-6 w-full max-w-md space-y-4 shadow-soft animate-modal-in border border-border"
+        className="bg-card rounded-3xl p-6 w-full max-w-md space-y-4 shadow-soft animate-modal-in border border-border overflow-y-auto max-h-[95vh]"
       >
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-xl flex items-center gap-2">
@@ -639,23 +679,99 @@ function RegisterSaleModal({
           </button>
         </div>
 
-        <Field label="Selecione a Afiliada *">
-          <select
-            value={data.affiliateId}
-            onChange={(e) => setData({ ...data, affiliateId: e.target.value })}
-            className="input"
-            required
-          >
-            <option value="">Selecione...</option>
-            {affiliates
-              .filter((a) => a.active)
-              .map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name} ({a.commissionType === "percent" ? `${a.commissionValue}%` : brl(a.commissionValue)})
-                </option>
-              ))}
-          </select>
-        </Field>
+        <div className="space-y-3">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <Field label="Selecione a Afiliada *">
+                <select
+                  value={data.affiliateId}
+                  disabled={creatingNewAff}
+                  onChange={(e) => setData({ ...data, affiliateId: e.target.value })}
+                  className="input disabled:opacity-50"
+                  required={!creatingNewAff}
+                >
+                  <option value="">Selecione...</option>
+                  {affiliates
+                    .filter((a) => a.active)
+                    .map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.commissionType === "percent" ? `${a.commissionValue}%` : brl(a.commissionValue)})
+                      </option>
+                    ))}
+                </select>
+              </Field>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setCreatingNewAff(!creatingNewAff);
+                if (!creatingNewAff) setData({ ...data, affiliateId: "" });
+              }}
+              className={cn(
+                "h-10 px-3 rounded-xl border border-border text-xs font-bold transition-colors whitespace-nowrap",
+                creatingNewAff ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              {creatingNewAff ? "Selecionar Existente" : "+ Nova"}
+            </button>
+          </div>
+
+          {creatingNewAff && (
+            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-3 animate-in slide-in-from-top-2 duration-300">
+              <div className="text-[11px] font-bold text-primary uppercase tracking-wider">Dados da Nova Afiliada</div>
+              <Field label="Nome da Afiliada *">
+                <input
+                  value={newAffData.name}
+                  onChange={(e) => setNewAffData({ ...newAffData, name: e.target.value })}
+                  className="input bg-card"
+                  placeholder="Nome completo"
+                  required
+                />
+              </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="E-mail *">
+                  <input
+                    type="email"
+                    value={newAffData.email}
+                    onChange={(e) => setNewAffData({ ...newAffData, email: e.target.value })}
+                    className="input bg-card"
+                    placeholder="email@exemplo.com"
+                    required
+                  />
+                </Field>
+                <Field label="WhatsApp">
+                  <input
+                    value={newAffData.phone}
+                    onChange={(e) => setNewAffData({ ...newAffData, phone: e.target.value })}
+                    className="input bg-card"
+                    placeholder="(00) 00000-0000"
+                  />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Tipo de Comissão">
+                  <select
+                    value={newAffData.commissionType}
+                    onChange={(e) => setNewAffData({ ...newAffData, commissionType: e.target.value as any })}
+                    className="input bg-card"
+                  >
+                    <option value="percent">% por venda</option>
+                    <option value="fixed">Valor fixo</option>
+                  </select>
+                </Field>
+                <Field label={newAffData.commissionType === "percent" ? "% Valor" : "R$ Valor"}>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={newAffData.commissionValue || ""}
+                    onChange={(e) => setNewAffData({ ...newAffData, commissionValue: parseFloat(e.target.value) || 0 })}
+                    className="input bg-card"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Nome do Cliente *">
@@ -710,10 +826,15 @@ function RegisterSaleModal({
           </Field>
         </div>
 
-        {selectedAff && (
+        {(selectedAff || creatingNewAff) && (
           <div className="bg-muted/40 p-3 rounded-2xl border border-border">
             <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
-              <span>Comissão ({selectedAff.commissionType === "percent" ? `${selectedAff.commissionValue}%` : "Fixo"})</span>
+              <span>
+                Comissão de {creatingNewAff ? newAffData.name || "Nova Afiliada" : selectedAff?.name}{" "}
+                ({(creatingNewAff ? newAffData.commissionType : selectedAff?.commissionType) === "percent" 
+                  ? `${creatingNewAff ? newAffData.commissionValue : selectedAff?.commissionValue}%` 
+                  : "Fixo"})
+              </span>
               <span className="font-bold text-gold">{brl(estimatedCommission)}</span>
             </div>
             <div className="flex justify-between items-center text-sm font-bold">
@@ -732,7 +853,7 @@ function RegisterSaleModal({
             Cancelar
           </button>
           <button className="flex-1 h-11 rounded-full gradient-primary text-primary-foreground font-bold shadow-soft active:scale-[0.98] transition-transform">
-            Registrar Venda
+            {creatingNewAff ? "Cadastrar e Vender" : "Registrar Venda"}
           </button>
         </div>
       </form>
