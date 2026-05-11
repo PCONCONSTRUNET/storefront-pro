@@ -160,19 +160,36 @@ OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "2daa3ed9-be86-4bc9-9819-4d641aea75d5",
     safari_web_id: "web.onesignal.auto.47a2f439-afd3-4bb7-8cdd-92cc4f5ee46c",
-    serviceWorkerPath: "/OneSignalSDKWorker.js",
     notifyButton: { enable: false },
     allowLocalhostAsSecureOrigin: true,
     autoPrompt: false,
     autoResubscribe: true,
-    customLink: { enabled: false },
-    promptOptions: {
-      slidedown: {
-        prompts: []
-      }
-    }
   });
-  console.log("[OneSignal] Ready. Permission:", Notification.permission);
+  console.log("[OneSignal] Init done. Permission:", Notification.permission);
+
+  // CRITICAL FIX: Se o usuário JA deu permissão no Android (pelo modal nativo),
+  // mas o OneSignal ainda não registrou a assinatura, forçamos o optIn agora.
+  try {
+    var perm = Notification.permission;
+    var sub = OneSignal.User.PushSubscription;
+    var alreadyAccepted = localStorage.getItem('push_prompt_accepted') === '1';
+
+    console.log("[OneSignal] Permission:", perm, "| optedIn:", sub.optedIn, "| accepted:", alreadyAccepted);
+
+    if (perm === 'granted' && !sub.optedIn) {
+      console.log("[OneSignal] Permission granted but not opted in — calling optIn()...");
+      await sub.optIn();
+      localStorage.setItem('push_prompt_accepted', '1');
+    }
+
+    // Log para debug
+    setTimeout(function() {
+      var subId = OneSignal.User.PushSubscription.id;
+      console.log("[OneSignal] Subscription ID after init:", subId || "NOT REGISTERED");
+    }, 3000);
+  } catch(e) {
+    console.warn("[OneSignal] Post-init error:", e);
+  }
 });`,
       },
       {
