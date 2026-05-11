@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
 import {
@@ -11,6 +12,7 @@ import {
   TrendingUp,
   Bell,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   LineChart,
   Line,
@@ -106,22 +108,13 @@ function Page() {
     },
   ];
 
-  const [osId, setOsId] = useState<string>("Aguardando...");
-  const [osActive, setOsActive] = useState<boolean>(false);
-  const [syncing, setSyncing] = useState(false);
-
-  useEffect(() => {
-    const check = () => {
-      const OS = (window as any).OneSignal;
-      if (OS?.User?.PushSubscription) {
-        setOsId(OS.User.PushSubscription.id || "Não registrado");
-        setOsActive(OS.User.PushSubscription.optedIn);
-      }
-    };
-    const interval = setInterval(check, 3000);
-    check();
-    return () => clearInterval(interval);
-  }, []);
+  const { 
+    playerId: osId, 
+    subscribed: osActive, 
+    loading: syncing, 
+    enable: forceSync,
+    permission: osPermission
+  } = usePushNotifications({ role: 'admin' });
 
   const nukeServiceWorker = async () => {
     if (!window.confirm("Isso vai limpar todas as configurações de notificação e recarregar a página. Continuar?")) return;
@@ -155,64 +148,28 @@ function Page() {
     }
   };
 
-  const forceSync = async () => {
-    setSyncing(true);
-    try {
-      const OS = (window as any).OneSignal;
-      if (!OS) return;
-
-      // Admin não tem currentCustomerId — usa ID fixo "admin-user"
-      const osUserId = "admin-user";
-
-      console.log("[Push] Forçando sincronismo como:", osUserId);
-      await OS.logout();
-      await new Promise((r) => setTimeout(r, 1000));
-      await OS.login(osUserId);
-
-      if (OS.User?.PushSubscription) {
-        await OS.User.PushSubscription.optIn();
-      }
-
-      OS.User.addTag("role", "admin");
-
-      import("sonner").then(({ toast }) =>
-        toast.success("Dispositivo sincronizado como admin!"),
-      );
-    } catch (err) {
-      console.error("[Push-Sync]", err);
-      import("sonner").then(({ toast }) =>
-        toast.error("Falha ao sincronizar."),
-      );
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   const testNotification = async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
-      const OS = (window as any).OneSignal;
-      const subId = OS?.User?.PushSubscription?.id;
+      if (!osId) {
+        toast.error("Dispositivo não registrado ainda.");
+        return;
+      }
 
       const { error } = await supabase.functions.invoke("send-push", {
         body: {
           title: "Teste Admin Push 🚀",
           message: `Recebido! ${new Date().toLocaleTimeString()}`,
-          // Manda por ID de assinatura direta E por external_id admin
-          subscriptionIds: subId ? [subId] : undefined,
+          subscriptionIds: [osId],
           externalUserIds: ["admin-user"],
         },
       });
 
       if (error) throw error;
-      import("sonner").then(({ toast }) =>
-        toast.success(`Push enviado! Sub: ${subId?.slice(0, 8) || "N/A"}`),
-      );
+      toast.success(`Push enviado para o ID: ${osId.slice(0, 8)}...`);
     } catch (err) {
       console.error("[push-test]", err);
-      import("sonner").then(({ toast }) =>
-        toast.error(`Erro: ${(err as Error).message || "Verifique o console"}`),
-      );
+      toast.error(`Erro: ${(err as Error).message}`);
     }
   };
 

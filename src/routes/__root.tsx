@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useStore, hydrateFromCloud } from "@/lib/store";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
 import appCss from "../styles.css?url";
@@ -148,77 +149,7 @@ export const Route = createRootRoute({
         href: "https://fonts.googleapis.com/css2?family=Pacifico&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
-    scripts: [
-      {
-        src: "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js",
-        defer: true,
-      },
-      {
-        children: `window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {
-  console.log("[OneSignal] Initializing...");
-  await OneSignal.init({
-    appId: "2daa3ed9-be86-4bc9-9819-4d641aea75d5",
-    safari_web_id: "web.onesignal.auto.47a2f439-afd3-4bb7-8cdd-92cc4f5ee46c",
-    notifyButton: { enable: false },
-    allowLocalhostAsSecureOrigin: true,
-    autoPrompt: false,
-    autoResubscribe: true,
-  });
-  console.log("[OneSignal] Init done. Permission:", Notification.permission);
-
-  // CRITICAL FIX: Se o usuário JA deu permissão no Android (pelo modal nativo),
-  // mas o OneSignal ainda não registrou a assinatura, forçamos o optIn agora.
-  try {
-    var perm = Notification.permission;
-    var sub = OneSignal.User.PushSubscription;
-    var alreadyAccepted = localStorage.getItem('push_prompt_accepted') === '1';
-
-    console.log("[OneSignal] Permission:", perm, "| optedIn:", sub.optedIn, "| accepted:", alreadyAccepted);
-
-    if (perm === 'granted' && !sub.optedIn) {
-      console.log("[OneSignal] Permission granted but not opted in — calling optIn()...");
-      await sub.optIn();
-      localStorage.setItem('push_prompt_accepted', '1');
-    }
-
-    // Log para debug
-    setTimeout(function() {
-      var subId = OneSignal.User.PushSubscription.id;
-      console.log("[OneSignal] Subscription ID after init:", subId || "NOT REGISTERED");
-    }, 3000);
-  } catch(e) {
-    console.warn("[OneSignal] Post-init error:", e);
-  }
-});`,
-      },
-      {
-        children: `(function(){
-  var timer;
-  function nukeOneSignalUI(){
-    try {
-      var sels = ['#onesignal-slidedown-container','#onesignal-bell-container','.onesignal-customlink-container','.onesignal-slidedown-container','.onesignal-reset'];
-      for(var i=0; i<sels.length; i++){
-        var els = document.querySelectorAll(sels[i]);
-        for(var j=0; j<els.length; j++){ els[j].style.display = 'none'; els[j].remove(); }
-      }
-    } catch(e) {}
-  }
-  
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded', function(){ 
-      nukeOneSignalUI();
-      timer = setInterval(nukeOneSignalUI, 2000); 
-    });
-  } else {
-    nukeOneSignalUI();
-    timer = setInterval(nukeOneSignalUI, 2000);
-  }
-  
-  setTimeout(function(){ if(timer) clearInterval(timer); }, 15000);
-})();`,
-      },
-    ],
+    scripts: [],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -242,24 +173,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const currentCustomerId = useStore((s) => s.currentCustomerId);
-
   const isAdmin = useStore((s) => s.isAdmin);
 
-  useEffect(() => {
-    const OS = (window as any).OneSignal;
-    if (!OS) return;
-
-    // Admin usa ID fixo "admin"; clientes usam seu ID de conta
-    const osUserId = isAdmin ? "admin-user" : currentCustomerId;
-    if (!osUserId) return;
-
-    console.log("[OneSignal] Syncing user:", osUserId);
-    OS.login(osUserId).then(() => {
-      const role = isAdmin ? "admin" : "cliente";
-      OS.User.addTag("role", role);
-      console.log("[OneSignal] Tag set:", role);
-    }).catch((e: any) => console.warn("[OneSignal] Login error", e));
-  }, [currentCustomerId, isAdmin]);
+  // Inicialização global do OneSignal
+  usePushNotifications({
+    role: isAdmin ? "admin" : "cliente",
+    userId: isAdmin ? null : currentCustomerId,
+  });
 
   const sessions = useStore((s) => s.sessions);
   const customers = useStore((s) => s.customers);
