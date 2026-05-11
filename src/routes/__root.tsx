@@ -173,6 +173,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const currentCustomerId = useStore((s) => s.currentCustomerId);
+
+  useEffect(() => {
+    const OS = (window as any).OneSignal;
+    if (OS && currentCustomerId) {
+      console.log("[OneSignal] Syncing user login:", currentCustomerId);
+      OS.login(currentCustomerId).catch((e: any) => console.warn("[OneSignal] Login error", e));
+    }
+  }, [currentCustomerId]);
+
   const sessions = useStore((s) => s.sessions);
   const customers = useStore((s) => s.customers);
   const affiliates = useStore((s) => s.affiliates);

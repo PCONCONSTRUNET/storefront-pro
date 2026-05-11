@@ -85,9 +85,17 @@ export function EnableNotificationsPrompt() {
 
       if (granted) {
         try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
+        
+        // CRITICAL: Link this device to the current user ID
+        if (sdkReady && currentCustomerId) {
+          console.log("[push-prompt] Linking device to user:", currentCustomerId);
+          await OS.login(currentCustomerId);
+        }
+
         // Força o opt-in no OneSignal
         if (sdkReady && OS.User?.PushSubscription) {
           await OS.User.PushSubscription.optIn();
+          console.log("[push-prompt] OneSignal optIn executed");
         }
       }
     } catch (err) {
