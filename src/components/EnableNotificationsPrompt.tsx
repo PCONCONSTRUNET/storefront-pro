@@ -40,20 +40,34 @@ export function EnableNotificationsPrompt() {
   };
 
   const enable = async () => {
-    setBusy(true);
     let granted = false;
     try {
+      setBusy(true);
       const OneSignal = (window as any).OneSignal;
+      
+      console.log("[push] Iniciando pedido de permissão...");
+
       if (OneSignal?.Notifications?.requestPermission) {
+        // OneSignal v16
         await OneSignal.Notifications.requestPermission();
+      } else if (OneSignal?.registerForPushNotifications) {
+        // OneSignal v15 fallback
+        await OneSignal.registerForPushNotifications();
       } else if ("Notification" in window) {
+        // Native fallback
         await Notification.requestPermission();
       }
+      
       granted = typeof Notification !== "undefined" && Notification.permission === "granted";
-    } catch {
+      console.log("[push] Resultado da permissão:", Notification.permission);
+    } catch (err) {
+      console.warn("[push] Erro ao pedir permissão:", err);
+      // Tentativa final nativa
       try {
-        await Notification.requestPermission();
-        granted = Notification.permission === "granted";
+        if ("Notification" in window) {
+          await Notification.requestPermission();
+          granted = Notification.permission === "granted";
+        }
       } catch {}
     } finally {
       setBusy(false);

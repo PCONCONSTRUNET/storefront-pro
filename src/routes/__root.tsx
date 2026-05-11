@@ -109,7 +109,7 @@ OneSignalDeferred.push(async function(OneSignal) {
   await OneSignal.init({
     appId: "eceb417e-8a33-4d57-9a0f-0cdfe8f8c7e6",
     safari_web_id: "web.onesignal.auto.18c6dc90-7633-4ce6-8875-ae2763214094",
-    serviceWorkerPath: "OneSignalSDKWorker.js",
+    serviceWorkerPath: "/OneSignalSDKWorker.js",
     notifyButton: { enable: false },
     allowLocalhostAsSecureOrigin: true,
   });
@@ -139,8 +139,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const sessions = useStore((s) => s.sessions);
+  const customers = useStore((s) => s.customers);
+  const affiliates = useStore((s) => s.affiliates);
   const refreshSession = useStore((s) => s.refreshSession);
-  const session = useStore((s) => (s as any).session);
   const router = useRouter();
   const location = useLocation();
 
@@ -230,22 +232,36 @@ function RootComponent() {
     const OS = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
     OS.push(async (OneSignal: any) => {
       try {
-        if (session?.user) {
-          const path = location.pathname;
-          let role = "customer";
-          if (path.startsWith("/admin")) role = "admin";
-          else if (path.startsWith("/afiliada")) role = "affiliate";
+        const path = location.pathname;
+        let role: "admin" | "affiliate" | "customer" = "customer";
+        let activeUser: { id: string; email: string; name?: string } | null = null;
 
-          console.log("[OneSignal] User role identified:", role);
+        // Identifica o usuário ativo baseado na rota e na sessão
+        if (path.startsWith("/admin") && sessions.admin) {
+          role = "admin";
+          activeUser = { id: sessions.admin.subjectId, email: sessions.admin.subjectId };
+        } else if (path.startsWith("/afiliada") && sessions.affiliate) {
+          role = "affiliate";
+          const aff = affiliates.find((a) => a.id === sessions.affiliate?.subjectId);
+          if (aff) activeUser = { id: aff.id, email: aff.email, name: aff.name };
+        } else if (sessions.customer) {
+          role = "customer";
+          const cust = customers.find((c) => c.id === sessions.customer?.subjectId);
+          if (cust) activeUser = { id: cust.id, email: cust.email, name: cust.name };
+        }
 
-          await OneSignal.login(session.user.id);
+        if (activeUser) {
+          console.log("[OneSignal] User identified:", role, activeUser.id);
+          // O login vincula o dispositivo ao external_id (id do usuário)
+          await OneSignal.login(activeUser.id);
+          // As tags permitem filtrar por público (admin, cliente, afiliada)
           await OneSignal.User.addTags({
             role: role,
-            email: session.user.email || "",
-            full_name: session.user.user_metadata?.full_name || "",
+            email: activeUser.email,
+            full_name: activeUser.name || "",
           });
         } else {
-          console.log("[OneSignal] Logging out (no session)");
+          console.log("[OneSignal] No active session, logging out of OneSignal");
           await OneSignal.logout();
         }
       } catch (e) {

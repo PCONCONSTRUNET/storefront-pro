@@ -364,6 +364,8 @@ export const useNotifications = create<NotificationState>()(
           const OS = (window as any).OneSignal;
           if (OS?.Notifications?.requestPermission) {
             await OS.Notifications.requestPermission();
+          } else if (OS?.registerForPushNotifications) {
+            await OS.registerForPushNotifications();
           } else {
             // Fallback to native API if OneSignal not yet loaded
             await Notification.requestPermission();
