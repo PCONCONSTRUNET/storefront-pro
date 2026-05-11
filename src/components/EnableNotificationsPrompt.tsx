@@ -22,15 +22,39 @@ export function EnableNotificationsPrompt() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!("Notification" in window)) return;
-    if (Notification.permission !== "default") return;
 
-    const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
-    const fresh = Date.now() - dismissedAt < DISMISS_DAYS * 24 * 60 * 60 * 1000;
-    if (fresh) return;
+    const shouldShow = () => {
+      // If permission is already granted or denied, no need to prompt
+      if ("Notification" in window && Notification.permission !== "default") {
+        return false;
+      }
+      // Respect the dismiss cooldown
+      const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
+      if (Date.now() - dismissedAt < DISMISS_DAYS * 24 * 60 * 60 * 1000) {
+        return false;
+      }
+      return true;
+    };
 
-    const t = window.setTimeout(() => setOpen(true), 1500);
-    return () => window.clearTimeout(t);
+    // In PWA/standalone mode, APIs may take longer to initialise
+    const isPWA = isStandalone();
+    const delay = isPWA ? 2500 : 1500;
+
+    const t1 = window.setTimeout(() => {
+      if (shouldShow()) setOpen(true);
+    }, delay);
+
+    // Retry after 5s in case Notification API wasn't ready on first check
+    const t2 = isPWA
+      ? window.setTimeout(() => {
+          if (shouldShow()) setOpen(true);
+        }, 5000)
+      : undefined;
+
+    return () => {
+      window.clearTimeout(t1);
+      if (t2) window.clearTimeout(t2);
+    };
   }, []);
 
   const dismiss = () => {
