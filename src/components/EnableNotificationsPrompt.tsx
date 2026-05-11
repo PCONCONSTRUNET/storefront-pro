@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStore } from "@/lib/store";
+import { getOneSignalSDK } from "@/lib/notifications";
 
 const DISMISS_KEY = "push_prompt_dismissed_at";
 const DISMISS_DAYS = 3;
@@ -43,26 +44,36 @@ export function EnableNotificationsPrompt() {
     let granted = false;
     try {
       setBusy(true);
-      const OneSignal = (window as any).OneSignal;
-      
-      console.log("[push] Iniciando pedido de permissão...");
+
+      console.log("[push-prompt] Aguardando OneSignal SDK...");
+      const OneSignal = await getOneSignalSDK();
+      console.log("[push-prompt] OneSignal pronto:", !!OneSignal);
 
       if (OneSignal?.Notifications?.requestPermission) {
-        // OneSignal v16
+        // OneSignal v16 — triggers native OS prompt (Android/iOS)
         await OneSignal.Notifications.requestPermission();
       } else if (OneSignal?.registerForPushNotifications) {
         // OneSignal v15 fallback
         await OneSignal.registerForPushNotifications();
       } else if ("Notification" in window) {
-        // Native fallback
+        // Native fallback (no OneSignal available)
+        console.warn("[push-prompt] OneSignal indisponível, usando API nativa");
         await Notification.requestPermission();
       }
-      
+
       granted = typeof Notification !== "undefined" && Notification.permission === "granted";
-      console.log("[push] Resultado da permissão:", Notification.permission);
+      console.log("[push-prompt] Resultado da permissão:", Notification.permission);
+
+      // Ensure the device is opted-in at OneSignal level
+      if (granted && OneSignal?.User?.PushSubscription?.optIn) {
+        try {
+          await OneSignal.User.PushSubscription.optIn();
+          console.log("[push-prompt] OneSignal optIn chamado");
+        } catch {}
+      }
     } catch (err) {
-      console.warn("[push] Erro ao pedir permissão:", err);
-      // Tentativa final nativa
+      console.warn("[push-prompt] Erro ao pedir permissão:", err);
+      // Final native fallback
       try {
         if ("Notification" in window) {
           await Notification.requestPermission();

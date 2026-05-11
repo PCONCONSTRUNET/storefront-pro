@@ -7,6 +7,34 @@ import { persist } from "zustand/middleware";
 import { supabase } from "@/integrations/supabase/client";
 import { cloud } from "./cloud";
 
+/**
+ * Resolve the OneSignal SDK instance using the deferred queue.
+ * This guarantees the SDK is fully initialised before we use it,
+ * which is critical on Android / iOS where the script may still be
+ * loading when the user taps the toggle.
+ */
+function getOneSignalSDK(timeoutMs = 8000): Promise<any | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+  return new Promise((resolve) => {
+    // If SDK is already ready (has Notifications namespace) return immediately
+    const existing = (window as any).OneSignal;
+    if (existing && typeof existing.Notifications !== "undefined") {
+      resolve(existing);
+      return;
+    }
+    // Otherwise wait via the deferred queue
+    const q = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
+    let resolved = false;
+    q.push((os: any) => {
+      if (!resolved) { resolved = true; resolve(os); }
+    });
+    // Safety timeout so we never hang forever
+    setTimeout(() => {
+      if (!resolved) { resolved = true; resolve(null); }
+    }, timeoutMs);
+  });
+}
+
 export type NotificationCategory =
   | "pedido_realizado" // cliente fez um pedido
   | "pagamento_aprovado" // pagamento confirmado
@@ -362,15 +390,19 @@ export const useNotifications = create<NotificationState>()(
           return "unsupported";
         }
         try {
-          // Use OneSignal SDK to request permission — this both asks the
-          // browser AND registers the push subscription with OneSignal.
-          const OS = (window as any).OneSignal;
+          console.log("[push] Aguardando OneSignal SDK...");
+          const OS = await getOneSignalSDK();
+          console.log("[push] OneSignal SDK pronto:", !!OS);
+
           if (OS?.Notifications?.requestPermission) {
+            // OneSignal v16 — triggers the native OS prompt (Android/iOS)
             await OS.Notifications.requestPermission();
           } else if (OS?.registerForPushNotifications) {
+            // OneSignal v15 fallback
             await OS.registerForPushNotifications();
           } else {
-            // Fallback to native API if OneSignal not yet loaded
+            // No OneSignal — use native API
+            console.warn("[push] OneSignal indisponível, usando API nativa");
             await Notification.requestPermission();
           }
         } catch (e) {
@@ -381,12 +413,16 @@ export const useNotifications = create<NotificationState>()(
         }
         const result = Notification.permission;
         set({ pushPermission: result });
+        console.log("[push] Permissão final:", result);
 
-        // If granted, also ensure we are opted in at OneSignal level
+        // If granted, ensure the device is opted-in at OneSignal level
         if (result === "granted") {
           try {
-            const OS = (window as any).OneSignal;
-            if (OS?.User?.PushSubscription?.optIn) await OS.User.PushSubscription.optIn();
+            const OS = await getOneSignalSDK(3000);
+            if (OS?.User?.PushSubscription?.optIn) {
+              await OS.User.PushSubscription.optIn();
+              console.log("[push] OneSignal optIn chamado");
+            }
           } catch {}
           set({ pushEnabled: true });
         }
@@ -397,13 +433,14 @@ export const useNotifications = create<NotificationState>()(
       disablePush: async () => {
         if (typeof window === "undefined") return;
         try {
-          const OS = (window as any).OneSignal;
+          console.log("[push] Desativando push...");
+          const OS = await getOneSignalSDK();
           if (OS?.User?.PushSubscription?.optOut) {
             await OS.User.PushSubscription.optOut();
+            console.log("[push] OneSignal optOut chamado");
           } else if (OS?.setSubscription) {
             await OS.setSubscription(false);
           }
-          console.log("[push] Opted out");
           set({ pushEnabled: false });
         } catch (e) {
           console.warn("[push] disablePush failed", e);
@@ -420,6 +457,32 @@ export const useNotifications = create<NotificationState>()(
     },
   ),
 );
+
+// ---- Sync pushEnabled with actual OneSignal state on page load ----
+if (typeof window !== "undefined") {
+  getOneSignalSDK(10000).then((OS) => {
+    if (!OS) return;
+    try {
+      const permission =
+        "Notification" in window ? Notification.permission : "unsupported";
+      const isOptedIn = OS?.User?.PushSubscription?.optedIn === true;
+      console.log(
+        "[push] Sync inicial — permission:",
+        permission,
+        "optedIn:",
+        isOptedIn,
+      );
+      useNotifications.setState({
+        pushPermission: permission,
+        pushEnabled: isOptedIn && permission === "granted",
+      });
+    } catch (e) {
+      console.warn("[push] Sync inicial falhou:", e);
+    }
+  });
+}
+
+export { getOneSignalSDK };
 
 export const CATEGORY_LABELS: Record<NotificationCategory, string> = {
   pedido_realizado: "Pedido realizado",
