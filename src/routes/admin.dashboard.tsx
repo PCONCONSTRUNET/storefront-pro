@@ -72,18 +72,21 @@ function Page() {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
       const currentCustomerId = useStore.getState().currentCustomerId;
+      const OS = (window as any).OneSignal;
+      const subId = OS?.User?.PushSubscription?.id;
       
       const { data, error } = await supabase.functions.invoke("send-push", {
         body: {
-          title: "Teste de Push — Storefront 🚀",
-          message: `O serviço está funcionando! Hora: ${new Date().toLocaleTimeString()}`,
+          title: "Teste de Push Direto 🚀",
+          message: `Enviado para ${subId ? "este aparelho" : "seu usuário"}. Hora: ${new Date().toLocaleTimeString()}`,
           externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
-          // Removemos o audience para forçar o envio apenas para o ID específico
+          // Se tivermos o ID da assinatura, mandamos direto para ele também
+          subscriptionIds: subId ? [subId] : undefined,
         },
       });
 
       if (error) throw error;
-      import("sonner").then(({ toast }) => toast.success("Push de teste enviado!"));
+      import("sonner").then(({ toast }) => toast.success(`Push enviado! (ID: ${subId?.slice(0,8)}...)`));
     } catch (err) {
       console.error("[push-test]", err);
       import("sonner").then(({ toast }) => toast.error(`Erro no teste: ${err.message || "Verifique o console"}`));

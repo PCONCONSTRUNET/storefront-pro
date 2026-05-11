@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   try {
     if (!ONESIGNAL_REST_API_KEY) throw new Error("ONESIGNAL_REST_API_KEY não configurada");
 
-    const { title, message, url, audience, externalUserIds } = await req.json();
+    const { title, message, url, audience, externalUserIds, subscriptionIds } = await req.json();
     if (!title || !message) throw new Error("title e message são obrigatórios");
 
     const payload: Record<string, unknown> = {
@@ -21,7 +21,9 @@ Deno.serve(async (req) => {
       url: url || undefined,
     };
 
-    if (Array.isArray(externalUserIds) && externalUserIds.length > 0) {
+    if (Array.isArray(subscriptionIds) && subscriptionIds.length > 0) {
+      payload.include_subscription_ids = subscriptionIds;
+    } else if (Array.isArray(externalUserIds) && externalUserIds.length > 0) {
       // OneSignal v16+: use include_aliases instead of deprecated include_external_user_ids
       payload.include_aliases = { external_id: externalUserIds };
       payload.target_channel = "push";
