@@ -45,35 +45,37 @@ export function EnableNotificationsPrompt() {
     try {
       setBusy(true);
 
-      console.log("[push-prompt] Aguardando OneSignal SDK...");
-      const OneSignal = await getOneSignalSDK();
-      console.log("[push-prompt] OneSignal pronto:", !!OneSignal);
+      // CRITICAL: Check OneSignal synchronously — do NOT await anything
+      // before calling requestPermission(). On Android/iOS, the browser
+      // requires the permission request in the SAME user-gesture microtask.
+      // Any await before it breaks the gesture chain and the native OS
+      // dialog will NOT appear.
+      const OS = (window as any).OneSignal;
+      const sdkReady = OS && typeof OS.Notifications !== "undefined";
 
-      if (OneSignal?.Notifications?.requestPermission) {
-        // OneSignal v16 — triggers native OS prompt (Android/iOS)
-        await OneSignal.Notifications.requestPermission();
-      } else if (OneSignal?.registerForPushNotifications) {
-        // OneSignal v15 fallback
-        await OneSignal.registerForPushNotifications();
+      if (sdkReady) {
+        console.log("[push-prompt] requestPermission via OneSignal SDK");
+        await OS.Notifications.requestPermission();
       } else if ("Notification" in window) {
-        // Native fallback (no OneSignal available)
-        console.warn("[push-prompt] OneSignal indisponível, usando API nativa");
+        console.log("[push-prompt] requestPermission via API nativa");
         await Notification.requestPermission();
       }
 
       granted = typeof Notification !== "undefined" && Notification.permission === "granted";
-      console.log("[push-prompt] Resultado da permissão:", Notification.permission);
+      console.log("[push-prompt] Permissão:", Notification.permission);
 
-      // Ensure the device is opted-in at OneSignal level
-      if (granted && OneSignal?.User?.PushSubscription?.optIn) {
+      // AFTER permission, register with OneSignal (async is OK now)
+      if (granted) {
         try {
-          await OneSignal.User.PushSubscription.optIn();
-          console.log("[push-prompt] OneSignal optIn chamado");
+          const sdk = sdkReady ? OS : await getOneSignalSDK(3000);
+          if (sdk?.User?.PushSubscription?.optIn) {
+            await sdk.User.PushSubscription.optIn();
+            console.log("[push-prompt] OneSignal optIn OK");
+          }
         } catch {}
       }
     } catch (err) {
-      console.warn("[push-prompt] Erro ao pedir permissão:", err);
-      // Final native fallback
+      console.warn("[push-prompt] Erro:", err);
       try {
         if ("Notification" in window) {
           await Notification.requestPermission();

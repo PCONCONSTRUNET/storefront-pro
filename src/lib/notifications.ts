@@ -389,20 +389,21 @@ export const useNotifications = create<NotificationState>()(
           set({ pushPermission: "unsupported" });
           return "unsupported";
         }
-        try {
-          console.log("[push] Aguardando OneSignal SDK...");
-          const OS = await getOneSignalSDK();
-          console.log("[push] OneSignal SDK pronto:", !!OS);
 
-          if (OS?.Notifications?.requestPermission) {
-            // OneSignal v16 — triggers the native OS prompt (Android/iOS)
+        // CRITICAL: Check OneSignal synchronously — do NOT await anything
+        // before calling requestPermission(). On Android/iOS, the browser
+        // requires the permission request to happen in the SAME user-gesture
+        // (click/tap) microtask. Any await before it breaks the gesture chain
+        // and the native dialog will NOT appear.
+        const OS = (window as any).OneSignal;
+        const sdkReady = OS && typeof OS.Notifications !== "undefined";
+
+        try {
+          if (sdkReady) {
+            console.log("[push] requestPermission via OneSignal SDK");
             await OS.Notifications.requestPermission();
-          } else if (OS?.registerForPushNotifications) {
-            // OneSignal v15 fallback
-            await OS.registerForPushNotifications();
           } else {
-            // No OneSignal — use native API
-            console.warn("[push] OneSignal indisponível, usando API nativa");
+            console.log("[push] requestPermission via API nativa");
             await Notification.requestPermission();
           }
         } catch (e) {
@@ -411,17 +412,18 @@ export const useNotifications = create<NotificationState>()(
             await Notification.requestPermission();
           } catch {}
         }
+
         const result = Notification.permission;
         set({ pushPermission: result });
         console.log("[push] Permissão final:", result);
 
-        // If granted, ensure the device is opted-in at OneSignal level
+        // AFTER permission is granted, register with OneSignal (async is OK now)
         if (result === "granted") {
           try {
-            const OS = await getOneSignalSDK(3000);
-            if (OS?.User?.PushSubscription?.optIn) {
-              await OS.User.PushSubscription.optIn();
-              console.log("[push] OneSignal optIn chamado");
+            const sdk = sdkReady ? OS : await getOneSignalSDK(3000);
+            if (sdk?.User?.PushSubscription?.optIn) {
+              await sdk.User.PushSubscription.optIn();
+              console.log("[push] OneSignal optIn OK");
             }
           } catch {}
           set({ pushEnabled: true });
@@ -433,13 +435,16 @@ export const useNotifications = create<NotificationState>()(
       disablePush: async () => {
         if (typeof window === "undefined") return;
         try {
-          console.log("[push] Desativando push...");
-          const OS = await getOneSignalSDK();
-          if (OS?.User?.PushSubscription?.optOut) {
-            await OS.User.PushSubscription.optOut();
-            console.log("[push] OneSignal optOut chamado");
-          } else if (OS?.setSubscription) {
-            await OS.setSubscription(false);
+          // Check synchronously first, then fallback to deferred
+          const OS = (window as any).OneSignal;
+          const sdkReady = OS && typeof OS.Notifications !== "undefined";
+          const sdk = sdkReady ? OS : await getOneSignalSDK(3000);
+
+          if (sdk?.User?.PushSubscription?.optOut) {
+            await sdk.User.PushSubscription.optOut();
+            console.log("[push] optOut OK");
+          } else if (sdk?.setSubscription) {
+            await sdk.setSubscription(false);
           }
           set({ pushEnabled: false });
         } catch (e) {
