@@ -245,6 +245,7 @@ interface NotificationState {
   templates: NotificationTemplate[];
   logs: NotificationLog[];
   pushPermission: NotificationPermission | "unsupported";
+  pushEnabled: boolean;
   // actions
   updateTemplate: (id: string, patch: Partial<NotificationTemplate>) => void;
   resetTemplates: () => void;
@@ -263,6 +264,7 @@ interface NotificationState {
   markRead: (id: string) => void;
   clearLogs: () => void;
   requestPushPermission: () => Promise<NotificationPermission | "unsupported">;
+  disablePush: () => Promise<void>;
 }
 
 function applyVars(tpl: string, vars: Record<string, string | number>): string {
@@ -278,6 +280,7 @@ export const useNotifications = create<NotificationState>()(
         typeof window !== "undefined" && "Notification" in window
           ? Notification.permission
           : "unsupported",
+      pushEnabled: false, // Default to false until we know or they enable it
 
       updateTemplate: (id, patch) =>
         set((s) => ({
@@ -378,12 +381,42 @@ export const useNotifications = create<NotificationState>()(
         }
         const result = Notification.permission;
         set({ pushPermission: result });
+
+        // If granted, also ensure we are opted in at OneSignal level
+        if (result === "granted") {
+          try {
+            const OS = (window as any).OneSignal;
+            if (OS?.User?.PushSubscription?.optIn) await OS.User.PushSubscription.optIn();
+          } catch {}
+          set({ pushEnabled: true });
+        }
+
         return result;
+      },
+
+      disablePush: async () => {
+        if (typeof window === "undefined") return;
+        try {
+          const OS = (window as any).OneSignal;
+          if (OS?.User?.PushSubscription?.optOut) {
+            await OS.User.PushSubscription.optOut();
+          } else if (OS?.setSubscription) {
+            await OS.setSubscription(false);
+          }
+          console.log("[push] Opted out");
+          set({ pushEnabled: false });
+        } catch (e) {
+          console.warn("[push] disablePush failed", e);
+        }
       },
     }),
     {
       name: "princesa-notifications-v2",
-      partialize: (s) => ({ templates: s.templates, logs: s.logs }),
+      partialize: (s) => ({
+        templates: s.templates,
+        logs: s.logs,
+        pushEnabled: s.pushEnabled,
+      }),
     },
   ),
 );

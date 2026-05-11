@@ -39,12 +39,14 @@ function Page() {
     templates,
     logs,
     pushPermission,
+    pushEnabled,
     updateTemplate,
     resetTemplates,
     sendManual,
     markAllRead,
     clearLogs,
     requestPushPermission,
+    disablePush,
   } = useNotifications();
 
   const [tab, setTab] = useState<Tab>("enviar");
@@ -89,13 +91,18 @@ function Page() {
     );
   };
 
-  const askPush = async () => {
-    const r = await requestPushPermission();
-    if (r === "granted") toast.success("Push habilitado neste navegador!");
-    else if (r === "denied")
-      toast.error("Permissão negada — habilite nas configurações do navegador");
-    else if (r === "unsupported") toast.error("Este navegador não suporta notificações push");
-    else toast("Permissão pendente");
+  const togglePush = async (enabled: boolean) => {
+    if (enabled) {
+      const r = await requestPushPermission();
+      if (r === "granted") toast.success("Notificações ativadas!");
+      else if (r === "denied")
+        toast.error("Permissão negada no navegador");
+      else if (r === "unsupported")
+        toast.error("Navegador sem suporte");
+    } else {
+      await disablePush();
+      toast.success("Notificações desativadas para este dispositivo");
+    }
   };
 
   return (
@@ -114,14 +121,20 @@ function Page() {
               <p className="text-xs opacity-90">Push, e-mail e in-app — tudo em um só lugar.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <PushBadge state={pushPermission} />
-            <button
-              onClick={askPush}
-              className="h-9 px-3 rounded-full bg-white/15 hover:bg-white/25 text-xs font-semibold flex items-center gap-1 backdrop-blur"
-            >
-              <Smartphone className="h-3.5 w-3.5" /> Habilitar push
-            </button>
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur px-4 py-2 rounded-2xl border border-white/10">
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase opacity-70">Status do Push</span>
+              <PushBadge state={pushPermission} />
+            </div>
+            <div className="w-px h-8 bg-white/20" />
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-bold uppercase opacity-70 mb-1">Notificações</span>
+              <Switch 
+                checked={pushEnabled} 
+                onChange={togglePush} 
+                className="bg-white/20"
+              />
+            </div>
           </div>
         </div>
         <div className="relative grid grid-cols-2 md:grid-cols-4 gap-2 px-5 pb-5">
@@ -581,15 +594,17 @@ function Switch({
   checked,
   onChange,
   label,
+  className,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   label?: string;
+  className?: string;
 }) {
   return (
     <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium select-none">
       <span
-        className={`relative w-10 h-6 rounded-full transition-colors ${checked ? "bg-primary" : "bg-muted"}`}
+        className={`relative w-10 h-6 rounded-full transition-colors ${checked ? "bg-primary" : "bg-muted"} ${className || ""}`}
       >
         <input
           type="checkbox"
