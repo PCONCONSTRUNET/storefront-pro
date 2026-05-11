@@ -16,17 +16,17 @@ export function BottomNav() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const count = useStore(selectCartCount);
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border safe-bottom">
-      <ul className="grid grid-cols-5">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-[50] bg-card/95 backdrop-blur border-t border-border safe-bottom overflow-hidden">
+      <ul className="grid grid-cols-5 relative">
         {items.map((it) => {
           const active = it.exact ? path === it.to : path.startsWith(it.to);
           const Icon = it.icon;
           return (
-            <li key={it.to}>
+            <li key={it.to} className="overflow-hidden">
               <Link
                 to={it.to}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium relative transition-colors",
+                  "flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium relative transition-colors overflow-hidden",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >

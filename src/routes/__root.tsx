@@ -114,6 +114,7 @@ OneSignalDeferred.push(async function(OneSignal) {
     allowLocalhostAsSecureOrigin: true,
     autoPrompt: false,
     autoResubscribe: true,
+    customLink: { enabled: false },
     promptOptions: {
       slidedown: {
         prompts: []
@@ -131,16 +132,34 @@ OneSignalDeferred.push(async function(OneSignal) {
       '#onesignal-bell-container',
       '.onesignal-customlink-container',
       '[class*="onesignal"]',
-      '[id*="onesignal"]'
+      '[id*="onesignal"]',
+      '.onesignal-reset'
     ];
     sels.forEach(function(s){
       document.querySelectorAll(s).forEach(function(el){ el.remove(); });
     });
+    
+    // Scan all divs and spans for the specific leaked text
+    var all = document.querySelectorAll('div, span, p');
+    for(var i=0; i<all.length; i++) {
+      if(all[i].textContent && all[i].textContent.indexOf('Não se trata de uma questão') !== -1) {
+        console.log("[OneSignal] Nuking leaked text element");
+        all[i].remove();
+      }
+    }
   }
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(nukeOneSignalUI,500); setTimeout(nukeOneSignalUI,2000); setTimeout(nukeOneSignalUI,5000); });
+    document.addEventListener('DOMContentLoaded', function(){ 
+      nukeOneSignalUI();
+      setTimeout(nukeOneSignalUI, 500); 
+      setTimeout(nukeOneSignalUI, 2000); 
+      setTimeout(nukeOneSignalUI, 5000); 
+    });
   } else {
-    setTimeout(nukeOneSignalUI,500); setTimeout(nukeOneSignalUI,2000); setTimeout(nukeOneSignalUI,5000);
+    nukeOneSignalUI();
+    setTimeout(nukeOneSignalUI, 500); 
+    setTimeout(nukeOneSignalUI, 2000); 
+    setTimeout(nukeOneSignalUI, 5000);
   }
   var ob = new MutationObserver(nukeOneSignalUI);
   var tryOb = function(){ if(document.body){ ob.observe(document.body,{childList:true,subtree:true}); } else { setTimeout(tryOb,200); } };

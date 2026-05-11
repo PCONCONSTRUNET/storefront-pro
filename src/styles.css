@@ -218,12 +218,19 @@
 .onesignal-slidedown-container,
 .onesignal-reset,
 div[class*="onesignal"],
-div[id*="onesignal"] {
+div[id*="onesignal"],
+span[class*="onesignal"],
+[id^="onesignal-"],
+[class^="onesignal-"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden !important;
   pointer-events: none !important;
   position: absolute !important;
+  top: -9999px !important;
   opacity: 0 !important;
 }
