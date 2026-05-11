@@ -32,14 +32,23 @@ import imgAdminCupons from "@/assets/slides/admin-cupons.png";
 
 export const Route = createFileRoute("/apresentacao")({
   head: () => ({
-    meta: [{ title: "Apresentação — Sistema Encantada" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "Apresentação — Sistema Encantada" },
+      { name: "robots", content: "noindex" },
+    ],
   }),
   component: Page,
 });
 
 type Slide =
   | { kind: "cover"; title: string; subtitle: string; eyebrow: string }
-  | { kind: "section"; title: string; subtitle: string; icon: React.ElementType; color: string }
+  | {
+      kind: "section";
+      title: string;
+      subtitle: string;
+      icon: React.ElementType;
+      color: string;
+    }
   | {
       kind: "image";
       title: string;
@@ -55,7 +64,8 @@ const slides: Slide[] = [
     kind: "cover",
     eyebrow: "Apresentação do sistema",
     title: "Princesa de Laços",
-    subtitle: "Plataforma completa de e-commerce, programa de afiliadas e painel administrativo.",
+    subtitle:
+      "Plataforma completa de e-commerce, programa de afiliadas e painel administrativo.",
   },
 
   {
@@ -83,7 +93,8 @@ const slides: Slide[] = [
     kind: "image",
     tag: "Catálogo",
     title: "Categorias",
-    description: "Grade clara com todas as categorias disponíveis e contagem de produtos.",
+    description:
+      "Grade clara com todas as categorias disponíveis e contagem de produtos.",
     bullets: [
       "6 categorias visíveis",
       "Ícones personalizados por categoria",
@@ -108,7 +119,8 @@ const slides: Slide[] = [
     kind: "image",
     tag: "Produto",
     title: "Página do produto",
-    description: "Detalhe completo do produto com foto grande, variações, preço Pix e CTAs.",
+    description:
+      "Detalhe completo do produto com foto grande, variações, preço Pix e CTAs.",
     bullets: [
       "Preço de venda + preço Pix com 5% off",
       "Seleção de tamanho e quantidade",
@@ -121,8 +133,13 @@ const slides: Slide[] = [
     kind: "image",
     tag: "Compra",
     title: "Carrinho",
-    description: "Sacola limpa, com mensagem amigável quando vazio e CTA para explorar produtos.",
-    bullets: ["Aplicação de cupons", "Resumo do pedido", "Animação suave ao abrir"],
+    description:
+      "Sacola limpa, com mensagem amigável quando vazio e CTA para explorar produtos.",
+    bullets: [
+      "Aplicação de cupons",
+      "Resumo do pedido",
+      "Animação suave ao abrir",
+    ],
     image: imgCarrinho,
   },
 
@@ -137,8 +154,13 @@ const slides: Slide[] = [
     kind: "image",
     tag: "Login",
     title: "Acesso da afiliada",
-    description: "Tela limpa de login para a revendedora entrar no painel próprio.",
-    bullets: ["Login com e-mail e senha", "Recuperação de senha", "Link para autocadastro"],
+    description:
+      "Tela limpa de login para a revendedora entrar no painel próprio.",
+    bullets: [
+      "Login com e-mail e senha",
+      "Recuperação de senha",
+      "Link para autocadastro",
+    ],
     image: imgAfiliadaLogin,
   },
   {
@@ -236,7 +258,8 @@ const slides: Slide[] = [
     kind: "image",
     tag: "Operação",
     title: "Pedidos",
-    description: "Fluxo de pedidos com filtros por status: do pagamento até a entrega.",
+    description:
+      "Fluxo de pedidos com filtros por status: do pagamento até a entrega.",
     bullets: [
       "Filtros: aguardando, pago, em separação, saiu para entrega…",
       "Busca por ID, nome ou telefone",
@@ -336,7 +359,9 @@ function Page() {
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-pink-500 to-rose-400 grid place-items-center">
             <Sparkles className="h-4 w-4" />
           </div>
-          <span className="font-semibold tracking-tight">Princesa de Laços · Apresentação</span>
+          <span className="font-semibold tracking-tight">
+            Princesa de Laços · Apresentação
+          </span>
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-400">
           <span>
@@ -429,8 +454,12 @@ function renderSlide(s: Slide) {
           <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur grid place-items-center">
             <Icon className="h-8 w-8" />
           </div>
-          <h2 className="font-semibold text-5xl md:text-6xl mt-6 tracking-tight">{s.title}</h2>
-          <p className="text-lg md:text-xl mt-3 opacity-95 max-w-2xl">{s.subtitle}</p>
+          <h2 className="font-semibold text-5xl md:text-6xl mt-6 tracking-tight">
+            {s.title}
+          </h2>
+          <p className="text-lg md:text-xl mt-3 opacity-95 max-w-2xl">
+            {s.subtitle}
+          </p>
         </div>
       </div>
     );
@@ -462,10 +491,15 @@ function renderSlide(s: Slide) {
         <h3 className="font-semibold text-3xl md:text-4xl mt-3 tracking-tight text-slate-900 leading-tight">
           {s.title}
         </h3>
-        <p className="text-sm md:text-base text-slate-600 mt-3 leading-relaxed">{s.description}</p>
+        <p className="text-sm md:text-base text-slate-600 mt-3 leading-relaxed">
+          {s.description}
+        </p>
         <ul className="mt-5 space-y-2">
           {s.bullets.map((b, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+            <li
+              key={i}
+              className="flex items-start gap-2 text-sm text-slate-700"
+            >
               <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-pink-500 shrink-0" />
               <span>{b}</span>
             </li>

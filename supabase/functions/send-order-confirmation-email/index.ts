@@ -7,19 +7,22 @@ interface Item {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
   try {
-    const { email, customerName, orderId, items, total, paymentMethod } = (await req.json()) as {
-      email: string;
-      customerName?: string;
-      orderId: string;
-      items: Item[];
-      total: number;
-      paymentMethod?: string;
-    };
+    const { email, customerName, orderId, items, total, paymentMethod } =
+      (await req.json()) as {
+        email: string;
+        customerName?: string;
+        orderId: string;
+        items: Item[];
+        total: number;
+        paymentMethod?: string;
+      };
     if (!email || !orderId || !items) throw new Error("dados incompletos");
 
-    const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    const fmt = (v: number) =>
+      v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     const rows = items
       .map(
         (i) => `
@@ -56,9 +59,12 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e instanceof Error ? e.message : e) }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: String(e instanceof Error ? e.message : e) }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

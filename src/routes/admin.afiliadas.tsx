@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore, type Affiliate, type AffiliateSaleStatus } from "@/lib/store";
+import {
+  useStore,
+  type Affiliate,
+  type AffiliateSaleStatus,
+} from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -58,7 +62,9 @@ function Page() {
   const [editing, setEditing] = useState<Affiliate | null>(null);
   const [viewing, setViewing] = useState<Affiliate | null>(null);
   const [filterAff, setFilterAff] = useState<string>("");
-  const [filterStatus, setFilterStatus] = useState<"" | AffiliateSaleStatus>("");
+  const [filterStatus, setFilterStatus] = useState<"" | AffiliateSaleStatus>(
+    "",
+  );
   const [search, setSearch] = useState("");
   const [searchAff, setSearchAff] = useState("");
   const [registeringSale, setRegisteringSale] = useState(false);
@@ -105,7 +111,9 @@ function Page() {
       return;
     }
     const exists = affiliates.find(
-      (a) => a.email.toLowerCase() === editing.email.toLowerCase() && a.id !== editing.id,
+      (a) =>
+        a.email.toLowerCase() === editing.email.toLowerCase() &&
+        a.id !== editing.id,
     );
     if (exists) {
       toast.error("E-mail já cadastrado para outra afiliada");
@@ -125,9 +133,21 @@ function Page() {
   return (
     <AdminLayout title="Afiliadas">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <Card icon={Users} label="Afiliadas" value={String(affiliates.length)} />
-        <Card icon={ShoppingBag} label="Vendas pagas" value={String(totals.paidCount)} />
-        <Card icon={DollarSign} label="Faturado (pago)" value={brl(totals.totalRevenue)} />
+        <Card
+          icon={Users}
+          label="Afiliadas"
+          value={String(affiliates.length)}
+        />
+        <Card
+          icon={ShoppingBag}
+          label="Vendas pagas"
+          value={String(totals.paidCount)}
+        />
+        <Card
+          icon={DollarSign}
+          label="Faturado (pago)"
+          value={brl(totals.totalRevenue)}
+        />
         <Card
           icon={DollarSign}
           label="Comissões pagas"
@@ -137,7 +157,10 @@ function Page() {
       </div>
 
       <div className="flex gap-2 mb-3">
-        <TabBtn active={tab === "afiliadas"} onClick={() => setTab("afiliadas")}>
+        <TabBtn
+          active={tab === "afiliadas"}
+          onClick={() => setTab("afiliadas")}
+        >
           Afiliadas
         </TabBtn>
         <TabBtn active={tab === "vendas"} onClick={() => setTab("vendas")}>
@@ -191,9 +214,13 @@ function Page() {
                 <tbody>
                   {filteredAffiliates.map((a) => {
                     const paid = sales.filter(
-                      (s) => s.affiliateId === a.id && s.status === "confirmada",
+                      (s) =>
+                        s.affiliateId === a.id && s.status === "confirmada",
                     );
-                    const earned = paid.reduce((acc, s) => acc + s.commissionEarned, 0);
+                    const earned = paid.reduce(
+                      (acc, s) => acc + s.commissionEarned,
+                      0,
+                    );
                     return (
                       <tr
                         key={a.id}
@@ -201,7 +228,9 @@ function Page() {
                         className="border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-colors"
                       >
                         <td className="py-2 pr-2 font-medium">{a.name}</td>
-                        <td className="py-2 pr-2 text-muted-foreground">{a.email}</td>
+                        <td className="py-2 pr-2 text-muted-foreground">
+                          {a.email}
+                        </td>
                         <td className="py-2 pr-2">
                           {a.commissionType === "percent"
                             ? `${a.commissionValue}%`
@@ -215,8 +244,13 @@ function Page() {
                           </span>
                         </td>
                         <td className="py-2 pr-2">{paid.length}</td>
-                        <td className="py-2 pr-2 text-gold font-semibold">{brl(earned)}</td>
-                        <td className="py-2 pr-2" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-2 pr-2 text-gold font-semibold">
+                          {brl(earned)}
+                        </td>
+                        <td
+                          className="py-2 pr-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex gap-1 justify-end">
                             <button
                               onClick={() => setViewing(a)}
@@ -235,7 +269,9 @@ function Page() {
                             <button
                               onClick={() => {
                                 if (
-                                  confirm(`Excluir ${a.name}? Vendas dela também serão removidas.`)
+                                  confirm(
+                                    `Excluir ${a.name}? Vendas dela também serão removidas.`,
+                                  )
                                 ) {
                                   remove(a.id);
                                   toast.success("Afiliada removida");
@@ -257,7 +293,8 @@ function Page() {
           )}
 
           <p className="text-[11px] text-muted-foreground mt-3">
-            Acesso da afiliada: <code className="bg-muted px-1 rounded">/afiliada/login</code>
+            Acesso da afiliada:{" "}
+            <code className="bg-muted px-1 rounded">/afiliada/login</code>
           </p>
         </div>
       )}
@@ -267,7 +304,8 @@ function Page() {
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-3">
               <h2 className="font-bold">
-                Vendas {filterStatus === "confirmada" ? "(pagas)" : "registradas"}
+                Vendas{" "}
+                {filterStatus === "confirmada" ? "(pagas)" : "registradas"}
               </h2>
               <button
                 onClick={() => setRegisteringSale(true)}
@@ -337,10 +375,10 @@ function Page() {
                       s.status,
                     ];
                   });
-                  downloadCSV(`vendas-afiliadas-${new Date().toISOString().slice(0, 10)}.csv`, [
-                    head,
-                    ...body,
-                  ]);
+                  downloadCSV(
+                    `vendas-afiliadas-${new Date().toISOString().slice(0, 10)}.csv`,
+                    [head, ...body],
+                  );
                   toast.success("CSV baixado");
                 }}
                 className="h-9 px-3 rounded-lg bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1"
@@ -353,15 +391,31 @@ function Page() {
                     toast.error("Sem dados para exportar");
                     return;
                   }
-                  const totalRev = filteredSales.reduce((a, s) => a + s.saleValue, 0);
-                  const totalCom = filteredSales.reduce((a, s) => a + s.commissionEarned, 0);
+                  const totalRev = filteredSales.reduce(
+                    (a, s) => a + s.saleValue,
+                    0,
+                  );
+                  const totalCom = filteredSales.reduce(
+                    (a, s) => a + s.commissionEarned,
+                    0,
+                  );
                   downloadPDF({
                     filename: `vendas-afiliadas-${new Date().toISOString().slice(0, 10)}.pdf`,
                     title: "Vendas de Afiliadas",
                     subtitle: `${filteredSales.length} venda(s) · Faturamento ${brl(totalRev)} · Comissão ${brl(totalCom)}`,
-                    head: ["Data", "Afiliada", "Cliente", "Produto", "Valor", "Comissão", "Status"],
+                    head: [
+                      "Data",
+                      "Afiliada",
+                      "Cliente",
+                      "Produto",
+                      "Valor",
+                      "Comissão",
+                      "Status",
+                    ],
                     body: filteredSales.map((s) => {
-                      const aff = affiliates.find((a) => a.id === s.affiliateId);
+                      const aff = affiliates.find(
+                        (a) => a.id === s.affiliateId,
+                      );
                       return [
                         new Date(s.createdAt).toLocaleDateString("pt-BR"),
                         aff?.name || "—",
@@ -372,7 +426,15 @@ function Page() {
                         s.status,
                       ];
                     }),
-                    foot: ["", "", "", "TOTAIS", brl(totalRev), brl(totalCom), ""],
+                    foot: [
+                      "",
+                      "",
+                      "",
+                      "TOTAIS",
+                      brl(totalRev),
+                      brl(totalCom),
+                      "",
+                    ],
                   });
                   toast.success("PDF baixado");
                 }}
@@ -392,7 +454,10 @@ function Page() {
               {filteredSales.map((s) => {
                 const aff = affiliates.find((a) => a.id === s.affiliateId);
                 return (
-                  <li key={s.id} className="py-3 flex flex-wrap items-start gap-3">
+                  <li
+                    key={s.id}
+                    className="py-3 flex flex-wrap items-start gap-3"
+                  >
                     <div className="flex-1 min-w-[220px]">
                       <div className="text-sm font-semibold">
                         {s.customerName}{" "}
@@ -400,7 +465,9 @@ function Page() {
                           por {aff?.name || "—"}
                         </span>
                       </div>
-                      <div className="text-xs text-muted-foreground">{s.productDescription}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {s.productDescription}
+                      </div>
                       {s.customerPhone && (
                         <div className="text-[11px] text-muted-foreground">
                           Tel: {s.customerPhone}
@@ -411,8 +478,12 @@ function Page() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold">{brl(s.saleValue)}</div>
-                      <div className="text-xs text-gold">Comissão {brl(s.commissionEarned)}</div>
+                      <div className="text-sm font-bold">
+                        {brl(s.saleValue)}
+                      </div>
+                      <div className="text-xs text-gold">
+                        Comissão {brl(s.commissionEarned)}
+                      </div>
                       <StatusBadge status={s.status} />
                     </div>
                     <div className="flex gap-1 w-full sm:w-auto justify-end">
@@ -492,7 +563,9 @@ function Page() {
             <Field label="Nome *">
               <input
                 value={editing.name}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, name: e.target.value })
+                }
                 className="input"
                 required
               />
@@ -501,7 +574,9 @@ function Page() {
               <input
                 type="email"
                 value={editing.email}
-                onChange={(e) => setEditing({ ...editing, email: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, email: e.target.value })
+                }
                 className="input"
                 required
               />
@@ -509,7 +584,9 @@ function Page() {
             <Field label="Senha *">
               <input
                 value={editing.password}
-                onChange={(e) => setEditing({ ...editing, password: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, password: e.target.value })
+                }
                 className="input"
                 required
               />
@@ -517,7 +594,9 @@ function Page() {
             <Field label="WhatsApp">
               <input
                 value={editing.phone}
-                onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
+                onChange={(e) =>
+                  setEditing({ ...editing, phone: e.target.value })
+                }
                 className="input"
               />
             </Field>
@@ -537,13 +616,22 @@ function Page() {
                   <option value="fixed">Valor fixo (R$)</option>
                 </select>
               </Field>
-              <Field label={editing.commissionType === "percent" ? "% por venda" : "R$ por venda"}>
+              <Field
+                label={
+                  editing.commissionType === "percent"
+                    ? "% por venda"
+                    : "R$ por venda"
+                }
+              >
                 <input
                   type="number"
                   step="0.01"
                   value={editing.commissionValue}
                   onChange={(e) =>
-                    setEditing({ ...editing, commissionValue: parseFloat(e.target.value) || 0 })
+                    setEditing({
+                      ...editing,
+                      commissionValue: parseFloat(e.target.value) || 0,
+                    })
                   }
                   className="input"
                 />
@@ -553,7 +641,9 @@ function Page() {
               <input
                 type="checkbox"
                 checked={editing.active}
-                onChange={(e) => setEditing({ ...editing, active: e.target.checked })}
+                onChange={(e) =>
+                  setEditing({ ...editing, active: e.target.checked })
+                }
               />
               Conta ativa
             </label>
@@ -594,9 +684,11 @@ function RegisterSaleModal({
 }) {
   const register = useStore((s) => s.registerAffiliateSale);
   const upsertAffiliate = useStore((s) => s.upsertAffiliate);
-  
+
   const [creatingNewAff, setCreatingNewAff] = useState(false);
-  const [newAffData, setNewAffData] = useState<Omit<Affiliate, "id" | "createdAt">>({
+  const [newAffData, setNewAffData] = useState<
+    Omit<Affiliate, "id" | "createdAt">
+  >({
     name: "",
     email: "",
     password: "123", // Senha padrão inicial
@@ -633,7 +725,7 @@ function RegisterSaleModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     let finalAffId = data.affiliateId;
 
     // Se estiver criando uma nova afiliada agora
@@ -675,7 +767,11 @@ function RegisterSaleModal({
           <h3 className="font-bold text-xl flex items-center gap-2">
             <Plus className="h-5 w-5 text-success" /> Registrar Venda Manual
           </h3>
-          <button type="button" onClick={onClose} className="p-1 hover:bg-muted rounded-full">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 hover:bg-muted rounded-full"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -687,7 +783,9 @@ function RegisterSaleModal({
                 <select
                   value={data.affiliateId}
                   disabled={creatingNewAff}
-                  onChange={(e) => setData({ ...data, affiliateId: e.target.value })}
+                  onChange={(e) =>
+                    setData({ ...data, affiliateId: e.target.value })
+                  }
                   className="input disabled:opacity-50"
                   required={!creatingNewAff}
                 >
@@ -696,7 +794,11 @@ function RegisterSaleModal({
                     .filter((a) => a.active)
                     .map((a) => (
                       <option key={a.id} value={a.id}>
-                        {a.name} ({a.commissionType === "percent" ? `${a.commissionValue}%` : brl(a.commissionValue)})
+                        {a.name} (
+                        {a.commissionType === "percent"
+                          ? `${a.commissionValue}%`
+                          : brl(a.commissionValue)}
+                        )
                       </option>
                     ))}
                 </select>
@@ -710,7 +812,9 @@ function RegisterSaleModal({
               }}
               className={cn(
                 "h-10 px-3 rounded-xl border border-border text-xs font-bold transition-colors whitespace-nowrap",
-                creatingNewAff ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                creatingNewAff
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80",
               )}
             >
               {creatingNewAff ? "Selecionar Existente" : "+ Nova"}
@@ -719,11 +823,15 @@ function RegisterSaleModal({
 
           {creatingNewAff && (
             <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-3 animate-in slide-in-from-top-2 duration-300">
-              <div className="text-[11px] font-bold text-primary uppercase tracking-wider">Dados da Nova Afiliada</div>
+              <div className="text-[11px] font-bold text-primary uppercase tracking-wider">
+                Dados da Nova Afiliada
+              </div>
               <Field label="Nome da Afiliada *">
                 <input
                   value={newAffData.name}
-                  onChange={(e) => setNewAffData({ ...newAffData, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewAffData({ ...newAffData, name: e.target.value })
+                  }
                   className="input bg-card"
                   placeholder="Nome completo"
                   required
@@ -734,7 +842,9 @@ function RegisterSaleModal({
                   <input
                     type="email"
                     value={newAffData.email}
-                    onChange={(e) => setNewAffData({ ...newAffData, email: e.target.value })}
+                    onChange={(e) =>
+                      setNewAffData({ ...newAffData, email: e.target.value })
+                    }
                     className="input bg-card"
                     placeholder="email@exemplo.com"
                     required
@@ -743,7 +853,9 @@ function RegisterSaleModal({
                 <Field label="WhatsApp">
                   <input
                     value={newAffData.phone}
-                    onChange={(e) => setNewAffData({ ...newAffData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setNewAffData({ ...newAffData, phone: e.target.value })
+                    }
                     className="input bg-card"
                     placeholder="(00) 00000-0000"
                   />
@@ -753,19 +865,35 @@ function RegisterSaleModal({
                 <Field label="Tipo de Comissão">
                   <select
                     value={newAffData.commissionType}
-                    onChange={(e) => setNewAffData({ ...newAffData, commissionType: e.target.value as any })}
+                    onChange={(e) =>
+                      setNewAffData({
+                        ...newAffData,
+                        commissionType: e.target.value as any,
+                      })
+                    }
                     className="input bg-card"
                   >
                     <option value="percent">% por venda</option>
                     <option value="fixed">Valor fixo</option>
                   </select>
                 </Field>
-                <Field label={newAffData.commissionType === "percent" ? "% Valor" : "R$ Valor"}>
+                <Field
+                  label={
+                    newAffData.commissionType === "percent"
+                      ? "% Valor"
+                      : "R$ Valor"
+                  }
+                >
                   <input
                     type="number"
                     step="0.01"
                     value={newAffData.commissionValue || ""}
-                    onChange={(e) => setNewAffData({ ...newAffData, commissionValue: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) =>
+                      setNewAffData({
+                        ...newAffData,
+                        commissionValue: parseFloat(e.target.value) || 0,
+                      })
+                    }
                     className="input bg-card"
                   />
                 </Field>
@@ -778,7 +906,9 @@ function RegisterSaleModal({
           <Field label="Nome do Cliente *">
             <input
               value={data.customerName}
-              onChange={(e) => setData({ ...data, customerName: e.target.value })}
+              onChange={(e) =>
+                setData({ ...data, customerName: e.target.value })
+              }
               className="input"
               placeholder="Ex: Maria Silva"
               required
@@ -787,7 +917,9 @@ function RegisterSaleModal({
           <Field label="WhatsApp/Telefone">
             <input
               value={data.customerPhone}
-              onChange={(e) => setData({ ...data, customerPhone: e.target.value })}
+              onChange={(e) =>
+                setData({ ...data, customerPhone: e.target.value })
+              }
               className="input"
               placeholder="(00) 00000-0000"
             />
@@ -797,7 +929,9 @@ function RegisterSaleModal({
         <Field label="Produto ou Descrição *">
           <input
             value={data.productDescription}
-            onChange={(e) => setData({ ...data, productDescription: e.target.value })}
+            onChange={(e) =>
+              setData({ ...data, productDescription: e.target.value })
+            }
             className="input"
             placeholder="Ex: 2x Laços G"
             required
@@ -810,7 +944,9 @@ function RegisterSaleModal({
               type="number"
               step="0.01"
               value={data.saleValue || ""}
-              onChange={(e) => setData({ ...data, saleValue: parseFloat(e.target.value) || 0 })}
+              onChange={(e) =>
+                setData({ ...data, saleValue: parseFloat(e.target.value) || 0 })
+              }
               className="input font-bold"
               required
             />
@@ -818,7 +954,9 @@ function RegisterSaleModal({
           <Field label="Status">
             <select
               value={data.status}
-              onChange={(e) => setData({ ...data, status: e.target.value as any })}
+              onChange={(e) =>
+                setData({ ...data, status: e.target.value as any })
+              }
               className="input"
             >
               <option value="confirmada">Paga (Confirmada)</option>
@@ -831,16 +969,27 @@ function RegisterSaleModal({
           <div className="bg-muted/40 p-3 rounded-2xl border border-border">
             <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
               <span>
-                Comissão de {creatingNewAff ? newAffData.name || "Nova Afiliada" : selectedAff?.name}{" "}
-                ({(creatingNewAff ? newAffData.commissionType : selectedAff?.commissionType) === "percent" 
-                  ? `${creatingNewAff ? newAffData.commissionValue : selectedAff?.commissionValue}%` 
-                  : "Fixo"})
+                Comissão de{" "}
+                {creatingNewAff
+                  ? newAffData.name || "Nova Afiliada"
+                  : selectedAff?.name}{" "}
+                (
+                {(creatingNewAff
+                  ? newAffData.commissionType
+                  : selectedAff?.commissionType) === "percent"
+                  ? `${creatingNewAff ? newAffData.commissionValue : selectedAff?.commissionValue}%`
+                  : "Fixo"}
+                )
               </span>
-              <span className="font-bold text-gold">{brl(estimatedCommission)}</span>
+              <span className="font-bold text-gold">
+                {brl(estimatedCommission)}
+              </span>
             </div>
             <div className="flex justify-between items-center text-sm font-bold">
               <span>Líquido para Loja</span>
-              <span className="text-success">{brl(data.saleValue - estimatedCommission)}</span>
+              <span className="text-success">
+                {brl(data.saleValue - estimatedCommission)}
+              </span>
             </div>
           </div>
         )}
@@ -901,7 +1050,13 @@ function TabBtn({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
@@ -922,7 +1077,12 @@ function ActionBtn({
   children: React.ReactNode;
 }) {
   return (
-    <button type="button" onClick={onClick} title={title} className={`p-1.5 rounded-lg ${cls}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`p-1.5 rounded-lg ${cls}`}
+    >
       {children}
     </button>
   );
@@ -932,11 +1092,16 @@ function StatusBadge({ status }: { status: AffiliateSaleStatus }) {
   const map = {
     pendente: { label: "Pendente", cls: "bg-gold/20 text-gold" },
     confirmada: { label: "Confirmada", cls: "bg-success/20 text-success" },
-    cancelada: { label: "Cancelada", cls: "bg-destructive/20 text-destructive" },
+    cancelada: {
+      label: "Cancelada",
+      cls: "bg-destructive/20 text-destructive",
+    },
   };
   const m = map[status];
   return (
-    <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1 ${m.cls}`}>
+    <span
+      className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1 ${m.cls}`}
+    >
       {m.label}
     </span>
   );
@@ -989,7 +1154,9 @@ function AffiliateDetailsModal({
               {affiliate.name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <h3 className="font-display text-2xl leading-tight truncate">{affiliate.name}</h3>
+              <h3 className="font-display text-2xl leading-tight truncate">
+                {affiliate.name}
+              </h3>
               <div className="flex items-center gap-2 mt-1 text-[11px]">
                 <span
                   className={`px-2 py-0.5 rounded-full ${affiliate.active ? "bg-success text-success-foreground" : "bg-white/20"}`}
@@ -1006,11 +1173,15 @@ function AffiliateDetailsModal({
           </div>
           <div className="relative grid grid-cols-2 gap-2 mt-4">
             <div className="rounded-xl bg-white/15 backdrop-blur px-3 py-2">
-              <div className="text-[10px] uppercase opacity-80">Faturado (pago)</div>
+              <div className="text-[10px] uppercase opacity-80">
+                Faturado (pago)
+              </div>
               <div className="font-bold">{brl(totalPaid)}</div>
             </div>
             <div className="rounded-xl bg-gold text-gold-foreground px-3 py-2">
-              <div className="text-[10px] uppercase opacity-80">Comissão paga</div>
+              <div className="text-[10px] uppercase opacity-80">
+                Comissão paga
+              </div>
               <div className="font-bold">{brl(totalCommission)}</div>
             </div>
           </div>
@@ -1048,34 +1219,52 @@ function AffiliateDetailsModal({
           </div>
 
           <div className="text-xs text-muted-foreground mb-3">
-            Cadastrada em {new Date(affiliate.createdAt).toLocaleDateString("pt-BR")}
+            Cadastrada em{" "}
+            {new Date(affiliate.createdAt).toLocaleDateString("pt-BR")}
           </div>
 
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="bg-success/10 rounded-xl p-3 text-center">
-              <div className="text-lg font-bold text-success">{paid.length}</div>
+              <div className="text-lg font-bold text-success">
+                {paid.length}
+              </div>
               <div className="text-[10px] text-muted-foreground">Pagas</div>
             </div>
             <div className="bg-gold/10 rounded-xl p-3 text-center">
-              <div className="text-lg font-bold text-gold">{pending.length}</div>
+              <div className="text-lg font-bold text-gold">
+                {pending.length}
+              </div>
               <div className="text-[10px] text-muted-foreground">Pendentes</div>
             </div>
             <div className="bg-destructive/10 rounded-xl p-3 text-center">
-              <div className="text-lg font-bold text-destructive">{cancelled.length}</div>
-              <div className="text-[10px] text-muted-foreground">Canceladas</div>
+              <div className="text-lg font-bold text-destructive">
+                {cancelled.length}
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                Canceladas
+              </div>
             </div>
           </div>
 
           <div className="mb-4">
-            <div className="text-xs font-semibold text-muted-foreground mb-2">Últimas vendas</div>
+            <div className="text-xs font-semibold text-muted-foreground mb-2">
+              Últimas vendas
+            </div>
             {recent.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-2">Nenhuma venda ainda.</p>
+              <p className="text-xs text-muted-foreground py-2">
+                Nenhuma venda ainda.
+              </p>
             ) : (
               <ul className="divide-y divide-border">
                 {recent.map((s) => (
-                  <li key={s.id} className="py-2 flex justify-between items-center text-sm">
+                  <li
+                    key={s.id}
+                    className="py-2 flex justify-between items-center text-sm"
+                  >
                     <div className="min-w-0">
-                      <div className="font-medium truncate">{s.customerName}</div>
+                      <div className="font-medium truncate">
+                        {s.customerName}
+                      </div>
                       <div className="text-[11px] text-muted-foreground truncate">
                         {s.productDescription}
                       </div>

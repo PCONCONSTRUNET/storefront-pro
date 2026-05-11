@@ -48,8 +48,12 @@ function Page() {
             className="h-20 w-auto mx-auto object-contain"
             style={{ mixBlendMode: "multiply" }}
           />
-          <h1 className="font-display text-2xl text-primary mt-3">Painel da Afiliada</h1>
-          <p className="text-xs text-muted-foreground">Acesse com seu e-mail e senha</p>
+          <h1 className="font-display text-2xl text-primary mt-3">
+            Painel da Afiliada
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Acesse com seu e-mail e senha
+          </p>
         </div>
         <form onSubmit={submit} className="mt-6 space-y-3">
           {error && (
@@ -58,7 +62,9 @@ function Page() {
             </div>
           )}
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">E-mail</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              E-mail
+            </span>
             <input
               type="email"
               value={email}
@@ -69,7 +75,9 @@ function Page() {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Senha</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Senha
+            </span>
             <input
               type="password"
               value={pwd}

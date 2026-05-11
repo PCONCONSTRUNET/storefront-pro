@@ -26,7 +26,11 @@ export function ImageCropModal({
     const cont = containerRef.current!;
     const maxW = cont.clientWidth;
     const maxH = Math.min(window.innerHeight * 0.6, 600);
-    const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+    const ratio = Math.min(
+      maxW / img.naturalWidth,
+      maxH / img.naturalHeight,
+      1,
+    );
     const w = img.naturalWidth * ratio;
     const h = img.naturalHeight * ratio;
     setImgSize({ w, h });
@@ -35,8 +39,11 @@ export function ImageCropModal({
     setRect({ x: m, y: m, w: w - m * 2, h: h - m * 2 });
   };
 
-  const getPos = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
-    const t = "touches" in e ? e.touches[0] || (e as TouchEvent).changedTouches[0] : e;
+  const getPos = (
+    e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent,
+  ) => {
+    const t =
+      "touches" in e ? e.touches[0] || (e as TouchEvent).changedTouches[0] : e;
     return { x: (t as any).clientX, y: (t as any).clientY };
   };
 
@@ -61,8 +68,10 @@ export function ImageCropModal({
         x = Math.max(0, Math.min(imgSize.w - w, x + dx));
         y = Math.max(0, Math.min(imgSize.h - h, y + dy));
       } else {
-        if (mode.includes("e")) w = Math.max(min, Math.min(imgSize.w - x, w + dx));
-        if (mode.includes("s")) h = Math.max(min, Math.min(imgSize.h - y, h + dy));
+        if (mode.includes("e"))
+          w = Math.max(min, Math.min(imgSize.w - x, w + dx));
+        if (mode.includes("s"))
+          h = Math.max(min, Math.min(imgSize.h - y, h + dy));
         if (mode.includes("w")) {
           const nx = Math.max(0, Math.min(x + w - min, x + dx));
           w = w + (x - nx);
@@ -159,7 +168,10 @@ export function ImageCropModal({
               onLoad={onImgLoad}
               alt=""
               className="block max-w-full pointer-events-none"
-              style={{ width: imgSize.w || undefined, height: imgSize.h || undefined }}
+              style={{
+                width: imgSize.w || undefined,
+                height: imgSize.h || undefined,
+              }}
               crossOrigin="anonymous"
             />
             {imgSize.w > 0 && (

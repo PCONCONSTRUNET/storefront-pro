@@ -5,7 +5,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -16,8 +17,10 @@ const json = (data: unknown, status = 200) =>
   });
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST")
+    return json({ error: "Método não permitido" }, 405);
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
   const SANDBOX = !MP_TOKEN;
@@ -116,7 +119,10 @@ Deno.serve(async (req) => {
       last_name: lastName,
       ...(customer.document
         ? {
-            identification: { type: "CPF", number: String(customer.document).replace(/\D/g, "") },
+            identification: {
+              type: "CPF",
+              number: String(customer.document).replace(/\D/g, ""),
+            },
           }
         : {}),
     },
@@ -138,8 +144,14 @@ Deno.serve(async (req) => {
 
   if (!mpRes.ok) {
     console.error("[mp-create-pix] MP error:", mpRes.status, mpData);
-    await supabase.from("orders").update({ payment_status: "rejected" }).eq("id", order.id);
-    return json({ error: "Mercado Pago recusou o pagamento", details: mpData }, 502);
+    await supabase
+      .from("orders")
+      .update({ payment_status: "rejected" })
+      .eq("id", order.id);
+    return json(
+      { error: "Mercado Pago recusou o pagamento", details: mpData },
+      502,
+    );
   }
 
   const td = mpData.point_of_interaction?.transaction_data ?? {};

@@ -34,7 +34,9 @@ function Page() {
           <div className="w-20 h-20 mx-auto rounded-full gradient-soft grid place-items-center">
             <User className="h-9 w-9 text-primary" />
           </div>
-          <h1 className="text-xl font-bold mt-4">Bem-vinda à Princesa de Laços</h1>
+          <h1 className="text-xl font-bold mt-4">
+            Bem-vinda à Princesa de Laços
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Entre ou crie sua conta para acompanhar pedidos.
           </p>
@@ -62,7 +64,11 @@ function Page() {
           </Link>
         </div>
         {authMode && (
-          <AuthModal mode={authMode} setMode={setAuthMode} onClose={() => setAuthMode(null)} />
+          <AuthModal
+            mode={authMode}
+            setMode={setAuthMode}
+            onClose={() => setAuthMode(null)}
+          />
         )}
       </StoreLayout>
     );
@@ -70,7 +76,11 @@ function Page() {
 
   const items = [
     { to: "/pedidos", icon: Package, label: "Meus pedidos" },
-    { to: "/perfil/transacoes", icon: Receipt, label: "Histórico de transações" },
+    {
+      to: "/perfil/transacoes",
+      icon: Receipt,
+      label: "Histórico de transações",
+    },
     { to: "/perfil/enderecos", icon: MapPin, label: "Endereços" },
     { to: "/perfil/favoritos", icon: Heart, label: "Favoritos" },
     { to: "/suporte", icon: HelpCircle, label: "Central de Ajuda" },
@@ -122,7 +132,8 @@ function Page() {
               aria-label="Instagram"
               className="group relative w-12 h-12 rounded-2xl flex items-center justify-center text-white overflow-hidden shadow-lg transition-all hover:scale-110 hover:shadow-xl"
               style={{
-                background: "linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
+                background:
+                  "linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)",
               }}
             >
               <Instagram className="h-6 w-6 relative z-10" />
@@ -134,7 +145,9 @@ function Page() {
               rel="noopener noreferrer"
               aria-label="WhatsApp"
               className="group relative w-12 h-12 rounded-2xl flex items-center justify-center text-white overflow-hidden shadow-lg transition-all hover:scale-110 hover:shadow-xl"
-              style={{ background: "linear-gradient(135deg, #25d366, #128c7e)" }}
+              style={{
+                background: "linear-gradient(135deg, #25d366, #128c7e)",
+              }}
             >
               <svg
                 viewBox="0 0 32 32"
@@ -173,7 +186,12 @@ function AuthModal({
   const registerCustomer = useStore((s) => s.registerCustomer);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
 
   const submitLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,12 +239,17 @@ function AuthModal({
             {mode === "login" ? "Bem-vinda" : "Crie sua conta"}
           </h2>
           <p className="text-primary-foreground/90 text-xs">
-            {mode === "login" ? "Entre na sua conta." : "Preencha os dados para começar."}
+            {mode === "login"
+              ? "Entre na sua conta."
+              : "Preencha os dados para começar."}
           </p>
         </div>
 
         {mode === "login" ? (
-          <form onSubmit={submitLogin} className="px-4 py-4 space-y-3 text-left">
+          <form
+            onSubmit={submitLogin}
+            className="px-4 py-4 space-y-3 text-left"
+          >
             <AuthField
               label="E-mail"
               type="email"
@@ -256,7 +279,10 @@ function AuthModal({
             </p>
           </form>
         ) : (
-          <form onSubmit={submitCadastro} className="px-4 py-4 space-y-3 text-left">
+          <form
+            onSubmit={submitCadastro}
+            className="px-4 py-4 space-y-3 text-left"
+          >
             <AuthField
               label="Nome completo"
               value={form.name}

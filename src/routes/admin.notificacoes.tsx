@@ -68,7 +68,11 @@ function Page() {
   );
 
   const audienceCount = (a: NotificationAudience) =>
-    a === "cliente" ? customers.length : a === "afiliada" ? affiliates.length : 1;
+    a === "cliente"
+      ? customers.length
+      : a === "afiliada"
+        ? affiliates.length
+        : 1;
 
   const send = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +88,12 @@ function Page() {
       toast.error("Escolha ao menos um canal");
       return;
     }
-    sendManual({ title: form.title, body: form.body, audience: form.audience, channels });
+    sendManual({
+      title: form.title,
+      body: form.body,
+      audience: form.audience,
+      channels,
+    });
     setForm({ ...form, title: "", body: "" });
     toast.success(
       `Notificação enviada para ${audienceCount(form.audience)} ${form.audience === "cliente" ? "cliente(s)" : form.audience === "afiliada" ? "afiliada(s)" : "destinatário(s)"}`,
@@ -95,10 +104,8 @@ function Page() {
     if (enabled) {
       const r = await requestPushPermission();
       if (r === "granted") toast.success("Notificações ativadas!");
-      else if (r === "denied")
-        toast.error("Permissão negada no navegador");
-      else if (r === "unsupported")
-        toast.error("Navegador sem suporte");
+      else if (r === "denied") toast.error("Permissão negada no navegador");
+      else if (r === "unsupported") toast.error("Navegador sem suporte");
     } else {
       await disablePush();
       toast.success("Notificações desativadas para este dispositivo");
@@ -117,21 +124,29 @@ function Page() {
               <BellRing className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="font-display text-2xl leading-tight">Central de notificações</h2>
-              <p className="text-xs opacity-90">Push, e-mail e in-app — tudo em um só lugar.</p>
+              <h2 className="font-display text-2xl leading-tight">
+                Central de notificações
+              </h2>
+              <p className="text-xs opacity-90">
+                Push, e-mail e in-app — tudo em um só lugar.
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur px-4 py-2 rounded-2xl border border-white/10">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold uppercase opacity-70">Status do Push</span>
+              <span className="text-[10px] font-bold uppercase opacity-70">
+                Status do Push
+              </span>
               <PushBadge state={pushPermission} />
             </div>
             <div className="w-px h-8 bg-white/20" />
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold uppercase opacity-70 mb-1">Notificações</span>
-              <Switch 
-                checked={pushEnabled} 
-                onChange={togglePush} 
+              <span className="text-[10px] font-bold uppercase opacity-70 mb-1">
+                Notificações
+              </span>
+              <Switch
+                checked={pushEnabled}
+                onChange={togglePush}
                 className="bg-white/20"
               />
             </div>
@@ -141,26 +156,44 @@ function Page() {
           <Stat label="Enviadas" value={stats.total} />
           <Stat label="Não lidas" value={stats.unread} highlight />
           <Stat label="Via push" value={stats.push} />
-          <Stat label="Modelos ativos" value={`${stats.activeTemplates}/${templates.length}`} />
+          <Stat
+            label="Modelos ativos"
+            value={`${stats.activeTemplates}/${templates.length}`}
+          />
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-4 overflow-x-auto">
-        <TabBtn active={tab === "enviar"} onClick={() => setTab("enviar")} icon={Send}>
+        <TabBtn
+          active={tab === "enviar"}
+          onClick={() => setTab("enviar")}
+          icon={Send}
+        >
           Enviar
         </TabBtn>
-        <TabBtn active={tab === "modelos"} onClick={() => setTab("modelos")} icon={Settings2}>
+        <TabBtn
+          active={tab === "modelos"}
+          onClick={() => setTab("modelos")}
+          icon={Settings2}
+        >
           Modelos ({templates.length})
         </TabBtn>
-        <TabBtn active={tab === "historico"} onClick={() => setTab("historico")} icon={History}>
+        <TabBtn
+          active={tab === "historico"}
+          onClick={() => setTab("historico")}
+          icon={History}
+        >
           Histórico ({logs.length})
         </TabBtn>
       </div>
 
       {tab === "enviar" && (
         <div className="grid lg:grid-cols-[1fr_360px] gap-4 animate-fade-in">
-          <form onSubmit={send} className="bg-card rounded-2xl p-5 shadow-card space-y-4">
+          <form
+            onSubmit={send}
+            className="bg-card rounded-2xl p-5 shadow-card space-y-4"
+          >
             <h3 className="font-bold flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" /> Notificação manual
             </h3>
@@ -173,7 +206,9 @@ function Page() {
                 className="input"
                 placeholder="Ex: Promoção relâmpago 🎀"
               />
-              <span className="text-[10px] text-muted-foreground">{form.title.length}/60</span>
+              <span className="text-[10px] text-muted-foreground">
+                {form.title.length}/60
+              </span>
             </Field>
 
             <Field label="Mensagem">
@@ -185,7 +220,9 @@ function Page() {
                 className="input min-h-[96px] py-2"
                 placeholder="Escreva uma mensagem curta e direta..."
               />
-              <span className="text-[10px] text-muted-foreground">{form.body.length}/160</span>
+              <span className="text-[10px] text-muted-foreground">
+                {form.body.length}/160
+              </span>
             </Field>
 
             <div>
@@ -193,7 +230,9 @@ function Page() {
                 Público
               </span>
               <div className="grid grid-cols-3 gap-2 mt-1.5">
-                {(["cliente", "afiliada", "admin"] as NotificationAudience[]).map((a) => (
+                {(
+                  ["cliente", "afiliada", "admin"] as NotificationAudience[]
+                ).map((a) => (
                   <button
                     key={a}
                     type="button"
@@ -201,7 +240,9 @@ function Page() {
                     className={`h-14 rounded-xl border text-xs font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.audience === a ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
                   >
                     <span className="capitalize">{AUDIENCE_LABELS[a]}s</span>
-                    <span className="text-[10px] opacity-80">{audienceCount(a)} dest.</span>
+                    <span className="text-[10px] opacity-80">
+                      {audienceCount(a)} dest.
+                    </span>
                   </button>
                 ))}
               </div>
@@ -217,7 +258,10 @@ function Page() {
                   label="Push"
                   active={form.channels.push}
                   onClick={() =>
-                    setForm({ ...form, channels: { ...form.channels, push: !form.channels.push } })
+                    setForm({
+                      ...form,
+                      channels: { ...form.channels, push: !form.channels.push },
+                    })
                   }
                 />
                 <ChannelToggle
@@ -227,7 +271,10 @@ function Page() {
                   onClick={() =>
                     setForm({
                       ...form,
-                      channels: { ...form.channels, email: !form.channels.email },
+                      channels: {
+                        ...form.channels,
+                        email: !form.channels.email,
+                      },
                     })
                   }
                 />
@@ -238,7 +285,10 @@ function Page() {
                   onClick={() =>
                     setForm({
                       ...form,
-                      channels: { ...form.channels, inapp: !form.channels.inapp },
+                      channels: {
+                        ...form.channels,
+                        inapp: !form.channels.inapp,
+                      },
                     })
                   }
                 />
@@ -249,8 +299,8 @@ function Page() {
               <Send className="h-4 w-4" /> Enviar agora
             </button>
             <p className="text-[11px] text-muted-foreground text-center">
-              Push via OneSignal ativo ✅ — notificações serão entregues aos dispositivos
-              cadastrados.
+              Push via OneSignal ativo ✅ — notificações serão entregues aos
+              dispositivos cadastrados.
             </p>
           </form>
 
@@ -271,8 +321,9 @@ function Page() {
             <div>
               <h3 className="font-bold">Modelos automáticos</h3>
               <p className="text-xs text-muted-foreground">
-                Disparados pelos eventos da loja. Use {"{cliente}"}, {"{pedido}"}, {"{total}"},{" "}
-                {"{afiliada}"}, {"{comissao}"}, {"{produto}"}, {"{estoque}"} como variáveis.
+                Disparados pelos eventos da loja. Use {"{cliente}"},{" "}
+                {"{pedido}"}, {"{total}"}, {"{afiliada}"}, {"{comissao}"},{" "}
+                {"{produto}"}, {"{estoque}"} como variáveis.
               </p>
             </div>
             <button
@@ -345,18 +396,30 @@ function Page() {
                           {AUDIENCE_LABELS[l.audience]}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{l.body}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {l.body}
+                      </p>
                       <div className="flex items-center gap-2 mt-1.5 text-[10px] text-muted-foreground">
-                        <span>{new Date(l.sentAt).toLocaleString("pt-BR")}</span>
+                        <span>
+                          {new Date(l.sentAt).toLocaleString("pt-BR")}
+                        </span>
                         <span>·</span>
                         <span className="flex items-center gap-1">
-                          {l.channels.includes("push") && <Smartphone className="h-3 w-3" />}
-                          {l.channels.includes("email") && <Mail className="h-3 w-3" />}
-                          {l.channels.includes("inapp") && <MessageSquare className="h-3 w-3" />}
+                          {l.channels.includes("push") && (
+                            <Smartphone className="h-3 w-3" />
+                          )}
+                          {l.channels.includes("email") && (
+                            <Mail className="h-3 w-3" />
+                          )}
+                          {l.channels.includes("inapp") && (
+                            <MessageSquare className="h-3 w-3" />
+                          )}
                         </span>
                       </div>
                     </div>
-                    {!l.read && <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />}
+                    {!l.read && (
+                      <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />
+                    )}
                   </div>
                 </li>
               ))}
@@ -404,26 +467,45 @@ function Stat({
     <div
       className={`rounded-xl px-3 py-2 backdrop-blur ${highlight ? "bg-gold text-gold-foreground" : "bg-white/15"}`}
     >
-      <div className="text-[10px] uppercase tracking-wide opacity-90">{label}</div>
+      <div className="text-[10px] uppercase tracking-wide opacity-90">
+        {label}
+      </div>
       <div className="font-bold text-base mt-0.5">{value}</div>
     </div>
   );
 }
 
-function PushBadge({ state }: { state: NotificationPermission | "unsupported" }) {
+function PushBadge({
+  state,
+}: {
+  state: NotificationPermission | "unsupported";
+}) {
   const map = {
     granted: { label: "Push ativo", cls: "bg-success text-success-foreground" },
-    denied: { label: "Push bloqueado", cls: "bg-destructive text-destructive-foreground" },
+    denied: {
+      label: "Push bloqueado",
+      cls: "bg-destructive text-destructive-foreground",
+    },
     default: { label: "Push pendente", cls: "bg-white/15" },
     unsupported: { label: "Sem suporte", cls: "bg-white/15" },
   } as const;
   const m = map[state] ?? map.default;
   return (
-    <span className={`text-[10px] px-2 py-1 rounded-full font-semibold ${m.cls}`}>{m.label}</span>
+    <span
+      className={`text-[10px] px-2 py-1 rounded-full font-semibold ${m.cls}`}
+    >
+      {m.label}
+    </span>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -452,7 +534,11 @@ function ChannelToggle({
       className={`h-12 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${active ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
     >
       <Icon className="h-3.5 w-3.5" /> {label}
-      {active ? <Check className="h-3 w-3" /> : <X className="h-3 w-3 opacity-50" />}
+      {active ? (
+        <Check className="h-3 w-3" />
+      ) : (
+        <X className="h-3 w-3 opacity-50" />
+      )}
     </button>
   );
 }
@@ -470,7 +556,9 @@ function NotificationPreview({ title, body }: { title: string; body: string }) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] opacity-70 uppercase">Princesa de Laços</span>
+              <span className="text-[10px] opacity-70 uppercase">
+                Princesa de Laços
+              </span>
               <span className="text-[10px] opacity-70">agora</span>
             </div>
             <div className="font-semibold text-sm truncate">{title}</div>
@@ -478,12 +566,16 @@ function NotificationPreview({ title, body }: { title: string; body: string }) {
           </div>
         </div>
       </div>
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">In-app (toast)</p>
+      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+        In-app (toast)
+      </p>
       <div className="rounded-xl bg-card border border-border p-3 flex items-start gap-2">
         <Bell className="h-4 w-4 text-primary shrink-0 mt-0.5" />
         <div className="min-w-0">
           <div className="font-semibold text-sm truncate">{title}</div>
-          <div className="text-xs text-muted-foreground line-clamp-2">{body}</div>
+          <div className="text-xs text-muted-foreground line-clamp-2">
+            {body}
+          </div>
         </div>
       </div>
     </div>
@@ -506,7 +598,9 @@ function TemplateRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm">{CATEGORY_LABELS[template.category]}</span>
+            <span className="font-semibold text-sm">
+              {CATEGORY_LABELS[template.category]}
+            </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted capitalize">
               {AUDIENCE_LABELS[template.audience]}
             </span>
@@ -516,13 +610,26 @@ function TemplateRow({
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground truncate">{template.title}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {template.title}
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <ChannelDot icon={Smartphone} active={template.sendPush} title="Push" />
+          <ChannelDot
+            icon={Smartphone}
+            active={template.sendPush}
+            title="Push"
+          />
           <ChannelDot icon={Mail} active={template.sendEmail} title="E-mail" />
-          <ChannelDot icon={MessageSquare} active={template.sendInApp} title="In-app" />
-          <Switch checked={template.enabled} onChange={(v) => onChange({ enabled: v })} />
+          <ChannelDot
+            icon={MessageSquare}
+            active={template.sendInApp}
+            title="In-app"
+          />
+          <Switch
+            checked={template.enabled}
+            onChange={(v) => onChange({ enabled: v })}
+          />
           <button
             onClick={() => setOpen((o) => !o)}
             className="text-xs font-semibold text-primary px-2"

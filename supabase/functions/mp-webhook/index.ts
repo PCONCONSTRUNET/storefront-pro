@@ -11,7 +11,9 @@ Deno.serve(async (req) => {
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
   if (!MP_TOKEN) {
-    console.warn("[mp-webhook] sem MERCADOPAGO_ACCESS_TOKEN — ignorando (modo sandbox)");
+    console.warn(
+      "[mp-webhook] sem MERCADOPAGO_ACCESS_TOKEN — ignorando (modo sandbox)",
+    );
     return new Response("sandbox", { status: 200 });
   }
 
@@ -44,9 +46,12 @@ Deno.serve(async (req) => {
   const eventId = `mp-${paymentId}-${Date.now()}`;
 
   // Busca status atualizado direto no MP
-  const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-    headers: { Authorization: `Bearer ${MP_TOKEN}` },
-  });
+  const mpRes = await fetch(
+    `https://api.mercadopago.com/v1/payments/${paymentId}`,
+    {
+      headers: { Authorization: `Bearer ${MP_TOKEN}` },
+    },
+  );
   if (!mpRes.ok) {
     console.error("[mp-webhook] MP fetch falhou:", mpRes.status);
     return new Response("mp error", { status: 200 }); // 200 pra MP não reenviar infinito
@@ -129,7 +134,8 @@ Deno.serve(async (req) => {
           orderId: order.id.slice(0, 8),
           items: order.items,
           total: Number(order.total),
-          paymentMethod: order.payment_method === "card" ? "Cartão de crédito" : "Pix",
+          paymentMethod:
+            order.payment_method === "card" ? "Cartão de crédito" : "Pix",
         },
       });
     } catch (e) {

@@ -13,7 +13,12 @@ function Page() {
   const hydrated = useStoreHydrated();
   const currentId = useStore((s) => s.currentAffiliateId);
   const register = useStore((s) => s.registerAffiliate);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
 
   useEffect(() => {
     if (hydrated && currentId) navigate({ to: "/afiliada" });
@@ -29,8 +34,9 @@ function Page() {
     } else toast.error(r.message);
   };
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm({ ...form, [k]: e.target.value });
+  const set =
+    (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+      setForm({ ...form, [k]: e.target.value });
 
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-rose/30 to-accent p-4">
@@ -39,12 +45,22 @@ function Page() {
           <div className="w-14 h-14 mx-auto rounded-full gradient-primary grid place-items-center text-primary-foreground">
             <Sparkles className="h-7 w-7" />
           </div>
-          <h1 className="font-display text-2xl text-primary mt-3">Seja uma afiliada</h1>
-          <p className="text-xs text-muted-foreground">Crie sua conta para registrar suas vendas</p>
+          <h1 className="font-display text-2xl text-primary mt-3">
+            Seja uma afiliada
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Crie sua conta para registrar suas vendas
+          </p>
         </div>
         <form onSubmit={submit} className="mt-6 space-y-3">
           <Field label="Nome completo *">
-            <input value={form.name} onChange={set("name")} required autoFocus className="input" />
+            <input
+              value={form.name}
+              onChange={set("name")}
+              required
+              autoFocus
+              className="input"
+            />
           </Field>
           <Field label="E-mail *">
             <input
@@ -56,7 +72,11 @@ function Page() {
             />
           </Field>
           <Field label="WhatsApp">
-            <input value={form.phone} onChange={set("phone")} className="input" />
+            <input
+              value={form.phone}
+              onChange={set("phone")}
+              className="input"
+            />
           </Field>
           <Field label="Senha *">
             <input
@@ -87,7 +107,13 @@ function Page() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>

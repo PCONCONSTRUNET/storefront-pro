@@ -3,11 +3,19 @@
 const BOT_BASE = "http://178.105.54.230:3005";
 const BOT_TOKEN = "princesa_secret_123";
 
-type SupabaseClient = { functions: { invoke: (n: string, opts: any) => Promise<any> } };
+type SupabaseClient = {
+  functions: { invoke: (n: string, opts: any) => Promise<any> };
+};
 
-export async function notifyOrderApproved(supabase: SupabaseClient, order: any) {
+export async function notifyOrderApproved(
+  supabase: SupabaseClient,
+  order: any,
+) {
   const phone = String(order.customer_phone ?? "").replace(/\D/g, "");
-  const total = Number(order.total).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const total = Number(order.total).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
   const firstName = String(order.customer_name ?? "Cliente").split(" ")[0];
   const method = order.payment_method === "card" ? "Cartão de crédito" : "Pix";
 

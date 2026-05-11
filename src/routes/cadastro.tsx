@@ -1,4 +1,9 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
@@ -14,7 +19,12 @@ function Page() {
   const navigate = useNavigate();
   const router = useRouter();
   const registerCustomer = useStore((s) => s.registerCustomer);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -29,7 +39,9 @@ function Page() {
     if (r.ok) {
       // Dispara e-mail de boas-vindas (não bloqueia o fluxo se falhar)
       supabase.functions
-        .invoke("send-welcome-email", { body: { email: form.email, name: form.name } })
+        .invoke("send-welcome-email", {
+          body: { email: form.email, name: form.name },
+        })
         .catch((err) => console.warn("welcome email failed", err));
       navigate({ to: "/perfil" });
       toast.success(r.message);
@@ -63,7 +75,9 @@ function Page() {
               <X className="h-3.5 w-3.5" />
             </button>
             <h2 className="font-display text-2xl">Crie sua conta</h2>
-            <p className="text-primary-foreground/90 text-xs">Preencha os dados para começar.</p>
+            <p className="text-primary-foreground/90 text-xs">
+              Preencha os dados para começar.
+            </p>
           </div>
 
           <form onSubmit={submit} className="px-4 py-4 space-y-3">

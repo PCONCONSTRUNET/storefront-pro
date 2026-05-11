@@ -14,10 +14,14 @@ function Page() {
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
-      case "auth": return <Shield className="h-4 w-4 text-primary" />;
-      case "catalog": return <Activity className="h-4 w-4 text-success" />;
-      case "order": return <Activity className="h-4 w-4 text-gold" />;
-      default: return <Info className="h-4 w-4 text-muted-foreground" />;
+      case "auth":
+        return <Shield className="h-4 w-4 text-primary" />;
+      case "catalog":
+        return <Activity className="h-4 w-4 text-success" />;
+      case "order":
+        return <Activity className="h-4 w-4 text-gold" />;
+      default:
+        return <Info className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -29,7 +33,8 @@ function Page() {
             <Clock className="h-4 w-4" /> Histórico de Atividades
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Acompanhe as ações realizadas no sistema por administradores e clientes.
+            Acompanhe as ações realizadas no sistema por administradores e
+            clientes.
           </p>
         </div>
 
@@ -47,15 +52,23 @@ function Page() {
             <tbody className="divide-y divide-border">
               {activityLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td
+                    colSpan={5}
+                    className="px-4 py-10 text-center text-sm text-muted-foreground"
+                  >
                     Nenhum log encontrado.
                   </td>
                 </tr>
               ) : (
                 activityLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-muted/20 transition-colors text-sm">
+                  <tr
+                    key={log.id}
+                    className="hover:bg-muted/20 transition-colors text-sm"
+                  >
                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
-                      {format(new Date(log.createdAt), "dd/MM/yy HH:mm", { locale: ptBR })}
+                      {format(new Date(log.createdAt), "dd/MM/yy HH:mm", {
+                        locale: ptBR,
+                      })}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -64,11 +77,15 @@ function Page() {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-semibold">{log.action}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{log.description}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {log.description}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <User className="h-3 w-3 opacity-50" />
-                        <span className="text-xs">{log.userId ? log.userId.slice(0,8) : "Sistema"}</span>
+                        <span className="text-xs">
+                          {log.userId ? log.userId.slice(0, 8) : "Sistema"}
+                        </span>
                       </div>
                     </td>
                   </tr>

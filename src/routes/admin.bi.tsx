@@ -27,17 +27,23 @@ function Page() {
   const { orders, products, customers } = useStore();
 
   const metrics = useMemo(() => {
-    const totalRev = orders.filter(o => o.status !== "cancelado").reduce((a, o) => a + o.total, 0);
+    const totalRev = orders
+      .filter((o) => o.status !== "cancelado")
+      .reduce((a, o) => a + o.total, 0);
     const avgTicket = orders.length > 0 ? totalRev / orders.length : 0;
-    const stockCritical = products.filter(p => p.stock <= (p.minStock ?? 5)).length;
+    const stockCritical = products.filter(
+      (p) => p.stock <= (p.minStock ?? 5),
+    ).length;
     const activeCustomers = customers.length;
 
     return { totalRev, avgTicket, stockCritical, activeCustomers };
   }, [orders, products, customers]);
 
   const stockHealth = useMemo(() => {
-    const outOfStock = products.filter(p => p.stock === 0).length;
-    const lowStock = products.filter(p => p.stock > 0 && p.stock <= (p.minStock ?? 5)).length;
+    const outOfStock = products.filter((p) => p.stock === 0).length;
+    const lowStock = products.filter(
+      (p) => p.stock > 0 && p.stock <= (p.minStock ?? 5),
+    ).length;
     const healthy = products.length - outOfStock - lowStock;
 
     return [
@@ -49,11 +55,11 @@ function Page() {
 
   const salesByCategory = useMemo(() => {
     const map = new Map<string, number>();
-    orders.forEach(o => {
-      o.items.forEach(it => {
-        const p = products.find(prod => prod.id === it.productId);
+    orders.forEach((o) => {
+      o.items.forEach((it) => {
+        const p = products.find((prod) => prod.id === it.productId);
         const cat = p?.category || "Outros";
-        map.set(cat, (map.get(cat) || 0) + (it.price * it.quantity));
+        map.set(cat, (map.get(cat) || 0) + it.price * it.quantity);
       });
     });
     return Array.from(map.entries())
@@ -64,10 +70,30 @@ function Page() {
   return (
     <AdminLayout title="Business Intelligence">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <BIStat label="Faturamento Total" value={brl(metrics.totalRev)} icon={TrendingUp} color="text-success" />
-        <BIStat label="Ticket Médio" value={brl(metrics.avgTicket)} icon={Activity} color="text-primary" />
-        <BIStat label="Estoque Crítico" value={metrics.stockCritical} icon={AlertTriangle} color="text-gold" />
-        <BIStat label="Base de Clientes" value={metrics.activeCustomers} icon={Package} color="text-primary" />
+        <BIStat
+          label="Faturamento Total"
+          value={brl(metrics.totalRev)}
+          icon={TrendingUp}
+          color="text-success"
+        />
+        <BIStat
+          label="Ticket Médio"
+          value={brl(metrics.avgTicket)}
+          icon={Activity}
+          color="text-primary"
+        />
+        <BIStat
+          label="Estoque Crítico"
+          value={metrics.stockCritical}
+          icon={AlertTriangle}
+          color="text-gold"
+        />
+        <BIStat
+          label="Base de Clientes"
+          value={metrics.activeCustomers}
+          icon={Package}
+          color="text-primary"
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -86,7 +112,10 @@ function Page() {
                   dataKey="value"
                 >
                   {stockHealth.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -95,9 +124,17 @@ function Page() {
           </div>
           <div className="flex justify-center gap-4 mt-2">
             {stockHealth.map((entry, index) => (
-              <div key={entry.name} className="flex items-center gap-1.5 text-xs">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                <span>{entry.name}: {entry.value}</span>
+              <div
+                key={entry.name}
+                className="flex items-center gap-1.5 text-xs"
+              >
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                />
+                <span>
+                  {entry.name}: {entry.value}
+                </span>
               </div>
             ))}
           </div>
@@ -108,13 +145,29 @@ function Page() {
           <div className="h-64">
             <ResponsiveContainer>
               <BarChart data={salesByCategory}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="name" fontSize={11} stroke="var(--muted-foreground)" />
-                <YAxis fontSize={11} stroke="var(--muted-foreground)" />
-                <Tooltip 
-                  contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }}
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="var(--border)"
                 />
-                <Bar dataKey="value" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+                <XAxis
+                  dataKey="name"
+                  fontSize={11}
+                  stroke="var(--muted-foreground)"
+                />
+                <YAxis fontSize={11} stroke="var(--muted-foreground)" />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="var(--primary)"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -124,7 +177,17 @@ function Page() {
   );
 }
 
-function BIStat({ label, value, icon: Icon, color }: { label: string, value: string | number, icon: any, color: string }) {
+function BIStat({
+  label,
+  value,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: string | number;
+  icon: any;
+  color: string;
+}) {
   return (
     <div className="bg-card rounded-2xl p-4 shadow-card border border-border/50">
       <div className="flex items-center justify-between mb-2">

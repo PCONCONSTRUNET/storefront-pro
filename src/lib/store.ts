@@ -14,9 +14,14 @@ import {
 import { useNotifications } from "./notifications";
 import { cloud, fetchCloudSnapshot } from "./cloud";
 
-const brlFmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const brlFmt = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-export type CartItem = { productId: string; quantity: number; variation?: string };
+export type CartItem = {
+  productId: string;
+  quantity: number;
+  variation?: string;
+};
 
 export type Review = {
   id: string;
@@ -81,7 +86,13 @@ export type Order = {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-  items: { productId: string; name: string; price: number; quantity: number; image: string }[];
+  items: {
+    productId: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }[];
   subtotal: number;
   discount: number;
   shipping: number;
@@ -261,29 +272,51 @@ type AppState = {
   applyCoupon: (code: string) => { ok: boolean; message: string };
   removeCoupon: () => void;
 
-  registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => { ok: boolean; message: string };
-  loginCustomer: (email: string, password: string) => { ok: boolean; message: string };
+  registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => {
+    ok: boolean;
+    message: string;
+  };
+  loginCustomer: (
+    email: string,
+    password: string,
+  ) => { ok: boolean; message: string };
   logoutCustomer: () => void;
-  updateCustomer: (data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>) => {
+  updateCustomer: (
+    data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>,
+  ) => {
     ok: boolean;
     message: string;
   };
   addAddress: (address: string) => void;
   removeAddress: (index: number) => void;
   toggleFavorite: (productId: string) => void;
-  loginAdmin: (email: string, password: string) => { ok: boolean; message: string };
+  loginAdmin: (
+    email: string,
+    password: string,
+  ) => { ok: boolean; message: string };
   logoutAdmin: () => void;
 
-  loginAffiliate: (email: string, password: string) => { ok: boolean; message: string };
+  loginAffiliate: (
+    email: string,
+    password: string,
+  ) => { ok: boolean; message: string };
   logoutAffiliate: () => void;
-  registerAffiliate: (data: { name: string; email: string; password: string; phone: string }) => {
+  registerAffiliate: (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+  }) => {
     ok: boolean;
     message: string;
   };
   upsertAffiliate: (a: Affiliate) => void;
   deleteAffiliate: (id: string) => void;
   registerAffiliateSale: (
-    s: Omit<AffiliateSale, "id" | "createdAt" | "commissionEarned" | "status"> & {
+    s: Omit<
+      AffiliateSale,
+      "id" | "createdAt" | "commissionEarned" | "status"
+    > & {
       status?: AffiliateSaleStatus;
     },
   ) => AffiliateSale | null;
@@ -311,16 +344,24 @@ type AppState = {
   updateSettings: (s: Partial<StoreSettings>) => void;
 
   addTransaction: (t: Omit<Transaction, "id" | "createdAt">) => Transaction;
-  updateTransaction: (id: string, patch: Partial<Omit<Transaction, "id" | "createdAt">>) => void;
+  updateTransaction: (
+    id: string,
+    patch: Partial<Omit<Transaction, "id" | "createdAt">>,
+  ) => void;
   deleteTransaction: (id: string) => void;
 
-  addReview: (r: Omit<Review, "id" | "createdAt" | "customerId" | "customerName">) => {
+  addReview: (
+    r: Omit<Review, "id" | "createdAt" | "customerId" | "customerName">,
+  ) => {
     ok: boolean;
     message: string;
   };
   deleteReview: (id: string) => void;
 
-  joinWaitlist: (productId: string, email: string) => { ok: boolean; message: string };
+  joinWaitlist: (
+    productId: string,
+    email: string,
+  ) => { ok: boolean; message: string };
   upsertFAQ: (f: FAQItem) => void;
   deleteFAQ: (id: string) => void;
 
@@ -373,9 +414,11 @@ export const useStore = create<AppState>()(
         const ADMIN_EMAILS = ["lucaspereirabn10@gmail.com"];
         if (ADMIN_EMAILS.includes(e)) return { kind: "admin", email: e };
         const aff = get().affiliates.find((a) => a.email.toLowerCase() === e);
-        if (aff) return { kind: "affiliate", email: aff.email, phone: aff.phone };
+        if (aff)
+          return { kind: "affiliate", email: aff.email, phone: aff.phone };
         const cust = get().customers.find((c) => c.email.toLowerCase() === e);
-        if (cust) return { kind: "customer", email: cust.email, phone: cust.phone };
+        if (cust)
+          return { kind: "customer", email: cust.email, phone: cust.phone };
         return null;
       },
       resetPasswordFor: (kind, email, newPassword) => {
@@ -383,12 +426,23 @@ export const useStore = create<AppState>()(
         if (!newPassword || newPassword.length < 4)
           return { ok: false, message: "Senha muito curta (mín. 4)" };
         if (kind === "admin") {
-          set((s) => ({ adminPasswordOverride: { ...s.adminPasswordOverride, [e]: newPassword } }));
+          set((s) => ({
+            adminPasswordOverride: {
+              ...s.adminPasswordOverride,
+              [e]: newPassword,
+            },
+          }));
           return { ok: true, message: "Senha redefinida com sucesso" };
         }
         if (kind === "affiliate") {
-          const exists = get().affiliates.find((a) => a.email.toLowerCase() === e);
-          if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
+          const exists = get().affiliates.find(
+            (a) => a.email.toLowerCase() === e,
+          );
+          if (!exists)
+            return {
+              ok: false,
+              message: "Conta não encontrada neste dispositivo",
+            };
           set((s) => ({
             affiliates: s.affiliates.map((a) =>
               a.email.toLowerCase() === e ? { ...a, password: newPassword } : a,
@@ -397,7 +451,11 @@ export const useStore = create<AppState>()(
           return { ok: true, message: "Senha redefinida com sucesso" };
         }
         const exists = get().customers.find((c) => c.email.toLowerCase() === e);
-        if (!exists) return { ok: false, message: "Conta não encontrada neste dispositivo" };
+        if (!exists)
+          return {
+            ok: false,
+            message: "Conta não encontrada neste dispositivo",
+          };
         set((s) => ({
           customers: s.customers.map((c) =>
             c.email.toLowerCase() === e ? { ...c, password: newPassword } : c,
@@ -418,24 +476,33 @@ export const useStore = create<AppState>()(
       },
       updateTransaction: (id, patch) => {
         set((s) => ({
-          transactions: s.transactions.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+          transactions: s.transactions.map((t) =>
+            t.id === id ? { ...t, ...patch } : t,
+          ),
         }));
         const tx = get().transactions.find((t) => t.id === id);
         if (tx) cloud.upsertTransaction(tx);
       },
       deleteTransaction: (id) => {
-        set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) }));
+        set((s) => ({
+          transactions: s.transactions.filter((t) => t.id !== id),
+        }));
         cloud.deleteTransaction(id);
       },
 
       addReview: (data) => {
         const state = get();
-        const customer = state.customers.find((c) => c.id === state.currentCustomerId);
+        const customer = state.customers.find(
+          (c) => c.id === state.currentCustomerId,
+        );
         if (!customer) return { ok: false, message: "Faça login para avaliar" };
         if (!data.rating || data.rating < 1 || data.rating > 5)
           return { ok: false, message: "Selecione uma nota" };
         if (!data.comment.trim() && data.photos.length === 0)
-          return { ok: false, message: "Escreva um comentário ou envie uma foto" };
+          return {
+            ok: false,
+            message: "Escreva um comentário ou envie uma foto",
+          };
         const review: Review = {
           id: `rev_${Date.now()}`,
           productId: data.productId,
@@ -473,7 +540,10 @@ export const useStore = create<AppState>()(
         };
         set((s) => ({ waitlist: [entry, ...s.waitlist] }));
         cloud.joinWaitlist({ productId, email, customerId });
-        return { ok: true, message: "Você será avisada assim que o estoque chegar! ✨" };
+        return {
+          ok: true,
+          message: "Você será avisada assim que o estoque chegar! ✨",
+        };
       },
 
       upsertFAQ: (f) => {
@@ -511,7 +581,9 @@ export const useStore = create<AppState>()(
           cart:
             qty <= 0
               ? s.cart.filter((i) => i.productId !== productId)
-              : s.cart.map((i) => (i.productId === productId ? { ...i, quantity: qty } : i)),
+              : s.cart.map((i) =>
+                  i.productId === productId ? { ...i, quantity: qty } : i,
+                ),
         })),
       clearCart: () => set({ cart: [], appliedCoupon: null }),
 
@@ -522,8 +594,12 @@ export const useStore = create<AppState>()(
         if (!c) return { ok: false, message: "Cupom inválido" };
         const subtotal = computeSubtotal(get());
         if (subtotal < c.minOrder)
-          return { ok: false, message: `Pedido mínimo R$ ${c.minOrder.toFixed(2)}` };
-        if (c.usedCount >= c.maxUses) return { ok: false, message: "Cupom esgotado" };
+          return {
+            ok: false,
+            message: `Pedido mínimo R$ ${c.minOrder.toFixed(2)}`,
+          };
+        if (c.usedCount >= c.maxUses)
+          return { ok: false, message: "Cupom esgotado" };
         set({ appliedCoupon: c.code });
         return { ok: true, message: "Cupom aplicado!" };
       },
@@ -547,12 +623,16 @@ export const useStore = create<AppState>()(
         }));
         cloud.upsertCustomer(newC);
         import("./emails")
-          .then((m) => m.sendWelcomeEmail({ email: newC.email, name: newC.name }))
+          .then((m) =>
+            m.sendWelcomeEmail({ email: newC.email, name: newC.name }),
+          )
           .catch(() => {});
         return { ok: true, message: "Cadastro realizado!" };
       },
       loginCustomer: (email, password) => {
-        const c = get().customers.find((x) => x.email === email && x.password === password);
+        const c = get().customers.find(
+          (x) => x.email === email && x.password === password,
+        );
         if (!c) return { ok: false, message: "Credenciais inválidas" };
         set((s) => ({
           currentCustomerId: c.id,
@@ -567,11 +647,18 @@ export const useStore = create<AppState>()(
         return { ok: true, message: "Bem-vinda!" };
       },
       logoutCustomer: () =>
-        set((s) => ({ currentCustomerId: null, sessions: { ...s.sessions, customer: null } })),
+        set((s) => ({
+          currentCustomerId: null,
+          sessions: { ...s.sessions, customer: null },
+        })),
       updateCustomer: (data) => {
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
-        set((s) => ({ customers: s.customers.map((c) => (c.id === id ? { ...c, ...data } : c)) }));
+        set((s) => ({
+          customers: s.customers.map((c) =>
+            c.id === id ? { ...c, ...data } : c,
+          ),
+        }));
         const c = get().customers.find((x) => x.id === id);
         if (c) cloud.upsertCustomer(c);
         return { ok: true, message: "Dados atualizados" };
@@ -581,7 +668,9 @@ export const useStore = create<AppState>()(
         if (!id || !address.trim()) return;
         set((s) => ({
           customers: s.customers.map((c) =>
-            c.id === id ? { ...c, addresses: [...(c.addresses || []), address.trim()] } : c,
+            c.id === id
+              ? { ...c, addresses: [...(c.addresses || []), address.trim()] }
+              : c,
           ),
         }));
         const c = get().customers.find((x) => x.id === id);
@@ -593,7 +682,10 @@ export const useStore = create<AppState>()(
         set((s) => ({
           customers: s.customers.map((c) =>
             c.id === id
-              ? { ...c, addresses: (c.addresses || []).filter((_, i) => i !== index) }
+              ? {
+                  ...c,
+                  addresses: (c.addresses || []).filter((_, i) => i !== index),
+                }
               : c,
           ),
         }));
@@ -625,8 +717,10 @@ export const useStore = create<AppState>()(
         const normalized = email.trim().toLowerCase();
         const override = get().adminPasswordOverride?.[normalized];
         const expected = override || AUTHORIZED_ADMINS[normalized];
-        if (!AUTHORIZED_ADMINS[normalized]) return { ok: false, message: "E-mail não autorizado" };
-        if (expected !== password) return { ok: false, message: "Senha incorreta" };
+        if (!AUTHORIZED_ADMINS[normalized])
+          return { ok: false, message: "E-mail não autorizado" };
+        if (expected !== password)
+          return { ok: false, message: "Senha incorreta" };
         set((s) => ({
           isAdmin: true,
           sessions: { ...s.sessions, admin: makeSession(normalized) },
@@ -638,15 +732,24 @@ export const useStore = create<AppState>()(
         });
         return { ok: true, message: "Bem-vindo!" };
       },
-      logoutAdmin: () => set((s) => ({ isAdmin: false, sessions: { ...s.sessions, admin: null } })),
+      logoutAdmin: () =>
+        set((s) => ({
+          isAdmin: false,
+          sessions: { ...s.sessions, admin: null },
+        })),
 
       loginAffiliate: (email, password) => {
         const normalized = email.trim().toLowerCase();
         const a = get().affiliates.find(
-          (x) => x.email.toLowerCase() === normalized && x.password === password,
+          (x) =>
+            x.email.toLowerCase() === normalized && x.password === password,
         );
         if (!a) return { ok: false, message: "Credenciais inválidas" };
-        if (!a.active) return { ok: false, message: "Conta desativada. Contate a administradora." };
+        if (!a.active)
+          return {
+            ok: false,
+            message: "Conta desativada. Contate a administradora.",
+          };
         set((s) => ({
           currentAffiliateId: a.id,
           sessions: { ...s.sessions, affiliate: makeSession(a.id) },
@@ -660,14 +763,20 @@ export const useStore = create<AppState>()(
         return { ok: true, message: `Bem-vinda, ${a.name}!` };
       },
       logoutAffiliate: () =>
-        set((s) => ({ currentAffiliateId: null, sessions: { ...s.sessions, affiliate: null } })),
+        set((s) => ({
+          currentAffiliateId: null,
+          sessions: { ...s.sessions, affiliate: null },
+        })),
       registerAffiliate: (data) => {
         const name = data.name.trim();
         const email = data.email.trim().toLowerCase();
         if (!name || !email || !data.password)
           return { ok: false, message: "Preencha todos os campos" };
-        if (data.password.length < 4) return { ok: false, message: "Senha muito curta" };
-        const exists = get().affiliates.find((a) => a.email.toLowerCase() === email);
+        if (data.password.length < 4)
+          return { ok: false, message: "Senha muito curta" };
+        const exists = get().affiliates.find(
+          (a) => a.email.toLowerCase() === email,
+        );
         if (exists) return { ok: false, message: "E-mail já cadastrado" };
         const newA: Affiliate = {
           id:
@@ -691,7 +800,8 @@ export const useStore = create<AppState>()(
         cloud.upsertAffiliate(newA);
         return {
           ok: true,
-          message: "Cadastro realizado! Aguarde a administradora definir sua comissão.",
+          message:
+            "Cadastro realizado! Aguarde a administradora definir sua comissão.",
         };
       },
       upsertAffiliate: (a) => {
@@ -768,7 +878,9 @@ export const useStore = create<AppState>()(
       updateAffiliateSaleStatus: (id, status) => {
         const sale = get().affiliateSales.find((v) => v.id === id);
         set((s) => ({
-          affiliateSales: s.affiliateSales.map((v) => (v.id === id ? { ...v, status } : v)),
+          affiliateSales: s.affiliateSales.map((v) =>
+            v.id === id ? { ...v, status } : v,
+          ),
         }));
         const updated = get().affiliateSales.find((v) => v.id === id);
         if (updated) cloud.upsertAffiliateSale(updated);
@@ -789,7 +901,9 @@ export const useStore = create<AppState>()(
         }
       },
       deleteAffiliateSale: (id) => {
-        set((s) => ({ affiliateSales: s.affiliateSales.filter((v) => v.id !== id) }));
+        set((s) => ({
+          affiliateSales: s.affiliateSales.filter((v) => v.id !== id),
+        }));
         cloud.deleteAffiliateSale(id);
       },
 
@@ -806,7 +920,9 @@ export const useStore = create<AppState>()(
           };
         });
         const subtotal = items.reduce((a, b) => a + b.price * b.quantity, 0);
-        const coupon = state.coupons.find((c) => c.code === state.appliedCoupon);
+        const coupon = state.coupons.find(
+          (c) => c.code === state.appliedCoupon,
+        );
         const discount = coupon
           ? coupon.type === "percent"
             ? (subtotal * coupon.value) / 100
@@ -830,9 +946,13 @@ export const useStore = create<AppState>()(
           total,
           paymentMethod: data.paymentMethod,
           deliveryMethod: data.deliveryMethod,
-          status: data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
+          status:
+            data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
           createdAt: new Date().toISOString(),
-          address: data.deliveryMethod === "retirada" ? state.settings.address : data.address,
+          address:
+            data.deliveryMethod === "retirada"
+              ? state.settings.address
+              : data.address,
           couponCode: state.appliedCoupon || undefined,
           notes: data.notes?.trim() || undefined,
         };
@@ -843,7 +963,9 @@ export const useStore = create<AppState>()(
             affiliateId: state.referralId,
             customerName: data.customerName,
             customerPhone: data.customerPhone,
-            productDescription: items.map((i) => `${i.quantity}x ${i.name}`).join(", "),
+            productDescription: items
+              .map((i) => `${i.quantity}x ${i.name}`)
+              .join(", "),
             saleValue: total,
             status: order.status === "pago" ? "confirmada" : "pendente",
           });
@@ -855,7 +977,9 @@ export const useStore = create<AppState>()(
           appliedCoupon: null,
           coupons: coupon
             ? s.coupons.map((c) =>
-                c.code === coupon.code ? { ...c, usedCount: c.usedCount + 1 } : c,
+                c.code === coupon.code
+                  ? { ...c, usedCount: c.usedCount + 1 }
+                  : c,
               )
             : s.coupons,
           products: s.products.map((p) => {
@@ -872,7 +996,7 @@ export const useStore = create<AppState>()(
         // Notificações automáticas
         try {
           const notif = useNotifications.getState();
-          
+
           // Notificação apenas para o ADMIN
           notif.trigger(
             "novo_pedido_admin",
@@ -915,7 +1039,11 @@ export const useStore = create<AppState>()(
           }
           // Estoque baixo
           get().products.forEach((p) => {
-            if (items.find((i) => i.productId === p.id) && p.stock > 0 && p.stock <= 3) {
+            if (
+              items.find((i) => i.productId === p.id) &&
+              p.stock > 0 &&
+              p.stock <= 3
+            ) {
               notif.trigger(
                 "estoque_baixo",
                 { produto: p.name, estoque: p.stock },
@@ -926,15 +1054,17 @@ export const useStore = create<AppState>()(
         } catch {
           /* ignore */
         }
-// ... cloud persistence logic continues ...
+        // ... cloud persistence logic continues ...
       },
       updateOrderStatus: (id, status) => {
         const order = get().orders.find((o) => o.id === id);
-        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)) }));
+        set((s) => ({
+          orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)),
+        }));
         if (!order) return;
         cloud.updateOrderStatus(id, status === "pago" ? "paid" : status);
-        
-        // Notificações de status agora apenas para logs/admin se necessário, 
+
+        // Notificações de status agora apenas para logs/admin se necessário,
         // mas o usuário pediu para focar no admin.
         if (status === "pago") {
           try {
@@ -965,7 +1095,9 @@ export const useStore = create<AppState>()(
               description: `Pedido ${order.id} — ${order.customerName}`,
               amount: order.total,
               date: new Date().toISOString(),
-              productSummary: order.items.map((i) => `${i.quantity}x ${i.name}`).join(", "),
+              productSummary: order.items
+                .map((i) => `${i.quantity}x ${i.name}`)
+                .join(", "),
               createdAt: new Date().toISOString(),
             };
             set((s) => ({ transactions: [tx, ...s.transactions] }));
@@ -1037,11 +1169,12 @@ export const useStore = create<AppState>()(
       sync: async () => {
         const snap = await fetchCloudSnapshot();
         const cur = get();
-        const isPlaceholder = (url: string) => !url || url === "" || url === "null" || url.length < 5;
+        const isPlaceholder = (url: string) =>
+          !url || url === "" || url === "null" || url.length < 5;
         const mergedProducts = cur.products.map((p) => {
           const remote = snap.products.find((rp) => rp.id === p.id);
           if (!remote) return p;
-          
+
           // CRITICAL: If local has a valid illustration, KEEP IT.
           // The database doesn't have real photos yet, so we prioritize the AI-generated ones.
           const localIsIllustration = p.image?.startsWith("/products/");
@@ -1049,8 +1182,16 @@ export const useStore = create<AppState>()(
 
           return {
             ...remote,
-            image: (localIsIllustration && !remoteIsRealImage) ? p.image : (remote.image || p.image),
-            gallery: (localIsIllustration && !remoteIsRealImage) ? p.gallery : (remote.gallery && remote.gallery.length > 0 ? remote.gallery : p.gallery)
+            image:
+              localIsIllustration && !remoteIsRealImage
+                ? p.image
+                : remote.image || p.image,
+            gallery:
+              localIsIllustration && !remoteIsRealImage
+                ? p.gallery
+                : remote.gallery && remote.gallery.length > 0
+                  ? remote.gallery
+                  : p.gallery,
           };
         });
         set((s) => ({
@@ -1066,7 +1207,9 @@ export const useStore = create<AppState>()(
           faq: snap.faq,
           waitlist: snap.waitlist,
           activityLogs: snap.activityLogs,
-          settings: snap.settings ? { ...s.settings, ...snap.settings } : s.settings,
+          settings: snap.settings
+            ? { ...s.settings, ...snap.settings }
+            : s.settings,
         }));
       },
     }),
@@ -1099,7 +1242,11 @@ export const useStore = create<AppState>()(
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         // Enforce session expiry on every page load — invalid tokens force re-login.
-        const sessions = state.sessions || { admin: null, customer: null, affiliate: null };
+        const sessions = state.sessions || {
+          admin: null,
+          customer: null,
+          affiliate: null,
+        };
         const patch: Partial<AppState> = {};
         const nextSessions = { ...sessions };
         if (!isSessionValid(sessions.admin) && state.isAdmin) {
@@ -1160,7 +1307,9 @@ export function hydrateFromCloud(): Promise<void> {
           if (loc) {
             // Product specific fallback
             // CRITICAL: Prioritize local illustrations
-            const localIsIllustration = (loc as any).image?.startsWith("/products/");
+            const localIsIllustration = (loc as any).image?.startsWith(
+              "/products/",
+            );
             const remoteIsRealImage = (x as any).image?.startsWith("http");
 
             if (localIsIllustration && !remoteIsRealImage) {
@@ -1168,16 +1317,22 @@ export function hydrateFromCloud(): Promise<void> {
               (x as any).gallery = (loc as any).gallery;
             } else {
               // Standard fallback
-              const isPlaceholder = (url: string) => 
-                !url || 
-                url === "" || 
-                url === "null" || 
-                (!url.startsWith("http") && !url.startsWith("/") && !url.startsWith("data:"));
-              
+              const isPlaceholder = (url: string) =>
+                !url ||
+                url === "" ||
+                url === "null" ||
+                (!url.startsWith("http") &&
+                  !url.startsWith("/") &&
+                  !url.startsWith("data:"));
+
               if (isPlaceholder((x as any).image)) {
                 (x as any).image = (loc as any).image;
               }
-              if (!(x as any).gallery || (x as any).gallery.length === 0 || isPlaceholder((x as any).gallery[0])) {
+              if (
+                !(x as any).gallery ||
+                (x as any).gallery.length === 0 ||
+                isPlaceholder((x as any).gallery[0])
+              ) {
                 (x as any).gallery = (loc as any).gallery;
               }
             }
@@ -1186,7 +1341,10 @@ export function hydrateFromCloud(): Promise<void> {
         });
         return Array.from(map.values());
       };
-      const mergeByCode = <T extends { code: string }>(local: T[], remote: T[]) => {
+      const mergeByCode = <T extends { code: string }>(
+        local: T[],
+        remote: T[],
+      ) => {
         const map = new Map<string, T>();
         local.forEach((x) => map.set(x.code, x));
         remote.forEach((x) => map.set(x.code, x));
@@ -1194,11 +1352,15 @@ export function hydrateFromCloud(): Promise<void> {
       };
       useStore.setState({
         customers: mergeById(cur.customers, snap.customers),
-        products: snap.products.length ? mergeById(cur.products, snap.products) : cur.products,
+        products: snap.products.length
+          ? mergeById(cur.products, snap.products)
+          : cur.products,
         categories: snap.categories.length
           ? mergeById(cur.categories, snap.categories)
           : cur.categories,
-        coupons: snap.coupons.length ? mergeByCode(cur.coupons, snap.coupons) : cur.coupons,
+        coupons: snap.coupons.length
+          ? mergeByCode(cur.coupons, snap.coupons)
+          : cur.coupons,
         affiliates: mergeById(cur.affiliates, snap.affiliates),
         affiliateSales: mergeById(cur.affiliateSales, snap.affiliateSales),
         transactions: mergeById(cur.transactions, snap.transactions),
@@ -1268,6 +1430,7 @@ export const selectCartTotals = (s: AppState) => {
   return { subtotal, discount, shipping, total, coupon };
 };
 
-export const selectCartCount = (s: AppState) => s.cart.reduce((a, i) => a + i.quantity, 0);
+export const selectCartCount = (s: AppState) =>
+  s.cart.reduce((a, i) => a + i.quantity, 0);
 export const selectCurrentCustomer = (s: AppState) =>
   s.customers.find((c) => c.id === s.currentCustomerId) || null;

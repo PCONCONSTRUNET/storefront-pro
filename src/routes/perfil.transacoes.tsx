@@ -37,16 +37,41 @@ type Tx = {
 };
 
 export const Route = createFileRoute("/perfil/transacoes")({
-  head: () => ({ meta: [{ title: "Histórico de transações — Princesa de Laços" }] }),
+  head: () => ({
+    meta: [{ title: "Histórico de transações — Princesa de Laços" }],
+  }),
   component: Page,
 });
 
-const STATUS: Record<string, { label: string; cls: string; Icon: typeof CheckCircle2 }> = {
-  approved: { label: "Aprovado", cls: "bg-green-100 text-green-700", Icon: CheckCircle2 },
-  pending: { label: "Pendente", cls: "bg-amber-100 text-amber-700", Icon: Clock },
-  rejected: { label: "Recusado", cls: "bg-destructive/10 text-destructive", Icon: XCircle },
-  cancelled: { label: "Cancelado", cls: "bg-muted text-muted-foreground", Icon: XCircle },
-  refunded: { label: "Reembolsado", cls: "bg-blue-100 text-blue-700", Icon: RefreshCw },
+const STATUS: Record<
+  string,
+  { label: string; cls: string; Icon: typeof CheckCircle2 }
+> = {
+  approved: {
+    label: "Aprovado",
+    cls: "bg-green-100 text-green-700",
+    Icon: CheckCircle2,
+  },
+  pending: {
+    label: "Pendente",
+    cls: "bg-amber-100 text-amber-700",
+    Icon: Clock,
+  },
+  rejected: {
+    label: "Recusado",
+    cls: "bg-destructive/10 text-destructive",
+    Icon: XCircle,
+  },
+  cancelled: {
+    label: "Cancelado",
+    cls: "bg-muted text-muted-foreground",
+    Icon: XCircle,
+  },
+  refunded: {
+    label: "Reembolsado",
+    cls: "bg-blue-100 text-blue-700",
+    Icon: RefreshCw,
+  },
 };
 
 type FilterKey = "all" | "approved" | "pending" | "rejected";
@@ -87,7 +112,9 @@ function Page() {
       <StoreLayout>
         <div className="max-w-md mx-auto text-center py-20 px-4">
           <Receipt className="h-12 w-12 text-primary mx-auto" />
-          <h1 className="text-xl font-bold mt-3">Faça login para ver suas transações</h1>
+          <h1 className="text-xl font-bold mt-3">
+            Faça login para ver suas transações
+          </h1>
           <Link
             to="/login"
             className="mt-4 inline-block bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
@@ -99,7 +126,9 @@ function Page() {
     );
   }
 
-  const filtered = txs.filter((t) => (filter === "all" ? true : t.payment_status === filter));
+  const filtered = txs.filter((t) =>
+    filter === "all" ? true : t.payment_status === filter,
+  );
   const totalApproved = txs
     .filter((t) => t.payment_status === "approved")
     .reduce((s, t) => s + Number(t.total), 0);
@@ -119,9 +148,12 @@ function Page() {
         <div className="flex items-center justify-between gap-3 mb-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Receipt className="h-6 w-6 text-primary" /> Histórico de transações
+              <Receipt className="h-6 w-6 text-primary" /> Histórico de
+              transações
             </h1>
-            <p className="text-sm text-muted-foreground">Pagamentos via Pix e Cartão.</p>
+            <p className="text-sm text-muted-foreground">
+              Pagamentos via Pix e Cartão.
+            </p>
           </div>
           <button
             onClick={load}
@@ -142,7 +174,9 @@ function Page() {
           <SummaryCard label="Total" value={String(txs.length)} />
           <SummaryCard
             label="Aprovadas"
-            value={String(txs.filter((t) => t.payment_status === "approved").length)}
+            value={String(
+              txs.filter((t) => t.payment_status === "approved").length,
+            )}
           />
           <SummaryCard label="Pago" value={brl(totalApproved)} />
         </div>
@@ -175,14 +209,19 @@ function Page() {
           <div className="bg-destructive/10 text-destructive rounded-2xl p-4 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
             <div className="text-sm">
-              <div className="font-semibold">Não foi possível carregar suas transações</div>
+              <div className="font-semibold">
+                Não foi possível carregar suas transações
+              </div>
               <div className="text-xs opacity-90 mt-0.5">{error}</div>
             </div>
           </div>
         ) : loading ? (
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-28 bg-muted rounded-2xl animate-pulse" />
+              <div
+                key={i}
+                className="h-28 bg-muted rounded-2xl animate-pulse"
+              />
             ))}
           </div>
         ) : filtered.length === 0 ? (
@@ -201,7 +240,10 @@ function Page() {
               const isCard = t.payment_method === "card";
               const isOpen = openId === t.id;
               return (
-                <li key={t.id} className="bg-card rounded-2xl shadow-card overflow-hidden">
+                <li
+                  key={t.id}
+                  className="bg-card rounded-2xl shadow-card overflow-hidden"
+                >
                   <button
                     type="button"
                     onClick={() => setOpenId(isOpen ? null : t.id)}
@@ -233,7 +275,9 @@ function Page() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="font-bold text-primary">{brl(Number(t.total))}</div>
+                        <div className="font-bold text-primary">
+                          {brl(Number(t.total))}
+                        </div>
                         {isOpen ? (
                           <ChevronUp className="h-4 w-4 text-muted-foreground ml-auto mt-1" />
                         ) : (
@@ -261,11 +305,23 @@ function Page() {
                             : undefined
                         }
                       />
-                      <DetailRow label="Criado em" value={formatDate(t.created_at)} />
-                      <DetailRow label="Pago em" value={t.paid_at ? formatDate(t.paid_at) : "—"} />
+                      <DetailRow
+                        label="Criado em"
+                        value={formatDate(t.created_at)}
+                      />
+                      <DetailRow
+                        label="Pago em"
+                        value={t.paid_at ? formatDate(t.paid_at) : "—"}
+                      />
                       <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                        <Mini label="Subtotal" value={brl(Number(t.subtotal))} />
-                        <Mini label="Desconto" value={`- ${brl(Number(t.discount))}`} />
+                        <Mini
+                          label="Subtotal"
+                          value={brl(Number(t.subtotal))}
+                        />
+                        <Mini
+                          label="Desconto"
+                          value={`- ${brl(Number(t.discount))}`}
+                        />
                         <Mini label="Frete" value={brl(Number(t.shipping))} />
                       </div>
                       {Array.isArray(t.items) && t.items.length > 0 && (
@@ -275,12 +331,18 @@ function Page() {
                           </div>
                           <ul className="space-y-1">
                             {t.items.map((it, i) => (
-                              <li key={i} className="flex justify-between text-xs">
+                              <li
+                                key={i}
+                                className="flex justify-between text-xs"
+                              >
                                 <span className="truncate pr-2">
                                   {it.quantity ?? 1}x {it.name ?? "Item"}
                                 </span>
                                 <span className="font-medium">
-                                  {brl(Number(it.price ?? 0) * Number(it.quantity ?? 1))}
+                                  {brl(
+                                    Number(it.price ?? 0) *
+                                      Number(it.quantity ?? 1),
+                                  )}
                                 </span>
                               </li>
                             ))}
@@ -309,7 +371,9 @@ function Page() {
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-card rounded-2xl p-3 shadow-card">
-      <div className="text-[11px] text-muted-foreground font-medium">{label}</div>
+      <div className="text-[11px] text-muted-foreground font-medium">
+        {label}
+      </div>
       <div className="font-bold text-sm mt-0.5 truncate">{value}</div>
     </div>
   );
@@ -328,9 +392,13 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <div className="text-xs font-semibold text-muted-foreground shrink-0">{label}</div>
+      <div className="text-xs font-semibold text-muted-foreground shrink-0">
+        {label}
+      </div>
       <div className="flex items-center gap-2 min-w-0">
-        <span className={`text-xs ${mono ? "font-mono" : ""} truncate`}>{value}</span>
+        <span className={`text-xs ${mono ? "font-mono" : ""} truncate`}>
+          {value}
+        </span>
         {onCopy && (
           <button
             onClick={onCopy}

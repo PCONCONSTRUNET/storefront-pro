@@ -46,8 +46,13 @@ function Page() {
           <MapPin className="h-5 w-5 text-primary" /> Endereços
         </h1>
 
-        <form onSubmit={submit} className="bg-card rounded-2xl shadow-card p-4 space-y-2 mb-4">
-          <label className="text-xs font-medium text-muted-foreground">Novo endereço</label>
+        <form
+          onSubmit={submit}
+          className="bg-card rounded-2xl shadow-card p-4 space-y-2 mb-4"
+        >
+          <label className="text-xs font-medium text-muted-foreground">
+            Novo endereço
+          </label>
           <div className="flex gap-2">
             <input
               value={value}

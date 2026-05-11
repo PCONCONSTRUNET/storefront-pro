@@ -23,7 +23,9 @@ function Page() {
     <StoreLayout>
       <div className="max-w-6xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold mb-1">Categorias</h1>
-        <p className="text-sm text-muted-foreground mb-5">Encontre o acessório perfeito.</p>
+        <p className="text-sm text-muted-foreground mb-5">
+          Encontre o acessório perfeito.
+        </p>
         {!hydrated ? (
           <CategoryGridSkeleton count={8} />
         ) : (

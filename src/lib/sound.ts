@@ -14,7 +14,13 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
-function tone(freq: number, duration = 0.12, when = 0, type: OscillatorType = "sine", gain = 0.18) {
+function tone(
+  freq: number,
+  duration = 0.12,
+  when = 0,
+  type: OscillatorType = "sine",
+  gain = 0.18,
+) {
   const c = getCtx();
   if (!c) return;
   const t = c.currentTime + when;

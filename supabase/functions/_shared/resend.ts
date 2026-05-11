@@ -3,7 +3,11 @@ const FROM =
   Deno.env.get("RESEND_FROM_EMAIL") ??
   "Princesa de Laços <nao-responda@xn--princesadelaos-rjb.com.br>";
 
-export async function sendEmail(opts: { to: string; subject: string; html: string }) {
+export async function sendEmail(opts: {
+  to: string;
+  subject: string;
+  html: string;
+}) {
   if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY não configurada");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -11,7 +15,12 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
       Authorization: `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: FROM, to: [opts.to], subject: opts.subject, html: opts.html }),
+    body: JSON.stringify({
+      from: FROM,
+      to: [opts.to],
+      subject: opts.subject,
+      html: opts.html,
+    }),
   });
   if (!res.ok) {
     const txt = await res.text();
@@ -22,15 +31,19 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const LOGO_URL =
-  Deno.env.get("EMAIL_LOGO_URL") ?? "https://amostrasistema.lovable.app/email-logo.png";
-const SITE_URL = Deno.env.get("SITE_URL") ?? "https://amostrasistema.lovable.app";
+  Deno.env.get("EMAIL_LOGO_URL") ??
+  "https://amostrasistema.lovable.app/email-logo.png";
+const SITE_URL =
+  Deno.env.get("SITE_URL") ?? "https://amostrasistema.lovable.app";
 const WHATSAPP_NUMBER = Deno.env.get("STORE_WHATSAPP") ?? "554888644474"; // formato wa.me
-const WHATSAPP_DISPLAY = Deno.env.get("STORE_WHATSAPP_DISPLAY") ?? "(48) 8864-4474";
+const WHATSAPP_DISPLAY =
+  Deno.env.get("STORE_WHATSAPP_DISPLAY") ?? "(48) 8864-4474";
 const INSTAGRAM_USER = Deno.env.get("STORE_INSTAGRAM") ?? "princesadelacos58";
 const FACEBOOK_USER = Deno.env.get("STORE_FACEBOOK") ?? "princesadelacos";
 const STORE_EMAIL = Deno.env.get("STORE_EMAIL") ?? "princesadelacos@proton.me";

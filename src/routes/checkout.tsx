@@ -4,7 +4,14 @@ import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
 import { brl } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, CreditCard, Banknote, QrCode, Loader2 } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  CreditCard,
+  Banknote,
+  QrCode,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
@@ -76,7 +83,12 @@ function Page() {
               image: (p as any)?.image,
             };
           }),
-          totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
+          totals: {
+            subtotal: totals.subtotal,
+            discount: totals.discount,
+            shipping,
+            total,
+          },
           delivery: "retirada",
           address: settings.address,
           notes: form.notes,
@@ -104,7 +116,12 @@ function Page() {
           image: (p as any)?.image,
         };
       }),
-      totals: { subtotal: totals.subtotal, discount: totals.discount, shipping, total },
+      totals: {
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        shipping,
+        total,
+      },
       delivery: "retirada" as const,
       address: settings.address,
       notes: form.notes,
@@ -186,7 +203,12 @@ function Page() {
               >
                 {i < step ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
               </div>
-              <div className={cn("h-0.5 flex-1 rounded", i < step ? "bg-primary" : "bg-muted")} />
+              <div
+                className={cn(
+                  "h-0.5 flex-1 rounded",
+                  i < step ? "bg-primary" : "bg-muted",
+                )}
+              />
             </li>
           ))}
         </ol>
@@ -218,7 +240,8 @@ function Page() {
                 </div>
                 <div className="text-muted-foreground">{settings.address}</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Avisaremos pelo WhatsApp quando o pedido estiver pronto para retirada.
+                  Avisaremos pelo WhatsApp quando o pedido estiver pronto para
+                  retirada.
                 </div>
               </div>
 
@@ -234,7 +257,9 @@ function Page() {
                   placeholder='Ex.: "É um presente, embale com cuidado" ou "Vou retirar na sexta de tarde"'
                   className="mt-1 w-full px-3 py-2 rounded-xl bg-muted/70 border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/40 focus:bg-background transition-all resize-none"
                 />
-                <span className="text-[10px] text-muted-foreground">{form.notes.length}/300</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {form.notes.length}/300
+                </span>
               </label>
             </div>
           )}
@@ -259,21 +284,32 @@ function Page() {
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-sm">{p.label}</div>
-                      <div className="text-xs text-muted-foreground">{p.sub}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {p.sub}
+                      </div>
                     </div>
                     <div
                       className={cn(
                         "w-5 h-5 rounded-full border-2",
-                        form.payment === p.id ? "border-primary bg-primary" : "border-border",
+                        form.payment === p.id
+                          ? "border-primary bg-primary"
+                          : "border-border",
                       )}
                     />
                   </button>
                 ))}
               <div className="mt-2 flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-muted/50 border border-border/50">
-                <img src={mpIcon} alt="Mercado Pago" className="h-5 w-5 object-contain" />
+                <img
+                  src={mpIcon}
+                  alt="Mercado Pago"
+                  className="h-5 w-5 object-contain"
+                />
                 <span className="text-[11px] text-muted-foreground">
                   Pagamentos processados por{" "}
-                  <span className="font-semibold text-foreground">Mercado Pago</span> · 100% seguro
+                  <span className="font-semibold text-foreground">
+                    Mercado Pago
+                  </span>{" "}
+                  · 100% seguro
                 </span>
               </div>
             </div>
@@ -285,13 +321,21 @@ function Page() {
                 <div className="space-y-3">
                   <h2 className="font-semibold">Revise seu pedido</h2>
                   <Row label="Cliente" value={form.name} />
-                  <Row label="Contato" value={`${form.email} · ${form.phone}`} />
+                  <Row
+                    label="Contato"
+                    value={`${form.email} · ${form.phone}`}
+                  />
                   <Row label="Retirada" value="No ateliê" />
                   <Row label="Local" value={settings.address} />
-                  {form.notes.trim() && <Row label="Observações" value={form.notes} />}
+                  {form.notes.trim() && (
+                    <Row label="Observações" value={form.notes} />
+                  )}
                   <Row
                     label="Pagamento"
-                    value={paymentOptions.find((p) => p.id === form.payment)?.label || ""}
+                    value={
+                      paymentOptions.find((p) => p.id === form.payment)
+                        ?.label || ""
+                    }
                   />
                   <hr className="border-border" />
                   <Row label="Subtotal" value={brl(totals.subtotal)} />

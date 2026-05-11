@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { X, Download, Share, Plus, MoreVertical, ChevronRight } from "lucide-react";
+import {
+  X,
+  Download,
+  Share,
+  Plus,
+  MoreVertical,
+  ChevronRight,
+} from "lucide-react";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
@@ -29,7 +36,9 @@ export function PwaInstallPrompt() {
   const [open, setOpen] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
-  const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop");
+  const [platform, setPlatform] = useState<"ios" | "android" | "desktop">(
+    "desktop",
+  );
 
   useEffect(() => {
     if (isStandalone()) return;
@@ -90,7 +99,9 @@ export function PwaInstallPrompt() {
                 <Download className="h-6 w-6" />
               </div>
               <div className="flex-1 min-w-0 pr-6">
-                <div className="font-bold text-sm text-foreground">Instale nosso app</div>
+                <div className="font-bold text-sm text-foreground">
+                  Instale nosso app
+                </div>
                 <div className="text-xs text-muted-foreground">
                   Acesso rápido na sua tela inicial 💖
                 </div>
@@ -112,7 +123,9 @@ export function PwaInstallPrompt() {
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="font-bold text-sm text-foreground mb-2 pr-6">Como instalar</div>
+            <div className="font-bold text-sm text-foreground mb-2 pr-6">
+              Como instalar
+            </div>
 
             {platform !== "android" && (
               <div className="mb-3">
@@ -124,7 +137,9 @@ export function PwaInstallPrompt() {
                     <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
                       1
                     </span>
-                    Toque em <Share className="inline h-3.5 w-3.5 text-primary" /> Compartilhar
+                    Toque em{" "}
+                    <Share className="inline h-3.5 w-3.5 text-primary" />{" "}
+                    Compartilhar
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
@@ -154,7 +169,9 @@ export function PwaInstallPrompt() {
                     <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">
                       1
                     </span>
-                    Toque em <MoreVertical className="inline h-3.5 w-3.5 text-primary" /> menu
+                    Toque em{" "}
+                    <MoreVertical className="inline h-3.5 w-3.5 text-primary" />{" "}
+                    menu
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-muted grid place-items-center text-[10px] font-bold text-foreground shrink-0">

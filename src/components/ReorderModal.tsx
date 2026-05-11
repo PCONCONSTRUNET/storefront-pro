@@ -5,7 +5,13 @@ import { brl } from "@/lib/format";
 import { X, Minus, Plus, RotateCcw, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-export function ReorderModal({ order, onClose }: { order: Order; onClose: () => void }) {
+export function ReorderModal({
+  order,
+  onClose,
+}: {
+  order: Order;
+  onClose: () => void;
+}) {
   const products = useStore((s) => s.products);
   const addToCart = useStore((s) => s.addToCart);
   const navigate = useNavigate();
@@ -41,12 +47,16 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
 
   const toggle = (id: string) =>
     setItems((arr) =>
-      arr.map((i) => (i.productId === id && i.available ? { ...i, selected: !i.selected } : i)),
+      arr.map((i) =>
+        i.productId === id && i.available ? { ...i, selected: !i.selected } : i,
+      ),
     );
   const setQty = (id: string, qty: number) =>
     setItems((arr) =>
       arr.map((i) =>
-        i.productId === id ? { ...i, qty: Math.max(1, Math.min(qty, i.maxStock || 1)) } : i,
+        i.productId === id
+          ? { ...i, qty: Math.max(1, Math.min(qty, i.maxStock || 1)) }
+          : i,
       ),
     );
 
@@ -76,12 +86,18 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
-            <h2 className="font-serif text-lg font-semibold">Comprar de novo</h2>
+            <h2 className="font-serif text-lg font-semibold">
+              Comprar de novo
+            </h2>
             <p className="text-xs text-muted-foreground">
               Escolha o que recomprar do pedido #{order.id}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Fechar" className="p-2 hover:bg-muted rounded-full">
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="p-2 hover:bg-muted rounded-full"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -89,14 +105,17 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
         <div className="px-4 py-2 border-b border-border flex items-center justify-between text-xs">
           <button
             onClick={() =>
-              setItems((arr) => arr.map((i) => (i.available ? { ...i, selected: !allOn } : i)))
+              setItems((arr) =>
+                arr.map((i) => (i.available ? { ...i, selected: !allOn } : i)),
+              )
             }
             className="font-semibold text-primary hover:underline"
           >
             {allOn ? "Desmarcar todos" : "Selecionar todos"}
           </button>
           <span className="text-muted-foreground">
-            {selected.length} de {items.filter((i) => i.available).length} selecionado(s)
+            {selected.length} de {items.filter((i) => i.available).length}{" "}
+            selecionado(s)
           </span>
         </div>
 
@@ -120,7 +139,9 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
               />
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm truncate">{it.name}</div>
-                <div className="text-xs text-muted-foreground">{brl(it.price)} cada</div>
+                <div className="text-xs text-muted-foreground">
+                  {brl(it.price)} cada
+                </div>
                 {!it.available ? (
                   <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-destructive font-semibold">
                     <AlertCircle className="h-3 w-3" /> Indisponível
@@ -135,7 +156,9 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
                     >
                       <Minus className="h-3 w-3" />
                     </button>
-                    <span className="text-sm font-semibold w-6 text-center">{it.qty}</span>
+                    <span className="text-sm font-semibold w-6 text-center">
+                      {it.qty}
+                    </span>
                     <button
                       onClick={() => setQty(it.productId, it.qty + 1)}
                       disabled={!it.selected || it.qty >= it.maxStock}
@@ -160,7 +183,9 @@ export function ReorderModal({ order, onClose }: { order: Order; onClose: () => 
         <div className="p-4 border-t border-border safe-bottom space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal selecionado</span>
-            <span className="font-bold text-primary text-base">{brl(total)}</span>
+            <span className="font-bold text-primary text-base">
+              {brl(total)}
+            </span>
           </div>
           <button
             onClick={confirm}

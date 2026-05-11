@@ -111,8 +111,12 @@ function Page() {
         <Sidebar collapsible="icon">
           <SidebarHeader>
             <div className="px-2 py-1">
-              <div className="font-display text-primary leading-none truncate">{me.name}</div>
-              <div className="text-[11px] text-muted-foreground truncate">{commissionLabel}</div>
+              <div className="font-display text-primary leading-none truncate">
+                {me.name}
+              </div>
+              <div className="text-[11px] text-muted-foreground truncate">
+                {commissionLabel}
+              </div>
             </div>
           </SidebarHeader>
           <SidebarContent>
@@ -122,7 +126,10 @@ function Page() {
                 <SidebarMenu>
                   {items.map((it) => (
                     <SidebarMenuItem key={it.id}>
-                      <SidebarMenuButton onClick={() => setView(it.id)} isActive={view === it.id}>
+                      <SidebarMenuButton
+                        onClick={() => setView(it.id)}
+                        isActive={view === it.id}
+                      >
                         <it.icon className="h-4 w-4" />
                         <span>{it.title}</span>
                       </SidebarMenuButton>
@@ -166,7 +173,11 @@ function Page() {
             </h1>
           </header>
           <main className="flex-1 p-4 max-w-4xl w-full mx-auto space-y-4">
-            <AffiliateHero name={me.name} commissionLabel={commissionLabel} sales={mySales} />
+            <AffiliateHero
+              name={me.name}
+              commissionLabel={commissionLabel}
+              sales={mySales}
+            />
             {view === "registrar" && (
               <RegisterSale
                 affiliateId={me.id}
@@ -223,7 +234,12 @@ function RegisterSale({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = parseFloat(form.saleValue.replace(",", "."));
-    if (!form.customerName || !form.productDescription || !value || value <= 0) {
+    if (
+      !form.customerName ||
+      !form.productDescription ||
+      !value ||
+      value <= 0
+    ) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
@@ -288,7 +304,9 @@ function RegisterSale({
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-display text-xl text-primary leading-tight">Nova venda</h2>
+            <h2 className="font-display text-xl text-primary leading-tight">
+              Nova venda
+            </h2>
             <p className="text-[11px] text-muted-foreground">
               A comissão é calculada automaticamente ✨
             </p>
@@ -299,7 +317,9 @@ function RegisterSale({
           <Field label="Nome da cliente" required icon={User}>
             <input
               value={form.customerName}
-              onChange={(e) => setForm((f) => ({ ...f, customerName: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, customerName: e.target.value }))
+              }
               required
               className="input"
               placeholder="Ex: Maria Silva"
@@ -308,7 +328,9 @@ function RegisterSale({
           <Field label="WhatsApp" icon={Phone}>
             <input
               value={form.customerPhone}
-              onChange={(e) => setForm((f) => ({ ...f, customerPhone: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, customerPhone: e.target.value }))
+              }
               className="input"
               placeholder="(11) 99999-9999"
             />
@@ -316,7 +338,9 @@ function RegisterSale({
           <Field label="Produto(s) vendido(s)" required full icon={ShoppingBag}>
             <input
               value={form.productDescription}
-              onChange={(e) => setForm((f) => ({ ...f, productDescription: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, productDescription: e.target.value }))
+              }
               required
               placeholder="Ex: 2 laços rosa + 1 tiara"
               className="input"
@@ -327,7 +351,9 @@ function RegisterSale({
               type="text"
               inputMode="decimal"
               value={form.saleValue}
-              onChange={(e) => setForm((f) => ({ ...f, saleValue: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, saleValue: e.target.value }))
+              }
               required
               placeholder="0,00"
               className="input"
@@ -336,7 +362,9 @@ function RegisterSale({
           <Field label="Observações" icon={MessageCircle}>
             <input
               value={form.notes}
-              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, notes: e.target.value }))
+              }
               className="input"
               placeholder="Opcional"
             />
@@ -418,10 +446,16 @@ function Field({
   );
 }
 
-function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["affiliateSales"] }) {
+function SalesList({
+  sales,
+}: {
+  sales: ReturnType<typeof useStore.getState>["affiliateSales"];
+}) {
   const deleteSale = useStore((s) => s.deleteAffiliateSale);
   const handleDelete = (id: string, name: string) => {
-    if (confirm(`Excluir a venda de "${name}"? Esta ação não pode ser desfeita.`)) {
+    if (
+      confirm(`Excluir a venda de "${name}"? Esta ação não pode ser desfeita.`)
+    ) {
       deleteSale(id);
       toast.success("Venda excluída");
     }
@@ -439,14 +473,18 @@ function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["aff
             <li key={s.id} className="py-3 flex items-start gap-3 flex-wrap">
               <div className="flex-1 min-w-[200px]">
                 <div className="text-sm font-semibold">{s.customerName}</div>
-                <div className="text-xs text-muted-foreground">{s.productDescription}</div>
+                <div className="text-xs text-muted-foreground">
+                  {s.productDescription}
+                </div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">
                   {new Date(s.createdAt).toLocaleString("pt-BR")}
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-sm font-bold">{brl(s.saleValue)}</div>
-                <div className="text-xs text-success">+ {brl(s.commissionEarned)}</div>
+                <div className="text-xs text-success">
+                  + {brl(s.commissionEarned)}
+                </div>
                 <StatusBadge status={s.status} />
               </div>
               <button
@@ -465,11 +503,23 @@ function SalesList({ sales }: { sales: ReturnType<typeof useStore.getState>["aff
   );
 }
 
-function StatusBadge({ status }: { status: "pendente" | "confirmada" | "cancelada" }) {
+function StatusBadge({
+  status,
+}: {
+  status: "pendente" | "confirmada" | "cancelada";
+}) {
   const map = {
     pendente: { label: "Pendente", icon: Clock, cls: "bg-gold/20 text-gold" },
-    confirmada: { label: "Confirmada", icon: Check, cls: "bg-success/20 text-success" },
-    cancelada: { label: "Cancelada", icon: X, cls: "bg-destructive/20 text-destructive" },
+    confirmada: {
+      label: "Confirmada",
+      icon: Check,
+      cls: "bg-success/20 text-success",
+    },
+    cancelada: {
+      label: "Cancelada",
+      icon: X,
+      cls: "bg-destructive/20 text-destructive",
+    },
   } as const;
   const m = map[status];
   return (
@@ -511,13 +561,15 @@ function AffiliateHero({
 
   const monthCount = sales.filter(
     (s) =>
-      s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) && s.status !== "cancelada",
+      s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) &&
+      s.status !== "cancelada",
   ).length;
   const goal = Math.max(10, Math.ceil(Math.max(monthCount, 1) / 10) * 10);
   const progress = Math.min(100, Math.round((monthCount / goal) * 100));
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const greeting =
+    hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
 
   return (
     <div className="relative overflow-hidden rounded-3xl gradient-primary text-primary-foreground shadow-soft animate-fade-in">
@@ -529,7 +581,9 @@ function AffiliateHero({
             <div className="text-[11px] uppercase tracking-wider opacity-80">
               {greeting}, princesa ✨
             </div>
-            <h2 className="font-display text-2xl md:text-3xl leading-tight">{name}</h2>
+            <h2 className="font-display text-2xl md:text-3xl leading-tight">
+              {name}
+            </h2>
             <div className="text-xs opacity-90 mt-0.5 flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" /> {commissionLabel}
             </div>
@@ -540,7 +594,12 @@ function AffiliateHero({
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
-          <HeroStat icon={ShoppingBag} label="Hoje" value={String(stats.todayCount)} sub="vendas" />
+          <HeroStat
+            icon={ShoppingBag}
+            label="Hoje"
+            value={String(stats.todayCount)}
+            sub="vendas"
+          />
           <HeroStat
             icon={DollarSign}
             label="Comissão hoje"
@@ -565,7 +624,8 @@ function AffiliateHero({
         <div className="mt-5">
           <div className="flex items-center justify-between text-[11px] opacity-90 mb-1.5">
             <span className="flex items-center gap-1">
-              <Target className="h-3 w-3" /> Meta do mês: {monthCount}/{goal} vendas
+              <Target className="h-3 w-3" /> Meta do mês: {monthCount}/{goal}{" "}
+              vendas
             </span>
             <span className="font-semibold">{progress}%</span>
           </div>
@@ -618,7 +678,9 @@ function LinkGenerator({ affiliateId }: { affiliateId: string }) {
     toast.success("Link copiado!");
   };
 
-  const productLink = selectedProduct ? `${baseUrl}/produto/${selectedProduct}?ref=${affiliateId}` : "";
+  const productLink = selectedProduct
+    ? `${baseUrl}/produto/${selectedProduct}?ref=${affiliateId}`
+    : "";
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -627,11 +689,19 @@ function LinkGenerator({ affiliateId }: { affiliateId: string }) {
           <Globe className="h-5 w-5" /> Link da Loja
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Divulgue o link geral da loja. Qualquer compra feita através dele será atribuída a você.
+          Divulgue o link geral da loja. Qualquer compra feita através dele será
+          atribuída a você.
         </p>
         <div className="flex gap-2">
-          <input readOnly value={mainLink} className="flex-1 h-11 px-3 rounded-xl bg-muted text-xs border border-border" />
-          <button onClick={() => copy(mainLink)} className="h-11 px-4 rounded-xl gradient-primary text-white font-semibold">
+          <input
+            readOnly
+            value={mainLink}
+            className="flex-1 h-11 px-3 rounded-xl bg-muted text-xs border border-border"
+          />
+          <button
+            onClick={() => copy(mainLink)}
+            className="h-11 px-4 rounded-xl gradient-primary text-white font-semibold"
+          >
             Copiar
           </button>
         </div>
@@ -642,22 +712,25 @@ function LinkGenerator({ affiliateId }: { affiliateId: string }) {
           <ShoppingBag className="h-5 w-5" /> Deep Links (Produtos)
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Gere um link direto para um produto específico para aumentar suas conversões.
+          Gere um link direto para um produto específico para aumentar suas
+          conversões.
         </p>
-        
+
         <div className="space-y-4">
           <div>
             <label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Selecione o produto
             </label>
-            <select 
+            <select
               value={selectedProduct}
               onChange={(e) => setSelectedProduct(e.target.value)}
               className="w-full h-11 mt-1 px-3 rounded-xl bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50"
             >
               <option value="">Selecione um produto...</option>
-              {products.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
           </div>
@@ -665,8 +738,15 @@ function LinkGenerator({ affiliateId }: { affiliateId: string }) {
           {productLink && (
             <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 animate-scale-in">
               <div className="flex gap-2 items-center">
-                <input readOnly value={productLink} className="flex-1 h-10 px-3 rounded-lg bg-white/50 text-xs border border-primary/10" />
-                <button onClick={() => copy(productLink)} className="h-10 px-4 rounded-lg bg-primary text-white text-xs font-bold">
+                <input
+                  readOnly
+                  value={productLink}
+                  className="flex-1 h-10 px-3 rounded-lg bg-white/50 text-xs border border-primary/10"
+                />
+                <button
+                  onClick={() => copy(productLink)}
+                  className="h-10 px-4 rounded-lg bg-primary text-white text-xs font-bold"
+                >
                   Copiar Link
                 </button>
               </div>

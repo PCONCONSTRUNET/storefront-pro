@@ -37,14 +37,23 @@ export function EnableNotificationsPrompt() {
 
     // If Notification API is available and permission already granted/denied, skip
     if ("Notification" in window && Notification.permission === "granted") {
-      try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
+      try {
+        localStorage.setItem(ACCEPTED_KEY, "1");
+      } catch {}
       return;
     }
-    if ("Notification" in window && Notification.permission === "denied") return;
+    if ("Notification" in window && Notification.permission === "denied")
+      return;
 
     // Show prompt — use a longer delay for PWA to let everything settle
     const delay = isStandalone() ? 4000 : 2000;
-    console.log("[push-prompt] Will show in", delay, "ms (PWA:", isStandalone(), ")");
+    console.log(
+      "[push-prompt] Will show in",
+      delay,
+      "ms (PWA:",
+      isStandalone(),
+      ")",
+    );
 
     const t = window.setTimeout(() => {
       // No Android PWA, ignoramos o estado nativo de Notification.permission
@@ -76,19 +85,26 @@ export function EnableNotificationsPrompt() {
       if (sdkReady) {
         await OS.Notifications.requestPermission();
         // O OneSignal pode demorar um pouco para atualizar a permissão internamente
-        await new Promise(r => setTimeout(r, 1000));
-        granted = OS.Notifications.permission === true || Notification.permission === "granted";
+        await new Promise((r) => setTimeout(r, 1000));
+        granted =
+          OS.Notifications.permission === true ||
+          Notification.permission === "granted";
       } else if ("Notification" in window) {
         await Notification.requestPermission();
         granted = Notification.permission === "granted";
       }
 
       if (granted) {
-        try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
-        
+        try {
+          localStorage.setItem(ACCEPTED_KEY, "1");
+        } catch {}
+
         // CRITICAL: Link this device to the current user ID
         if (sdkReady && currentCustomerId) {
-          console.log("[push-prompt] Linking device to user:", currentCustomerId);
+          console.log(
+            "[push-prompt] Linking device to user:",
+            currentCustomerId,
+          );
           await OS.login(currentCustomerId);
           const isAdmin = window.location.pathname.includes("/admin");
           OS.User.addTag("role", isAdmin ? "admin" : "cliente");
@@ -113,19 +129,24 @@ export function EnableNotificationsPrompt() {
         try {
           const OS = (window as any).OneSignal;
           const isAdmin = window.location.pathname.includes("/admin");
-          
+
           // Aguardamos até 10 segundos pelo ID de inscrição (com checks a cada 1s)
           let subscriptionId = OS?.User?.PushSubscription?.id;
           let attempts = 0;
           while (!subscriptionId && attempts < 10) {
-            console.log("[push-prompt] Waiting for subscription ID... attempt", attempts + 1);
-            await new Promise(r => setTimeout(r, 1000));
+            console.log(
+              "[push-prompt] Waiting for subscription ID... attempt",
+              attempts + 1,
+            );
+            await new Promise((r) => setTimeout(r, 1000));
             subscriptionId = OS?.User?.PushSubscription?.id;
             attempts++;
           }
 
           if (!subscriptionId) {
-            console.warn("[push-prompt] Could not get subscription ID after 10s");
+            console.warn(
+              "[push-prompt] Could not get subscription ID after 10s",
+            );
             return;
           }
 
@@ -134,10 +155,12 @@ export function EnableNotificationsPrompt() {
           await supabase.functions.invoke("send-push", {
             body: {
               title: "Notificações ativadas! 🔔",
-              message: isAdmin 
-                ? "Admin: Você receberá avisos de novos pedidos e pagamentos 💰" 
+              message: isAdmin
+                ? "Admin: Você receberá avisos de novos pedidos e pagamentos 💰"
                 : "Pronto! Você vai receber avisos de seus pedidos e novidades 💖",
-              externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
+              externalUserIds: currentCustomerId
+                ? [currentCustomerId]
+                : undefined,
               audience: isAdmin ? "admin" : "cliente",
             },
           });
@@ -153,7 +176,10 @@ export function EnableNotificationsPrompt() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[9999] p-3 sm:p-4 pointer-events-none" style={{ marginBottom: "60px" }}>
+    <div
+      className="fixed inset-x-0 bottom-0 z-[9999] p-3 sm:p-4 pointer-events-none"
+      style={{ marginBottom: "60px" }}
+    >
       <div className="pointer-events-auto max-w-sm mx-auto bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
         <div className="relative p-4">
           <button
@@ -168,7 +194,9 @@ export function EnableNotificationsPrompt() {
               <Bell className="h-6 w-6" />
             </div>
             <div className="flex-1 min-w-0 pr-6">
-              <div className="font-bold text-sm text-foreground">Ativar notificações</div>
+              <div className="font-bold text-sm text-foreground">
+                Ativar notificações
+              </div>
               <div className="text-xs text-muted-foreground">
                 Receba avisos de pedidos, pagamentos e novidades 💖
               </div>

@@ -12,7 +12,12 @@ function getBotProxyPath(path: string) {
   return isLovableHost ? path.replace("/api/bot/", "/api/lovable-bot/") : path;
 }
 
-export type BotStatus = "QR_READY" | "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "UNKNOWN";
+export type BotStatus =
+  | "QR_READY"
+  | "CONNECTED"
+  | "CONNECTING"
+  | "DISCONNECTED"
+  | "UNKNOWN";
 
 export type BotStatusResponse = {
   status: BotStatus;
@@ -20,8 +25,13 @@ export type BotStatusResponse = {
   message?: string;
 };
 
-export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusResponse> {
-  const res = await fetch(getBotProxyPath(`/api/bot/status`), { method: "GET", signal });
+export async function fetchBotStatus(
+  signal?: AbortSignal,
+): Promise<BotStatusResponse> {
+  const res = await fetch(getBotProxyPath(`/api/bot/status`), {
+    method: "GET",
+    signal,
+  });
   if (!res.ok && res.status !== 502) throw new Error(`Status ${res.status}`);
   const data = await res.json();
   if (data.error && !data.status) throw new Error(data.error);
@@ -33,7 +43,9 @@ export async function fetchBotStatus(signal?: AbortSignal): Promise<BotStatusRes
 }
 
 export async function logoutBot(): Promise<void> {
-  const res = await fetch(getBotProxyPath(`/api/bot/logout`), { method: "POST" });
+  const res = await fetch(getBotProxyPath(`/api/bot/logout`), {
+    method: "POST",
+  });
   if (!res.ok) {
     let msg = `Logout falhou (${res.status})`;
     try {
@@ -64,7 +76,11 @@ export async function sendBotNotification(
     if (ok && typeof rawBody === "string") {
       try {
         const inner = JSON.parse(rawBody);
-        if (inner && typeof inner === "object" && typeof inner.aviso === "string") {
+        if (
+          inner &&
+          typeof inner === "object" &&
+          typeof inner.aviso === "string"
+        ) {
           ok = false;
           body = `Bot ignorou: ${inner.aviso}`;
         }
@@ -119,7 +135,13 @@ export function clearBotLogs() {
 export async function notifyWhatsApp(numero: string, mensagem: string) {
   try {
     const r = await sendBotNotification({ numero, mensagem });
-    pushBotLog({ numero, mensagem, ok: r.ok, status: r.status, error: r.ok ? undefined : r.body });
+    pushBotLog({
+      numero,
+      mensagem,
+      ok: r.ok,
+      status: r.status,
+      error: r.ok ? undefined : r.body,
+    });
     return r;
   } catch (e) {
     const err = e instanceof Error ? e.message : String(e);

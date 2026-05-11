@@ -48,7 +48,9 @@ function Page() {
               <X className="h-3.5 w-3.5" />
             </button>
             <h2 className="font-display text-2xl">Bem-vinda</h2>
-            <p className="text-primary-foreground/90 text-xs">Entre na sua conta.</p>
+            <p className="text-primary-foreground/90 text-xs">
+              Entre na sua conta.
+            </p>
           </div>
 
           <form onSubmit={submit} className="px-4 py-4 space-y-3">

@@ -4,7 +4,10 @@ import { Star, Camera, X, Trash2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 
-export function productRating(reviews: { productId: string; rating: number }[], productId: string) {
+export function productRating(
+  reviews: { productId: string; rating: number }[],
+  productId: string,
+) {
   const list = reviews.filter((r) => r.productId === productId);
   if (list.length === 0) return { avg: 0, count: 0 };
   const avg = list.reduce((a, r) => a + r.rating, 0) / list.length;
@@ -24,7 +27,9 @@ export function Stars({
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => {
         const filled = i <= Math.round(value);
-        const Cls = onChange ? "cursor-pointer hover:scale-110 transition-transform" : "";
+        const Cls = onChange
+          ? "cursor-pointer hover:scale-110 transition-transform"
+          : "";
         return (
           <Star
             key={i}
@@ -65,17 +70,23 @@ export function ProductReviews({ productId }: { productId: string }) {
     return { avg, total, dist };
   }, [reviews]);
 
-  const filtered = filterStars ? reviews.filter((r) => r.rating === filterStars) : reviews;
+  const filtered = filterStars
+    ? reviews.filter((r) => r.rating === filterStars)
+    : reviews;
 
   const customerHasBought = useMemo(() => {
     if (!currentCustomerId) return false;
     return orders.some(
-      (o) => o.customerId === currentCustomerId && o.items.some((i) => i.productId === productId),
+      (o) =>
+        o.customerId === currentCustomerId &&
+        o.items.some((i) => i.productId === productId),
     );
   }, [orders, currentCustomerId, productId]);
 
   const alreadyReviewed = useMemo(
-    () => !!currentCustomerId && reviews.some((r) => r.customerId === currentCustomerId),
+    () =>
+      !!currentCustomerId &&
+      reviews.some((r) => r.customerId === currentCustomerId),
     [reviews, currentCustomerId],
   );
 
@@ -129,7 +140,9 @@ export function ProductReviews({ productId }: { productId: string }) {
       {/* Resumo */}
       <div className="bg-card rounded-2xl p-4 shadow-card grid md:grid-cols-[180px_1fr] gap-4">
         <div className="text-center md:border-r md:border-border md:pr-4">
-          <div className="text-4xl font-bold text-gold">{summary.avg.toFixed(1)}</div>
+          <div className="text-4xl font-bold text-gold">
+            {summary.avg.toFixed(1)}
+          </div>
           <Stars value={summary.avg} size={16} />
           <div className="text-xs text-muted-foreground mt-1">
             {summary.total} avaliação{summary.total === 1 ? "" : "ões"}
@@ -149,9 +162,14 @@ export function ProductReviews({ productId }: { productId: string }) {
                 <span className="w-3 text-right">{s}</span>
                 <Star className="h-3 w-3 fill-gold text-gold" />
                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-gold" style={{ width: `${pct}%` }} />
+                  <div
+                    className="h-full bg-gold"
+                    style={{ width: `${pct}%` }}
+                  />
                 </div>
-                <span className="w-8 text-right text-muted-foreground">{count}</span>
+                <span className="w-8 text-right text-muted-foreground">
+                  {count}
+                </span>
               </button>
             );
           })}
@@ -170,8 +188,8 @@ export function ProductReviews({ productId }: { productId: string }) {
       {reviewPhotos.length > 0 && (
         <div className="mt-4">
           <div className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-            <ImageIcon className="h-4 w-4 text-primary" /> Fotos dos clientes ({reviewPhotos.length}
-            )
+            <ImageIcon className="h-4 w-4 text-primary" /> Fotos dos clientes (
+            {reviewPhotos.length})
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {reviewPhotos.slice(0, 12).map((p, i) => (
@@ -180,7 +198,11 @@ export function ProductReviews({ productId }: { productId: string }) {
                 onClick={() => setPhotoView(p.src)}
                 className="shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-muted border border-border hover:opacity-80"
               >
-                <img src={p.src} alt={`Foto de ${p.name}`} className="w-full h-full object-cover" />
+                <img
+                  src={p.src}
+                  alt={`Foto de ${p.name}`}
+                  className="w-full h-full object-cover"
+                />
               </button>
             ))}
           </div>
@@ -217,10 +239,19 @@ export function ProductReviews({ productId }: { productId: string }) {
             />
             <div className="flex flex-wrap items-center gap-2">
               {photos.map((src, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted">
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                <div
+                  key={i}
+                  className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted"
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   <button
-                    onClick={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
+                    onClick={() =>
+                      setPhotos((p) => p.filter((_, idx) => idx !== i))
+                    }
                     className="absolute top-0.5 right-0.5 w-5 h-5 grid place-items-center rounded-full bg-destructive text-destructive-foreground"
                   >
                     <X className="h-3 w-3" />
@@ -253,7 +284,8 @@ export function ProductReviews({ productId }: { productId: string }) {
             </div>
             {!customerHasBought && (
               <p className="text-[11px] text-muted-foreground">
-                💡 Avaliações de quem já comprou ganham o selo "Compra verificada".
+                💡 Avaliações de quem já comprou ganham o selo "Compra
+                verificada".
               </p>
             )}
             <button
@@ -271,13 +303,16 @@ export function ProductReviews({ productId }: { productId: string }) {
       <div className="mt-4 space-y-3">
         {filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-6 bg-card rounded-2xl">
-            {filterStars ? "Nenhuma avaliação com esse filtro." : "Seja a primeira a avaliar!"}
+            {filterStars
+              ? "Nenhuma avaliação com esse filtro."
+              : "Seja a primeira a avaliar!"}
           </p>
         ) : (
           filtered.map((r) => {
             const verified = orders.some(
               (o) =>
-                o.customerId === r.customerId && o.items.some((i) => i.productId === productId),
+                o.customerId === r.customerId &&
+                o.items.some((i) => i.productId === productId),
             );
             const canDelete = isAdmin || r.customerId === currentCustomerId;
             return (
@@ -285,7 +320,9 @@ export function ProductReviews({ productId }: { productId: string }) {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">{r.customerName}</span>
+                      <span className="font-semibold text-sm">
+                        {r.customerName}
+                      </span>
                       {verified && (
                         <span className="text-[9px] uppercase tracking-wide bg-success/15 text-success px-1.5 py-0.5 rounded-full font-bold">
                           ✓ Compra verificada
@@ -314,7 +351,9 @@ export function ProductReviews({ productId }: { productId: string }) {
                   )}
                 </div>
                 {r.comment && (
-                  <p className="mt-2 text-sm text-foreground/90 whitespace-pre-wrap">{r.comment}</p>
+                  <p className="mt-2 text-sm text-foreground/90 whitespace-pre-wrap">
+                    {r.comment}
+                  </p>
                 )}
                 {r.photos.length > 0 && (
                   <div className="mt-2 flex gap-2 flex-wrap">
@@ -324,7 +363,11 @@ export function ProductReviews({ productId }: { productId: string }) {
                         onClick={() => setPhotoView(src)}
                         className="w-20 h-20 rounded-lg overflow-hidden bg-muted hover:opacity-80"
                       >
-                        <img src={src} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={src}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
@@ -341,7 +384,11 @@ export function ProductReviews({ productId }: { productId: string }) {
           onClick={() => setPhotoView(null)}
           className="fixed inset-0 z-50 bg-black/80 grid place-items-center p-4 cursor-zoom-out"
         >
-          <img src={photoView} alt="" className="max-w-full max-h-full rounded-xl object-contain" />
+          <img
+            src={photoView}
+            alt=""
+            className="max-w-full max-h-full rounded-xl object-contain"
+          />
           <button className="absolute top-4 right-4 w-10 h-10 grid place-items-center rounded-full bg-white/10 text-white">
             <X className="h-5 w-5" />
           </button>

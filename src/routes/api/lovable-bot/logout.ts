@@ -19,7 +19,11 @@ export const Route = createFileRoute("/api/lovable-bot/logout")({
             body: JSON.stringify({ token: BOT_TOKEN }),
           });
           const text = await r.text();
-          return botJsonResponse(request, parseProxyJson(text, { ok: r.ok, body: text }), r.status);
+          return botJsonResponse(
+            request,
+            parseProxyJson(text, { ok: r.ok, body: text }),
+            r.status,
+          );
         } catch (e) {
           return botJsonResponse(
             request,

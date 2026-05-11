@@ -4,577 +4,577 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       activity_logs: {
         Row: {
-          action: string
-          category: string
-          created_at: string
-          description: string
-          id: string
-          metadata: Json
-          user_id: string | null
-        }
+          action: string;
+          category: string;
+          created_at: string;
+          description: string;
+          id: string;
+          metadata: Json;
+          user_id: string | null;
+        };
         Insert: {
-          action: string
-          category: string
-          created_at?: string
-          description: string
-          id?: string
-          metadata?: Json
-          user_id?: string | null
-        }
+          action: string;
+          category: string;
+          created_at?: string;
+          description: string;
+          id?: string;
+          metadata?: Json;
+          user_id?: string | null;
+        };
         Update: {
-          action?: string
-          category?: string
-          created_at?: string
-          description?: string
-          id?: string
-          metadata?: Json
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+          action?: string;
+          category?: string;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          metadata?: Json;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       affiliate_sales: {
         Row: {
-          affiliate_id: string
-          commission_earned: number
-          created_at: string
-          customer_name: string
-          customer_phone: string | null
-          id: string
-          notes: string | null
-          product_description: string
-          sale_value: number
-          status: string
-        }
+          affiliate_id: string;
+          commission_earned: number;
+          created_at: string;
+          customer_name: string;
+          customer_phone: string | null;
+          id: string;
+          notes: string | null;
+          product_description: string;
+          sale_value: number;
+          status: string;
+        };
         Insert: {
-          affiliate_id: string
-          commission_earned?: number
-          created_at?: string
-          customer_name: string
-          customer_phone?: string | null
-          id?: string
-          notes?: string | null
-          product_description: string
-          sale_value?: number
-          status?: string
-        }
+          affiliate_id: string;
+          commission_earned?: number;
+          created_at?: string;
+          customer_name: string;
+          customer_phone?: string | null;
+          id?: string;
+          notes?: string | null;
+          product_description: string;
+          sale_value?: number;
+          status?: string;
+        };
         Update: {
-          affiliate_id?: string
-          commission_earned?: number
-          created_at?: string
-          customer_name?: string
-          customer_phone?: string | null
-          id?: string
-          notes?: string | null
-          product_description?: string
-          sale_value?: number
-          status?: string
-        }
-        Relationships: []
-      }
+          affiliate_id?: string;
+          commission_earned?: number;
+          created_at?: string;
+          customer_name?: string;
+          customer_phone?: string | null;
+          id?: string;
+          notes?: string | null;
+          product_description?: string;
+          sale_value?: number;
+          status?: string;
+        };
+        Relationships: [];
+      };
       affiliates: {
         Row: {
-          active: boolean
-          commission_type: string
-          commission_value: number
-          created_at: string
-          email: string
-          id: string
-          name: string
-          password_hash: string
-          phone: string
-          updated_at: string
-        }
+          active: boolean;
+          commission_type: string;
+          commission_value: number;
+          created_at: string;
+          email: string;
+          id: string;
+          name: string;
+          password_hash: string;
+          phone: string;
+          updated_at: string;
+        };
         Insert: {
-          active?: boolean
-          commission_type?: string
-          commission_value?: number
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          password_hash: string
-          phone?: string
-          updated_at?: string
-        }
+          active?: boolean;
+          commission_type?: string;
+          commission_value?: number;
+          created_at?: string;
+          email: string;
+          id?: string;
+          name: string;
+          password_hash: string;
+          phone?: string;
+          updated_at?: string;
+        };
         Update: {
-          active?: boolean
-          commission_type?: string
-          commission_value?: number
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          password_hash?: string
-          phone?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          active?: boolean;
+          commission_type?: string;
+          commission_value?: number;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          name?: string;
+          password_hash?: string;
+          phone?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       categories: {
         Row: {
-          created_at: string
-          id: string
-          image: string | null
-          name: string
-          slug: string
-          sort_order: number
-        }
+          created_at: string;
+          id: string;
+          image: string | null;
+          name: string;
+          slug: string;
+          sort_order: number;
+        };
         Insert: {
-          created_at?: string
-          id: string
-          image?: string | null
-          name: string
-          slug: string
-          sort_order?: number
-        }
+          created_at?: string;
+          id: string;
+          image?: string | null;
+          name: string;
+          slug: string;
+          sort_order?: number;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          image?: string | null
-          name?: string
-          slug?: string
-          sort_order?: number
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          image?: string | null;
+          name?: string;
+          slug?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
       coupons: {
         Row: {
-          active: boolean
-          code: string
-          created_at: string
-          expires_at: string | null
-          extra: Json
-          kind: string
-          min_subtotal: number
-          value: number
-        }
+          active: boolean;
+          code: string;
+          created_at: string;
+          expires_at: string | null;
+          extra: Json;
+          kind: string;
+          min_subtotal: number;
+          value: number;
+        };
         Insert: {
-          active?: boolean
-          code: string
-          created_at?: string
-          expires_at?: string | null
-          extra?: Json
-          kind?: string
-          min_subtotal?: number
-          value?: number
-        }
+          active?: boolean;
+          code: string;
+          created_at?: string;
+          expires_at?: string | null;
+          extra?: Json;
+          kind?: string;
+          min_subtotal?: number;
+          value?: number;
+        };
         Update: {
-          active?: boolean
-          code?: string
-          created_at?: string
-          expires_at?: string | null
-          extra?: Json
-          kind?: string
-          min_subtotal?: number
-          value?: number
-        }
-        Relationships: []
-      }
+          active?: boolean;
+          code?: string;
+          created_at?: string;
+          expires_at?: string | null;
+          extra?: Json;
+          kind?: string;
+          min_subtotal?: number;
+          value?: number;
+        };
+        Relationships: [];
+      };
       customers: {
         Row: {
-          address: string | null
-          addresses: Json
-          created_at: string
-          email: string
-          favorites: Json
-          id: string
-          name: string
-          password_hash: string
-          phone: string
-          updated_at: string
-        }
+          address: string | null;
+          addresses: Json;
+          created_at: string;
+          email: string;
+          favorites: Json;
+          id: string;
+          name: string;
+          password_hash: string;
+          phone: string;
+          updated_at: string;
+        };
         Insert: {
-          address?: string | null
-          addresses?: Json
-          created_at?: string
-          email: string
-          favorites?: Json
-          id?: string
-          name: string
-          password_hash: string
-          phone?: string
-          updated_at?: string
-        }
+          address?: string | null;
+          addresses?: Json;
+          created_at?: string;
+          email: string;
+          favorites?: Json;
+          id?: string;
+          name: string;
+          password_hash: string;
+          phone?: string;
+          updated_at?: string;
+        };
         Update: {
-          address?: string | null
-          addresses?: Json
-          created_at?: string
-          email?: string
-          favorites?: Json
-          id?: string
-          name?: string
-          password_hash?: string
-          phone?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          address?: string | null;
+          addresses?: Json;
+          created_at?: string;
+          email?: string;
+          favorites?: Json;
+          id?: string;
+          name?: string;
+          password_hash?: string;
+          phone?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       faq_items: {
         Row: {
-          answer: string
-          category: string
-          created_at: string
-          id: string
-          question: string
-          sort_order: number
-        }
+          answer: string;
+          category: string;
+          created_at: string;
+          id: string;
+          question: string;
+          sort_order: number;
+        };
         Insert: {
-          answer: string
-          category: string
-          created_at?: string
-          id?: string
-          question: string
-          sort_order?: number
-        }
+          answer: string;
+          category: string;
+          created_at?: string;
+          id?: string;
+          question: string;
+          sort_order?: number;
+        };
         Update: {
-          answer?: string
-          category?: string
-          created_at?: string
-          id?: string
-          question?: string
-          sort_order?: number
-        }
-        Relationships: []
-      }
+          answer?: string;
+          category?: string;
+          created_at?: string;
+          id?: string;
+          question?: string;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
       orders: {
         Row: {
-          address: string | null
-          created_at: string
-          customer_document: string | null
-          customer_email: string
-          customer_name: string
-          customer_phone: string
-          delivery_method: string
-          discount: number
-          id: string
-          items: Json
-          mp_payment_id: string | null
-          notes: string | null
-          paid_at: string | null
-          payment_method: string
-          payment_status: Database["public"]["Enums"]["payment_status"]
-          pix_expires_at: string | null
-          pix_qr_code: string | null
-          pix_qr_code_base64: string | null
-          shipping: number
-          subtotal: number
-          total: number
-          updated_at: string
-        }
+          address: string | null;
+          created_at: string;
+          customer_document: string | null;
+          customer_email: string;
+          customer_name: string;
+          customer_phone: string;
+          delivery_method: string;
+          discount: number;
+          id: string;
+          items: Json;
+          mp_payment_id: string | null;
+          notes: string | null;
+          paid_at: string | null;
+          payment_method: string;
+          payment_status: Database["public"]["Enums"]["payment_status"];
+          pix_expires_at: string | null;
+          pix_qr_code: string | null;
+          pix_qr_code_base64: string | null;
+          shipping: number;
+          subtotal: number;
+          total: number;
+          updated_at: string;
+        };
         Insert: {
-          address?: string | null
-          created_at?: string
-          customer_document?: string | null
-          customer_email: string
-          customer_name: string
-          customer_phone: string
-          delivery_method?: string
-          discount?: number
-          id?: string
-          items?: Json
-          mp_payment_id?: string | null
-          notes?: string | null
-          paid_at?: string | null
-          payment_method?: string
-          payment_status?: Database["public"]["Enums"]["payment_status"]
-          pix_expires_at?: string | null
-          pix_qr_code?: string | null
-          pix_qr_code_base64?: string | null
-          shipping?: number
-          subtotal?: number
-          total: number
-          updated_at?: string
-        }
+          address?: string | null;
+          created_at?: string;
+          customer_document?: string | null;
+          customer_email: string;
+          customer_name: string;
+          customer_phone: string;
+          delivery_method?: string;
+          discount?: number;
+          id?: string;
+          items?: Json;
+          mp_payment_id?: string | null;
+          notes?: string | null;
+          paid_at?: string | null;
+          payment_method?: string;
+          payment_status?: Database["public"]["Enums"]["payment_status"];
+          pix_expires_at?: string | null;
+          pix_qr_code?: string | null;
+          pix_qr_code_base64?: string | null;
+          shipping?: number;
+          subtotal?: number;
+          total: number;
+          updated_at?: string;
+        };
         Update: {
-          address?: string | null
-          created_at?: string
-          customer_document?: string | null
-          customer_email?: string
-          customer_name?: string
-          customer_phone?: string
-          delivery_method?: string
-          discount?: number
-          id?: string
-          items?: Json
-          mp_payment_id?: string | null
-          notes?: string | null
-          paid_at?: string | null
-          payment_method?: string
-          payment_status?: Database["public"]["Enums"]["payment_status"]
-          pix_expires_at?: string | null
-          pix_qr_code?: string | null
-          pix_qr_code_base64?: string | null
-          shipping?: number
-          subtotal?: number
-          total?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          address?: string | null;
+          created_at?: string;
+          customer_document?: string | null;
+          customer_email?: string;
+          customer_name?: string;
+          customer_phone?: string;
+          delivery_method?: string;
+          discount?: number;
+          id?: string;
+          items?: Json;
+          mp_payment_id?: string | null;
+          notes?: string | null;
+          paid_at?: string | null;
+          payment_method?: string;
+          payment_status?: Database["public"]["Enums"]["payment_status"];
+          pix_expires_at?: string | null;
+          pix_qr_code?: string | null;
+          pix_qr_code_base64?: string | null;
+          shipping?: number;
+          subtotal?: number;
+          total?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       password_reset_tokens: {
         Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          subject_email: string
-          subject_type: Database["public"]["Enums"]["reset_subject"]
-          token: string
-          used_at: string | null
-        }
+          created_at: string;
+          expires_at: string;
+          id: string;
+          subject_email: string;
+          subject_type: Database["public"]["Enums"]["reset_subject"];
+          token: string;
+          used_at: string | null;
+        };
         Insert: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          subject_email: string
-          subject_type: Database["public"]["Enums"]["reset_subject"]
-          token: string
-          used_at?: string | null
-        }
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          subject_email: string;
+          subject_type: Database["public"]["Enums"]["reset_subject"];
+          token: string;
+          used_at?: string | null;
+        };
         Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          subject_email?: string
-          subject_type?: Database["public"]["Enums"]["reset_subject"]
-          token?: string
-          used_at?: string | null
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          subject_email?: string;
+          subject_type?: Database["public"]["Enums"]["reset_subject"];
+          token?: string;
+          used_at?: string | null;
+        };
+        Relationships: [];
+      };
       payment_events: {
         Row: {
-          event_type: string
-          id: string
-          mp_event_id: string
-          mp_payment_id: string | null
-          order_id: string | null
-          processed_at: string
-          raw_payload: Json
-        }
+          event_type: string;
+          id: string;
+          mp_event_id: string;
+          mp_payment_id: string | null;
+          order_id: string | null;
+          processed_at: string;
+          raw_payload: Json;
+        };
         Insert: {
-          event_type: string
-          id?: string
-          mp_event_id: string
-          mp_payment_id?: string | null
-          order_id?: string | null
-          processed_at?: string
-          raw_payload: Json
-        }
+          event_type: string;
+          id?: string;
+          mp_event_id: string;
+          mp_payment_id?: string | null;
+          order_id?: string | null;
+          processed_at?: string;
+          raw_payload: Json;
+        };
         Update: {
-          event_type?: string
-          id?: string
-          mp_event_id?: string
-          mp_payment_id?: string | null
-          order_id?: string | null
-          processed_at?: string
-          raw_payload?: Json
-        }
+          event_type?: string;
+          id?: string;
+          mp_event_id?: string;
+          mp_payment_id?: string | null;
+          order_id?: string | null;
+          processed_at?: string;
+          raw_payload?: Json;
+        };
         Relationships: [
           {
-            foreignKeyName: "payment_events_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
+            foreignKeyName: "payment_events_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       product_waitlist: {
         Row: {
-          created_at: string
-          customer_id: string | null
-          email: string
-          id: string
-          notified: boolean
-          product_id: string
-        }
+          created_at: string;
+          customer_id: string | null;
+          email: string;
+          id: string;
+          notified: boolean;
+          product_id: string;
+        };
         Insert: {
-          created_at?: string
-          customer_id?: string | null
-          email: string
-          id?: string
-          notified?: boolean
-          product_id: string
-        }
+          created_at?: string;
+          customer_id?: string | null;
+          email: string;
+          id?: string;
+          notified?: boolean;
+          product_id: string;
+        };
         Update: {
-          created_at?: string
-          customer_id?: string | null
-          email?: string
-          id?: string
-          notified?: boolean
-          product_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          customer_id?: string | null;
+          email?: string;
+          id?: string;
+          notified?: boolean;
+          product_id?: string;
+        };
+        Relationships: [];
+      };
       products: {
         Row: {
-          active: boolean
-          category_id: string | null
-          created_at: string
-          description: string | null
-          extra: Json
-          featured: boolean
-          id: string
-          images: Json
-          name: string
-          original_price: number | null
-          price: number
-          slug: string | null
-          stock: number
-          updated_at: string
-          variations: Json
-        }
+          active: boolean;
+          category_id: string | null;
+          created_at: string;
+          description: string | null;
+          extra: Json;
+          featured: boolean;
+          id: string;
+          images: Json;
+          name: string;
+          original_price: number | null;
+          price: number;
+          slug: string | null;
+          stock: number;
+          updated_at: string;
+          variations: Json;
+        };
         Insert: {
-          active?: boolean
-          category_id?: string | null
-          created_at?: string
-          description?: string | null
-          extra?: Json
-          featured?: boolean
-          id: string
-          images?: Json
-          name: string
-          original_price?: number | null
-          price?: number
-          slug?: string | null
-          stock?: number
-          updated_at?: string
-          variations?: Json
-        }
+          active?: boolean;
+          category_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          extra?: Json;
+          featured?: boolean;
+          id: string;
+          images?: Json;
+          name: string;
+          original_price?: number | null;
+          price?: number;
+          slug?: string | null;
+          stock?: number;
+          updated_at?: string;
+          variations?: Json;
+        };
         Update: {
-          active?: boolean
-          category_id?: string | null
-          created_at?: string
-          description?: string | null
-          extra?: Json
-          featured?: boolean
-          id?: string
-          images?: Json
-          name?: string
-          original_price?: number | null
-          price?: number
-          slug?: string | null
-          stock?: number
-          updated_at?: string
-          variations?: Json
-        }
-        Relationships: []
-      }
+          active?: boolean;
+          category_id?: string | null;
+          created_at?: string;
+          description?: string | null;
+          extra?: Json;
+          featured?: boolean;
+          id?: string;
+          images?: Json;
+          name?: string;
+          original_price?: number | null;
+          price?: number;
+          slug?: string | null;
+          stock?: number;
+          updated_at?: string;
+          variations?: Json;
+        };
+        Relationships: [];
+      };
       reviews: {
         Row: {
-          comment: string | null
-          created_at: string
-          customer_id: string | null
-          customer_name: string
-          id: string
-          photos: Json
-          product_id: string
-          rating: number
-        }
+          comment: string | null;
+          created_at: string;
+          customer_id: string | null;
+          customer_name: string;
+          id: string;
+          photos: Json;
+          product_id: string;
+          rating: number;
+        };
         Insert: {
-          comment?: string | null
-          created_at?: string
-          customer_id?: string | null
-          customer_name: string
-          id?: string
-          photos?: Json
-          product_id: string
-          rating?: number
-        }
+          comment?: string | null;
+          created_at?: string;
+          customer_id?: string | null;
+          customer_name: string;
+          id?: string;
+          photos?: Json;
+          product_id: string;
+          rating?: number;
+        };
         Update: {
-          comment?: string | null
-          created_at?: string
-          customer_id?: string | null
-          customer_name?: string
-          id?: string
-          photos?: Json
-          product_id?: string
-          rating?: number
-        }
-        Relationships: []
-      }
+          comment?: string | null;
+          created_at?: string;
+          customer_id?: string | null;
+          customer_name?: string;
+          id?: string;
+          photos?: Json;
+          product_id?: string;
+          rating?: number;
+        };
+        Relationships: [];
+      };
       store_settings: {
         Row: {
-          data: Json
-          id: number
-          updated_at: string
-        }
+          data: Json;
+          id: number;
+          updated_at: string;
+        };
         Insert: {
-          data?: Json
-          id?: number
-          updated_at?: string
-        }
+          data?: Json;
+          id?: number;
+          updated_at?: string;
+        };
         Update: {
-          data?: Json
-          id?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          data?: Json;
+          id?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       transactions: {
         Row: {
-          affiliate_id: string | null
-          amount: number
-          category: string
-          created_at: string
-          date: string
-          description: string
-          id: string
-          kind: string
-          notes: string | null
-          product_summary: string | null
-        }
+          affiliate_id: string | null;
+          amount: number;
+          category: string;
+          created_at: string;
+          date: string;
+          description: string;
+          id: string;
+          kind: string;
+          notes: string | null;
+          product_summary: string | null;
+        };
         Insert: {
-          affiliate_id?: string | null
-          amount?: number
-          category: string
-          created_at?: string
-          date?: string
-          description: string
-          id?: string
-          kind: string
-          notes?: string | null
-          product_summary?: string | null
-        }
+          affiliate_id?: string | null;
+          amount?: number;
+          category: string;
+          created_at?: string;
+          date?: string;
+          description: string;
+          id?: string;
+          kind: string;
+          notes?: string | null;
+          product_summary?: string | null;
+        };
         Update: {
-          affiliate_id?: string | null
-          amount?: number
-          category?: string
-          created_at?: string
-          date?: string
-          description?: string
-          id?: string
-          kind?: string
-          notes?: string | null
-          product_summary?: string | null
-        }
-        Relationships: []
-      }
-    }
+          affiliate_id?: string | null;
+          amount?: number;
+          category?: string;
+          created_at?: string;
+          date?: string;
+          description?: string;
+          id?: string;
+          kind?: string;
+          notes?: string | null;
+          product_summary?: string | null;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       consume_password_reset_token: {
-        Args: { _token: string }
+        Args: { _token: string };
         Returns: {
-          subject_email: string
-          subject_type: Database["public"]["Enums"]["reset_subject"]
-        }[]
-      }
-    }
+          subject_email: string;
+          subject_type: Database["public"]["Enums"]["reset_subject"];
+        }[];
+      };
+    };
     Enums: {
       payment_status:
         | "pending"
@@ -582,35 +582,38 @@ export type Database = {
         | "rejected"
         | "cancelled"
         | "refunded"
-        | "expired"
-      reset_subject: "admin" | "customer" | "affiliate"
-    }
+        | "expired";
+      reset_subject: "admin" | "customer" | "affiliate";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
@@ -618,95 +621,95 @@ export type Tables<
         DefaultSchema["Views"])
     ? (DefaultSchema["Tables"] &
         DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
@@ -722,4 +725,4 @@ export const Constants = {
       reset_subject: ["admin", "customer", "affiliate"],
     },
   },
-} as const
+} as const;

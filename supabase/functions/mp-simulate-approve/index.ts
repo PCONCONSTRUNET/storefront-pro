@@ -6,7 +6,8 @@ import { notifyOrderApproved } from "../_shared/notify-approval.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const json = (d: unknown, s = 200) =>
@@ -16,8 +17,10 @@ const json = (d: unknown, s = 200) =>
   });
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST")
+    return json({ error: "Método não permitido" }, 405);
 
   let body: any;
   try {

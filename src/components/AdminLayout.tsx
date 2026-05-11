@@ -26,7 +26,12 @@ import { cn } from "@/lib/utils";
 import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
 
 const nav = [
-  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  {
+    to: "/admin/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    exact: true,
+  },
   { to: "/admin/bi", label: "B.I.", icon: BarChart },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
@@ -41,7 +46,13 @@ const nav = [
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-export function AdminLayout({ children, title }: { children: ReactNode; title: string }) {
+export function AdminLayout({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title: string;
+}) {
   const navigate = useNavigate();
   const hydrated = useStoreHydrated();
   const isAdmin = useStore((s) => s.isAdmin);
@@ -76,7 +87,9 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
                 to={it.to}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                  active ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-muted text-foreground",
                 )}
               >
                 <it.icon className="h-4 w-4" /> {it.label}
@@ -105,7 +118,10 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
 
       {/* Mobile drawer */}
       {open && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setOpen(false)}>
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/50"
+          onClick={() => setOpen(false)}
+        >
           <aside
             className="absolute left-0 top-0 bottom-0 w-64 bg-card p-3 flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -118,7 +134,9 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
             </div>
             <nav className="flex-1 space-y-0.5 overflow-y-auto">
               {nav.map((it) => {
-                const active = it.exact ? path === it.to : path.startsWith(it.to);
+                const active = it.exact
+                  ? path === it.to
+                  : path.startsWith(it.to);
                 return (
                   <Link
                     key={it.to}
@@ -126,7 +144,9 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
                     onClick={() => setOpen(false)}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
-                      active ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-muted",
                     )}
                   >
                     <it.icon className="h-4 w-4" /> {it.label}
@@ -149,7 +169,11 @@ export function AdminLayout({ children, title }: { children: ReactNode; title: s
 
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="bg-card border-b border-border h-14 flex items-center px-4 sticky top-0 z-30 gap-3">
-          <button className="md:hidden" onClick={() => setOpen(true)} aria-label="Menu">
+          <button
+            className="md:hidden"
+            onClick={() => setOpen(true)}
+            aria-label="Menu"
+          >
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="text-lg font-bold truncate">{title}</h1>
@@ -177,7 +201,8 @@ function GlobalSearch() {
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
@@ -204,11 +229,14 @@ function GlobalSearch() {
             (digits && c.phone.replace(/\D/g, "").includes(digits)),
         )
         .slice(0, 5),
-      products: products.filter((p) => p.name.toLowerCase().includes(term)).slice(0, 5),
+      products: products
+        .filter((p) => p.name.toLowerCase().includes(term))
+        .slice(0, 5),
     };
   }, [q, orders, customers, products]);
 
-  const total = results.orders.length + results.customers.length + results.products.length;
+  const total =
+    results.orders.length + results.customers.length + results.products.length;
 
   return (
     <div ref={ref} className="relative w-44 sm:w-72">
@@ -293,7 +321,11 @@ function GlobalSearch() {
                       className="w-full text-left px-3 py-2 hover:bg-muted text-sm flex items-center gap-2"
                     >
                       {p.image && (
-                        <img src={p.image} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                        <img
+                          src={p.image}
+                          alt=""
+                          className="w-8 h-8 rounded-lg object-cover"
+                        />
                       )}
                       <div className="flex-1">
                         <div className="font-semibold">{p.name}</div>

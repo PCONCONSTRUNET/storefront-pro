@@ -21,7 +21,8 @@ async function safeInvoke(fn: string, body: Record<string, unknown>) {
   }
 }
 
-export const sendWelcomeEmail = (p: WelcomePayload) => safeInvoke("send-welcome-email", p);
+export const sendWelcomeEmail = (p: WelcomePayload) =>
+  safeInvoke("send-welcome-email", p);
 export const sendPasswordResetEmail = (p: ResetPayload) =>
   safeInvoke("send-password-reset-email", p);
 export const sendOrderConfirmationEmail = (p: OrderPayload) =>

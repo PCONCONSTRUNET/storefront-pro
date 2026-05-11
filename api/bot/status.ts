@@ -46,10 +46,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers: { Accept: "application/json" },
     });
     const text = await r.text();
-    res
-      .status(r.status)
-      .json(parseJson(text, { status: "UNKNOWN", error: text || `Status ${r.status}` }));
+    res.status(r.status).json(
+      parseJson(text, {
+        status: "UNKNOWN",
+        error: text || `Status ${r.status}`,
+      }),
+    );
   } catch (e) {
-    res.status(502).json({ status: "UNKNOWN", error: e instanceof Error ? e.message : String(e) });
+    res.status(502).json({
+      status: "UNKNOWN",
+      error: e instanceof Error ? e.message : String(e),
+    });
   }
 }

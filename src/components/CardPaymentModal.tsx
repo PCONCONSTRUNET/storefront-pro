@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CreditCard, Loader2, Lock, X, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  CreditCard,
+  Loader2,
+  Lock,
+  X,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { brl } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { createCardPayment, type CreateCardInput, type CreateCardResult } from "@/lib/mercadopago";
+import {
+  createCardPayment,
+  type CreateCardInput,
+  type CreateCardResult,
+} from "@/lib/mercadopago";
 import { toast } from "sonner";
 import mpIcon from "@/assets/mercadopago-icon.png";
 
@@ -12,7 +23,9 @@ declare global {
   }
 }
 
-const MP_PUBLIC_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as string | undefined;
+const MP_PUBLIC_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as
+  | string
+  | undefined;
 const SDK_URL = "https://sdk.mercadopago.com/js/v2";
 
 let sdkPromise: Promise<void> | null = null;
@@ -73,7 +86,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   });
   const [pmId, setPmId] = useState<string | null>(null);
   const [issuerId, setIssuerId] = useState<string | null>(null);
-  const [brand, setBrand] = useState<{ name: string; thumb: string } | null>(null);
+  const [brand, setBrand] = useState<{ name: string; thumb: string } | null>(
+    null,
+  );
   const [installmentsList, setInstallmentsList] = useState<
     Array<{ installments: number; recommended_message: string }>
   >([]);
@@ -86,7 +101,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   useEffect(() => {
     if (!open || SANDBOX) return;
     loadMpSdk()
-      .then(() => setMp(new window.MercadoPago!(MP_PUBLIC_KEY!, { locale: "pt-BR" })))
+      .then(() =>
+        setMp(new window.MercadoPago!(MP_PUBLIC_KEY!, { locale: "pt-BR" })),
+      )
       .catch((e) => setSdkErr(e.message));
   }, [open, SANDBOX]);
 
@@ -119,7 +136,10 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         });
         const list = inst?.[0]?.payer_costs ?? [];
         setInstallmentsList(list);
-        if (list.length && !list.find((x: any) => x.installments === card.installments)) {
+        if (
+          list.length &&
+          !list.find((x: any) => x.installments === card.installments)
+        ) {
           setCard((c) => ({ ...c, installments: list[0].installments }));
         }
         const issuers = inst?.[0]?.issuer ?? null;
@@ -155,7 +175,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             token: "SANDBOX_TOKEN",
             payment_method_id: "sandbox",
             installments: card.installments,
-            payer: { identification: { type: "CPF", number: onlyDigits(card.doc) } },
+            payer: {
+              identification: { type: "CPF", number: onlyDigits(card.doc) },
+            },
           },
         });
         toast.success("Pagamento simulado com sucesso! 🎉");
@@ -173,7 +195,8 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         identificationType: "CPF",
         identificationNumber: onlyDigits(card.doc),
       });
-      if (!tokenRes?.id) throw new Error("Não foi possível validar o cartão. Confira os dados.");
+      if (!tokenRes?.id)
+        throw new Error("Não foi possível validar o cartão. Confira os dados.");
 
       const result = await createCardPayment({
         ...payload,
@@ -182,7 +205,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
           payment_method_id: pmId!,
           issuer_id: issuerId ?? undefined,
           installments: card.installments,
-          payer: { identification: { type: "CPF", number: onlyDigits(card.doc) } },
+          payer: {
+            identification: { type: "CPF", number: onlyDigits(card.doc) },
+          },
         },
       });
 
@@ -194,7 +219,8 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         onSuccess(result);
       } else {
         setErrorMsg(
-          detailMsg(result.status_detail) || "Pagamento recusado pelo emissor. Tente outro cartão.",
+          detailMsg(result.status_detail) ||
+            "Pagamento recusado pelo emissor. Tente outro cartão.",
         );
       }
     } catch (e: any) {
@@ -246,10 +272,13 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
         {SANDBOX && (
           <div className="mx-5 mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 text-xs text-amber-900 dark:text-amber-200">
-            <div className="font-bold flex items-center gap-1">🧪 MODO SANDBOX (TESTE)</div>
+            <div className="font-bold flex items-center gap-1">
+              🧪 MODO SANDBOX (TESTE)
+            </div>
             <div className="mt-1">
-              Mercado Pago não configurado. Qualquer cartão será aceito e o pagamento será aprovado
-              automaticamente para testar as notificações.
+              Mercado Pago não configurado. Qualquer cartão será aceito e o
+              pagamento será aprovado automaticamente para testar as
+              notificações.
             </div>
           </div>
         )}
@@ -270,7 +299,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
               )}
             </div>
             <div className="relative mt-6 font-mono text-lg tracking-widest">
-              {(card.number || "•••• •••• •••• ••••").padEnd(19, "•").slice(0, 19)}
+              {(card.number || "•••• •••• •••• ••••")
+                .padEnd(19, "•")
+                .slice(0, 19)}
             </div>
             <div className="relative mt-3 flex justify-between text-[11px] uppercase opacity-90">
               <div>
@@ -281,7 +312,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
               </div>
               <div>
                 <div className="opacity-70 text-[9px]">Validade</div>
-                <div className="font-semibold tracking-wide">{card.exp || "MM/AA"}</div>
+                <div className="font-semibold tracking-wide">
+                  {card.exp || "MM/AA"}
+                </div>
               </div>
             </div>
           </div>
@@ -315,7 +348,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             <Field
               label="CVV"
               value={card.cvv}
-              onChange={(v) => setCard({ ...card, cvv: onlyDigits(v).slice(0, 4) })}
+              onChange={(v) =>
+                setCard({ ...card, cvv: onlyDigits(v).slice(0, 4) })
+              }
               placeholder="123"
               inputMode="numeric"
               autoComplete="cc-csc"
@@ -331,10 +366,14 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
           {installmentsList.length > 0 && (
             <label className="block">
-              <span className="text-xs font-medium text-muted-foreground">Parcelas</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Parcelas
+              </span>
               <select
                 value={card.installments}
-                onChange={(e) => setCard({ ...card, installments: Number(e.target.value) })}
+                onChange={(e) =>
+                  setCard({ ...card, installments: Number(e.target.value) })
+                }
                 className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/50"
               >
                 {installmentsList.map((i) => (
@@ -375,10 +414,16 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
           </button>
 
           <div className="flex items-center justify-center gap-2 pt-1">
-            <img src={mpIcon} alt="Mercado Pago" className="h-4 w-4 object-contain" />
+            <img
+              src={mpIcon}
+              alt="Mercado Pago"
+              className="h-4 w-4 object-contain"
+            />
             <span className="text-[10px] text-muted-foreground">
               Pagamento criptografado por{" "}
-              <span className="font-semibold text-foreground">Mercado Pago</span>
+              <span className="font-semibold text-foreground">
+                Mercado Pago
+              </span>
             </span>
           </div>
         </form>
@@ -428,8 +473,10 @@ function detailMsg(detail?: string) {
     cc_rejected_bad_filled_date: "Data de validade incorreta.",
     cc_rejected_bad_filled_security_code: "CVV incorreto.",
     cc_rejected_bad_filled_other: "Confira os dados do cartão.",
-    cc_rejected_call_for_authorize: "Você precisa autorizar o pagamento com o banco emissor.",
-    cc_rejected_high_risk: "Pagamento recusado por análise de risco. Tente outro cartão ou Pix.",
+    cc_rejected_call_for_authorize:
+      "Você precisa autorizar o pagamento com o banco emissor.",
+    cc_rejected_high_risk:
+      "Pagamento recusado por análise de risco. Tente outro cartão ou Pix.",
     cc_rejected_other_reason: "Pagamento recusado. Tente outro cartão.",
   };
   return map[detail] ?? null;

@@ -31,7 +31,10 @@ function CartHeader() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="flex-1 text-center font-bold text-base">
-          Carrinho {count > 0 && <span className="opacity-90 font-semibold">({count})</span>}
+          Carrinho{" "}
+          {count > 0 && (
+            <span className="opacity-90 font-semibold">({count})</span>
+          )}
         </h1>
         <span className="w-10 h-10" />
       </div>
@@ -65,7 +68,9 @@ function Page() {
             <ShoppingBag className="h-9 w-9 text-primary" />
           </div>
           <h1 className="text-xl font-bold mt-4">Seu carrinho está vazio</h1>
-          <p className="text-sm text-muted-foreground mt-1">Que tal escolher um lacinho lindo?</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Que tal escolher um lacinho lindo?
+          </p>
           <Link
             to="/"
             className="mt-6 inline-block bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
@@ -100,8 +105,15 @@ function Page() {
               const p = products.find((x) => x.id === ci.productId);
               if (!p) return null;
               return (
-                <li key={ci.productId} className="bg-card rounded-2xl p-3 flex gap-3 shadow-card">
-                  <Link to="/produto/$id" params={{ id: p.id }} className="shrink-0">
+                <li
+                  key={ci.productId}
+                  className="bg-card rounded-2xl p-3 flex gap-3 shadow-card"
+                >
+                  <Link
+                    to="/produto/$id"
+                    params={{ id: p.id }}
+                    className="shrink-0"
+                  >
                     <img
                       src={p.image}
                       alt={p.name}
@@ -117,7 +129,9 @@ function Page() {
                     >
                       {p.name}
                     </Link>
-                    <div className="text-primary font-bold text-sm mt-1">{brl(p.price)}</div>
+                    <div className="text-primary font-bold text-sm mt-1">
+                      {brl(p.price)}
+                    </div>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center bg-muted rounded-full">
                         <button
@@ -126,9 +140,16 @@ function Page() {
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
-                        <span className="w-6 text-center text-sm font-semibold">{ci.quantity}</span>
+                        <span className="w-6 text-center text-sm font-semibold">
+                          {ci.quantity}
+                        </span>
                         <button
-                          onClick={() => updateCartQty(p.id, Math.min(p.stock, ci.quantity + 1))}
+                          onClick={() =>
+                            updateCartQty(
+                              p.id,
+                              Math.min(p.stock, ci.quantity + 1),
+                            )
+                          }
                           className="w-8 h-8 grid place-items-center"
                         >
                           <Plus className="h-3.5 w-3.5" />

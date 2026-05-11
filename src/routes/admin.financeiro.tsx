@@ -86,7 +86,12 @@ function Page() {
     const list: Row[] = [];
 
     orders.forEach((o) => {
-      const isPaid = ["pago", "em_separacao", "saiu_para_entrega", "concluido"].includes(o.status);
+      const isPaid = [
+        "pago",
+        "em_separacao",
+        "saiu_para_entrega",
+        "concluido",
+      ].includes(o.status);
       const isRefund = o.status === "reembolsado";
       if (!isPaid && !isRefund) return;
       const productSummary = o.items
@@ -138,7 +143,9 @@ function Page() {
       });
 
     transactions.forEach((t) => {
-      const aff = t.affiliateId ? affiliates.find((a) => a.id === t.affiliateId) : null;
+      const aff = t.affiliateId
+        ? affiliates.find((a) => a.id === t.affiliateId)
+        : null;
       list.push({
         id: `tx-${t.id}`,
         date: t.date,
@@ -163,8 +170,12 @@ function Page() {
   }, [orders, products, affiliateSales, affiliates, transactions]);
 
   const totals = useMemo(() => {
-    const entradas = rows.filter((r) => !r.isOut).reduce((a, r) => a + r.amount, 0);
-    const saidas = rows.filter((r) => r.isOut).reduce((a, r) => a + r.amount, 0);
+    const entradas = rows
+      .filter((r) => !r.isOut)
+      .reduce((a, r) => a + r.amount, 0);
+    const saidas = rows
+      .filter((r) => r.isOut)
+      .reduce((a, r) => a + r.amount, 0);
     const pendente = orders
       .filter((o) => o.status === "aguardando_pagamento")
       .reduce((a, o) => a + o.total, 0);
@@ -176,10 +187,30 @@ function Page() {
   );
 
   const cards = [
-    { label: "Entradas", value: brl(totals.entradas), icon: TrendingUp, color: "text-success" },
-    { label: "Pendentes", value: brl(totals.pendente), icon: Wallet, color: "text-gold" },
-    { label: "Saídas", value: brl(totals.saidas), icon: TrendingDown, color: "text-destructive" },
-    { label: "Caixa", value: brl(totals.caixa), icon: Wallet, color: "text-primary" },
+    {
+      label: "Entradas",
+      value: brl(totals.entradas),
+      icon: TrendingUp,
+      color: "text-success",
+    },
+    {
+      label: "Pendentes",
+      value: brl(totals.pendente),
+      icon: Wallet,
+      color: "text-gold",
+    },
+    {
+      label: "Saídas",
+      value: brl(totals.saidas),
+      icon: TrendingDown,
+      color: "text-destructive",
+    },
+    {
+      label: "Caixa",
+      value: brl(totals.caixa),
+      icon: Wallet,
+      color: "text-primary",
+    },
   ];
 
   return (
@@ -203,7 +234,11 @@ function Page() {
               onClick={() => setFilter(f)}
               className={`text-xs px-3 py-1.5 rounded-full font-semibold transition ${filter === f ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
             >
-              {f === "todos" ? "Todos" : f === "entrada" ? "Entradas" : "Saídas"}
+              {f === "todos"
+                ? "Todos"
+                : f === "entrada"
+                  ? "Entradas"
+                  : "Saídas"}
             </button>
           ))}
         </div>
@@ -223,7 +258,8 @@ function Page() {
           <span>Movimentações</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground font-normal">
-              {filteredRows.length} lançamento{filteredRows.length === 1 ? "" : "s"}
+              {filteredRows.length} lançamento
+              {filteredRows.length === 1 ? "" : "s"}
             </span>
             <button
               onClick={() => {
@@ -231,7 +267,13 @@ function Page() {
                   toast.error("Sem dados para exportar");
                   return;
                 }
-                const head = ["Data", "Descrição", "Categoria/Detalhes", "Tipo", "Valor (R$)"];
+                const head = [
+                  "Data",
+                  "Descrição",
+                  "Categoria/Detalhes",
+                  "Tipo",
+                  "Valor (R$)",
+                ];
                 const body = filteredRows.map((r) => [
                   new Date(r.date).toLocaleDateString("pt-BR"),
                   r.description,
@@ -239,10 +281,10 @@ function Page() {
                   r.isOut ? "Saída" : "Entrada",
                   (r.isOut ? -r.amount : r.amount).toFixed(2).replace(".", ","),
                 ]);
-                downloadCSV(`financeiro-${new Date().toISOString().slice(0, 10)}.csv`, [
-                  head,
-                  ...body,
-                ]);
+                downloadCSV(
+                  `financeiro-${new Date().toISOString().slice(0, 10)}.csv`,
+                  [head, ...body],
+                );
                 toast.success("CSV baixado");
               }}
               className="text-xs flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/70 font-semibold"
@@ -278,15 +320,24 @@ function Page() {
           </div>
         </div>
         {filteredRows.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">Sem movimentações.</div>
+          <div className="text-center py-12 text-muted-foreground">
+            Sem movimentações.
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {filteredRows.map((r) => (
-              <li key={r.id} className="p-4 flex justify-between items-start gap-3">
+              <li
+                key={r.id}
+                className="p-4 flex justify-between items-start gap-3"
+              >
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
-                    {r.kind === "comissao" && <Users className="h-3.5 w-3.5 text-primary" />}
-                    {r.kind === "pedido" && <ShoppingBag className="h-3.5 w-3.5 text-primary" />}
+                    {r.kind === "comissao" && (
+                      <Users className="h-3.5 w-3.5 text-primary" />
+                    )}
+                    {r.kind === "pedido" && (
+                      <ShoppingBag className="h-3.5 w-3.5 text-primary" />
+                    )}
                     {r.description}
                     {r.kind === "manual" && (
                       <span className="text-[9px] uppercase tracking-wide bg-muted px-1.5 py-0.5 rounded-full">
@@ -295,9 +346,13 @@ function Page() {
                     )}
                   </div>
                   {r.meta && (
-                    <div className="text-xs text-muted-foreground mt-0.5 break-words">{r.meta}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5 break-words">
+                      {r.meta}
+                    </div>
                   )}
-                  <div className="text-[11px] text-muted-foreground mt-1">{formatDate(r.date)}</div>
+                  <div className="text-[11px] text-muted-foreground mt-1">
+                    {formatDate(r.date)}
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <div
@@ -401,7 +456,9 @@ function TransactionForm({
   const affiliates = useStore((s) => s.affiliates);
 
   const [kind, setKind] = useState<TransactionKind>(editing?.kind || "entrada");
-  const [category, setCategory] = useState<TransactionCategory>(editing?.category || "venda");
+  const [category, setCategory] = useState<TransactionCategory>(
+    editing?.category || "venda",
+  );
   const [description, setDescription] = useState(editing?.description || "");
   const [amount, setAmount] = useState(editing ? String(editing.amount) : "");
   const [date, setDate] = useState(
@@ -409,10 +466,12 @@ function TransactionForm({
   );
   const [affiliateId, setAffiliateId] = useState(editing?.affiliateId || "");
   const [notes, setNotes] = useState(editing?.notes || "");
-  const [items, setItems] = useState<{ productId: string; qty: number }[]>(() => {
-    if (editing?.productSummary) return [];
-    return [];
-  });
+  const [items, setItems] = useState<{ productId: string; qty: number }[]>(
+    () => {
+      if (editing?.productSummary) return [];
+      return [];
+    },
+  );
 
   const productSummary =
     items
@@ -467,8 +526,14 @@ function TransactionForm({
         className="bg-card rounded-2xl p-5 w-full max-w-lg max-h-[90vh] overflow-y-auto space-y-3 animate-modal-in"
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg">{editing ? "Editar lançamento" : "Novo lançamento"}</h3>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted">
+          <h3 className="font-bold text-lg">
+            {editing ? "Editar lançamento" : "Novo lançamento"}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-muted"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -536,26 +601,29 @@ function TransactionForm({
           </Field>
         </div>
 
-        {(category === "venda" || category === "comissao_afiliada") && affiliates.length > 0 && (
-          <Field label="Afiliada (opcional)">
-            <select
-              value={affiliateId}
-              onChange={(e) => setAffiliateId(e.target.value)}
-              className="input"
-            >
-              <option value="">— Nenhuma —</option>
-              {affiliates.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
+        {(category === "venda" || category === "comissao_afiliada") &&
+          affiliates.length > 0 && (
+            <Field label="Afiliada (opcional)">
+              <select
+                value={affiliateId}
+                onChange={(e) => setAffiliateId(e.target.value)}
+                className="input"
+              >
+                <option value="">— Nenhuma —</option>
+                {affiliates.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
 
         <div className="border border-border rounded-xl p-3 bg-muted/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold">Produtos vendidos (opcional)</span>
+            <span className="text-xs font-semibold">
+              Produtos vendidos (opcional)
+            </span>
             <button
               type="button"
               onClick={() => setItems([...items, { productId: "", qty: 1 }])}
@@ -576,7 +644,9 @@ function TransactionForm({
                     value={it.productId}
                     onChange={(e) =>
                       setItems(
-                        items.map((x, i) => (i === idx ? { ...x, productId: e.target.value } : x)),
+                        items.map((x, i) =>
+                          i === idx ? { ...x, productId: e.target.value } : x,
+                        ),
                       )
                     }
                     className="input flex-1 !mt-0"
@@ -595,7 +665,9 @@ function TransactionForm({
                     onChange={(e) =>
                       setItems(
                         items.map((x, i) =>
-                          i === idx ? { ...x, qty: parseInt(e.target.value) || 1 } : x,
+                          i === idx
+                            ? { ...x, qty: parseInt(e.target.value) || 1 }
+                            : x,
                         ),
                       )
                     }
@@ -651,7 +723,13 @@ function TransactionForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
@@ -685,14 +763,25 @@ function AffiliateReport({
 
     const rows = affiliates
       .map((a) => {
-        const sales = affiliateSales.filter((s) => s.affiliateId === a.id && inRange(s.createdAt));
+        const sales = affiliateSales.filter(
+          (s) => s.affiliateId === a.id && inRange(s.createdAt),
+        );
         const confirmed = sales.filter((s) => s.status === "confirmada");
         const pending = sales.filter((s) => s.status === "pendente");
         const canceled = sales.filter((s) => s.status === "cancelada");
-        const revenueConfirmed = confirmed.reduce((acc, s) => acc + s.saleValue, 0);
-        const commissionConfirmed = confirmed.reduce((acc, s) => acc + s.commissionEarned, 0);
+        const revenueConfirmed = confirmed.reduce(
+          (acc, s) => acc + s.saleValue,
+          0,
+        );
+        const commissionConfirmed = confirmed.reduce(
+          (acc, s) => acc + s.commissionEarned,
+          0,
+        );
         const revenuePending = pending.reduce((acc, s) => acc + s.saleValue, 0);
-        const commissionPending = pending.reduce((acc, s) => acc + s.commissionEarned, 0);
+        const commissionPending = pending.reduce(
+          (acc, s) => acc + s.commissionEarned,
+          0,
+        );
         const manualPaid = transactions
           .filter(
             (t) =>
@@ -876,29 +965,44 @@ function AffiliateReport({
                     <td className="px-4 py-2 font-medium">
                       {r.name}
                       <div className="text-[10px] text-muted-foreground">
-                        {r.confirmedCount} conf. · {r.pendingCount} pend. · {r.canceledCount} canc.
+                        {r.confirmedCount} conf. · {r.pendingCount} pend. ·{" "}
+                        {r.canceledCount} canc.
                       </div>
                     </td>
                     <td className="text-center px-2 py-2">{r.salesCount}</td>
-                    <td className="text-right px-2 py-2">{brl(r.revenueConfirmed)}</td>
+                    <td className="text-right px-2 py-2">
+                      {brl(r.revenueConfirmed)}
+                    </td>
                     <td className="text-right px-2 py-2 text-gold font-semibold">
                       {brl(r.commissionConfirmed)}
                     </td>
-                    <td className="text-right px-2 py-2 text-success">{brl(r.commissionPaid)}</td>
-                    <td className="text-right px-4 py-2 font-bold">{brl(r.commissionToPay)}</td>
+                    <td className="text-right px-2 py-2 text-success">
+                      {brl(r.commissionPaid)}
+                    </td>
+                    <td className="text-right px-4 py-2 font-bold">
+                      {brl(r.commissionToPay)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot className="bg-muted/30 font-bold text-sm">
                 <tr>
                   <td className="px-4 py-2">Totais</td>
-                  <td className="text-center px-2 py-2">{report.totals.sales}</td>
-                  <td className="text-right px-2 py-2">{brl(report.totals.revenue)}</td>
+                  <td className="text-center px-2 py-2">
+                    {report.totals.sales}
+                  </td>
+                  <td className="text-right px-2 py-2">
+                    {brl(report.totals.revenue)}
+                  </td>
                   <td className="text-right px-2 py-2 text-gold">
                     {brl(report.totals.commission)}
                   </td>
-                  <td className="text-right px-2 py-2 text-success">{brl(report.totals.paid)}</td>
-                  <td className="text-right px-4 py-2">{brl(report.totals.toPay)}</td>
+                  <td className="text-right px-2 py-2 text-success">
+                    {brl(report.totals.paid)}
+                  </td>
+                  <td className="text-right px-4 py-2">
+                    {brl(report.totals.toPay)}
+                  </td>
                 </tr>
               </tfoot>
             </table>

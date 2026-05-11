@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BOT_BASE, BOT_TOKEN, botJsonResponse, botOptionsResponse } from "@/lib/botProxy";
+import {
+  BOT_BASE,
+  BOT_TOKEN,
+  botJsonResponse,
+  botOptionsResponse,
+} from "@/lib/botProxy";
 
 export const Route = createFileRoute("/api/lovable-bot/notify")({
   server: {
@@ -10,7 +15,11 @@ export const Route = createFileRoute("/api/lovable-bot/notify")({
         try {
           payload = await request.json();
         } catch {
-          return botJsonResponse(request, { ok: false, error: "JSON inválido" }, 400);
+          return botJsonResponse(
+            request,
+            { ok: false, error: "JSON inválido" },
+            400,
+          );
         }
 
         const numero = (payload.numero ?? "").toString().replace(/\D/g, "");
@@ -31,11 +40,19 @@ export const Route = createFileRoute("/api/lovable-bot/notify")({
             body: JSON.stringify({ numero, mensagem, token: BOT_TOKEN }),
           });
           const text = await r.text();
-          return botJsonResponse(request, { ok: r.ok, status: r.status, body: text });
+          return botJsonResponse(request, {
+            ok: r.ok,
+            status: r.status,
+            body: text,
+          });
         } catch (e) {
           return botJsonResponse(
             request,
-            { ok: false, status: 0, error: e instanceof Error ? e.message : String(e) },
+            {
+              ok: false,
+              status: 0,
+              error: e instanceof Error ? e.message : String(e),
+            },
             502,
           );
         }

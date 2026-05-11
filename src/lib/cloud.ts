@@ -24,7 +24,10 @@ const log = (label: string, err: unknown) => {
 
 async function sha256(text: string): Promise<string> {
   if (typeof crypto !== "undefined" && crypto.subtle) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    const buf = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(text),
+    );
     return Array.from(new Uint8Array(buf))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
@@ -309,7 +312,10 @@ export const cloud = {
     log("upsertAffiliateSale", error);
   },
   async deleteAffiliateSale(id: string) {
-    const { error } = await supabase.from("affiliate_sales").delete().eq("id", id);
+    const { error } = await supabase
+      .from("affiliate_sales")
+      .delete()
+      .eq("id", id);
     log("deleteAffiliateSale", error);
   },
 
@@ -379,7 +385,9 @@ export const cloud = {
   },
 
   async upsertNotificationLog(l: any) {
-    const { error } = await (supabase.from("notification_logs" as any) as any).upsert(
+    const { error } = await (
+      supabase.from("notification_logs" as any) as any
+    ).upsert(
       {
         id: l.id,
         category: l.category,
@@ -408,7 +416,9 @@ export const cloud = {
     if (error && error.code !== "P0001") log("logActivity", error);
   },
 
-  async joinWaitlist(data: Omit<WaitlistEntry, "id" | "createdAt" | "notified">) {
+  async joinWaitlist(
+    data: Omit<WaitlistEntry, "id" | "createdAt" | "notified">,
+  ) {
     const { error } = await supabase.from("product_waitlist").insert({
       product_id: data.productId,
       customer_id: data.customerId || null,
@@ -452,22 +462,58 @@ export type CloudSnapshot = {
 };
 
 export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
-  const [cust, cats, prods, coups, affs, affSales, txs, revs, settings, ords, faq, wait, logs] =
-    await Promise.all([
-      supabase.from("customers").select("*"),
-      supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-      supabase.from("products").select("*"),
-      supabase.from("coupons").select("*"),
-      supabase.from("affiliates").select("*"),
-      supabase.from("affiliate_sales").select("*").order("created_at", { ascending: false }),
-      supabase.from("transactions").select("*").order("date", { ascending: false }),
-      supabase.from("reviews").select("*").order("created_at", { ascending: false }),
-      supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
-      supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(500),
-      supabase.from("faq_items").select("*").order("sort_order", { ascending: true }),
-      supabase.from("product_waitlist").select("*"),
-      supabase.from("activity_logs").select("*").order("created_at", { ascending: false }).limit(200),
-    ]);
+  const [
+    cust,
+    cats,
+    prods,
+    coups,
+    affs,
+    affSales,
+    txs,
+    revs,
+    settings,
+    ords,
+    faq,
+    wait,
+    logs,
+  ] = await Promise.all([
+    supabase.from("customers").select("*"),
+    supabase
+      .from("categories")
+      .select("*")
+      .order("sort_order", { ascending: true }),
+    supabase.from("products").select("*"),
+    supabase.from("coupons").select("*"),
+    supabase.from("affiliates").select("*"),
+    supabase
+      .from("affiliate_sales")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("transactions")
+      .select("*")
+      .order("date", { ascending: false }),
+    supabase
+      .from("reviews")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
+    supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500),
+    supabase
+      .from("faq_items")
+      .select("*")
+      .order("sort_order", { ascending: true }),
+    supabase.from("product_waitlist").select("*"),
+    supabase
+      .from("activity_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200),
+  ]);
   return {
     customers: (cust.data || []).map(toCustomer),
     categories: (cats.data || []).map(toCategory),

@@ -45,7 +45,11 @@ export function downloadPDF(opts: {
     foot: opts.foot ? [opts.foot.map((v) => String(v))] : undefined,
     styles: { fontSize: 8, cellPadding: 2 },
     headStyles: { fillColor: [233, 30, 99], textColor: 255, fontStyle: "bold" },
-    footStyles: { fillColor: [245, 245, 245], textColor: 40, fontStyle: "bold" },
+    footStyles: {
+      fillColor: [245, 245, 245],
+      textColor: 40,
+      fontStyle: "bold",
+    },
     alternateRowStyles: { fillColor: [250, 250, 252] },
     margin: { left: 14, right: 14 },
   });

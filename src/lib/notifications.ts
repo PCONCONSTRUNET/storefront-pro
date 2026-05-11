@@ -23,14 +23,22 @@ function getOneSignalSDK(timeoutMs = 8000): Promise<any | null> {
       return;
     }
     // Otherwise wait via the deferred queue
-    const q = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
+    const q =
+      (window as any).OneSignalDeferred ||
+      ((window as any).OneSignalDeferred = []);
     let resolved = false;
     q.push((os: any) => {
-      if (!resolved) { resolved = true; resolve(os); }
+      if (!resolved) {
+        resolved = true;
+        resolve(os);
+      }
     });
     // Safety timeout so we never hang forever
     setTimeout(() => {
-      if (!resolved) { resolved = true; resolve(null); }
+      if (!resolved) {
+        resolved = true;
+        resolve(null);
+      }
     }, timeoutMs);
   });
 }
@@ -52,7 +60,10 @@ export type NotificationCategory =
 
 export type NotificationAudience = "cliente" | "admin" | "afiliada";
 
-const AUDIENCE_TAG: Record<NotificationAudience, "customer" | "admin" | "affiliate"> = {
+const AUDIENCE_TAG: Record<
+  NotificationAudience,
+  "customer" | "admin" | "affiliate"
+> = {
   cliente: "customer",
   admin: "admin",
   afiliada: "affiliate",
@@ -65,13 +76,18 @@ async function dispatchPush(args: {
   externalUserIds?: string[];
 }) {
   try {
-    const payload: Record<string, unknown> = { title: args.title, message: args.body };
+    const payload: Record<string, unknown> = {
+      title: args.title,
+      message: args.body,
+    };
     if (args.externalUserIds && args.externalUserIds.length > 0) {
       payload.externalUserIds = args.externalUserIds;
     } else {
       payload.audience = AUDIENCE_TAG[args.audience];
     }
-    const { data, error } = await supabase.functions.invoke("send-push", { body: payload });
+    const { data, error } = await supabase.functions.invoke("send-push", {
+      body: payload,
+    });
     if (error) console.warn("[push] send-push erro:", error.message);
     else console.log("[push] enviado:", data);
   } catch (e) {
@@ -296,7 +312,9 @@ interface NotificationState {
 }
 
 function applyVars(tpl: string, vars: Record<string, string | number>): string {
-  return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? String(vars[k]) : `{${k}}`));
+  return tpl.replace(/\{(\w+)\}/g, (_, k) =>
+    vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
+  );
 }
 
 export const useNotifications = create<NotificationState>()(
@@ -312,7 +330,9 @@ export const useNotifications = create<NotificationState>()(
 
       updateTemplate: (id, patch) =>
         set((s) => ({
-          templates: s.templates.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+          templates: s.templates.map((t) =>
+            t.id === id ? { ...t, ...patch } : t,
+          ),
         })),
 
       resetTemplates: () => set({ templates: DEFAULT_TEMPLATES }),
@@ -352,7 +372,9 @@ export const useNotifications = create<NotificationState>()(
               title: log.title,
               body: log.body,
               audience: tpl.audience,
-              externalUserIds: opts?.recipientId ? [opts.recipientId] : undefined,
+              externalUserIds: opts?.recipientId
+                ? [opts.recipientId]
+                : undefined,
             });
           }
           if (!firstLog) firstLog = log;
@@ -374,14 +396,21 @@ export const useNotifications = create<NotificationState>()(
         set((s) => ({ logs: [log, ...s.logs].slice(0, 200) }));
         cloud.upsertNotificationLog(log);
         if (data.channels.includes("push")) {
-          void dispatchPush({ title: data.title, body: data.body, audience: data.audience });
+          void dispatchPush({
+            title: data.title,
+            body: data.body,
+            audience: data.audience,
+          });
         }
         return log;
       },
 
-      markAllRead: () => set((s) => ({ logs: s.logs.map((l) => ({ ...l, read: true })) })),
+      markAllRead: () =>
+        set((s) => ({ logs: s.logs.map((l) => ({ ...l, read: true })) })),
       markRead: (id) =>
-        set((s) => ({ logs: s.logs.map((l) => (l.id === id ? { ...l, read: true } : l)) })),
+        set((s) => ({
+          logs: s.logs.map((l) => (l.id === id ? { ...l, read: true } : l)),
+        })),
       clearLogs: () => set({ logs: [] }),
 
       requestPushPermission: async () => {

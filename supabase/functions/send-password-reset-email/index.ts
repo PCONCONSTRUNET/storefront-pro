@@ -1,7 +1,8 @@
 import { sendEmail, corsHeaders, baseLayout } from "../_shared/resend.ts";
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
   try {
     const { email, resetUrl } = await req.json();
     if (!email || !resetUrl) throw new Error("email e resetUrl obrigatórios");
@@ -14,14 +15,21 @@ Deno.serve(async (req) => {
        </p>
        <p style="margin-top:24px;font-size:13px;color:#777">Se você não pediu isso, pode ignorar este email com tranquilidade.</p>`,
     );
-    await sendEmail({ to: email, subject: "Redefinir senha — Princesa de Laços", html });
+    await sendEmail({
+      to: email,
+      subject: "Redefinir senha — Princesa de Laços",
+      html,
+    });
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e instanceof Error ? e.message : e) }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: String(e instanceof Error ? e.message : e) }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

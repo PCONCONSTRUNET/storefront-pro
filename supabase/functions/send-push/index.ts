@@ -2,16 +2,19 @@
 // Body: { title, message, url?, audience?: "all" | "admin" | "affiliate" | "customer", externalUserIds?: string[] }
 import { corsHeaders } from "../_shared/resend.ts";
 
-const ONESIGNAL_APP_ID = "eceb417e-8a33-4d57-9a0f-0cdfe8f8c7e6";
+const ONESIGNAL_APP_ID = "2daa3ed9-be86-4bc9-9819-4d641aea75d5";
 const ONESIGNAL_REST_API_KEY = Deno.env.get("ONESIGNAL_REST_API_KEY");
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
 
   try {
-    if (!ONESIGNAL_REST_API_KEY) throw new Error("ONESIGNAL_REST_API_KEY não configurada");
+    if (!ONESIGNAL_REST_API_KEY)
+      throw new Error("ONESIGNAL_REST_API_KEY não configurada");
 
-    const { title, message, url, audience, externalUserIds, subscriptionIds } = await req.json();
+    const { title, message, url, audience, externalUserIds, subscriptionIds } =
+      await req.json();
     if (!title || !message) throw new Error("title e message são obrigatórios");
 
     const payload: Record<string, unknown> = {
@@ -30,11 +33,17 @@ Deno.serve(async (req) => {
     } else if (audience === "all") {
       payload.included_segments = ["All"];
     } else if (audience === "admin") {
-      payload.filters = [{ field: "tag", key: "role", relation: "=", value: "admin" }];
+      payload.filters = [
+        { field: "tag", key: "role", relation: "=", value: "admin" },
+      ];
     } else if (audience === "customer") {
-      payload.filters = [{ field: "tag", key: "role", relation: "=", value: "customer" }];
+      payload.filters = [
+        { field: "tag", key: "role", relation: "=", value: "customer" },
+      ];
     } else if (audience === "affiliate") {
-      payload.filters = [{ field: "tag", key: "role", relation: "=", value: "affiliate" }];
+      payload.filters = [
+        { field: "tag", key: "role", relation: "=", value: "affiliate" },
+      ];
     } else {
       payload.included_segments = ["Subscribed Users"];
     }
@@ -58,14 +67,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ ok: true, id: data.id, recipients: data.recipients }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ ok: true, id: data.id, recipients: data.recipients }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (e) {
     console.error("[send-push] erro:", e);
-    return new Response(JSON.stringify({ error: String((e as Error).message ?? e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: String((e as Error).message ?? e) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

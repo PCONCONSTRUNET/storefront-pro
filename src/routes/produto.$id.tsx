@@ -3,9 +3,21 @@ import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
-import { ProductReviews, Stars, productRating } from "@/components/ProductReviews";
+import {
+  ProductReviews,
+  Stars,
+  productRating,
+} from "@/components/ProductReviews";
 import { brl } from "@/lib/format";
-import { ChevronLeft, Minus, Plus, ShoppingBag, Zap, Truck, ShieldCheck } from "lucide-react";
+import {
+  ChevronLeft,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Zap,
+  Truck,
+  ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/produto/$id")({
@@ -50,11 +62,22 @@ function Page() {
     );
   }
 
-  const gallery = product.gallery && product.gallery.length > 0 ? product.gallery : [product.image];
+  const gallery =
+    product.gallery && product.gallery.length > 0
+      ? product.gallery
+      : [product.image];
   const related = products
-    .filter((p) => p.category === product.category && p.id !== product.id && p.active && !p.hidden)
+    .filter(
+      (p) =>
+        p.category === product.category &&
+        p.id !== product.id &&
+        p.active &&
+        !p.hidden,
+    )
     .slice(0, 4);
-  const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
+  const discount = product.oldPrice
+    ? Math.round((1 - product.price / product.oldPrice) * 100)
+    : 0;
 
   const handleBuyNow = () => {
     addToCart(product.id, qty);
@@ -103,7 +126,11 @@ function Page() {
                     }}
                     className={`w-16 h-16 rounded-xl overflow-hidden border-2 ${i === imgIdx ? "border-primary" : "border-transparent"}`}
                   >
-                    <img src={g} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={g}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -111,7 +138,9 @@ function Page() {
           </div>
 
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold leading-tight">{product.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold leading-tight">
+              {product.name}
+            </h1>
             {(() => {
               const r = productRating(reviews, product.id);
               if (r.count === 0) return null;
@@ -121,7 +150,9 @@ function Page() {
                   className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
                 >
                   <Stars value={r.avg} size={14} />
-                  <span className="font-semibold text-foreground">{r.avg.toFixed(1)}</span>
+                  <span className="font-semibold text-foreground">
+                    {r.avg.toFixed(1)}
+                  </span>
                   <span>
                     · {r.count} avaliação{r.count === 1 ? "" : "ões"}
                   </span>
@@ -133,7 +164,9 @@ function Page() {
             </div>
 
             <div className="mt-4 flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-primary">{brl(finalPrice)}</span>
+              <span className="text-3xl font-bold text-primary">
+                {brl(finalPrice)}
+              </span>
               {product.oldPrice && (
                 <span className="text-base text-muted-foreground line-through">
                   {brl(product.oldPrice)}
@@ -144,7 +177,9 @@ function Page() {
               ou Pix com 5% off: {brl(finalPrice * 0.95)}
             </p>
 
-            <p className="mt-5 text-sm text-foreground/80 leading-relaxed">{product.description}</p>
+            <p className="mt-5 text-sm text-foreground/80 leading-relaxed">
+              {product.description}
+            </p>
 
             {product.variations?.map((v) => (
               <div key={v.name} className="mt-4">
@@ -152,18 +187,23 @@ function Page() {
                 <div className="flex gap-2 flex-wrap">
                   {v.options.map((o, idx) => {
                     const label = typeof o === "string" ? o : o.label;
-                    const delta = typeof o === "object" ? o.priceDelta : undefined;
+                    const delta =
+                      typeof o === "object" ? o.priceDelta : undefined;
                     const isSel = selected[v.name] === idx;
                     return (
                       <button
                         key={label + idx}
                         type="button"
-                        onClick={() => setSelected((s) => ({ ...s, [v.name]: idx }))}
+                        onClick={() =>
+                          setSelected((s) => ({ ...s, [v.name]: idx }))
+                        }
                         className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${isSel ? "border-primary bg-primary/10 text-primary font-semibold" : "border-border hover:border-primary hover:bg-primary/5"}`}
                       >
                         {label}
                         {delta ? (
-                          <span className="ml-1 text-xs opacity-80">+{brl(delta)}</span>
+                          <span className="ml-1 text-xs opacity-80">
+                            +{brl(delta)}
+                          </span>
                         ) : null}
                       </button>
                     );
@@ -197,7 +237,8 @@ function Page() {
                   <ShieldCheck className="h-4 w-4" /> Avise-me quando chegar
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Este produto está esgotado no momento. Deixe seu e-mail para ser avisada assim que ele voltar!
+                  Este produto está esgotado no momento. Deixe seu e-mail para
+                  ser avisada assim que ele voltar!
                 </p>
                 <form
                   onSubmit={(e) => {
@@ -255,7 +296,8 @@ function Page() {
                 <Truck className="h-4 w-4 text-primary" /> Frete fixo R$ 12,90
               </div>
               <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-primary" /> Compra protegida
+                <ShieldCheck className="h-4 w-4 text-primary" /> Compra
+                protegida
               </div>
             </div>
           </div>

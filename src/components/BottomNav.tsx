@@ -3,7 +3,13 @@ import { Home, Grid3x3, ShoppingBag, Package, User } from "lucide-react";
 import { useStore, selectCartCount } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-type NavItem = { to: string; label: string; icon: typeof Home; exact?: boolean; badge?: boolean };
+type NavItem = {
+  to: string;
+  label: string;
+  icon: typeof Home;
+  exact?: boolean;
+  badge?: boolean;
+};
 const items: NavItem[] = [
   { to: "/", label: "Início", icon: Home, exact: true },
   { to: "/categorias", label: "Categorias", icon: Grid3x3 },
@@ -27,7 +33,9 @@ export function BottomNav() {
                 to={it.to}
                 className={cn(
                   "flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium relative transition-colors overflow-hidden",
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  active
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div className="relative">

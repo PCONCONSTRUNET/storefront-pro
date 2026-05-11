@@ -15,7 +15,9 @@ function Page() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [link, setLink] = useState<string | null>(null);
-  const [accountPhone, setAccountPhone] = useState<string | undefined>(undefined);
+  const [accountPhone, setAccountPhone] = useState<string | undefined>(
+    undefined,
+  );
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +81,9 @@ function Page() {
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-rose/30 to-accent p-4">
       <div className="w-full max-w-sm bg-card rounded-3xl shadow-soft p-6">
-        <h1 className="font-display text-2xl text-primary text-center">Recuperar senha</h1>
+        <h1 className="font-display text-2xl text-primary text-center">
+          Recuperar senha
+        </h1>
         <p className="text-xs text-muted-foreground text-center mt-1">
           Digite seu e-mail e geramos um link seguro de redefinição.
         </p>
@@ -87,7 +91,9 @@ function Page() {
         {!link ? (
           <form onSubmit={submit} className="mt-6 space-y-3">
             <label className="block">
-              <span className="text-xs font-medium text-muted-foreground">E-mail</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                E-mail
+              </span>
               <input
                 type="email"
                 value={email}
@@ -116,7 +122,9 @@ function Page() {
               <p className="text-xs text-muted-foreground mb-1">
                 Link gerado (válido por 30 minutos):
               </p>
-              <p className="text-xs font-mono break-all text-foreground">{link}</p>
+              <p className="text-xs font-mono break-all text-foreground">
+                {link}
+              </p>
             </div>
             <button
               onClick={copyLink}

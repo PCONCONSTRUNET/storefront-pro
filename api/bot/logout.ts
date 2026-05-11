@@ -50,6 +50,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const text = await r.text();
     res.status(r.status).json(parseJson(text, { ok: r.ok, body: text }));
   } catch (e) {
-    res.status(502).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    res
+      .status(502)
+      .json({ ok: false, error: e instanceof Error ? e.message : String(e) });
   }
 }

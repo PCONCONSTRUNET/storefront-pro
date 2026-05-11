@@ -10,15 +10,22 @@ export function ProductCard({ product }: { product: Product }) {
   const customer = useStore(selectCurrentCustomer);
   const toggleFavorite = useStore((s) => s.toggleFavorite);
   const isFav = !!customer?.favorites?.includes(product.id);
-  const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
+  const discount = product.oldPrice
+    ? Math.round((1 - product.price / product.oldPrice) * 100)
+    : 0;
   const reviews = useStore((s) => s.reviews);
   const productReviews = reviews.filter((r) => r.productId === product.id);
   // Pseudo-random but stable based on id, for the demo
   const seed = product.id.charCodeAt(1) || 3;
   const sold = 50 + ((seed * 37) % 950);
   const realCount = productReviews.length;
-  const realAvg = realCount ? productReviews.reduce((a, r) => a + r.rating, 0) / realCount : 0;
-  const rating = realCount > 0 ? realAvg.toFixed(1) : (4 + ((seed * 13) % 10) / 10).toFixed(1);
+  const realAvg = realCount
+    ? productReviews.reduce((a, r) => a + r.rating, 0) / realCount
+    : 0;
+  const rating =
+    realCount > 0
+      ? realAvg.toFixed(1)
+      : (4 + ((seed * 13) % 10) / 10).toFixed(1);
   const freeShip = seed % 3 === 0;
   const bestSeller = discount >= 25;
 
@@ -64,11 +71,16 @@ export function ProductCard({ product }: { product: Product }) {
             e.stopPropagation();
             toggleFavorite(product.id);
           }}
-          aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          aria-label={
+            isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"
+          }
           className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-card/90 backdrop-blur grid place-items-center shadow-sm hover:scale-110 transition-transform z-10"
         >
           <Heart
-            className={"h-4 w-4 " + (isFav ? "fill-primary text-primary" : "text-muted-foreground")}
+            className={
+              "h-4 w-4 " +
+              (isFav ? "fill-primary text-primary" : "text-muted-foreground")
+            }
           />
         </button>
       )}
@@ -97,7 +109,9 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-0.5">
           <span className="flex items-center gap-0.5">
             <Star className="h-3 w-3 fill-gold text-gold" /> {rating}
-            {realCount > 0 && <span className="text-muted-foreground/70">({realCount})</span>}
+            {realCount > 0 && (
+              <span className="text-muted-foreground/70">({realCount})</span>
+            )}
           </span>
           <span>{sold} vendidos</span>
         </div>

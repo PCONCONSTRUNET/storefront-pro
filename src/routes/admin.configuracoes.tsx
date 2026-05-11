@@ -68,7 +68,13 @@ function Page() {
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-card rounded-2xl p-4 shadow-card">
       <h2 className="font-bold mb-3">{title}</h2>

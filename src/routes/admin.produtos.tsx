@@ -3,7 +3,16 @@ import { useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { Plus, Edit, Trash2, X, Upload, Star, GripVertical, Crop } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Upload,
+  Star,
+  GripVertical,
+  Crop,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/data";
 import { ImageCropModal } from "@/components/ImageCropModal";
@@ -32,7 +41,9 @@ function Page() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
 
-  const list = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  const list = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <AdminLayout title="Produtos">
@@ -66,7 +77,11 @@ function Page() {
               key={p.id}
               className="md:grid md:grid-cols-[60px_1fr_120px_100px_80px_100px] gap-3 px-4 py-3 items-center flex"
             >
-              <img src={p.image} alt="" className="w-12 h-12 rounded-lg object-cover bg-muted" />
+              <img
+                src={p.image}
+                alt=""
+                className="w-12 h-12 rounded-lg object-cover bg-muted"
+              />
               <div className="flex-1 min-w-0 ml-3 md:ml-0">
                 <div className="font-medium text-sm truncate">{p.name}</div>
                 <div className="text-xs text-muted-foreground">SKU {p.sku}</div>
@@ -120,7 +135,11 @@ function Page() {
       {editing && (
         <Modal
           onClose={() => setEditing(null)}
-          title={products.find((p) => p.id === editing.id) ? "Editar produto" : "Novo produto"}
+          title={
+            products.find((p) => p.id === editing.id)
+              ? "Editar produto"
+              : "Novo produto"
+          }
         >
           <ProductForm
             product={editing}
@@ -185,9 +204,16 @@ function ProductForm({
             className="col-span-2"
             required
           />
-          <Field label="SKU" value={p.sku} onChange={(v) => setP({ ...p, sku: v })} required />
+          <Field
+            label="SKU"
+            value={p.sku}
+            onChange={(v) => setP({ ...p, sku: v })}
+            required
+          />
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Categoria</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Categoria
+            </span>
             <select
               value={p.category}
               onChange={(e) => setP({ ...p, category: e.target.value })}
@@ -211,7 +237,9 @@ function ProductForm({
             label="Promocional"
             type="number"
             value={String(p.oldPrice ?? "")}
-            onChange={(v) => setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })}
+            onChange={(v) =>
+              setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })
+            }
           />
           <div className="col-span-2 flex gap-2">
             <Field
@@ -238,7 +266,8 @@ function ProductForm({
             </button>
           </div>
           <p className="col-span-2 text-[11px] text-muted-foreground -mt-1">
-            Você receberá um alerta quando o estoque ficar igual ou abaixo do mínimo.
+            Você receberá um alerta quando o estoque ficar igual ou abaixo do
+            mínimo.
           </p>
           <label className="col-span-2 flex items-center gap-2 p-3 rounded-xl bg-muted/50">
             <input
@@ -264,8 +293,16 @@ function ProductForm({
 
       {tab === "midia" && (
         <GalleryEditor
-          gallery={p.gallery && p.gallery.length > 0 ? p.gallery : p.image ? [p.image] : []}
-          onChange={(imgs) => setP({ ...p, gallery: imgs, image: imgs[0] || "" })}
+          gallery={
+            p.gallery && p.gallery.length > 0
+              ? p.gallery
+              : p.image
+                ? [p.image]
+                : []
+          }
+          onChange={(imgs) =>
+            setP({ ...p, gallery: imgs, image: imgs[0] || "" })
+          }
         />
       )}
 
@@ -278,7 +315,9 @@ function ProductForm({
 
       {tab === "desc" && (
         <label className="block">
-          <span className="text-xs font-medium text-muted-foreground">Descrição</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            Descrição
+          </span>
           <textarea
             value={p.description}
             onChange={(e) => setP({ ...p, description: e.target.value })}
@@ -346,7 +385,10 @@ function VariationsEditor({
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
-          <OptionsInput options={v.options} onChange={(opts) => update(i, { options: opts })} />
+          <OptionsInput
+            options={v.options}
+            onChange={(opts) => update(i, { options: opts })}
+          />
         </div>
       ))}
       <button
@@ -384,14 +426,19 @@ function OptionsInput({
   const updateDelta = (i: number, v: string) => {
     const d = parseFloat(v);
     onChange(
-      options.map((o, idx) => (idx === i ? { ...o, priceDelta: isNaN(d) ? undefined : d } : o)),
+      options.map((o, idx) =>
+        idx === i ? { ...o, priceDelta: isNaN(d) ? undefined : d } : o,
+      ),
     );
   };
   return (
     <div>
       <div className="space-y-1 mb-2">
         {options.map((o, i) => (
-          <div key={i} className="flex items-center gap-1 bg-card px-2 py-1 rounded-lg">
+          <div
+            key={i}
+            className="flex items-center gap-1 bg-card px-2 py-1 rounded-lg"
+          >
             <span className="text-xs flex-1 truncate">{o.label}</span>
             <span className="text-[10px] text-muted-foreground">+R$</span>
             <input

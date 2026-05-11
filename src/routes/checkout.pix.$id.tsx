@@ -1,9 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { StoreLayout } from "@/components/StoreLayout";
-import { fetchOrder, isSandboxOrder, simulateApprove, type OrderRow } from "@/lib/mercadopago";
+import {
+  fetchOrder,
+  isSandboxOrder,
+  simulateApprove,
+  type OrderRow,
+} from "@/lib/mercadopago";
 import { brl } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, Copy, FlaskConical, Loader2, QrCode } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  Copy,
+  FlaskConical,
+  Loader2,
+  QrCode,
+} from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
 
@@ -54,7 +66,10 @@ function PixPage() {
         if (o.payment_status === "approved") {
           playBeep();
           toast.success("Pagamento aprovado! 🎉");
-          setTimeout(() => navigate({ to: "/pedido/$id", params: { id: o.id } }), 1500);
+          setTimeout(
+            () => navigate({ to: "/pedido/$id", params: { id: o.id } }),
+            1500,
+          );
           return;
         }
         if (["rejected", "cancelled", "expired"].includes(o.payment_status)) {
@@ -94,7 +109,9 @@ function PixPage() {
     return (
       <StoreLayout>
         <div className="text-center py-20">
-          <p className="text-destructive">{error ?? "Pedido não encontrado."}</p>
+          <p className="text-destructive">
+            {error ?? "Pedido não encontrado."}
+          </p>
           <Link to="/" className="text-primary font-semibold">
             Voltar
           </Link>
@@ -119,14 +136,18 @@ function PixPage() {
           <div className="bg-gradient-to-br from-success to-success/70 text-white rounded-2xl p-6 text-center shadow-soft">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-2" />
             <h1 className="text-xl font-bold">Pagamento aprovado!</h1>
-            <p className="text-sm opacity-90 mt-1">Redirecionando para seu pedido...</p>
+            <p className="text-sm opacity-90 mt-1">
+              Redirecionando para seu pedido...
+            </p>
           </div>
         ) : ["rejected", "cancelled", "expired"].includes(status) ? (
           <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-6 text-center">
             <h1 className="text-lg font-bold text-destructive">
               Pagamento {status === "expired" ? "expirado" : "não aprovado"}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Você pode tentar novamente.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Você pode tentar novamente.
+            </p>
             <Link
               to="/carrinho"
               className="inline-block mt-4 px-6 h-11 leading-[2.75rem] rounded-full gradient-primary text-primary-foreground font-semibold"
@@ -142,8 +163,8 @@ function PixPage() {
                   <FlaskConical className="h-4 w-4" /> MODO SANDBOX (TESTE)
                 </div>
                 <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">
-                  Mercado Pago não configurado. Clique abaixo para simular a aprovação e testar as
-                  notificações por WhatsApp e e-mail.
+                  Mercado Pago não configurado. Clique abaixo para simular a
+                  aprovação e testar as notificações por WhatsApp e e-mail.
                 </p>
                 <button
                   onClick={handleSimulate}
@@ -156,7 +177,8 @@ function PixPage() {
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="h-4 w-4" /> Simular pagamento aprovado
+                      <CheckCircle2 className="h-4 w-4" /> Simular pagamento
+                      aprovado
                     </>
                   )}
                 </button>
@@ -169,9 +191,12 @@ function PixPage() {
                 <span className="font-semibold">Pague com Pix</span>
               </div>
               <p className="text-sm opacity-90 mt-1">
-                Escaneie o QR Code ou copie o código abaixo. A confirmação é automática.
+                Escaneie o QR Code ou copie o código abaixo. A confirmação é
+                automática.
               </p>
-              <div className="text-2xl font-bold mt-3">{brl(Number(order.total))}</div>
+              <div className="text-2xl font-bold mt-3">
+                {brl(Number(order.total))}
+              </div>
             </div>
 
             <div className="mt-4 bg-card rounded-2xl p-5 shadow-card">
@@ -184,7 +209,9 @@ function PixPage() {
                   />
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground py-8">QR Code indisponível</div>
+                <div className="text-center text-muted-foreground py-8">
+                  QR Code indisponível
+                </div>
               )}
 
               <div className="mt-4">
@@ -206,13 +233,14 @@ function PixPage() {
               </div>
 
               <div className="mt-4 flex items-center gap-2 justify-center text-xs text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" /> Aguardando confirmação do pagamento...
+                <Loader2 className="h-3 w-3 animate-spin" /> Aguardando
+                confirmação do pagamento...
               </div>
             </div>
 
             <p className="text-center text-xs text-muted-foreground mt-4">
-              Pedido <span className="font-mono">#{order.id.slice(0, 8)}</span> · Pagamento
-              processado por Mercado Pago
+              Pedido <span className="font-mono">#{order.id.slice(0, 8)}</span>{" "}
+              · Pagamento processado por Mercado Pago
             </p>
           </>
         )}

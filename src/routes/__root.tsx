@@ -26,7 +26,10 @@ function isStandaloneMode() {
 }
 
 function matchAllowedRoute(path: string): string | null {
-  return PWA_ALLOWED_ROUTES.find((r) => path === r || path.startsWith(r + "/")) ?? null;
+  return (
+    PWA_ALLOWED_ROUTES.find((r) => path === r || path.startsWith(r + "/")) ??
+    null
+  );
 }
 
 function NotFoundComponent() {
@@ -34,7 +37,9 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">
+          Page not found
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
@@ -66,13 +71,28 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-title", content: "Princesa de Laços" },
       { name: "mobile-web-app-capable", content: "yes" },
       { title: "Princesa de Laços — Catálogo encantado" },
-      { name: "description", content: "Catálogo encantado de laços, tiaras e acessórios." },
-      { property: "og:title", content: "Princesa de Laços — Catálogo encantado" },
-      { property: "og:description", content: "Catálogo encantado de laços, tiaras e acessórios." },
+      {
+        name: "description",
+        content: "Catálogo encantado de laços, tiaras e acessórios.",
+      },
+      {
+        property: "og:title",
+        content: "Princesa de Laços — Catálogo encantado",
+      },
+      {
+        property: "og:description",
+        content: "Catálogo encantado de laços, tiaras e acessórios.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Princesa de Laços — Catálogo encantado" },
-      { name: "twitter:description", content: "Catálogo encantado de laços, tiaras e acessórios." },
+      {
+        name: "twitter:title",
+        content: "Princesa de Laços — Catálogo encantado",
+      },
+      {
+        name: "twitter:description",
+        content: "Catálogo encantado de laços, tiaras e acessórios.",
+      },
       {
         property: "og:image",
         content:
@@ -86,29 +106,60 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
-      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
-      { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
-      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
-      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/favicon-32.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        href: "/favicon-16.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "192x192",
+        href: "/icon-192.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "512x512",
+        href: "/icon-512.png",
+      },
       { rel: "shortcut icon", href: "/favicon.ico" },
       { rel: "mask-icon", href: "/icon-maskable-512.png", color: "#d177a8" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Pacifico&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
     scripts: [
-      { src: "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js", defer: true },
+      {
+        src: "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js",
+        defer: true,
+      },
       {
         children: `window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
   console.log("[OneSignal] Initializing...");
   await OneSignal.init({
-    appId: "eceb417e-8a33-4d57-9a0f-0cdfe8f8c7e6",
-    safari_web_id: "web.onesignal.auto.18c6dc90-7633-4ce6-8875-ae2763214094",
+    appId: "2daa3ed9-be86-4bc9-9819-4d641aea75d5",
+    safari_web_id: "web.onesignal.auto.47a2f439-afd3-4bb7-8cdd-92cc4f5ee46c",
     serviceWorkerPath: "/OneSignalSDKWorker.js",
     notifyButton: { enable: false },
     allowLocalhostAsSecureOrigin: true,
@@ -179,13 +230,15 @@ function RootComponent() {
     const OS = (window as any).OneSignal;
     if (OS && currentCustomerId) {
       console.log("[OneSignal] Syncing user login:", currentCustomerId);
-      OS.login(currentCustomerId).then(() => {
-        // Define a tag de role para filtros no backend
-        const isAdmin = window.location.pathname.includes("/admin");
-        const role = isAdmin ? "admin" : "cliente";
-        OS.User.addTag("role", role);
-        console.log("[OneSignal] Tag sync:", role);
-      }).catch((e: any) => console.warn("[OneSignal] Login error", e));
+      OS.login(currentCustomerId)
+        .then(() => {
+          // Define a tag de role para filtros no backend
+          const isAdmin = window.location.pathname.includes("/admin");
+          const role = isAdmin ? "admin" : "cliente";
+          OS.User.addTag("role", role);
+          console.log("[OneSignal] Tag sync:", role);
+        })
+        .catch((e: any) => console.warn("[OneSignal] Login error", e));
     }
   }, [currentCustomerId]);
 
@@ -209,12 +262,15 @@ function RootComponent() {
 
     // Swap <link rel="manifest"> based on current area
     let manifestHref = "/manifest.json";
-    if (path === "/admin" || path.startsWith("/admin/")) manifestHref = "/admin/manifest.json";
+    if (path === "/admin" || path.startsWith("/admin/"))
+      manifestHref = "/admin/manifest.json";
     else if (path === "/afiliada" || path.startsWith("/afiliada/"))
       manifestHref = "/afiliada/manifest.json";
 
     const finalHref = `${manifestHref}?v=${Date.now()}`;
-    let link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    let link = document.querySelector(
+      'link[rel="manifest"]',
+    ) as HTMLLinkElement | null;
 
     if (!link) {
       link = document.createElement("link");
@@ -279,25 +335,37 @@ function RootComponent() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const OS = (window as any).OneSignalDeferred || ((window as any).OneSignalDeferred = []);
+    const OS =
+      (window as any).OneSignalDeferred ||
+      ((window as any).OneSignalDeferred = []);
     OS.push(async (OneSignal: any) => {
       try {
         const path = location.pathname;
         let role: "admin" | "affiliate" | "customer" = "customer";
-        let activeUser: { id: string; email: string; name?: string } | null = null;
+        let activeUser: { id: string; email: string; name?: string } | null =
+          null;
 
         // Identifica o usuário ativo baseado na rota e na sessão
         if (path.startsWith("/admin") && sessions.admin) {
           role = "admin";
-          activeUser = { id: sessions.admin.subjectId, email: sessions.admin.subjectId };
+          activeUser = {
+            id: sessions.admin.subjectId,
+            email: sessions.admin.subjectId,
+          };
         } else if (path.startsWith("/afiliada") && sessions.affiliate) {
           role = "affiliate";
-          const aff = affiliates.find((a) => a.id === sessions.affiliate?.subjectId);
-          if (aff) activeUser = { id: aff.id, email: aff.email, name: aff.name };
+          const aff = affiliates.find(
+            (a) => a.id === sessions.affiliate?.subjectId,
+          );
+          if (aff)
+            activeUser = { id: aff.id, email: aff.email, name: aff.name };
         } else if (sessions.customer) {
           role = "customer";
-          const cust = customers.find((c) => c.id === sessions.customer?.subjectId);
-          if (cust) activeUser = { id: cust.id, email: cust.email, name: cust.name };
+          const cust = customers.find(
+            (c) => c.id === sessions.customer?.subjectId,
+          );
+          if (cust)
+            activeUser = { id: cust.id, email: cust.email, name: cust.name };
         }
 
         if (activeUser) {
@@ -311,7 +379,9 @@ function RootComponent() {
             full_name: activeUser.name || "",
           });
         } else {
-          console.log("[OneSignal] No active session, logging out of OneSignal");
+          console.log(
+            "[OneSignal] No active session, logging out of OneSignal",
+          );
           await OneSignal.logout();
         }
       } catch (e) {

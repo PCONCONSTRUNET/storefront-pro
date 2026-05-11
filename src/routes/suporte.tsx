@@ -17,15 +17,16 @@ function Page() {
   const filteredFaq = useMemo(() => {
     const term = search.toLowerCase();
     if (!term) return faq;
-    return faq.filter(f => 
-      f.question.toLowerCase().includes(term) || 
-      f.answer.toLowerCase().includes(term) ||
-      f.category.toLowerCase().includes(term)
+    return faq.filter(
+      (f) =>
+        f.question.toLowerCase().includes(term) ||
+        f.answer.toLowerCase().includes(term) ||
+        f.category.toLowerCase().includes(term),
     );
   }, [faq, search]);
 
   const categories = useMemo(() => {
-    const cats = new Set(filteredFaq.map(f => f.category));
+    const cats = new Set(filteredFaq.map((f) => f.category));
     return Array.from(cats);
   }, [filteredFaq]);
 
@@ -33,13 +34,17 @@ function Page() {
     <StoreLayout>
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl text-primary mb-2">Como podemos ajudar?</h1>
-          <p className="text-muted-foreground">Encontre respostas rápidas para suas dúvidas.</p>
+          <h1 className="font-display text-3xl text-primary mb-2">
+            Como podemos ajudar?
+          </h1>
+          <p className="text-muted-foreground">
+            Encontre respostas rápidas para suas dúvidas.
+          </p>
         </div>
 
         <div className="relative mb-8">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <input 
+          <input
             type="text"
             placeholder="Busque por 'frete', 'prazo', 'pagamento'..."
             value={search}
@@ -54,28 +59,36 @@ function Page() {
               Nenhuma pergunta encontrada para sua busca.
             </div>
           ) : (
-            categories.map(cat => (
+            categories.map((cat) => (
               <div key={cat}>
                 <h2 className="text-sm font-bold uppercase tracking-wider text-primary mb-3 px-2">
                   {cat}
                 </h2>
                 <div className="bg-card rounded-2xl border border-border shadow-card divide-y divide-border overflow-hidden">
-                  {filteredFaq.filter(f => f.category === cat).map(f => (
-                    <div key={f.id}>
-                      <button 
-                        onClick={() => setOpenId(openId === f.id ? null : f.id)}
-                        className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
-                      >
-                        <span className="font-medium text-sm">{f.question}</span>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${openId === f.id ? "rotate-180" : ""}`} />
-                      </button>
-                      {openId === f.id && (
-                        <div className="px-5 pb-4 text-sm text-muted-foreground animate-fade-in whitespace-pre-wrap">
-                          {f.answer}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {filteredFaq
+                    .filter((f) => f.category === cat)
+                    .map((f) => (
+                      <div key={f.id}>
+                        <button
+                          onClick={() =>
+                            setOpenId(openId === f.id ? null : f.id)
+                          }
+                          className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                        >
+                          <span className="font-medium text-sm">
+                            {f.question}
+                          </span>
+                          <ChevronDown
+                            className={`h-4 w-4 text-muted-foreground transition-transform ${openId === f.id ? "rotate-180" : ""}`}
+                          />
+                        </button>
+                        {openId === f.id && (
+                          <div className="px-5 pb-4 text-sm text-muted-foreground animate-fade-in whitespace-pre-wrap">
+                            {f.answer}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
             ))
@@ -88,7 +101,7 @@ function Page() {
           <p className="text-sm text-muted-foreground mb-5">
             Fale diretamente com nosso time de atendimento.
           </p>
-          <a 
+          <a
             href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
             target="_blank"
             rel="noopener noreferrer"

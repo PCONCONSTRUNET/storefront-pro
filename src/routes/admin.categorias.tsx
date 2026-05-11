@@ -36,10 +36,15 @@ function Page() {
         {categories
           .sort((a, b) => a.order - b.order)
           .map((c) => (
-            <div key={c.id} className="bg-card rounded-2xl p-4 shadow-card text-center">
+            <div
+              key={c.id}
+              className="bg-card rounded-2xl p-4 shadow-card text-center"
+            >
               <div className="text-4xl">{c.image}</div>
               <div className="font-semibold mt-2">{c.name}</div>
-              <div className="text-xs text-muted-foreground">Ordem: {c.order}</div>
+              <div className="text-xs text-muted-foreground">
+                Ordem: {c.order}
+              </div>
               <div className="flex gap-1 justify-center mt-3">
                 <button
                   onClick={() => setEditing(c)}
@@ -88,7 +93,9 @@ function Page() {
               label="Ordem"
               type="number"
               value={String(editing.order)}
-              onChange={(v) => setEditing({ ...editing, order: parseInt(v) || 0 })}
+              onChange={(v) =>
+                setEditing({ ...editing, order: parseInt(v) || 0 })
+              }
             />
             <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold">
               Salvar

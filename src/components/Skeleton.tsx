@@ -103,7 +103,13 @@ export function StatsGridSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
+export function TableSkeleton({
+  rows = 6,
+  cols = 5,
+}: {
+  rows?: number;
+  cols?: number;
+}) {
   return (
     <div className="bg-card rounded-2xl shadow-card overflow-hidden">
       <div className="p-3 border-b border-border flex gap-3">
@@ -112,7 +118,10 @@ export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: nu
         ))}
       </div>
       {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="p-3 border-b border-border last:border-0 flex gap-3 items-center">
+        <div
+          key={r}
+          className="p-3 border-b border-border last:border-0 flex gap-3 items-center"
+        >
           {Array.from({ length: cols }).map((_, c) => (
             <Skeleton key={c} className="h-4 flex-1" />
           ))}

@@ -3,7 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
+import {
+  DollarSign,
+  ShoppingCart,
+  Users,
+  Package,
+  TrendingUp,
+  Bell,
+} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -29,12 +36,19 @@ function Page() {
 
   const stats = useMemo(() => {
     const today = new Date().toDateString();
-    const ordersToday = orders.filter((o) => new Date(o.createdAt).toDateString() === today);
+    const ordersToday = orders.filter(
+      (o) => new Date(o.createdAt).toDateString() === today,
+    );
     const monthRev = orders
       .filter((o) => o.status !== "cancelado")
       .reduce((a, o) => a + o.total, 0);
     const ticket = orders.length ? monthRev / orders.length : 0;
-    return { ordersToday: ordersToday.length, monthRev, ticket, customers: customers.length };
+    return {
+      ordersToday: ordersToday.length,
+      monthRev,
+      ticket,
+      customers: customers.length,
+    };
   }, [orders, customers]);
 
   const chartData = useMemo(() => {
@@ -43,7 +57,9 @@ function Page() {
       d.setDate(d.getDate() - (6 - i));
       const label = d.toLocaleDateString("pt-BR", { weekday: "short" });
       const total = orders
-        .filter((o) => new Date(o.createdAt).toDateString() === d.toDateString())
+        .filter(
+          (o) => new Date(o.createdAt).toDateString() === d.toDateString(),
+        )
         .reduce((a, o) => a + o.total, 0);
       return { day: label, total: Math.round(total) };
     });
@@ -53,7 +69,9 @@ function Page() {
   const topProducts = useMemo(() => {
     const map = new Map<string, number>();
     orders.forEach((o) =>
-      o.items.forEach((it) => map.set(it.name, (map.get(it.name) || 0) + it.quantity)),
+      o.items.forEach((it) =>
+        map.set(it.name, (map.get(it.name) || 0) + it.quantity),
+      ),
     );
     return Array.from(map.entries())
       .map(([name, qty]) => ({ name, qty }))
@@ -62,10 +80,30 @@ function Page() {
   }, [orders]);
 
   const cards = [
-    { label: "Faturamento", value: brl(stats.monthRev), icon: DollarSign, color: "text-success" },
-    { label: "Pedidos hoje", value: stats.ordersToday, icon: ShoppingCart, color: "text-primary" },
-    { label: "Ticket médio", value: brl(stats.ticket), icon: TrendingUp, color: "text-gold" },
-    { label: "Clientes", value: stats.customers, icon: Users, color: "text-primary" },
+    {
+      label: "Faturamento",
+      value: brl(stats.monthRev),
+      icon: DollarSign,
+      color: "text-success",
+    },
+    {
+      label: "Pedidos hoje",
+      value: stats.ordersToday,
+      icon: ShoppingCart,
+      color: "text-primary",
+    },
+    {
+      label: "Ticket médio",
+      value: brl(stats.ticket),
+      icon: TrendingUp,
+      color: "text-gold",
+    },
+    {
+      label: "Clientes",
+      value: stats.customers,
+      icon: Users,
+      color: "text-primary",
+    },
   ];
 
   const [osId, setOsId] = useState<string>("Aguardando...");
@@ -94,19 +132,23 @@ function Page() {
 
       console.log("[Push] Forçando sincronismo...");
       await OS.logout();
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1000));
       await OS.login(currentCustomerId);
-      
+
       if (OS.User?.PushSubscription) {
         await OS.User.PushSubscription.optIn();
       }
-      
+
       OS.User.addTag("role", "admin");
-      
-      import("sonner").then(({ toast }) => toast.success("Dispositivo sincronizado!"));
+
+      import("sonner").then(({ toast }) =>
+        toast.success("Dispositivo sincronizado!"),
+      );
     } catch (err) {
       console.error("[Push-Sync]", err);
-      import("sonner").then(({ toast }) => toast.error("Falha ao sincronizar."));
+      import("sonner").then(({ toast }) =>
+        toast.error("Falha ao sincronizar."),
+      );
     } finally {
       setSyncing(false);
     }
@@ -118,7 +160,7 @@ function Page() {
       const currentCustomerId = useStore.getState().currentCustomerId;
       const OS = (window as any).OneSignal;
       const subId = OS?.User?.PushSubscription?.id;
-      
+
       const { data, error } = await supabase.functions.invoke("send-push", {
         body: {
           title: "Teste de Push Direto 🚀",
@@ -129,10 +171,14 @@ function Page() {
       });
 
       if (error) throw error;
-      import("sonner").then(({ toast }) => toast.success(`Push enviado! (ID: ${subId?.slice(0,8)}...)`));
+      import("sonner").then(({ toast }) =>
+        toast.success(`Push enviado! (ID: ${subId?.slice(0, 8)}...)`),
+      );
     } catch (err) {
       console.error("[push-test]", err);
-      import("sonner").then(({ toast }) => toast.error(`Erro no teste: ${err.message || "Verifique o console"}`));
+      import("sonner").then(({ toast }) =>
+        toast.error(`Erro no teste: ${err.message || "Verifique o console"}`),
+      );
     }
   };
 
@@ -144,18 +190,22 @@ function Page() {
           <div className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-widest flex items-center gap-2">
             <Bell className="h-3 w-3" /> Status do Push
           </div>
-          <div className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${osActive ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}>
+          <div
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${osActive ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}
+          >
             {osActive ? "CONECTADO" : "DESCONECTADO"}
           </div>
         </div>
-        
+
         <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
-          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">Subscription ID</span>
+          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">
+            Subscription ID
+          </span>
           {osId}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               window.alert("Sincronizando... aguarde o aviso de sucesso.");
@@ -166,7 +216,7 @@ function Page() {
           >
             {syncing ? "..." : "Sincronizar"}
           </button>
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               testNotification();
@@ -197,7 +247,11 @@ function Page() {
             <ResponsiveContainer>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
+                <XAxis
+                  dataKey="day"
+                  stroke="var(--muted-foreground)"
+                  fontSize={11}
+                />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} />
                 <Tooltip
                   contentStyle={{
@@ -221,12 +275,18 @@ function Page() {
         <div className="bg-card rounded-2xl p-4 shadow-card">
           <h2 className="font-bold mb-3">Mais vendidos</h2>
           {topProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Sem vendas ainda.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              Sem vendas ainda.
+            </p>
           ) : (
             <div className="h-56">
               <ResponsiveContainer>
                 <BarChart data={topProducts} layout="vertical">
-                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} />
+                  <XAxis
+                    type="number"
+                    stroke="var(--muted-foreground)"
+                    fontSize={11}
+                  />
                   <YAxis
                     type="category"
                     dataKey="name"
@@ -241,7 +301,11 @@ function Page() {
                       borderRadius: 12,
                     }}
                   />
-                  <Bar dataKey="qty" fill="var(--primary)" radius={[0, 8, 8, 0]} />
+                  <Bar
+                    dataKey="qty"
+                    fill="var(--primary)"
+                    radius={[0, 8, 8, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -269,7 +333,9 @@ function Page() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm truncate">{p.name}</div>
-                    <div className="text-[11px] text-muted-foreground">Mínimo: {min} un.</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Mínimo: {min} un.
+                    </div>
                   </div>
                   <span
                     className={`text-xs font-bold px-2 py-0.5 rounded-full ${out ? "bg-destructive/15 text-destructive" : "bg-gold/15 text-gold"}`}
@@ -279,7 +345,8 @@ function Page() {
                 </li>
               );
             })}
-          {products.filter((p) => p.stock <= (p.minStock ?? 5)).length === 0 && (
+          {products.filter((p) => p.stock <= (p.minStock ?? 5)).length ===
+            0 && (
             <li className="text-sm text-muted-foreground py-4">Tudo ok!</li>
           )}
         </ul>

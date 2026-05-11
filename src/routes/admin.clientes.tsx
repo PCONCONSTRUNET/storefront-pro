@@ -13,7 +13,9 @@ function Page() {
     <AdminLayout title="Clientes">
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
         {customers.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">Nenhum cliente cadastrado.</div>
+          <div className="text-center py-16 text-muted-foreground">
+            Nenhum cliente cadastrado.
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {customers.map((c) => {
@@ -21,7 +23,10 @@ function Page() {
               const spent = cOrders.reduce((a, o) => a + o.total, 0);
               const last = cOrders[0]?.createdAt;
               return (
-                <li key={c.id} className="p-4 flex flex-wrap items-center gap-3">
+                <li
+                  key={c.id}
+                  className="p-4 flex flex-wrap items-center gap-3"
+                >
                   <div className="w-10 h-10 rounded-full gradient-primary text-primary-foreground grid place-items-center font-bold">
                     {c.name[0]?.toUpperCase()}
                   </div>
@@ -33,9 +38,13 @@ function Page() {
                   </div>
                   <div className="text-right text-xs">
                     <div className="text-primary font-bold">{brl(spent)}</div>
-                    <div className="text-muted-foreground">{cOrders.length} pedidos</div>
+                    <div className="text-muted-foreground">
+                      {cOrders.length} pedidos
+                    </div>
                     {last && (
-                      <div className="text-muted-foreground">Último: {formatDate(last)}</div>
+                      <div className="text-muted-foreground">
+                        Último: {formatDate(last)}
+                      </div>
                     )}
                   </div>
                 </li>

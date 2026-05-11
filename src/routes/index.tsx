@@ -59,10 +59,14 @@ function Home() {
   const { products, categories, settings, coupons } = useStore();
   const hydrated = useStoreHydrated();
   const flash = useMemo(
-    () => products.filter((p) => p.active && !p.hidden && p.oldPrice).slice(0, 8),
+    () =>
+      products.filter((p) => p.active && !p.hidden && p.oldPrice).slice(0, 8),
     [products],
   );
-  const all = useMemo(() => products.filter((p) => p.active && !p.hidden), [products]);
+  const all = useMemo(
+    () => products.filter((p) => p.active && !p.hidden),
+    [products],
+  );
   const { h, m, s } = useCountdown(8);
 
   const banners = [
@@ -78,7 +82,12 @@ function Home() {
       sub: "A partir de R$ 49,90",
       color: "from-gold to-[oklch(0.78_0.16_55)]",
     },
-    { icon: Sparkles, title: "Novidades", sub: "Toda semana", color: "from-rose to-accent" },
+    {
+      icon: Sparkles,
+      title: "Novidades",
+      sub: "Toda semana",
+      color: "from-rose to-accent",
+    },
   ];
 
   return (
@@ -123,8 +132,16 @@ function Home() {
       <section className="px-3 md:px-4 mt-3 max-w-6xl mx-auto">
         <div className="bg-card rounded-md border border-border grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
           {[
-            { icon: Truck, label: "Frete fixo", sub: `R$ ${settings.shippingFee.toFixed(2)}` },
-            { icon: ShieldCheck, label: "Compra 100% segura", sub: "Pix, cartão e dinheiro" },
+            {
+              icon: Truck,
+              label: "Frete fixo",
+              sub: `R$ ${settings.shippingFee.toFixed(2)}`,
+            },
+            {
+              icon: ShieldCheck,
+              label: "Compra 100% segura",
+              sub: "Pix, cartão e dinheiro",
+            },
             { icon: Zap, label: "Envio rápido", sub: "Em até 24h" },
             {
               icon: Tag,
@@ -137,7 +154,9 @@ function Home() {
                 <t.icon className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <div className="text-[11px] md:text-xs font-semibold leading-tight">{t.label}</div>
+                <div className="text-[11px] md:text-xs font-semibold leading-tight">
+                  {t.label}
+                </div>
                 <div className="text-[10px] md:text-[11px] text-muted-foreground truncate">
                   {t.sub}
                 </div>
@@ -164,9 +183,13 @@ function Home() {
                     <Tag className="h-4 w-4" />
                   </div>
                   <div className="px-3 py-1.5">
-                    <div className="text-[11px] font-bold text-primary leading-tight">{c.code}</div>
+                    <div className="text-[11px] font-bold text-primary leading-tight">
+                      {c.code}
+                    </div>
                     <div className="text-[10px] text-muted-foreground">
-                      {c.type === "percent" ? `${c.value}% OFF` : `R$ ${c.value} OFF`}
+                      {c.type === "percent"
+                        ? `${c.value}% OFF`
+                        : `R$ ${c.value} OFF`}
                       {c.minOrder > 0 ? ` · acima de R$ ${c.minOrder}` : ""}
                     </div>
                   </div>
@@ -288,7 +311,11 @@ function CategoriesScroller({
               aria-label={autoplay ? "Pausar rolagem" : "Iniciar rolagem"}
               className="w-7 h-7 rounded-full bg-muted hover:bg-primary/10 text-foreground grid place-items-center transition-colors"
             >
-              {autoplay ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              {autoplay ? (
+                <Pause className="h-3.5 w-3.5" />
+              ) : (
+                <Play className="h-3.5 w-3.5" />
+              )}
             </button>
             <button
               onClick={() => scrollBy(-1)}

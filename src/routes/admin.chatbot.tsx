@@ -79,7 +79,12 @@ function Page() {
   }, []);
 
   const handleLogout = async () => {
-    if (!confirm("Tem certeza que deseja desconectar o WhatsApp? A sessão será encerrada.")) return;
+    if (
+      !confirm(
+        "Tem certeza que deseja desconectar o WhatsApp? A sessão será encerrada.",
+      )
+    )
+      return;
     setLoadingLogout(true);
     try {
       await logoutBot();
@@ -129,7 +134,9 @@ function Page() {
             <MessageCircle className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-display text-xl">Princesa de Laços · WhatsApp</div>
+            <div className="font-display text-xl">
+              Princesa de Laços · WhatsApp
+            </div>
             <div className="text-xs text-muted-foreground truncate">
               Endpoint: {WHATSAPP_BOT_BASE_URL}
             </div>
@@ -154,13 +161,19 @@ function Page() {
               {error ? (
                 <div className="text-center text-sm text-destructive flex flex-col items-center gap-2">
                   <AlertCircle className="h-8 w-8" />
-                  <div className="font-semibold">Não foi possível conectar à API</div>
-                  <div className="text-xs text-muted-foreground max-w-xs">{error}</div>
+                  <div className="font-semibold">
+                    Não foi possível conectar à API
+                  </div>
+                  <div className="text-xs text-muted-foreground max-w-xs">
+                    {error}
+                  </div>
                 </div>
               ) : status === "CONNECTED" ? (
                 <div className="text-center flex flex-col items-center gap-2">
                   <CheckCircle2 className="h-12 w-12 text-green-600" />
-                  <div className="font-semibold text-lg">✅ WhatsApp Conectado</div>
+                  <div className="font-semibold text-lg">
+                    ✅ WhatsApp Conectado
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     O bot está pronto para enviar e receber mensagens.
                   </div>
@@ -173,7 +186,8 @@ function Page() {
                     className="w-56 h-56 rounded-lg bg-white p-2"
                   />
                   <div className="text-xs text-muted-foreground max-w-xs">
-                    Abra o WhatsApp → Configurações → Aparelhos conectados → Conectar aparelho
+                    Abra o WhatsApp → Configurações → Aparelhos conectados →
+                    Conectar aparelho
                   </div>
                 </div>
               ) : status === "CONNECTING" ? (
@@ -226,7 +240,9 @@ function Page() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground">Mensagem</label>
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Mensagem
+                </label>
                 <textarea
                   value={testMessage}
                   onChange={(e) => setTestMessage(e.target.value)}
@@ -298,9 +314,13 @@ function Page() {
                         {new Date(l.at).toLocaleString("pt-BR")}
                       </span>
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">{l.mensagem}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {l.mensagem}
+                    </div>
                     {l.error && (
-                      <div className="text-[11px] text-destructive mt-1 break-all">{l.error}</div>
+                      <div className="text-[11px] text-destructive mt-1 break-all">
+                        {l.error}
+                      </div>
                     )}
                   </div>
                 </li>
@@ -318,11 +338,16 @@ function StatusBadge({ status }: { status: BotStatus }) {
     CONNECTED: { label: "Conectado", cls: "bg-green-100 text-green-700" },
     QR_READY: { label: "Aguardando QR", cls: "bg-amber-100 text-amber-700" },
     CONNECTING: { label: "Conectando", cls: "bg-blue-100 text-blue-700" },
-    DISCONNECTED: { label: "Desconectado", cls: "bg-muted text-muted-foreground" },
+    DISCONNECTED: {
+      label: "Desconectado",
+      cls: "bg-muted text-muted-foreground",
+    },
     UNKNOWN: { label: "Desconhecido", cls: "bg-muted text-muted-foreground" },
   };
   const m = map[status];
   return (
-    <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${m.cls}`}>{m.label}</span>
+    <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${m.cls}`}>
+      {m.label}
+    </span>
   );
 }

@@ -7,7 +7,9 @@ import { Modal } from "./admin.produtos";
 import { Search, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/pedidos")({
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    q: typeof s.q === "string" ? s.q : "",
+  }),
   component: Page,
 });
 
@@ -83,7 +85,9 @@ function Page() {
 
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
         {list.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">Nenhum pedido.</div>
+          <div className="text-center py-16 text-muted-foreground">
+            Nenhum pedido.
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {list.map((o) => (
@@ -121,11 +125,15 @@ function Page() {
               <strong>Cliente:</strong> {order.customerName}
             </div>
             <div>
-              <strong>Contato:</strong> {order.customerEmail} · {order.customerPhone}
+              <strong>Contato:</strong> {order.customerEmail} ·{" "}
+              {order.customerPhone}
             </div>
             <div>
               <strong>
-                {order.deliveryMethod === "retirada" ? "Retirada no ateliê" : "Endereço"}:
+                {order.deliveryMethod === "retirada"
+                  ? "Retirada no ateliê"
+                  : "Endereço"}
+                :
               </strong>{" "}
               {order.address}
             </div>
@@ -147,7 +155,9 @@ function Page() {
                   <span>
                     {it.quantity}× {it.name}
                   </span>
-                  <span className="font-semibold">{brl(it.price * it.quantity)}</span>
+                  <span className="font-semibold">
+                    {brl(it.price * it.quantity)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -157,10 +167,14 @@ function Page() {
               <span className="text-primary">{brl(order.total)}</span>
             </div>
             <label className="block mt-4">
-              <span className="text-xs font-medium text-muted-foreground">Alterar status</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Alterar status
+              </span>
               <select
                 value={order.status}
-                onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
+                onChange={(e) =>
+                  updateOrderStatus(order.id, e.target.value as OrderStatus)
+                }
                 className="mt-1 w-full h-11 px-3 rounded-xl bg-muted"
               >
                 {statuses.map((s) => (
@@ -178,7 +192,11 @@ function Page() {
             </button>
             <button
               onClick={() => {
-                if (confirm(`Excluir o pedido #${order.id}? Esta ação não pode ser desfeita.`)) {
+                if (
+                  confirm(
+                    `Excluir o pedido #${order.id}? Esta ação não pode ser desfeita.`,
+                  )
+                ) {
                   deleteOrder(order.id);
                   setSelected(null);
                 }

@@ -9,7 +9,12 @@ export type CreatePixInput = {
     quantity: number;
     image?: string;
   }>;
-  totals: { subtotal: number; discount: number; shipping: number; total: number };
+  totals: {
+    subtotal: number;
+    discount: number;
+    shipping: number;
+    total: number;
+  };
   delivery: "entrega" | "retirada";
   address?: string;
   notes?: string;
@@ -25,8 +30,12 @@ export type CreatePixResult = {
   total: number;
 };
 
-export async function createPixPayment(input: CreatePixInput): Promise<CreatePixResult> {
-  const { data, error } = await supabase.functions.invoke("mp-create-pix", { body: input });
+export async function createPixPayment(
+  input: CreatePixInput,
+): Promise<CreatePixResult> {
+  const { data, error } = await supabase.functions.invoke("mp-create-pix", {
+    body: input,
+  });
   if (error) throw new Error(error.message || "Falha ao criar pagamento Pix");
   if ((data as any)?.error) throw new Error((data as any).error);
   return data as CreatePixResult;
@@ -40,7 +49,9 @@ export type CardPayload = {
   payer?: { identification?: { type: string; number: string } };
 };
 
-export type CreateCardInput = Omit<CreatePixInput, never> & { card: CardPayload };
+export type CreateCardInput = Omit<CreatePixInput, never> & {
+  card: CardPayload;
+};
 
 export type CreateCardResult = {
   order_id: string;
@@ -51,8 +62,12 @@ export type CreateCardResult = {
   total: number;
 };
 
-export async function createCardPayment(input: CreateCardInput): Promise<CreateCardResult> {
-  const { data, error } = await supabase.functions.invoke("mp-create-card", { body: input });
+export async function createCardPayment(
+  input: CreateCardInput,
+): Promise<CreateCardResult> {
+  const { data, error } = await supabase.functions.invoke("mp-create-card", {
+    body: input,
+  });
   if (error) throw new Error(error.message || "Falha ao processar cartão");
   if ((data as any)?.error) throw new Error((data as any).error);
   return data as CreateCardResult;
@@ -60,7 +75,13 @@ export async function createCardPayment(input: CreateCardInput): Promise<CreateC
 
 export type OrderRow = {
   id: string;
-  payment_status: "pending" | "approved" | "rejected" | "cancelled" | "refunded" | "expired";
+  payment_status:
+    | "pending"
+    | "approved"
+    | "rejected"
+    | "cancelled"
+    | "refunded"
+    | "expired";
   pix_qr_code: string | null;
   pix_qr_code_base64: string | null;
   pix_expires_at: string | null;
@@ -83,9 +104,12 @@ export async function fetchOrder(id: string): Promise<OrderRow | null> {
 }
 
 export async function simulateApprove(orderId: string): Promise<void> {
-  const { data, error } = await supabase.functions.invoke("mp-simulate-approve", {
-    body: { order_id: orderId },
-  });
+  const { data, error } = await supabase.functions.invoke(
+    "mp-simulate-approve",
+    {
+      body: { order_id: orderId },
+    },
+  );
   if (error) throw new Error(error.message || "Falha ao simular aprovação");
   if ((data as any)?.error) throw new Error((data as any).error);
 }

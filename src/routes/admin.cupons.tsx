@@ -39,14 +39,18 @@ function Page() {
 
       <div className="grid md:grid-cols-2 gap-3">
         {coupons.map((c) => (
-          <div key={c.code} className="bg-card rounded-2xl p-4 shadow-card flex items-start gap-3">
+          <div
+            key={c.code}
+            className="bg-card rounded-2xl p-4 shadow-card flex items-start gap-3"
+          >
             <div className="w-14 h-14 rounded-xl gradient-primary text-primary-foreground grid place-items-center font-bold text-xl">
               %
             </div>
             <div className="flex-1">
               <div className="font-bold">{c.code}</div>
               <div className="text-xs text-muted-foreground">
-                {c.type === "percent" ? `${c.value}% off` : `R$ ${c.value} off`} · Mín {c.minOrder}
+                {c.type === "percent" ? `${c.value}% off` : `R$ ${c.value} off`}{" "}
+                · Mín {c.minOrder}
               </div>
               <div className="text-xs text-muted-foreground">
                 Usos: {c.usedCount}/{c.maxUses} · Até {c.validUntil}
@@ -94,15 +98,22 @@ function Page() {
             <Field
               label="Código"
               value={editing.code}
-              onChange={(v) => setEditing({ ...editing, code: v.toUpperCase() })}
+              onChange={(v) =>
+                setEditing({ ...editing, code: v.toUpperCase() })
+              }
             />
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="text-xs font-medium text-muted-foreground">Tipo</span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Tipo
+                </span>
                 <select
                   value={editing.type}
                   onChange={(e) =>
-                    setEditing({ ...editing, type: e.target.value as "percent" | "fixed" })
+                    setEditing({
+                      ...editing,
+                      type: e.target.value as "percent" | "fixed",
+                    })
                   }
                   className="mt-1 w-full h-11 px-3 rounded-xl bg-muted"
                 >
@@ -114,19 +125,25 @@ function Page() {
                 label="Valor"
                 type="number"
                 value={String(editing.value)}
-                onChange={(v) => setEditing({ ...editing, value: parseFloat(v) || 0 })}
+                onChange={(v) =>
+                  setEditing({ ...editing, value: parseFloat(v) || 0 })
+                }
               />
               <Field
                 label="Pedido mínimo"
                 type="number"
                 value={String(editing.minOrder)}
-                onChange={(v) => setEditing({ ...editing, minOrder: parseFloat(v) || 0 })}
+                onChange={(v) =>
+                  setEditing({ ...editing, minOrder: parseFloat(v) || 0 })
+                }
               />
               <Field
                 label="Máx. usos"
                 type="number"
                 value={String(editing.maxUses)}
-                onChange={(v) => setEditing({ ...editing, maxUses: parseInt(v) || 0 })}
+                onChange={(v) =>
+                  setEditing({ ...editing, maxUses: parseInt(v) || 0 })
+                }
               />
               <Field
                 label="Validade"
@@ -138,7 +155,9 @@ function Page() {
                 <input
                   type="checkbox"
                   checked={editing.active}
-                  onChange={(e) => setEditing({ ...editing, active: e.target.checked })}
+                  onChange={(e) =>
+                    setEditing({ ...editing, active: e.target.checked })
+                  }
                 />
                 <span className="text-sm">Ativo</span>
               </label>

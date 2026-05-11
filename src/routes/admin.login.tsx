@@ -1,4 +1,9 @@
-import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+  Link,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { Crown, Loader2 } from "lucide-react";
@@ -48,12 +53,18 @@ function Page() {
           <div className="w-14 h-14 mx-auto rounded-full gradient-primary grid place-items-center text-primary-foreground">
             <Crown className="h-7 w-7" />
           </div>
-          <h1 className="font-display text-2xl text-primary mt-3">Painel Admin</h1>
-          <p className="text-xs text-muted-foreground">Acesso restrito a e-mails autorizados</p>
+          <h1 className="font-display text-2xl text-primary mt-3">
+            Painel Admin
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Acesso restrito a e-mails autorizados
+          </p>
         </div>
         <form onSubmit={submit} className="mt-6 space-y-3">
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">E-mail autorizado</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              E-mail autorizado
+            </span>
             <input
               type="email"
               value={email}
@@ -65,7 +76,9 @@ function Page() {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Senha</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Senha
+            </span>
             <input
               type="password"
               value={pwd}

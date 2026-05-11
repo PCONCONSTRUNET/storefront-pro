@@ -31,7 +31,10 @@ function Page() {
 
   const save = (e: React.FormEvent) => {
     e.preventDefault();
-    const data: { name: string; phone: string; password?: string } = { name, phone };
+    const data: { name: string; phone: string; password?: string } = {
+      name,
+      phone,
+    };
     if (pwd) data.password = pwd;
     const r = updateCustomer(data);
     if (r.ok) {
@@ -53,9 +56,14 @@ function Page() {
           <SettingsIcon className="h-5 w-5 text-primary" /> Configurações
         </h1>
 
-        <form onSubmit={save} className="bg-card rounded-2xl shadow-card p-4 space-y-3">
+        <form
+          onSubmit={save}
+          className="bg-card rounded-2xl shadow-card p-4 space-y-3"
+        >
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Nome</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Nome
+            </span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -64,7 +72,9 @@ function Page() {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">E-mail</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              E-mail
+            </span>
             <input
               value={customer.email}
               disabled
@@ -72,7 +82,9 @@ function Page() {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Telefone</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Telefone
+            </span>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -80,7 +92,9 @@ function Page() {
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">Nova senha (opcional)</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Nova senha (opcional)
+            </span>
             <input
               type="password"
               value={pwd}

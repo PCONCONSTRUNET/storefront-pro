@@ -14,7 +14,9 @@ function Page() {
   const hydrated = useStoreHydrated();
   const { products, categories } = useStore();
   const cat = categories.find((c) => c.id === slug);
-  const list = products.filter((p) => p.category === slug && p.active && !p.hidden);
+  const list = products.filter(
+    (p) => p.category === slug && p.active && !p.hidden,
+  );
 
   return (
     <StoreLayout>
@@ -35,7 +37,10 @@ function Page() {
             : "Carregando..."}
         </p>
         {!hydrated ? (
-          <ProductGridSkeleton count={8} cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4" />
+          <ProductGridSkeleton
+            count={8}
+            cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          />
         ) : list.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             Nenhum produto nesta categoria.

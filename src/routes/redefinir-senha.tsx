@@ -1,4 +1,9 @@
-import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useSearch,
+  Link,
+} from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useStore } from "@/lib/store";
@@ -73,7 +78,9 @@ function Page() {
   return (
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-rose/30 to-accent p-4">
       <div className="w-full max-w-sm bg-card rounded-3xl shadow-soft p-6">
-        <h1 className="font-display text-2xl text-primary text-center">Redefinir senha</h1>
+        <h1 className="font-display text-2xl text-primary text-center">
+          Redefinir senha
+        </h1>
 
         {loading ? (
           <div className="mt-6 grid place-items-center">
@@ -81,15 +88,22 @@ function Page() {
           </div>
         ) : !token || !account ? (
           <div className="mt-6 text-center space-y-3">
-            <p className="text-sm text-muted-foreground">Link inválido ou expirado.</p>
-            <Link to="/esqueci-senha" className="inline-block text-sm text-primary underline">
+            <p className="text-sm text-muted-foreground">
+              Link inválido ou expirado.
+            </p>
+            <Link
+              to="/esqueci-senha"
+              className="inline-block text-sm text-primary underline"
+            >
               Solicitar novo link
             </Link>
           </div>
         ) : done ? (
           <div className="mt-6 text-center space-y-4">
             <CheckCircle2 className="h-12 w-12 mx-auto text-primary" />
-            <p className="text-sm text-foreground">Senha redefinida com sucesso!</p>
+            <p className="text-sm text-foreground">
+              Senha redefinida com sucesso!
+            </p>
             <button
               onClick={() => navigate({ to: loginPath, replace: true })}
               className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold"
@@ -100,10 +114,15 @@ function Page() {
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
             <p className="text-xs text-muted-foreground text-center">
-              Conta: <span className="font-medium text-foreground">{account.subjectEmail}</span>
+              Conta:{" "}
+              <span className="font-medium text-foreground">
+                {account.subjectEmail}
+              </span>
             </p>
             <label className="block">
-              <span className="text-xs font-medium text-muted-foreground">Nova senha</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Nova senha
+              </span>
               <input
                 type="password"
                 value={pwd}
@@ -115,7 +134,9 @@ function Page() {
               />
             </label>
             <label className="block">
-              <span className="text-xs font-medium text-muted-foreground">Confirmar senha</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Confirmar senha
+              </span>
               <input
                 type="password"
                 value={pwd2}

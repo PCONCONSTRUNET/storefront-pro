@@ -3,7 +3,13 @@ import { useRouterState } from "@tanstack/react-router";
 import { StoreHeader } from "./StoreHeader";
 import { BottomNav } from "./BottomNav";
 
-export function StoreLayout({ children, header }: { children: ReactNode; header?: ReactNode }) {
+export function StoreLayout({
+  children,
+  header,
+}: {
+  children: ReactNode;
+  header?: ReactNode;
+}) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   return (
     <div className="min-h-screen flex flex-col bg-background">

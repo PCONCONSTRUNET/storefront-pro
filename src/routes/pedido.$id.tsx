@@ -4,7 +4,13 @@ import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ReorderModal } from "@/components/ReorderModal";
 import { brl, formatDate } from "@/lib/format";
-import { CheckCircle2, ChevronLeft, Copy, QrCode, RotateCcw } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronLeft,
+  Copy,
+  QrCode,
+  RotateCcw,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/pedido/$id")({
@@ -75,7 +81,9 @@ function Page() {
             </div>
             <button
               onClick={() => {
-                navigator.clipboard.writeText("00020126...PIXSIMULADO" + order.id);
+                navigator.clipboard.writeText(
+                  "00020126...PIXSIMULADO" + order.id,
+                );
                 toast.success("Código copiado");
               }}
               className="mt-3 w-full h-10 rounded-full bg-muted text-sm font-semibold flex items-center justify-center gap-2"
@@ -93,10 +101,18 @@ function Page() {
                 <div
                   className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${i <= currentIdx ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                 >
-                  {i <= currentIdx ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
+                  {i <= currentIdx ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    i + 1
+                  )}
                 </div>
                 <span
-                  className={i === currentIdx ? "font-semibold" : "text-muted-foreground text-sm"}
+                  className={
+                    i === currentIdx
+                      ? "font-semibold"
+                      : "text-muted-foreground text-sm"
+                  }
                 >
                   {ORDER_STATUS_LABEL[s]}
                 </span>
@@ -121,7 +137,9 @@ function Page() {
                     Qtd: {it.quantity} × {brl(it.price)}
                   </div>
                 </div>
-                <div className="font-semibold text-sm">{brl(it.price * it.quantity)}</div>
+                <div className="font-semibold text-sm">
+                  {brl(it.price * it.quantity)}
+                </div>
               </li>
             ))}
           </ul>
@@ -150,7 +168,9 @@ function Page() {
 
         <div className="mt-4 bg-card rounded-2xl p-4 shadow-card text-sm">
           <h2 className="font-semibold mb-2">
-            {order.deliveryMethod === "retirada" ? "Retirada no ateliê" : "Entrega"}
+            {order.deliveryMethod === "retirada"
+              ? "Retirada no ateliê"
+              : "Entrega"}
           </h2>
           <p className="text-muted-foreground">{order.address}</p>
           {order.notes && (
@@ -170,7 +190,9 @@ function Page() {
           <RotateCcw className="h-4 w-4" /> Comprar de novo
         </button>
       </div>
-      {reorderOpen && <ReorderModal order={order} onClose={() => setReorderOpen(false)} />}
+      {reorderOpen && (
+        <ReorderModal order={order} onClose={() => setReorderOpen(false)} />
+      )}
     </StoreLayout>
   );
 }

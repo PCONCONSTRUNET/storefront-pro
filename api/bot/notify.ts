@@ -1,7 +1,11 @@
 const BOT_BASE = "http://178.105.54.230:3005";
 const BOT_TOKEN = "princesa_secret_123";
 
-type VercelRequest = { method?: string; headers: { origin?: string }; body?: unknown };
+type VercelRequest = {
+  method?: string;
+  headers: { origin?: string };
+  body?: unknown;
+};
 type VercelResponse = {
   setHeader: (name: string, value: string) => void;
   status: (code: number) => VercelResponse;
@@ -35,7 +39,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let payload: any = {};
   try {
-    payload = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body ?? {});
+    payload =
+      typeof req.body === "string"
+        ? JSON.parse(req.body || "{}")
+        : (req.body ?? {});
   } catch {
     res.status(400).json({ ok: false, error: "JSON inválido" });
     return;
@@ -44,7 +51,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const mensagem = String(payload.mensagem ?? "").trim();
 
   if (numero.length < 10 || !mensagem) {
-    res.status(400).json({ ok: false, error: "Parâmetros inválidos (numero/mensagem)" });
+    res
+      .status(400)
+      .json({ ok: false, error: "Parâmetros inválidos (numero/mensagem)" });
     return;
   }
 
@@ -57,8 +66,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const text = await r.text();
     res.status(200).json({ ok: r.ok, status: r.status, body: text });
   } catch (e) {
-    res
-      .status(502)
-      .json({ ok: false, status: 0, error: e instanceof Error ? e.message : String(e) });
+    res.status(502).json({
+      ok: false,
+      status: 0,
+      error: e instanceof Error ? e.message : String(e),
+    });
   }
 }

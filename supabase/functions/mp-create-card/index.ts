@@ -5,7 +5,8 @@ import { notifyOrderApproved } from "../_shared/notify-approval.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -16,8 +17,10 @@ const json = (data: unknown, status = 200) =>
   });
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
+  if (req.method === "OPTIONS")
+    return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST")
+    return json({ error: "Método não permitido" }, 405);
 
   const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
   const SANDBOX = !MP_TOKEN;
@@ -95,7 +98,10 @@ Deno.serve(async (req) => {
       raw_payload: { simulated: true, card: { last4: "0000" } },
     });
 
-    await notifyOrderApproved(supabase, { ...order, payment_status: "approved" });
+    await notifyOrderApproved(supabase, {
+      ...order,
+      payment_status: "approved",
+    });
 
     return json({
       order_id: order.id,
@@ -120,7 +126,9 @@ Deno.serve(async (req) => {
     external_reference: order.id,
     payer: {
       email: customer.email,
-      ...(card.payer?.identification ? { identification: card.payer.identification } : {}),
+      ...(card.payer?.identification
+        ? { identification: card.payer.identification }
+        : {}),
     },
     statement_descriptor: "PRINCESA LACOS",
   };
@@ -142,7 +150,10 @@ Deno.serve(async (req) => {
 
   if (!mpRes.ok) {
     console.error("[mp-create-card] MP error:", mpRes.status, mpData);
-    await supabase.from("orders").update({ payment_status: "rejected" }).eq("id", order.id);
+    await supabase
+      .from("orders")
+      .update({ payment_status: "rejected" })
+      .eq("id", order.id);
     return json(
       {
         error: mpData?.message || "Mercado Pago recusou o pagamento",
@@ -167,7 +178,10 @@ Deno.serve(async (req) => {
     .update({
       mp_payment_id: String(mpData.id),
       payment_status: newStatus,
-      paid_at: newStatus === "approved" ? (mpData.date_approved ?? new Date().toISOString()) : null,
+      paid_at:
+        newStatus === "approved"
+          ? (mpData.date_approved ?? new Date().toISOString())
+          : null,
     })
     .eq("id", order.id);
 
