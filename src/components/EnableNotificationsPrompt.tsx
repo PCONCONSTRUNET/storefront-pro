@@ -106,12 +106,29 @@ export function EnableNotificationsPrompt() {
     }
 
     if (granted) {
-      // Notificação de boas-vindas imediata para o Admin
+      // Notificação de boas-vindas IMEDIATA assim que o registro propagar
       const sendWelcome = async () => {
         try {
-          // Identifica se é admin ou cliente
+          const OS = (window as any).OneSignal;
           const isAdmin = window.location.pathname.includes("/admin");
           
+          // Aguardamos até 10 segundos pelo ID de inscrição (com checks a cada 1s)
+          let subscriptionId = OS?.User?.PushSubscription?.id;
+          let attempts = 0;
+          while (!subscriptionId && attempts < 10) {
+            console.log("[push-prompt] Waiting for subscription ID... attempt", attempts + 1);
+            await new Promise(r => setTimeout(r, 1000));
+            subscriptionId = OS?.User?.PushSubscription?.id;
+            attempts++;
+          }
+
+          if (!subscriptionId) {
+            console.warn("[push-prompt] Could not get subscription ID after 10s");
+            return;
+          }
+
+          console.log("[push-prompt] Device registered! ID:", subscriptionId);
+
           await supabase.functions.invoke("send-push", {
             body: {
               title: "Notificações ativadas! 🔔",
@@ -122,12 +139,12 @@ export function EnableNotificationsPrompt() {
               audience: isAdmin ? "admin" : "cliente",
             },
           });
-          console.log("[push-prompt] Welcome push sent to audience:", isAdmin ? "admin" : "cliente");
+          console.log("[push-prompt] Welcome push triggered successfully");
         } catch (e) {
           console.warn("[push-prompt] Welcome push failed", e);
         }
       };
-      window.setTimeout(sendWelcome, 3000);
+      sendWelcome();
     }
   };
 
