@@ -90,14 +90,45 @@ function Page() {
     }
   };
 
+  const [osId, setOsId] = useState<string>("Aguardando...");
+  const [osActive, setOsActive] = useState<boolean>(false);
+
+  useEffect(() => {
+    const check = () => {
+      const OS = (window as any).OneSignal;
+      if (OS?.User?.PushSubscription) {
+        setOsId(OS.User.PushSubscription.id || "Não registrado");
+        setOsActive(OS.User.PushSubscription.optedIn);
+      }
+    };
+    const interval = setInterval(check, 3000);
+    check();
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <AdminLayout title="Dashboard">
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 bg-muted/30 p-3 rounded-2xl border border-border flex flex-wrap items-center justify-between gap-3">
+        <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Diagnóstico Push</div>
+        <div className="flex gap-4 text-xs font-mono overflow-hidden">
+          <div className="flex flex-col">
+            <span className="text-[9px] opacity-60">Subscription ID</span>
+            <span className="truncate max-w-[150px] font-bold">
+              {osId}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[9px] opacity-60">Status</span>
+            <span className={`font-bold ${osActive ? "text-success" : "text-destructive"}`}>
+              {osActive ? "VINCULADO" : "DESCONECTADO"}
+            </span>
+          </div>
+        </div>
         <button 
           onClick={testNotification}
-          className="text-xs flex items-center gap-2 bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full font-bold transition-colors"
+          className="text-xs flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold shadow-soft transition-transform active:scale-95"
         >
-          <TrendingUp className="h-3 w-3" /> Testar Notificação Push
+          <TrendingUp className="h-3 w-3" /> Testar Notificação
         </button>
       </div>
 
