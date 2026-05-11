@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
-import { DollarSign, ShoppingCart, Users, Package, TrendingUp } from "lucide-react";
+import { DollarSign, ShoppingCart, Users, Package, TrendingUp, Bell } from "lucide-react";
 import {
   LineChart,
   Line,
