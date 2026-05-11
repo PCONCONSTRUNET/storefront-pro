@@ -68,33 +68,9 @@ function Page() {
     { label: "Clientes", value: stats.customers, icon: Users, color: "text-primary" },
   ];
 
-  const testNotification = async () => {
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const currentCustomerId = useStore.getState().currentCustomerId;
-      const OS = (window as any).OneSignal;
-      const subId = OS?.User?.PushSubscription?.id;
-      
-      const { data, error } = await supabase.functions.invoke("send-push", {
-        body: {
-          title: "Teste de Push Direto 🚀",
-          message: `Enviado para ${subId ? "este aparelho" : "seu usuário"}. Hora: ${new Date().toLocaleTimeString()}`,
-          externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
-          // Se tivermos o ID da assinatura, mandamos direto para ele também
-          subscriptionIds: subId ? [subId] : undefined,
-        },
-      });
-
-      if (error) throw error;
-      import("sonner").then(({ toast }) => toast.success(`Push enviado! (ID: ${subId?.slice(0,8)}...)`));
-    } catch (err) {
-      console.error("[push-test]", err);
-      import("sonner").then(({ toast }) => toast.error(`Erro no teste: ${err.message || "Verifique o console"}`));
-    }
-  };
-
   const [osId, setOsId] = useState<string>("Aguardando...");
   const [osActive, setOsActive] = useState<boolean>(false);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     const check = () => {
@@ -108,6 +84,57 @@ function Page() {
     check();
     return () => clearInterval(interval);
   }, []);
+
+  const forceSync = async () => {
+    setSyncing(true);
+    try {
+      const OS = (window as any).OneSignal;
+      const currentCustomerId = useStore.getState().currentCustomerId;
+      if (!OS || !currentCustomerId) return;
+
+      console.log("[Push] Forçando sincronismo...");
+      await OS.logout();
+      await new Promise(r => setTimeout(r, 1000));
+      await OS.login(currentCustomerId);
+      
+      if (OS.User?.PushSubscription) {
+        await OS.User.PushSubscription.optIn();
+      }
+      
+      OS.User.addTag("role", "admin");
+      
+      import("sonner").then(({ toast }) => toast.success("Dispositivo sincronizado!"));
+    } catch (err) {
+      console.error("[Push-Sync]", err);
+      import("sonner").then(({ toast }) => toast.error("Falha ao sincronizar."));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const testNotification = async () => {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const currentCustomerId = useStore.getState().currentCustomerId;
+      const OS = (window as any).OneSignal;
+      const subId = OS?.User?.PushSubscription?.id;
+      
+      const { data, error } = await supabase.functions.invoke("send-push", {
+        body: {
+          title: "Teste de Push Direto 🚀",
+          message: `Enviado para ${subId ? "este aparelho" : "seu usuário"}. Hora: ${new Date().toLocaleTimeString()}`,
+          externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
+          subscriptionIds: subId ? [subId] : undefined,
+        },
+      });
+
+      if (error) throw error;
+      import("sonner").then(({ toast }) => toast.success(`Push enviado! (ID: ${subId?.slice(0,8)}...)`));
+    } catch (err) {
+      console.error("[push-test]", err);
+      import("sonner").then(({ toast }) => toast.error(`Erro no teste: ${err.message || "Verifique o console"}`));
+    }
+  };
 
   return (
     <AdminLayout title="Dashboard">
@@ -127,12 +154,21 @@ function Page() {
             </span>
           </div>
         </div>
-        <button 
-          onClick={testNotification}
-          className="text-xs flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold shadow-soft transition-transform active:scale-95"
-        >
-          <TrendingUp className="h-3 w-3" /> Testar Notificação
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={forceSync}
+            disabled={syncing}
+            className="text-[10px] bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full font-bold transition-all disabled:opacity-50"
+          >
+            {syncing ? "Sincronizando..." : "Sincronizar Agora"}
+          </button>
+          <button 
+            onClick={testNotification}
+            className="text-xs flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold shadow-soft transition-transform active:scale-95"
+          >
+            <TrendingUp className="h-3 w-3" /> Testar Notificação
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
