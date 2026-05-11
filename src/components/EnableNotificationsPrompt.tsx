@@ -43,10 +43,12 @@ export function EnableNotificationsPrompt() {
     if ("Notification" in window && Notification.permission === "denied") return;
 
     // Show prompt — use a longer delay for PWA to let everything settle
-    const delay = isStandalone() ? 3000 : 2000;
+    const delay = isStandalone() ? 4000 : 2000;
     console.log("[push-prompt] Will show in", delay, "ms (PWA:", isStandalone(), ")");
 
     const t = window.setTimeout(() => {
+      // No Android PWA, ignoramos o estado nativo de Notification.permission
+      // e confiamos apenas no localStorage para decidir se mostramos o modal.
       console.log("[push-prompt] Showing notification prompt");
       setOpen(true);
     }, delay);
@@ -66,71 +68,58 @@ export function EnableNotificationsPrompt() {
     try {
       setBusy(true);
 
-      // CRITICAL: Check OneSignal synchronously — do NOT await anything
-      // before calling requestPermission(). On Android/iOS, the browser
-      // requires the permission request in the SAME user-gesture microtask.
       const OS = (window as any).OneSignal;
       const sdkReady = OS && typeof OS.Notifications !== "undefined";
 
-      console.log("[push-prompt] SDK ready:", sdkReady, "Notification API:", "Notification" in window);
+      console.log("[push-prompt] SDK ready:", sdkReady);
 
       if (sdkReady) {
-        console.log("[push-prompt] Calling OneSignal.Notifications.requestPermission()");
         await OS.Notifications.requestPermission();
+        // O OneSignal pode demorar um pouco para atualizar a permissão internamente
+        await new Promise(r => setTimeout(r, 1000));
+        granted = OS.Notifications.permission === true || Notification.permission === "granted";
       } else if ("Notification" in window) {
-        console.log("[push-prompt] Calling native Notification.requestPermission()");
         await Notification.requestPermission();
-      } else {
-        console.warn("[push-prompt] No Notification API available");
+        granted = Notification.permission === "granted";
       }
 
-      granted = typeof Notification !== "undefined" && Notification.permission === "granted";
-      console.log("[push-prompt] Permission result:", granted ? "granted" : Notification?.permission);
-
-      // AFTER permission, register with OneSignal
       if (granted) {
         try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
-        try {
-          const sdk = sdkReady ? OS : await getOneSignalSDK(3000);
-          if (sdk?.User?.PushSubscription?.optIn) {
-            await sdk.User.PushSubscription.optIn();
-            console.log("[push-prompt] OneSignal optIn OK");
-          }
-        } catch {}
+        // Força o opt-in no OneSignal
+        if (sdkReady && OS.User?.PushSubscription) {
+          await OS.User.PushSubscription.optIn();
+        }
       }
     } catch (err) {
       console.warn("[push-prompt] Error:", err);
-      try {
-        if ("Notification" in window) {
-          await Notification.requestPermission();
-          granted = Notification.permission === "granted";
-          if (granted) {
-            try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
-          }
-        }
-      } catch {}
     } finally {
       setBusy(false);
       dismiss();
     }
 
     if (granted) {
+      // Notificação de boas-vindas imediata para o Admin
       const sendWelcome = async () => {
         try {
+          // Identifica se é admin ou cliente
+          const isAdmin = window.location.pathname.includes("/admin");
+          
           await supabase.functions.invoke("send-push", {
             body: {
               title: "Notificações ativadas! 🔔",
-              message: "Pronto! Você vai receber avisos de pedidos, pagamentos e novidades 💖",
+              message: isAdmin 
+                ? "Admin: Você receberá avisos de novos pedidos e pagamentos 💰" 
+                : "Pronto! Você vai receber avisos de seus pedidos e novidades 💖",
               externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
-              audience: currentCustomerId ? undefined : "customer",
+              audience: isAdmin ? "admin" : "cliente",
             },
           });
-          console.log("[push-prompt] Welcome push sent");
+          console.log("[push-prompt] Welcome push sent to audience:", isAdmin ? "admin" : "cliente");
         } catch (e) {
           console.warn("[push-prompt] Welcome push failed", e);
         }
       };
-      window.setTimeout(sendWelcome, 3500);
+      window.setTimeout(sendWelcome, 3000);
     }
   };
 

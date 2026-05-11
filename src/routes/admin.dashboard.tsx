@@ -68,8 +68,39 @@ function Page() {
     { label: "Clientes", value: stats.customers, icon: Users, color: "text-primary" },
   ];
 
+  const testNotification = async () => {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const currentCustomerId = useStore.getState().currentCustomerId;
+      
+      const { data, error } = await supabase.functions.invoke("send-push", {
+        body: {
+          title: "Teste de Push — Storefront 🚀",
+          message: `O serviço está funcionando! Hora: ${new Date().toLocaleTimeString()}`,
+          externalUserIds: currentCustomerId ? [currentCustomerId] : undefined,
+          audience: "admin",
+        },
+      });
+
+      if (error) throw error;
+      import("sonner").then(({ toast }) => toast.success("Push de teste enviado!"));
+    } catch (err) {
+      console.error("[push-test]", err);
+      import("sonner").then(({ toast }) => toast.error(`Erro no teste: ${err.message || "Verifique o console"}`));
+    }
+  };
+
   return (
     <AdminLayout title="Dashboard">
+      <div className="mb-4 flex justify-end">
+        <button 
+          onClick={testNotification}
+          className="text-xs flex items-center gap-2 bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full font-bold transition-colors"
+        >
+          <TrendingUp className="h-3 w-3" /> Testar Notificação Push
+        </button>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {cards.map((c) => (
           <div key={c.label} className="bg-card rounded-2xl p-4 shadow-card">
