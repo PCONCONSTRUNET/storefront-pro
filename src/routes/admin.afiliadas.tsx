@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore, type Affiliate, type AffiliateSaleStatus } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import {
   Plus,
   Pencil,
