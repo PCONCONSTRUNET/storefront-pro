@@ -123,6 +123,31 @@ OneSignalDeferred.push(async function(OneSignal) {
   console.log("[OneSignal] Ready. Permission:", Notification.permission);
 });`,
       },
+      {
+        children: `(function(){
+  function nukeOneSignalUI(){
+    var sels = [
+      '#onesignal-slidedown-container',
+      '#onesignal-bell-container',
+      '.onesignal-customlink-container',
+      '[class*="onesignal"]',
+      '[id*="onesignal"]'
+    ];
+    sels.forEach(function(s){
+      document.querySelectorAll(s).forEach(function(el){ el.remove(); });
+    });
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(nukeOneSignalUI,500); setTimeout(nukeOneSignalUI,2000); setTimeout(nukeOneSignalUI,5000); });
+  } else {
+    setTimeout(nukeOneSignalUI,500); setTimeout(nukeOneSignalUI,2000); setTimeout(nukeOneSignalUI,5000);
+  }
+  var ob = new MutationObserver(nukeOneSignalUI);
+  var tryOb = function(){ if(document.body){ ob.observe(document.body,{childList:true,subtree:true}); } else { setTimeout(tryOb,200); } };
+  tryOb();
+  setTimeout(function(){ ob.disconnect(); }, 30000);
+})();`,
+      },
     ],
   }),
   shellComponent: RootShell,

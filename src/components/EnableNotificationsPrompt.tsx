@@ -5,6 +5,7 @@ import { useStore } from "@/lib/store";
 import { getOneSignalSDK } from "@/lib/notifications";
 
 const DISMISS_KEY = "push_prompt_dismissed_at";
+const ACCEPTED_KEY = "push_prompt_accepted";
 const DISMISS_DAYS = 3;
 
 function isStandalone() {
@@ -23,38 +24,34 @@ export function EnableNotificationsPrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const shouldShow = () => {
-      // If permission is already granted or denied, no need to prompt
-      if ("Notification" in window && Notification.permission !== "default") {
-        return false;
-      }
-      // Respect the dismiss cooldown
+    // Already accepted push? Don't show again.
+    try {
+      if (localStorage.getItem(ACCEPTED_KEY) === "1") return;
+    } catch {}
+
+    // Dismissed recently? Don't show.
+    try {
       const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
-      if (Date.now() - dismissedAt < DISMISS_DAYS * 24 * 60 * 60 * 1000) {
-        return false;
-      }
-      return true;
-    };
+      if (Date.now() - dismissedAt < DISMISS_DAYS * 24 * 60 * 60 * 1000) return;
+    } catch {}
 
-    // In PWA/standalone mode, APIs may take longer to initialise
-    const isPWA = isStandalone();
-    const delay = isPWA ? 2500 : 1500;
+    // If Notification API is available and permission already granted/denied, skip
+    if ("Notification" in window && Notification.permission === "granted") {
+      try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
+      return;
+    }
+    if ("Notification" in window && Notification.permission === "denied") return;
 
-    const t1 = window.setTimeout(() => {
-      if (shouldShow()) setOpen(true);
+    // Show prompt — use a longer delay for PWA to let everything settle
+    const delay = isStandalone() ? 3000 : 2000;
+    console.log("[push-prompt] Will show in", delay, "ms (PWA:", isStandalone(), ")");
+
+    const t = window.setTimeout(() => {
+      console.log("[push-prompt] Showing notification prompt");
+      setOpen(true);
     }, delay);
 
-    // Retry after 5s in case Notification API wasn't ready on first check
-    const t2 = isPWA
-      ? window.setTimeout(() => {
-          if (shouldShow()) setOpen(true);
-        }, 5000)
-      : undefined;
-
-    return () => {
-      window.clearTimeout(t1);
-      if (t2) window.clearTimeout(t2);
-    };
+    return () => window.clearTimeout(t);
   }, []);
 
   const dismiss = () => {
@@ -72,24 +69,27 @@ export function EnableNotificationsPrompt() {
       // CRITICAL: Check OneSignal synchronously — do NOT await anything
       // before calling requestPermission(). On Android/iOS, the browser
       // requires the permission request in the SAME user-gesture microtask.
-      // Any await before it breaks the gesture chain and the native OS
-      // dialog will NOT appear.
       const OS = (window as any).OneSignal;
       const sdkReady = OS && typeof OS.Notifications !== "undefined";
 
+      console.log("[push-prompt] SDK ready:", sdkReady, "Notification API:", "Notification" in window);
+
       if (sdkReady) {
-        console.log("[push-prompt] requestPermission via OneSignal SDK");
+        console.log("[push-prompt] Calling OneSignal.Notifications.requestPermission()");
         await OS.Notifications.requestPermission();
       } else if ("Notification" in window) {
-        console.log("[push-prompt] requestPermission via API nativa");
+        console.log("[push-prompt] Calling native Notification.requestPermission()");
         await Notification.requestPermission();
+      } else {
+        console.warn("[push-prompt] No Notification API available");
       }
 
       granted = typeof Notification !== "undefined" && Notification.permission === "granted";
-      console.log("[push-prompt] Permissão:", Notification.permission);
+      console.log("[push-prompt] Permission result:", granted ? "granted" : Notification?.permission);
 
-      // AFTER permission, register with OneSignal (async is OK now)
+      // AFTER permission, register with OneSignal
       if (granted) {
+        try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
         try {
           const sdk = sdkReady ? OS : await getOneSignalSDK(3000);
           if (sdk?.User?.PushSubscription?.optIn) {
@@ -99,11 +99,14 @@ export function EnableNotificationsPrompt() {
         } catch {}
       }
     } catch (err) {
-      console.warn("[push-prompt] Erro:", err);
+      console.warn("[push-prompt] Error:", err);
       try {
         if ("Notification" in window) {
           await Notification.requestPermission();
           granted = Notification.permission === "granted";
+          if (granted) {
+            try { localStorage.setItem(ACCEPTED_KEY, "1"); } catch {}
+          }
         }
       } catch {}
     } finally {
@@ -112,7 +115,6 @@ export function EnableNotificationsPrompt() {
     }
 
     if (granted) {
-      // Aguarda OneSignal registrar a subscription antes de enviar boas-vindas
       const sendWelcome = async () => {
         try {
           await supabase.functions.invoke("send-push", {
@@ -123,8 +125,9 @@ export function EnableNotificationsPrompt() {
               audience: currentCustomerId ? undefined : "customer",
             },
           });
+          console.log("[push-prompt] Welcome push sent");
         } catch (e) {
-          console.warn("[push] welcome falhou", e);
+          console.warn("[push-prompt] Welcome push failed", e);
         }
       };
       window.setTimeout(sendWelcome, 3500);
@@ -134,7 +137,7 @@ export function EnableNotificationsPrompt() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4 pointer-events-none">
+    <div className="fixed inset-x-0 bottom-0 z-[9999] p-3 sm:p-4 pointer-events-none" style={{ marginBottom: "60px" }}>
       <div className="pointer-events-auto max-w-sm mx-auto bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
         <div className="relative p-4">
           <button
