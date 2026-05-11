@@ -59,8 +59,18 @@ Deno.serve(async (req) => {
     });
 
     const data = await res.json();
+    console.log("[send-push] OneSignal response:", res.status, JSON.stringify(data));
+
     if (!res.ok) {
-      console.error("[send-push] OneSignal erro", res.status, data);
+      // 400 with "All included players are not subscribed" is not a real error
+      const errStr = JSON.stringify(data);
+      if (res.status === 400 && (data.errors?.includes("All included players are not subscribed") || data.recipients === 0)) {
+        console.warn("[send-push] No recipients yet — device may not be registered");
+        return new Response(JSON.stringify({ ok: true, recipients: 0, warning: "No registered devices yet" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      console.error("[send-push] OneSignal erro", res.status, errStr);
       return new Response(JSON.stringify({ error: data }), {
         status: res.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
