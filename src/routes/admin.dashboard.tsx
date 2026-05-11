@@ -154,17 +154,23 @@ function Page() {
             </span>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative z-[100] pointer-events-auto">
           <button 
-            onClick={forceSync}
+            onClick={(e) => {
+              e.stopPropagation();
+              forceSync();
+            }}
             disabled={syncing}
-            className="text-[10px] bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full font-bold transition-all disabled:opacity-50"
+            className="text-[10px] bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full font-bold transition-all active:scale-90 disabled:opacity-50 relative z-[101]"
           >
             {syncing ? "Sincronizando..." : "Sincronizar Agora"}
           </button>
           <button 
-            onClick={testNotification}
-            className="text-xs flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold shadow-soft transition-transform active:scale-95"
+            onClick={(e) => {
+              e.stopPropagation();
+              testNotification();
+            }}
+            className="text-xs flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold shadow-soft transition-transform active:scale-90 relative z-[101]"
           >
             <TrendingUp className="h-3 w-3" /> Testar Notificação
           </button>
