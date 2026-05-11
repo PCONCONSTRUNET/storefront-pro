@@ -268,7 +268,7 @@ function RootComponent() {
         console.warn("[OneSignal] Role sync failed", e);
       }
     });
-  }, [session, location.pathname]);
+  }, [sessions, customers, affiliates, location.pathname]);
 
   return (
     <>
