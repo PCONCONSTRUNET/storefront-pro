@@ -112,6 +112,13 @@ OneSignalDeferred.push(async function(OneSignal) {
     serviceWorkerPath: "/OneSignalSDKWorker.js",
     notifyButton: { enable: false },
     allowLocalhostAsSecureOrigin: true,
+    autoPrompt: false,
+    autoResubscribe: true,
+    promptOptions: {
+      slidedown: {
+        prompts: []
+      }
+    }
   });
   console.log("[OneSignal] Ready. Permission:", Notification.permission);
 });`,
