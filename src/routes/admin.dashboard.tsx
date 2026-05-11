@@ -138,41 +138,42 @@ function Page() {
 
   return (
     <AdminLayout title="Dashboard">
-      <div className="mb-4 bg-muted/30 p-3 rounded-2xl border border-border flex flex-wrap items-center justify-between gap-3">
-        <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Diagnóstico Push</div>
-        <div className="flex gap-4 text-xs font-mono overflow-hidden">
-          <div className="flex flex-col">
-            <span className="text-[9px] opacity-60">Subscription ID</span>
-            <span className="truncate max-w-[150px] font-bold">
-              {osId}
-            </span>
+      {/* Barra de Diagnóstico Push - Reforçada para Mobile */}
+      <div className="mb-6 bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-2xl border-2 border-indigo-500/20 shadow-lg relative z-[999] pointer-events-auto">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-widest flex items-center gap-2">
+            <Bell className="h-3 w-3" /> Status do Push
           </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] opacity-60">Status</span>
-            <span className={`font-bold ${osActive ? "text-success" : "text-destructive"}`}>
-              {osActive ? "VINCULADO" : "DESCONECTADO"}
-            </span>
+          <div className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${osActive ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}>
+            {osActive ? "CONECTADO" : "DESCONECTADO"}
           </div>
         </div>
-        <div className="flex gap-2 relative z-[100] pointer-events-auto">
+        
+        <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
+          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">Subscription ID</span>
+          {osId}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
           <button 
             onClick={(e) => {
               e.stopPropagation();
+              window.alert("Sincronizando... aguarde o aviso de sucesso.");
               forceSync();
             }}
             disabled={syncing}
-            className="text-[10px] bg-muted hover:bg-muted/80 px-3 py-1.5 rounded-full font-bold transition-all active:scale-90 disabled:opacity-50 relative z-[101]"
+            className="h-11 bg-white dark:bg-white/10 text-foreground rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-border"
           >
-            {syncing ? "Sincronizando..." : "Sincronizar Agora"}
+            {syncing ? "..." : "Sincronizar"}
           </button>
           <button 
             onClick={(e) => {
               e.stopPropagation();
               testNotification();
             }}
-            className="text-xs flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold shadow-soft transition-transform active:scale-90 relative z-[101]"
+            className="h-11 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
           >
-            <TrendingUp className="h-3 w-3" /> Testar Notificação
+            <TrendingUp className="h-4 w-4" /> Testar Push
           </button>
         </div>
       </div>
