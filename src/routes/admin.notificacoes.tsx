@@ -100,15 +100,53 @@ function Page() {
     );
   };
 
+  const [togglingPush, setTogglingPush] = useState(false);
+
   const togglePush = async (enabled: boolean) => {
-    if (enabled) {
-      const r = await requestPushPermission();
-      if (r === "granted") toast.success("Notificações ativadas!");
-      else if (r === "denied") toast.error("Permissão negada no navegador");
-      else if (r === "unsupported") toast.error("Navegador sem suporte");
-    } else {
-      await disablePush();
-      toast.success("Notificações desativadas para este dispositivo");
+    setTogglingPush(true);
+    try {
+      if (enabled) {
+        // ATIVAR
+        const OS = (window as any).OneSignal;
+
+        // Se permissão já foi concedida, apenas faz optIn
+        if (Notification.permission === "granted") {
+          const sub = OS?.User?.PushSubscription;
+          if (sub && !sub.optedIn) {
+            await sub.optIn();
+          }
+          // Vincula ao admin
+          if (OS) {
+            await OS.login("admin-user");
+            OS.User.addTag("role", "admin");
+          }
+          toast.success("Notificações reativadas neste dispositivo!");
+        } else {
+          // Pede permissão via store
+          const r = await requestPushPermission();
+          if (r === "granted") toast.success("Notificações ativadas!");
+          else if (r === "denied") toast.error("Permissão negada. Ative manualmente nas configurações do navegador.");
+          else toast.error("Seu navegador não suporta notificações push.");
+        }
+      } else {
+        // DESATIVAR — optOut no OneSignal
+        const OS = (window as any).OneSignal;
+        const sub = OS?.User?.PushSubscription;
+
+        if (sub?.optedIn) {
+          await sub.optOut();
+          await disablePush(); // Atualiza o estado no store
+          toast.success("Notificações desativadas neste dispositivo.");
+        } else {
+          await disablePush();
+          toast.info("Notificações já estavam desativadas.");
+        }
+      }
+    } catch (e) {
+      console.error("[togglePush]", e);
+      toast.error("Erro ao alterar as notificações. Tente novamente.");
+    } finally {
+      setTogglingPush(false);
     }
   };
 
@@ -147,7 +185,8 @@ function Page() {
               <Switch
                 checked={pushEnabled}
                 onChange={togglePush}
-                className="bg-white/20"
+                disabled={togglingPush}
+                className={`bg-white/20 ${togglingPush ? "opacity-50" : ""}`}
               />
             </div>
           </div>
