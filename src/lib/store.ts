@@ -104,6 +104,10 @@ export type Order = {
   address: string;
   couponCode?: string;
   notes?: string;
+  paymentStatus?: string;
+  paidAt?: string;
+  mpPaymentId?: string;
+  pixExpiresAt?: string;
 };
 
 export type Affiliate = {
