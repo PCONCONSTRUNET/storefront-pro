@@ -256,6 +256,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          daily_summary_id: string | null
           delivery_method: string
           discount: number
           id: string
@@ -268,6 +269,7 @@ export type Database = {
           pix_expires_at: string | null
           pix_qr_code: string | null
           pix_qr_code_base64: string | null
+          reminder_sent_at: string | null
           shipping: number
           subtotal: number
           total: number
@@ -280,6 +282,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          daily_summary_id?: string | null
           delivery_method?: string
           discount?: number
           id?: string
@@ -292,6 +295,7 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          reminder_sent_at?: string | null
           shipping?: number
           subtotal?: number
           total: number
@@ -304,6 +308,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          daily_summary_id?: string | null
           delivery_method?: string
           discount?: number
           id?: string
@@ -316,6 +321,7 @@ export type Database = {
           pix_expires_at?: string | null
           pix_qr_code?: string | null
           pix_qr_code_base64?: string | null
+          reminder_sent_at?: string | null
           shipping?: number
           subtotal?: number
           total?: number
