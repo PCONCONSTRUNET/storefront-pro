@@ -157,6 +157,10 @@ const toOrder = (r: any): Order => ({
   createdAt: r.created_at,
   address: r.address || "",
   notes: r.notes || undefined,
+  paymentStatus: r.payment_status || undefined,
+  paidAt: r.paid_at || undefined,
+  mpPaymentId: r.mp_payment_id || undefined,
+  pixExpiresAt: r.pix_expires_at || undefined,
 });
 
 const toWaitlist = (r: any): WaitlistEntry => ({
