@@ -747,6 +747,8 @@ export const useStore = create<AppState>()(
           data: { email: normalized, password },
         });
         if (!res.ok) return { ok: false, message: res.message };
+        const { setAdminToken } = await import("./adminToken");
+        setAdminToken(res.token);
         set((s) => ({
           isAdmin: true,
           adminToken: res.token,
@@ -761,6 +763,9 @@ export const useStore = create<AppState>()(
       },
       logoutAdmin: () => {
         const tok = get().adminToken;
+        import("./adminToken").then(({ setAdminToken }) =>
+          setAdminToken(null),
+        );
         if (tok) {
           import("./admin.functions").then(({ logoutAdminFn }) =>
             logoutAdminFn({ data: { token: tok } }).catch(() => {}),
