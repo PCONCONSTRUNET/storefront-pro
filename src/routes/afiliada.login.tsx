@@ -22,12 +22,12 @@ function Page() {
     if (hydrated && currentId) navigate({ to: "/afiliada", replace: true });
   }, [hydrated, currentId, navigate]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setError(null);
     setSubmitting(true);
-    const r = login(email, pwd);
+    const r = await login(email, pwd);
     if (r.ok) {
       toast.success(r.message);
       navigate({ to: "/afiliada", replace: true });

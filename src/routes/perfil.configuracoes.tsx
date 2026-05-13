@@ -29,14 +29,14 @@ function Page() {
 
   if (!customer) return null;
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     const data: { name: string; phone: string; password?: string } = {
       name,
       phone,
     };
     if (pwd) data.password = pwd;
-    const r = updateCustomer(data);
+    const r = await updateCustomer(data);
     if (r.ok) {
       toast.success(r.message);
       setPwd("");

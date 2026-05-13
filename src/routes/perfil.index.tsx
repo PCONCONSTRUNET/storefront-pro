@@ -193,9 +193,9 @@ function AuthModal({
     password: "",
   });
 
-  const submitLogin = (e: React.FormEvent) => {
+  const submitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = loginCustomer(email, password);
+    const r = await loginCustomer(email, password);
     if (r.ok) {
       toast.success(r.message);
       onClose();
@@ -204,9 +204,9 @@ function AuthModal({
     }
   };
 
-  const submitCadastro = (e: React.FormEvent) => {
+  const submitCadastro = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = registerCustomer(form);
+    const r = await registerCustomer(form);
     if (r.ok) {
       toast.success(r.message);
       onClose();

@@ -24,9 +24,9 @@ function Page() {
     if (hydrated && currentId) navigate({ to: "/afiliada" });
   }, [hydrated, currentId, navigate]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = register(form);
+    const r = await register(form);
     if (r.ok) {
       window.history.replaceState(null, "", "/afiliada");
       navigate({ to: "/afiliada", replace: true });

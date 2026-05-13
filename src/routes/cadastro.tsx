@@ -31,13 +31,12 @@ function Page() {
     router.preloadRoute({ to: "/perfil" }).catch(() => {});
   }, [router]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
-    const r = registerCustomer(form);
+    const r = await registerCustomer(form);
     if (r.ok) {
-      // Dispara e-mail de boas-vindas (não bloqueia o fluxo se falhar)
       supabase.functions
         .invoke("send-welcome-email", {
           body: { email: form.email, name: form.name },
