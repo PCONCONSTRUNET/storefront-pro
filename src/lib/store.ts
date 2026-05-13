@@ -297,7 +297,7 @@ type AppState = {
   loginAdmin: (
     email: string,
     password: string,
-  ) => { ok: boolean; message: string };
+  ) => Promise<{ ok: boolean; message: string }>;
   logoutAdmin: () => void;
 
   loginAffiliate: (
