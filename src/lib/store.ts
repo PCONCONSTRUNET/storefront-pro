@@ -247,6 +247,7 @@ type AppState = {
   transactions: Transaction[];
   reviews: Review[];
   adminPasswordOverride: Record<string, string>;
+  adminToken: string | null;
   sessions: {
     admin: SessionToken | null;
     customer: SessionToken | null;
@@ -390,6 +391,7 @@ export const useStore = create<AppState>()(
       currentAffiliateId: null,
       transactions: [],
       adminPasswordOverride: {},
+      adminToken: null,
       reviews: [],
       faq: initialFAQ,
       waitlist: [],
@@ -738,19 +740,16 @@ export const useStore = create<AppState>()(
         const c = get().customers.find((x) => x.id === id);
         if (c) cloud.upsertCustomer(c);
       },
-      loginAdmin: (email, password) => {
-        const AUTHORIZED_ADMINS: Record<string, string> = {
-          "lucaspereirabn10@gmail.com": "admin123",
-        };
+      loginAdmin: async (email, password) => {
+        const { loginAdminFn } = await import("./admin.functions");
         const normalized = email.trim().toLowerCase();
-        const override = get().adminPasswordOverride?.[normalized];
-        const expected = override || AUTHORIZED_ADMINS[normalized];
-        if (!AUTHORIZED_ADMINS[normalized])
-          return { ok: false, message: "E-mail não autorizado" };
-        if (expected !== password)
-          return { ok: false, message: "Senha incorreta" };
+        const res = await loginAdminFn({
+          data: { email: normalized, password },
+        });
+        if (!res.ok) return { ok: false, message: res.message };
         set((s) => ({
           isAdmin: true,
+          adminToken: res.token,
           sessions: { ...s.sessions, admin: makeSession(normalized) },
         }));
         cloud.logActivity({
@@ -758,13 +757,21 @@ export const useStore = create<AppState>()(
           category: "auth",
           description: `Admin logou: ${normalized}`,
         });
-        return { ok: true, message: "Bem-vindo!" };
+        return { ok: true, message: res.message };
       },
-      logoutAdmin: () =>
+      logoutAdmin: () => {
+        const tok = get().adminToken;
+        if (tok) {
+          import("./admin.functions").then(({ logoutAdminFn }) =>
+            logoutAdminFn({ data: { token: tok } }).catch(() => {}),
+          );
+        }
         set((s) => ({
           isAdmin: false,
+          adminToken: null,
           sessions: { ...s.sessions, admin: null },
-        })),
+        }));
+      },
 
       loginAffiliate: async (email, password) => {
         const { loginAffiliateFn } = await import("./auth.functions");
