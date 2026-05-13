@@ -156,10 +156,10 @@ export const adminUpsertFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin(data.token);
-    const q = supabaseAdmin.from(data.table as WriteTable);
+    const q: any = supabaseAdmin.from(data.table as WriteTable);
     const { error } = data.onConflict
-      ? await q.upsert(data.row as any, { onConflict: data.onConflict })
-      : await q.upsert(data.row as any);
+      ? await q.upsert(data.row, { onConflict: data.onConflict })
+      : await q.upsert(data.row);
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
