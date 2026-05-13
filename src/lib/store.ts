@@ -1283,9 +1283,7 @@ export const useStore = create<AppState>()(
         useStore.setState({ ...patch, sessions: nextSessions });
         // Espelhar o token admin no holder global pra cloud.ts usar.
         import("./adminToken").then(({ setAdminToken }) =>
-          setAdminToken(
-            patch.adminToken === null ? null : useStore.getState().adminToken,
-          ),
+          setAdminToken(useStore.getState().adminToken),
         );
       },
     },
