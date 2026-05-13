@@ -23,3 +23,12 @@ verify_jwt = false
 
 [functions.send-push]
 verify_jwt = false
+
+[functions.cancel-expired-pix]
+verify_jwt = false
+
+[functions.abandoned-cart-reminder]
+verify_jwt = false
+
+[functions.daily-admin-summary]
+verify_jwt = false
