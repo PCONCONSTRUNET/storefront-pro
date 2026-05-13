@@ -615,7 +615,7 @@ function Page() {
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </button>
               <button
-                onClick={() => window.print()}
+                onClick={() => printOrderReceipt(order, settings)}
                 className="h-10 rounded-full bg-muted font-semibold text-xs flex items-center justify-center gap-1.5"
               >
                 <Printer className="h-4 w-4" /> Imprimir
