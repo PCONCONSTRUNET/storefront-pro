@@ -15,9 +15,9 @@ function Page() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = loginCustomer(email, password);
+    const r = await loginCustomer(email, password);
     if (r.ok) {
       toast.success(r.message);
       navigate({ to: "/perfil" });

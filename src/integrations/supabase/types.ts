@@ -44,6 +44,35 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_credentials: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_credentials_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: true
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_sales: {
         Row: {
           affiliate_id: string
@@ -92,7 +121,6 @@ export type Database = {
           email: string
           id: string
           name: string
-          password_hash: string
           phone: string
           updated_at: string
         }
@@ -104,7 +132,6 @@ export type Database = {
           email: string
           id?: string
           name: string
-          password_hash: string
           phone?: string
           updated_at?: string
         }
@@ -116,7 +143,6 @@ export type Database = {
           email?: string
           id?: string
           name?: string
-          password_hash?: string
           phone?: string
           updated_at?: string
         }
@@ -182,6 +208,35 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_credentials: {
+        Row: {
+          created_at: string
+          customer_id: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credentials_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
@@ -191,7 +246,6 @@ export type Database = {
           favorites: Json
           id: string
           name: string
-          password_hash: string
           phone: string
           updated_at: string
         }
@@ -203,7 +257,6 @@ export type Database = {
           favorites?: Json
           id?: string
           name: string
-          password_hash: string
           phone?: string
           updated_at?: string
         }
@@ -215,7 +268,6 @@ export type Database = {
           favorites?: Json
           id?: string
           name?: string
-          password_hash?: string
           phone?: string
           updated_at?: string
         }
