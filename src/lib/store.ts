@@ -643,9 +643,15 @@ export const useStore = create<AppState>()(
         const res = await loginCustomerFn({ data: { email, password } });
         if (!res.ok) return { ok: false, message: res.message };
         const c: Customer = {
-          ...res.customer,
+          id: res.customer.id,
+          name: res.customer.name,
+          email: res.customer.email,
+          phone: res.customer.phone,
           password: "",
           address: res.customer.address ?? undefined,
+          addresses: (res.customer.addresses as string[]) || [],
+          favorites: (res.customer.favorites as string[]) || [],
+          createdAt: res.customer.createdAt,
         };
         set((s) => ({
           customers: [...s.customers.filter((x) => x.id !== c.id), c],
