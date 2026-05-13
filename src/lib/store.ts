@@ -1055,6 +1055,7 @@ export const useStore = create<AppState>()(
           /* ignore */
         }
         // ... cloud persistence logic continues ...
+        return order;
       },
       updateOrderStatus: (id, status) => {
         const order = get().orders.find((o) => o.id === id);
