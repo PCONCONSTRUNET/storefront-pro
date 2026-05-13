@@ -24,6 +24,7 @@ import { useStore, useStoreHydrated } from "@/lib/store";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
+import { AdminDeviceSyncBanner } from "@/components/AdminDeviceSyncBanner";
 
 const nav = [
   {
@@ -182,6 +183,7 @@ export function AdminLayout({
           </div>
         </header>
         <main key={path} className="flex-1 p-4 md:p-6 animate-page-in">
+          <AdminDeviceSyncBanner />
           {children}
         </main>
       </div>

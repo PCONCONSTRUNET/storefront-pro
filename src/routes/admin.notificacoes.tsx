@@ -185,8 +185,7 @@ function Page() {
               <Switch
                 checked={pushEnabled}
                 onChange={togglePush}
-                disabled={togglingPush}
-                className={`bg-white/20 ${togglingPush ? "opacity-50" : ""}`}
+                className={`bg-white/20 ${togglingPush ? "opacity-50 pointer-events-none" : ""}`}
               />
             </div>
           </div>

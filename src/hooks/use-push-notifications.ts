@@ -40,7 +40,7 @@ async function initOneSignal(): Promise<void> {
       autoResubscribe: true,
       welcomeNotification: { disable: true },
       notifyButton: { enable: false },
-    } as Parameters<typeof OneSignal.init>[0]);
+    } as unknown as Parameters<typeof OneSignal.init>[0]);
     console.log('[push] OneSignal init OK');
   })();
 
