@@ -276,21 +276,21 @@ type AppState = {
   applyCoupon: (code: string) => { ok: boolean; message: string };
   removeCoupon: () => void;
 
-  registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => {
+  registerCustomer: (c: Omit<Customer, "id" | "createdAt">) => Promise<{
     ok: boolean;
     message: string;
-  };
+  }>;
   loginCustomer: (
     email: string,
     password: string,
-  ) => { ok: boolean; message: string };
+  ) => Promise<{ ok: boolean; message: string }>;
   logoutCustomer: () => void;
   updateCustomer: (
     data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>,
-  ) => {
+  ) => Promise<{
     ok: boolean;
     message: string;
-  };
+  }>;
   addAddress: (address: string) => void;
   removeAddress: (index: number) => void;
   toggleFavorite: (productId: string) => void;
@@ -303,17 +303,17 @@ type AppState = {
   loginAffiliate: (
     email: string,
     password: string,
-  ) => { ok: boolean; message: string };
+  ) => Promise<{ ok: boolean; message: string }>;
   logoutAffiliate: () => void;
   registerAffiliate: (data: {
     name: string;
     email: string;
     password: string;
     phone: string;
-  }) => {
+  }) => Promise<{
     ok: boolean;
     message: string;
-  };
+  }>;
   upsertAffiliate: (a: Affiliate) => void;
   deleteAffiliate: (id: string) => void;
   registerAffiliateSale: (
@@ -609,36 +609,46 @@ export const useStore = create<AppState>()(
       },
       removeCoupon: () => set({ appliedCoupon: null }),
 
-      registerCustomer: (c) => {
-        const exists = get().customers.find((x) => x.email === c.email);
-        if (exists) return { ok: false, message: "E-mail já cadastrado" };
+      registerCustomer: async (c) => {
+        const { registerCustomerFn } = await import("./auth.functions");
+        const res = await registerCustomerFn({
+          data: {
+            name: c.name,
+            email: c.email,
+            phone: c.phone || "",
+            password: c.password,
+            address: c.address,
+          },
+        });
+        if (!res.ok) return { ok: false, message: res.message };
         const newC: Customer = {
-          ...c,
-          id:
-            typeof crypto !== "undefined" && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `c_${Date.now()}`,
-          createdAt: new Date().toISOString(),
+          ...res.customer,
+          password: "",
+          address: res.customer.address ?? undefined,
         };
         set((s) => ({
-          customers: [...s.customers, newC],
+          customers: [...s.customers.filter((x) => x.id !== newC.id), newC],
           currentCustomerId: newC.id,
           sessions: { ...s.sessions, customer: makeSession(newC.id) },
         }));
-        cloud.upsertCustomer(newC);
         import("./emails")
           .then((m) =>
             m.sendWelcomeEmail({ email: newC.email, name: newC.name }),
           )
           .catch(() => {});
-        return { ok: true, message: "Cadastro realizado!" };
+        return { ok: true, message: res.message };
       },
-      loginCustomer: (email, password) => {
-        const c = get().customers.find(
-          (x) => x.email === email && x.password === password,
-        );
-        if (!c) return { ok: false, message: "Credenciais inválidas" };
+      loginCustomer: async (email, password) => {
+        const { loginCustomerFn } = await import("./auth.functions");
+        const res = await loginCustomerFn({ data: { email, password } });
+        if (!res.ok) return { ok: false, message: res.message };
+        const c: Customer = {
+          ...res.customer,
+          password: "",
+          address: res.customer.address ?? undefined,
+        };
         set((s) => ({
+          customers: [...s.customers.filter((x) => x.id !== c.id), c],
           currentCustomerId: c.id,
           sessions: { ...s.sessions, customer: makeSession(c.id) },
         }));
@@ -648,23 +658,31 @@ export const useStore = create<AppState>()(
           description: `Cliente logou: ${c.name}`,
           userId: c.id,
         });
-        return { ok: true, message: "Bem-vinda!" };
+        return { ok: true, message: res.message };
       },
       logoutCustomer: () =>
         set((s) => ({
           currentCustomerId: null,
           sessions: { ...s.sessions, customer: null },
         })),
-      updateCustomer: (data) => {
+      updateCustomer: async (data) => {
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
+        const { password, ...rest } = data;
         set((s) => ({
           customers: s.customers.map((c) =>
-            c.id === id ? { ...c, ...data } : c,
+            c.id === id ? { ...c, ...rest } : c,
           ),
         }));
         const c = get().customers.find((x) => x.id === id);
         if (c) cloud.upsertCustomer(c);
+        if (password && password.length >= 4) {
+          const { updateCustomerPasswordFn } = await import("./auth.functions");
+          const r = await updateCustomerPasswordFn({
+            data: { customerId: id, newPassword: password },
+          });
+          if (!r.ok) return { ok: false, message: r.message };
+        }
         return { ok: true, message: "Dados atualizados" };
       },
       addAddress: (address) => {
@@ -742,19 +760,13 @@ export const useStore = create<AppState>()(
           sessions: { ...s.sessions, admin: null },
         })),
 
-      loginAffiliate: (email, password) => {
-        const normalized = email.trim().toLowerCase();
-        const a = get().affiliates.find(
-          (x) =>
-            x.email.toLowerCase() === normalized && x.password === password,
-        );
-        if (!a) return { ok: false, message: "Credenciais inválidas" };
-        if (!a.active)
-          return {
-            ok: false,
-            message: "Conta desativada. Contate a administradora.",
-          };
+      loginAffiliate: async (email, password) => {
+        const { loginAffiliateFn } = await import("./auth.functions");
+        const res = await loginAffiliateFn({ data: { email, password } });
+        if (!res.ok) return { ok: false, message: res.message };
+        const a: Affiliate = { ...res.affiliate, password: "" };
         set((s) => ({
+          affiliates: [...s.affiliates.filter((x) => x.id !== a.id), a],
           currentAffiliateId: a.id,
           sessions: { ...s.sessions, affiliate: makeSession(a.id) },
         }));
@@ -764,49 +776,32 @@ export const useStore = create<AppState>()(
           description: `Afiliada logou: ${a.name}`,
           userId: a.id,
         });
-        return { ok: true, message: `Bem-vinda, ${a.name}!` };
+        return { ok: true, message: res.message };
       },
       logoutAffiliate: () =>
         set((s) => ({
           currentAffiliateId: null,
           sessions: { ...s.sessions, affiliate: null },
         })),
-      registerAffiliate: (data) => {
+      registerAffiliate: async (data) => {
         const name = data.name.trim();
         const email = data.email.trim().toLowerCase();
         if (!name || !email || !data.password)
           return { ok: false, message: "Preencha todos os campos" };
         if (data.password.length < 4)
           return { ok: false, message: "Senha muito curta" };
-        const exists = get().affiliates.find(
-          (a) => a.email.toLowerCase() === email,
-        );
-        if (exists) return { ok: false, message: "E-mail já cadastrado" };
-        const newA: Affiliate = {
-          id:
-            typeof crypto !== "undefined" && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `aff_${Date.now()}`,
-          name,
-          email,
-          password: data.password,
-          phone: data.phone.trim(),
-          commissionType: "percent",
-          commissionValue: 10,
-          active: true,
-          createdAt: new Date().toISOString(),
-        };
+        const { registerAffiliateFn } = await import("./auth.functions");
+        const res = await registerAffiliateFn({
+          data: { name, email, password: data.password, phone: data.phone.trim() },
+        });
+        if (!res.ok) return { ok: false, message: res.message };
+        const newA: Affiliate = { ...res.affiliate, password: "" };
         set((s) => ({
-          affiliates: [...s.affiliates, newA],
+          affiliates: [...s.affiliates.filter((x) => x.id !== newA.id), newA],
           currentAffiliateId: newA.id,
           sessions: { ...s.sessions, affiliate: makeSession(newA.id) },
         }));
-        cloud.upsertAffiliate(newA);
-        return {
-          ok: true,
-          message:
-            "Cadastro realizado! Aguarde a administradora definir sua comissão.",
-        };
+        return { ok: true, message: res.message };
       },
       upsertAffiliate: (a) => {
         set((s) => ({
