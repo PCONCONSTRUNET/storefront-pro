@@ -1120,6 +1120,7 @@ export const useStore = create<AppState>()(
             )
             .catch(() => {});
         }
+        return order;
       },
       deleteOrder: (id) => {
         set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }));
