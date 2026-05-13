@@ -228,7 +228,7 @@ export const loginAffiliateFn = createServerFn({ method: "POST" })
             ? ("fixed" as const)
             : ("percent" as const),
         commissionValue: Number(aff.commission_value) || 0,
-        active: aff.active !== false,
+        active: true,
         createdAt: aff.created_at,
       },
     };
