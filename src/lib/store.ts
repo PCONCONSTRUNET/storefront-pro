@@ -1264,6 +1264,7 @@ export const useStore = create<AppState>()(
         const nextSessions = { ...sessions };
         if (!isSessionValid(sessions.admin) && state.isAdmin) {
           patch.isAdmin = false;
+          patch.adminToken = null;
           nextSessions.admin = null;
         }
         if (!isSessionValid(sessions.customer) && state.currentCustomerId) {
@@ -1275,6 +1276,12 @@ export const useStore = create<AppState>()(
           nextSessions.affiliate = null;
         }
         useStore.setState({ ...patch, sessions: nextSessions });
+        // Espelhar o token admin no holder global pra cloud.ts usar.
+        import("./adminToken").then(({ setAdminToken }) =>
+          setAdminToken(
+            patch.adminToken === null ? null : useStore.getState().adminToken,
+          ),
+        );
       },
     },
   ),
