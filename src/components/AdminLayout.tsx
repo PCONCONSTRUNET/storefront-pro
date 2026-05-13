@@ -183,6 +183,7 @@ export function AdminLayout({
           </div>
         </header>
         <main key={path} className="flex-1 p-4 md:p-6 animate-page-in">
+          <AdminDeviceSyncBanner />
           {children}
         </main>
       </div>
