@@ -31,11 +31,11 @@ function Page() {
     if (hydrated && isAdmin) navigate({ to: "/admin/dashboard" });
   }, [hydrated, isAdmin, navigate]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
-    const r = loginAdmin(email, pwd);
+    const r = await loginAdmin(email, pwd);
     if (r.ok) {
       window.history.replaceState(null, "", "/admin/dashboard");
       navigate({ to: "/admin/dashboard", replace: true });

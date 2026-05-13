@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_credentials: {
+        Row: {
+          created_at: string
+          email: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          token?: string
+        }
+        Relationships: []
+      }
       affiliate_credentials: {
         Row: {
           affiliate_id: string

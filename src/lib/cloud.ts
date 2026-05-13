@@ -1,8 +1,18 @@
-// Cloud sync layer — mirrors the Zustand store to Supabase tables and hydrates on boot.
-// Designed to be non-invasive: every mutation in store.ts also calls one of these
-// fire-and-forget helpers so the admin sees the same data persisted in the database.
+// Cloud sync — leituras públicas via supabase anon (RLS permite só o que é público),
+// e TODAS as mutações + leituras sensíveis via server functions admin (supabaseAdmin).
+//
+// Escritas admin exigem adminToken (definido após loginAdmin no store). Sem token,
+// a chamada é silenciosamente ignorada — admin não logado não consegue escrever.
 
 import { supabase } from "@/integrations/supabase/client";
+import { getAdminToken } from "./adminToken";
+import {
+  adminUpsertFn,
+  adminDeleteFn,
+  adminUpdateFn,
+  adminFetchAllFn,
+  updateCustomerFn,
+} from "./admin.functions";
 import type {
   Affiliate,
   AffiliateSale,
@@ -22,6 +32,54 @@ const log = (label: string, err: unknown) => {
   if (err) console.warn(`[cloud:${label}]`, err);
 };
 
+async function adminUpsert(
+  table: string,
+  row: Record<string, any>,
+  onConflict?: string,
+) {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    const r = await adminUpsertFn({
+      data: { token, table: table as any, row, onConflict },
+    });
+    if (!r.ok) log(`upsert ${table}`, r.message);
+  } catch (e) {
+    log(`upsert ${table}`, e);
+  }
+}
+
+async function adminDelete(table: string, match: Record<string, any>) {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    const r = await adminDeleteFn({
+      data: { token, table: table as any, match },
+    });
+    if (!r.ok) log(`delete ${table}`, r.message);
+  } catch (e) {
+    log(`delete ${table}`, e);
+  }
+}
+
+async function adminPatch(
+  table: string,
+  match: Record<string, any>,
+  patch: Record<string, any>,
+) {
+  const token = getAdminToken();
+  if (!token) return;
+  try {
+    const r = await adminUpdateFn({
+      data: { token, table: table as any, match, patch },
+    });
+    if (!r.ok) log(`update ${table}`, r.message);
+  } catch (e) {
+    log(`update ${table}`, e);
+  }
+}
+
+// Compat shim para fluxos antigos que ainda esperam hashPassword.
 async function sha256(text: string): Promise<string> {
   if (typeof crypto !== "undefined" && crypto.subtle) {
     const buf = await crypto.subtle.digest(
@@ -32,13 +90,12 @@ async function sha256(text: string): Promise<string> {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
   }
-  return text; // fallback: store plain (dev only)
+  return text;
 }
-
 export const hashPassword = (email: string, password: string) =>
   sha256(`${email.trim().toLowerCase()}::${password}`);
 
-// ---------- mappers (db row → app shape and back) ----------
+// ---------- mappers ----------
 const toCustomer = (r: any): Customer => ({
   id: r.id,
   name: r.name,
@@ -190,30 +247,50 @@ const toActivityLog = (r: any): ActivityLog => ({
   createdAt: r.created_at,
 });
 
-// ---------- writes (fire-and-forget) ----------
+// ---------- writes ----------
 export const cloud = {
   async upsertCustomer(c: Customer) {
-    const { error } = await supabase.from("customers").upsert(
-      {
-        id: c.id,
-        name: c.name,
-        email: c.email,
-        phone: c.phone,
-        address: c.address || null,
-        addresses: c.addresses || [],
-        favorites: c.favorites || [],
-      },
-      { onConflict: "id" },
-    );
-    log("upsertCustomer", error);
+    // Atualização de cliente vem do próprio cliente OU do admin.
+    // Se admin, vai pelo proxy; se cliente comum, vai pelo updateCustomerFn.
+    const token = getAdminToken();
+    const row = {
+      id: c.id,
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      address: c.address || null,
+      addresses: c.addresses || [],
+      favorites: c.favorites || [],
+    };
+    if (token) {
+      await adminUpsert("customers", row, "id");
+      return;
+    }
+    // cliente comum: atualizar só campos seguros do próprio perfil
+    try {
+      await updateCustomerFn({
+        data: {
+          customerId: c.id,
+          patch: {
+            name: c.name,
+            phone: c.phone,
+            address: c.address ?? null,
+            addresses: (c.addresses || []) as any,
+            favorites: c.favorites || [],
+          },
+        },
+      });
+    } catch (e) {
+      log("upsertCustomer", e);
+    }
   },
   async deleteCustomer(id: string) {
-    const { error } = await supabase.from("customers").delete().eq("id", id);
-    log("deleteCustomer", error);
+    await adminDelete("customers", { id });
   },
 
   async upsertProduct(p: Product) {
-    const { error } = await supabase.from("products").upsert(
+    await adminUpsert(
+      "products",
       {
         id: p.id,
         name: p.name,
@@ -229,17 +306,16 @@ export const cloud = {
         variations: p.variations || [],
         extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock },
       },
-      { onConflict: "id" },
+      "id",
     );
-    log("upsertProduct", error);
   },
   async deleteProduct(id: string) {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    log("deleteProduct", error);
+    await adminDelete("products", { id });
   },
 
   async upsertCategory(c: Category) {
-    const { error } = await supabase.from("categories").upsert(
+    await adminUpsert(
+      "categories",
       {
         id: c.id,
         name: c.name,
@@ -247,17 +323,16 @@ export const cloud = {
         image: c.image,
         sort_order: c.order,
       },
-      { onConflict: "id" },
+      "id",
     );
-    log("upsertCategory", error);
   },
   async deleteCategory(id: string) {
-    const { error } = await supabase.from("categories").delete().eq("id", id);
-    log("deleteCategory", error);
+    await adminDelete("categories", { id });
   },
 
   async upsertCoupon(c: Coupon) {
-    const { error } = await supabase.from("coupons").upsert(
+    await adminUpsert(
+      "coupons",
       {
         code: c.code,
         kind: c.type,
@@ -267,17 +342,16 @@ export const cloud = {
         active: c.active,
         extra: { maxUses: c.maxUses, usedCount: c.usedCount },
       },
-      { onConflict: "code" },
+      "code",
     );
-    log("upsertCoupon", error);
   },
   async deleteCoupon(code: string) {
-    const { error } = await supabase.from("coupons").delete().eq("code", code);
-    log("deleteCoupon", error);
+    await adminDelete("coupons", { code });
   },
 
   async upsertAffiliate(a: Affiliate) {
-    const { error } = await supabase.from("affiliates").upsert(
+    await adminUpsert(
+      "affiliates",
       {
         id: a.id,
         name: a.name,
@@ -287,17 +361,16 @@ export const cloud = {
         commission_value: a.commissionValue,
         active: a.active,
       },
-      { onConflict: "id" },
+      "id",
     );
-    log("upsertAffiliate", error);
   },
   async deleteAffiliate(id: string) {
-    const { error } = await supabase.from("affiliates").delete().eq("id", id);
-    log("deleteAffiliate", error);
+    await adminDelete("affiliates", { id });
   },
 
   async upsertAffiliateSale(s: AffiliateSale) {
-    const { error } = await supabase.from("affiliate_sales").upsert(
+    await adminUpsert(
+      "affiliate_sales",
       {
         id: s.id,
         affiliate_id: s.affiliateId,
@@ -309,20 +382,16 @@ export const cloud = {
         status: s.status,
         notes: s.notes || null,
       },
-      { onConflict: "id" },
+      "id",
     );
-    log("upsertAffiliateSale", error);
   },
   async deleteAffiliateSale(id: string) {
-    const { error } = await supabase
-      .from("affiliate_sales")
-      .delete()
-      .eq("id", id);
-    log("deleteAffiliateSale", error);
+    await adminDelete("affiliate_sales", { id });
   },
 
   async upsertTransaction(t: Transaction) {
-    const { error } = await supabase.from("transactions").upsert(
+    await adminUpsert(
+      "transactions",
       {
         id: t.id,
         kind: t.kind,
@@ -334,80 +403,53 @@ export const cloud = {
         product_summary: t.productSummary || null,
         notes: t.notes || null,
       },
-      { onConflict: "id" },
+      "id",
     );
-    log("upsertTransaction", error);
   },
   async deleteTransaction(id: string) {
-    const { error } = await supabase.from("transactions").delete().eq("id", id);
-    log("deleteTransaction", error);
+    await adminDelete("transactions", { id });
   },
 
   async upsertReview(r: Review) {
-    const { error } = await supabase.from("reviews").upsert(
-      {
-        id: r.id,
-        product_id: r.productId,
-        customer_id: r.customerId || null,
-        customer_name: r.customerName,
-        rating: r.rating,
-        comment: r.comment,
-        photos: r.photos || [],
-      },
-      { onConflict: "id" },
-    );
-    log("upsertReview", error);
+    // Reviews podem ser criadas por clientes via insert público; updates só admin.
+    const token = getAdminToken();
+    const row = {
+      id: r.id,
+      product_id: r.productId,
+      customer_id: r.customerId || null,
+      customer_name: r.customerName,
+      rating: r.rating,
+      comment: r.comment,
+      photos: r.photos || [],
+    };
+    if (token) {
+      await adminUpsert("reviews", row, "id");
+    } else {
+      const { error } = await supabase.from("reviews").insert(row);
+      log("upsertReview", error);
+    }
   },
   async deleteReview(id: string) {
-    const { error } = await supabase.from("reviews").delete().eq("id", id);
-    log("deleteReview", error);
+    await adminDelete("reviews", { id });
   },
 
   async upsertSettings(s: StoreSettings) {
-    const { error } = await supabase.from("store_settings").upsert(
-      {
-        id: 1,
-        data: s as any,
-      },
-      { onConflict: "id" },
-    );
-    log("upsertSettings", error);
+    await adminUpsert("store_settings", { id: 1, data: s as any }, "id");
   },
 
   async updateOrderStatus(id: string, status: string) {
-    const { error } = await supabase
-      .from("orders")
-      .update({ payment_status: status as any })
-      .eq("id", id);
-    log("updateOrderStatus", error);
+    await adminPatch("orders", { id }, { payment_status: status });
   },
   async deleteOrder(id: string) {
-    const { error } = await supabase.from("orders").delete().eq("id", id);
-    log("deleteOrder", error);
+    await adminDelete("orders", { id });
   },
 
-  async upsertNotificationLog(l: any) {
-    const { error } = await (
-      supabase.from("notification_logs" as any) as any
-    ).upsert(
-      {
-        id: l.id,
-        category: l.category,
-        title: l.title,
-        body: l.body,
-        audience: l.audience,
-        recipient_id: l.recipientId || null,
-        channels: l.channels,
-        sent_at: l.sentAt,
-        read: l.read,
-        metadata: l.data || {},
-      },
-      { onConflict: "id" },
-    );
-    if (error && error.code !== "P0001") log("upsertNotificationLog", error);
+  async upsertNotificationLog(_l: any) {
+    // notification_logs descontinuado nesta camada; preservado como no-op.
   },
 
   async logActivity(data: Omit<ActivityLog, "id" | "createdAt">) {
+    // activity_logs ainda permite insert público (auditoria básica).
     const { error } = await supabase.from("activity_logs").insert({
       action: data.action,
       category: data.category,
@@ -415,12 +457,13 @@ export const cloud = {
       metadata: data.metadata || {},
       user_id: data.userId || null,
     });
-    if (error && error.code !== "P0001") log("logActivity", error);
+    if (error && (error as any).code !== "P0001") log("logActivity", error);
   },
 
   async joinWaitlist(
     data: Omit<WaitlistEntry, "id" | "createdAt" | "notified">,
   ) {
+    // Insert público mantido pra cliente entrar na fila sem login.
     const { error } = await supabase.from("product_waitlist").insert({
       product_id: data.productId,
       customer_id: data.customerId || null,
@@ -430,19 +473,17 @@ export const cloud = {
   },
 
   async upsertFAQ(f: FAQItem) {
-    const { error } = await supabase.from("faq_items").upsert({
+    await adminUpsert("faq_items", {
       id: f.id,
       category: f.category,
       question: f.question,
       answer: f.answer,
       sort_order: f.sortOrder,
     });
-    log("upsertFAQ", error);
   },
 
   async deleteFAQ(id: string) {
-    const { error } = await supabase.from("faq_items").delete().eq("id", id);
-    log("deleteFAQ", error);
+    await adminDelete("faq_items", { id });
   },
 };
 
@@ -464,71 +505,49 @@ export type CloudSnapshot = {
 };
 
 export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
-  const [
-    cust,
-    cats,
-    prods,
-    coups,
-    affs,
-    affSales,
-    txs,
-    revs,
-    settings,
-    ords,
-    faq,
-    wait,
-    logs,
-  ] = await Promise.all([
-    supabase.from("customers").select("*"),
+  // Leituras públicas (RLS permite anon SELECT):
+  const [cats, prods, coups, revs, settings, faq] = await Promise.all([
     supabase
       .from("categories")
       .select("*")
       .order("sort_order", { ascending: true }),
     supabase.from("products").select("*"),
     supabase.from("coupons").select("*"),
-    supabase.from("affiliates").select("*"),
-    supabase
-      .from("affiliate_sales")
-      .select("*")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("transactions")
-      .select("*")
-      .order("date", { ascending: false }),
     supabase
       .from("reviews")
       .select("*")
       .order("created_at", { ascending: false }),
     supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
     supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500),
-    supabase
       .from("faq_items")
       .select("*")
       .order("sort_order", { ascending: true }),
-    supabase.from("product_waitlist").select("*"),
-    supabase
-      .from("activity_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200),
   ]);
+
+  // Leituras privadas só se for admin logado:
+  let admin: Awaited<ReturnType<typeof adminFetchAllFn>> | null = null;
+  const token = getAdminToken();
+  if (token) {
+    try {
+      admin = await adminFetchAllFn({ data: { token } });
+    } catch (e) {
+      console.warn("[cloud:adminFetchAll]", e);
+    }
+  }
+
   return {
-    customers: (cust.data || []).map(toCustomer),
+    customers: (admin?.customers || []).map(toCustomer),
     categories: (cats.data || []).map(toCategory),
     products: (prods.data || []).map(toProduct),
     coupons: (coups.data || []).map(toCoupon),
-    affiliates: (affs.data || []).map(toAffiliate),
-    affiliateSales: (affSales.data || []).map(toAffiliateSale),
-    transactions: (txs.data || []).map(toTransaction),
+    affiliates: (admin?.affiliates || []).map(toAffiliate),
+    affiliateSales: (admin?.affiliateSales || []).map(toAffiliateSale),
+    transactions: (admin?.transactions || []).map(toTransaction),
     reviews: (revs.data || []).map(toReview),
     settings: (settings.data?.data as any) || null,
-    orders: (ords.data || []).map(toOrder),
+    orders: (admin?.orders || []).map(toOrder),
     faq: (faq.data || []).map(toFAQ),
-    waitlist: (wait.data || []).map(toWaitlist),
-    activityLogs: (logs.data || []).map(toActivityLog),
+    waitlist: (admin?.waitlist || []).map(toWaitlist),
+    activityLogs: (admin?.activityLogs || []).map(toActivityLog),
   };
 }
