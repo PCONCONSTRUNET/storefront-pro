@@ -177,7 +177,7 @@ export const adminUpdateFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin(data.token);
-    let q: any = supabaseAdmin.from(data.table as WriteTable).update(data.patch);
+    let q: any = (supabaseAdmin.from(data.table as WriteTable) as any).update(data.patch);
     for (const [k, v] of Object.entries(data.match)) q = q.eq(k, v);
     const { error } = await q;
     if (error) return { ok: false as const, message: error.message };
