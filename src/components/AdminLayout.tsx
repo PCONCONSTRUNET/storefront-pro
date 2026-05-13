@@ -24,6 +24,7 @@ import { useStore, useStoreHydrated } from "@/lib/store";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
+import { AdminDeviceSyncBanner } from "@/components/AdminDeviceSyncBanner";
 
 const nav = [
   {
