@@ -15,31 +15,55 @@ function AuthCallback() {
 
   useEffect(() => {
     let cancelled = false;
+
+    const waitForSession = async () => {
+      const url = new URL(window.location.href);
+      const urlError =
+        url.searchParams.get("error_description") ||
+        url.searchParams.get("error") ||
+        new URLSearchParams(url.hash.replace(/^#/, "")).get("error_description");
+      if (urlError) throw new Error(decodeURIComponent(urlError));
+
+      const first = await supabase.auth.getSession();
+      if (first.error) throw first.error;
+      if (first.data.session) return first.data.session;
+
+      const code = url.searchParams.get("code");
+      if (code) {
+        const exchanged = await supabase.auth.exchangeCodeForSession(code);
+        if (!exchanged.error && exchanged.data.session) {
+          return exchanged.data.session;
+        }
+
+        const retry = await supabase.auth.getSession();
+        if (retry.error) throw retry.error;
+        if (retry.data.session) return retry.data.session;
+        if (exchanged.error) throw exchanged.error;
+      }
+
+      return await new Promise<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>(
+        (resolve) => {
+          let settled = false;
+          let subscription: { unsubscribe: () => void } | null = null;
+          const finish = (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeout);
+            subscription?.unsubscribe();
+            resolve(session);
+          };
+          const timeout = window.setTimeout(() => finish(null), 8000);
+          const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
+            if (session) finish(session);
+          });
+          subscription = sub.subscription;
+        },
+      );
+    };
+
     (async () => {
       try {
-        // Aguarda o Supabase processar o hash/code da URL
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        let session = data.session;
-
-        // Se ainda não veio (pode estar processando), escuta uma vez
-        if (!session) {
-          session = await new Promise((resolve) => {
-            const { data: sub } = supabase.auth.onAuthStateChange(
-              (_evt, s) => {
-                if (s) {
-                  sub.subscription.unsubscribe();
-                  resolve(s);
-                }
-              },
-            );
-            // timeout 5s
-            setTimeout(() => {
-              sub.subscription.unsubscribe();
-              resolve(null);
-            }, 5000);
-          });
-        }
+        const session = await waitForSession();
 
         if (!session?.user) {
           throw new Error("Sessão não encontrada");
