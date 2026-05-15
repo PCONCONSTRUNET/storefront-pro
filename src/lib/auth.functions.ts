@@ -234,33 +234,15 @@ export const loginWithGoogleFn = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    // Já existe?
-    const { data: existing } = await supabaseAdmin
-      .from("customers")
-      .select("*")
-      .ilike("email", data.email)
+    const { data: cust, error } = await supabase
+      .rpc("upsert_customer_google", {
+        _email: data.email,
+        _name: data.name,
+        _phone: data.phone || "",
+      })
       .maybeSingle();
-
-    let cust = existing;
-    if (!cust) {
-      const id = crypto.randomUUID();
-      const { data: created, error } = await supabaseAdmin
-        .from("customers")
-        .insert({
-          id,
-          name: data.name,
-          email: data.email,
-          phone: data.phone || "",
-          address: null,
-          addresses: [],
-          favorites: [],
-        })
-        .select("*")
-        .single();
-      if (error || !created) {
-        return { ok: false as const, message: error?.message || "Erro ao criar conta" };
-      }
-      cust = created;
+    if (error || !cust) {
+      return { ok: false as const, message: error?.message || "Erro ao criar conta" };
     }
 
     return {
@@ -272,8 +254,8 @@ export const loginWithGoogleFn = createServerFn({ method: "POST" })
         email: cust.email,
         phone: cust.phone || "",
         address: cust.address || null,
-        addresses: Array.isArray(cust.addresses) ? cust.addresses : [],
-        favorites: Array.isArray(cust.favorites) ? cust.favorites : [],
+        addresses: toStringArray(cust.addresses),
+        favorites: toStringArray(cust.favorites),
         createdAt: cust.created_at,
       },
     };
