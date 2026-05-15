@@ -190,11 +190,7 @@ function RootComponent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (
-      !["/", "/login", "/cadastro"].includes(location.pathname) ||
-      location.pathname === "/auth/callback"
-    )
-      return;
+    if (location.pathname === "/auth/callback") return;
 
     const params = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(
