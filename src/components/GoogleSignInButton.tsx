@@ -2,8 +2,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 
+const GOOGLE_OAUTH_RETRY_KEY = "princesa_google_oauth_retry";
+
 function clearStalePkceVerifier() {
   if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(GOOGLE_OAUTH_RETRY_KEY);
+  } catch {}
   [window.localStorage, window.sessionStorage].forEach((storage) => {
     try {
       for (let i = storage.length - 1; i >= 0; i -= 1) {
