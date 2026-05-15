@@ -73,16 +73,6 @@ function Page() {
               Entrar
             </button>
 
-            <div className="flex items-center gap-2 py-1">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                ou
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <GoogleSignInButton />
-
             <p className="text-center text-xs text-muted-foreground pt-0.5">
               <Link to="/esqueci-senha" className="text-primary font-semibold">
                 Esqueci minha senha
