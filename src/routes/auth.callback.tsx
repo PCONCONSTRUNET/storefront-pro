@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
+import type { Session } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallback,
@@ -41,11 +42,10 @@ function AuthCallback() {
         if (exchanged.error) throw exchanged.error;
       }
 
-      return await new Promise<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>(
-        (resolve) => {
+      return await new Promise<Session | null>((resolve) => {
           let settled = false;
           let subscription: { unsubscribe: () => void } | null = null;
-          const finish = (session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+          const finish = (session: Session | null) => {
             if (settled) return;
             settled = true;
             window.clearTimeout(timeout);
@@ -57,8 +57,7 @@ function AuthCallback() {
             if (session) finish(session);
           });
           subscription = sub.subscription;
-        },
-      );
+        });
     };
 
     (async () => {
