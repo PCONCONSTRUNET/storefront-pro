@@ -716,21 +716,6 @@ export type Database = {
           ok: boolean
         }[]
       }
-      upsert_customer_google: {
-        Args: { _email: string; _name: string; _phone?: string }
-        Returns: {
-          address: string
-          addresses: Json
-          created_at: string
-          email: string
-          favorites: Json
-          id: string
-          message: string
-          name: string
-          ok: boolean
-          phone: string
-        }[]
-      }
     }
     Enums: {
       payment_status:
