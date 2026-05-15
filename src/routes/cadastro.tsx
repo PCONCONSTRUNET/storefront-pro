@@ -7,6 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { X } from "lucide-react";
