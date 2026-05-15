@@ -57,8 +57,15 @@ function Page() {
   }
 
   const next = () => {
-    if (step === 0 && (!form.name || !form.email || !form.phone))
-      return toast.error("Preencha todos os campos");
+    if (step === 0) {
+      if (!form.name.trim() || !form.email.trim() || !form.phone.trim())
+        return toast.error("Preencha todos os campos");
+      if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+        return toast.error("E-mail inválido");
+      const digits = form.phone.replace(/\D/g, "");
+      if (digits.length < 10 || digits.length > 13)
+        return toast.error("WhatsApp inválido — informe DDD + número");
+    }
     setStep((s) => s + 1);
   };
 
