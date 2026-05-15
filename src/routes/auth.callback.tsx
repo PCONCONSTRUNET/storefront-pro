@@ -31,19 +31,6 @@ function AuthCallback() {
       if (first.error) throw first.error;
       if (first.data.session) return first.data.session;
 
-      const code = url.searchParams.get("code");
-      if (code) {
-        const exchanged = await supabase.auth.exchangeCodeForSession(code);
-        if (!exchanged.error && exchanged.data.session) {
-          return exchanged.data.session;
-        }
-
-        const retry = await supabase.auth.getSession();
-        if (retry.error) throw retry.error;
-        if (retry.data.session) return retry.data.session;
-        if (exchanged.error) throw exchanged.error;
-      }
-
       return await new Promise<Session | null>((resolve) => {
         let settled = false;
         let subscription: { unsubscribe: () => void } | null = null;
