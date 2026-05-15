@@ -9,6 +9,18 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallback,
 });
 
+function cleanAuthCallbackUrl() {
+  const cleanUrl = `${window.location.origin}/auth/callback`;
+  window.history.replaceState(window.history.state, "", cleanUrl);
+}
+
+function isPkceVerifierMissing(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.toLowerCase().includes("code verifier")
+  );
+}
+
 function AuthCallback() {
   const navigate = useNavigate();
   const loginWithGoogle = useStore((s) => s.loginWithGoogle);
@@ -31,6 +43,11 @@ function AuthCallback() {
       const code = url.searchParams.get("code");
       if (code) {
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (isPkceVerifierMissing(error)) {
+          throw new Error(
+            "Não consegui concluir o login do Google. Toque em Entrar com Google novamente.",
+          );
+        }
         if (error) throw error;
         if (data.session) return data.session;
       }
@@ -79,6 +96,7 @@ function AuthCallback() {
         const r = await loginWithGoogle(email, name);
         // Limpa a sessão Supabase — usamos só pra pegar identidade
         await supabase.auth.signOut();
+        cleanAuthCallbackUrl();
 
         if (cancelled) return;
         if (r.ok) {
@@ -90,7 +108,9 @@ function AuthCallback() {
         }
       } catch (e) {
         if (cancelled) return;
-        const m = e instanceof Error ? e.message : "Falha ao logar";
+        cleanAuthCallbackUrl();
+        const m =
+          e instanceof Error && e.message.trim() ? e.message : "Falha ao logar";
         setMsg(m);
         toast.error(m);
         setTimeout(() => navigate({ to: "/login" }), 1500);
