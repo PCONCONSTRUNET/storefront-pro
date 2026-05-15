@@ -285,6 +285,10 @@ type AppState = {
     email: string,
     password: string,
   ) => Promise<{ ok: boolean; message: string }>;
+  loginWithGoogle: (
+    email: string,
+    name: string,
+  ) => Promise<{ ok: boolean; message: string }>;
   logoutCustomer: () => void;
   updateCustomer: (
     data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>,
