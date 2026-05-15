@@ -31,6 +31,7 @@ import { Route as PerfilEnderecosRouteImport } from './routes/perfil.enderecos'
 import { Route as PerfilConfiguracoesRouteImport } from './routes/perfil.configuracoes'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
 import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
@@ -163,6 +164,11 @@ const PedidoIdRoute = PedidoIdRouteImport.update({
 const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
   id: '/categoria/$slug',
   path: '/categoria/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AfiliadaLoginRoute = AfiliadaLoginRouteImport.update({
@@ -310,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/admin/produtos': typeof AdminProdutosRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
   '/afiliada/login': typeof AfiliadaLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
@@ -357,6 +364,7 @@ export interface FileRoutesByTo {
   '/admin/produtos': typeof AdminProdutosRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
   '/afiliada/login': typeof AfiliadaLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
@@ -405,6 +413,7 @@ export interface FileRoutesById {
   '/admin/produtos': typeof AdminProdutosRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
   '/afiliada/login': typeof AfiliadaLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/perfil/configuracoes': typeof PerfilConfiguracoesRoute
@@ -454,6 +463,7 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/afiliada/cadastro'
     | '/afiliada/login'
+    | '/auth/callback'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/perfil/configuracoes'
@@ -501,6 +511,7 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/afiliada/cadastro'
     | '/afiliada/login'
+    | '/auth/callback'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/perfil/configuracoes'
@@ -548,6 +559,7 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/afiliada/cadastro'
     | '/afiliada/login'
+    | '/auth/callback'
     | '/categoria/$slug'
     | '/pedido/$id'
     | '/perfil/configuracoes'
@@ -596,6 +608,7 @@ export interface RootRouteChildren {
   AdminProdutosRoute: typeof AdminProdutosRoute
   AfiliadaCadastroRoute: typeof AfiliadaCadastroRoute
   AfiliadaLoginRoute: typeof AfiliadaLoginRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
   PedidoIdRoute: typeof PedidoIdRoute
   PerfilConfiguracoesRoute: typeof PerfilConfiguracoesRoute
@@ -768,6 +781,13 @@ declare module '@tanstack/react-router' {
       path: '/categoria/$slug'
       fullPath: '/categoria/$slug'
       preLoaderRoute: typeof CategoriaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/afiliada/login': {
@@ -975,6 +995,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProdutosRoute: AdminProdutosRoute,
   AfiliadaCadastroRoute: AfiliadaCadastroRoute,
   AfiliadaLoginRoute: AfiliadaLoginRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
   PedidoIdRoute: PedidoIdRoute,
   PerfilConfiguracoesRoute: PerfilConfiguracoesRoute,
@@ -995,12 +1016,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
