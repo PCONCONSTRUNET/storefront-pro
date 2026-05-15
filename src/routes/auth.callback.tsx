@@ -9,6 +9,8 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallback,
 });
 
+const GOOGLE_OAUTH_RETRY_KEY = "princesa_google_oauth_retry";
+
 function cleanAuthCallbackUrl() {
   const cleanUrl = `${window.location.origin}/auth/callback`;
   window.history.replaceState(window.history.state, "", cleanUrl);
@@ -19,6 +21,29 @@ function isPkceVerifierMissing(error: unknown) {
     error instanceof Error &&
     error.message.toLowerCase().includes("code verifier")
   );
+}
+
+function getStoredPkceVerifier() {
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    try {
+      for (let i = 0; i < storage.length; i += 1) {
+        const key = storage.key(i);
+        if (key?.includes("code-verifier") && storage.getItem(key)) return true;
+      }
+    } catch {}
+  }
+  return false;
+}
+
+function clearStoredPkceVerifier() {
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    try {
+      for (let i = storage.length - 1; i >= 0; i -= 1) {
+        const key = storage.key(i);
+        if (key?.includes("code-verifier")) storage.removeItem(key);
+      }
+    } catch {}
+  }
 }
 
 function AuthCallback() {
