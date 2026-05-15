@@ -197,7 +197,9 @@ function RootComponent() {
       return;
 
     const params = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const hashParams = new URLSearchParams(
+      window.location.hash.replace(/^#/, ""),
+    );
     const hasOAuthCallback =
       params.has("code") ||
       params.has("error_description") ||
