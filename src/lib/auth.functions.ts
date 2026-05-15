@@ -233,3 +233,62 @@ export const loginAffiliateFn = createServerFn({ method: "POST" })
       },
     };
   });
+
+// ---------- GOOGLE OAUTH BRIDGE ----------
+// Recebe email + nome (vindo da sessão Supabase Google OAuth) e
+// busca/cria a customer correspondente. Sem senha (login social).
+export const loginWithGoogleFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        email: emailSchema,
+        name: z.string().trim().min(1).max(255),
+        phone: z.string().trim().max(50).optional().default(""),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    // Já existe?
+    const { data: existing } = await supabaseAdmin
+      .from("customers")
+      .select("*")
+      .ilike("email", data.email)
+      .maybeSingle();
+
+    let cust = existing;
+    if (!cust) {
+      const id = crypto.randomUUID();
+      const { data: created, error } = await supabaseAdmin
+        .from("customers")
+        .insert({
+          id,
+          name: data.name,
+          email: data.email,
+          phone: data.phone || "",
+          address: null,
+          addresses: [],
+          favorites: [],
+        })
+        .select("*")
+        .single();
+      if (error || !created) {
+        return { ok: false as const, message: error?.message || "Erro ao criar conta" };
+      }
+      cust = created;
+    }
+
+    return {
+      ok: true as const,
+      message: `Bem-vinda, ${cust.name}!`,
+      customer: {
+        id: cust.id,
+        name: cust.name,
+        email: cust.email,
+        phone: cust.phone || "",
+        address: cust.address || null,
+        addresses: Array.isArray(cust.addresses) ? cust.addresses : [],
+        favorites: Array.isArray(cust.favorites) ? cust.favorites : [],
+        createdAt: cust.created_at,
+      },
+    };
+  });
