@@ -674,6 +674,63 @@ export type Database = {
           subject_type: Database["public"]["Enums"]["reset_subject"]
         }[]
       }
+      create_customer_with_password_hash: {
+        Args: {
+          _address: string
+          _email: string
+          _name: string
+          _password_hash: string
+          _phone: string
+        }
+        Returns: {
+          address: string
+          addresses: Json
+          created_at: string
+          email: string
+          favorites: Json
+          id: string
+          message: string
+          name: string
+          ok: boolean
+          phone: string
+        }[]
+      }
+      get_customer_auth_record: {
+        Args: { _email: string }
+        Returns: {
+          address: string
+          addresses: Json
+          created_at: string
+          email: string
+          favorites: Json
+          id: string
+          name: string
+          password_hash: string
+          phone: string
+        }[]
+      }
+      update_customer_password_hash: {
+        Args: { _customer_id: string; _password_hash: string }
+        Returns: {
+          message: string
+          ok: boolean
+        }[]
+      }
+      upsert_customer_google: {
+        Args: { _email: string; _name: string; _phone?: string }
+        Returns: {
+          address: string
+          addresses: Json
+          created_at: string
+          email: string
+          favorites: Json
+          id: string
+          message: string
+          name: string
+          ok: boolean
+          phone: string
+        }[]
+      }
     }
     Enums: {
       payment_status:
