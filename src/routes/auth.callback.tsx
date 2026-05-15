@@ -122,6 +122,7 @@ function AuthCallback() {
         const r = await loginWithGoogle(email, name);
         // Limpa a sessão Supabase — usamos só pra pegar identidade
         await supabase.auth.signOut();
+        sessionStorage.removeItem(GOOGLE_OAUTH_RETRY_KEY);
         cleanAuthCallbackUrl();
 
         if (cancelled) return;
