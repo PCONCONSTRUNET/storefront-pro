@@ -236,10 +236,16 @@ function Page() {
                 onChange={(v) => setForm({ ...form, email: v })}
               />
               <Field
-                label="Telefone / WhatsApp"
+                label="WhatsApp (com DDD) — obrigatório para avisos"
+                type="tel"
                 value={form.phone}
+                placeholder="(11) 91234-5678"
                 onChange={(v) => setForm({ ...form, phone: v })}
               />
+              <p className="text-[11px] text-muted-foreground -mt-1">
+                Enviaremos o lembrete de pagamento, confirmação de compra
+                aprovada e aviso quando o pedido estiver pronto pelo WhatsApp.
+              </p>
 
               <div className="rounded-xl bg-accent/40 border border-accent p-3 text-sm mt-2">
                 <div className="font-semibold text-accent-foreground mb-0.5">
