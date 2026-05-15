@@ -27,6 +27,14 @@ function AuthCallback() {
         );
       if (urlError) throw new Error(decodeURIComponent(urlError));
 
+      // PKCE flow: troca o ?code=... por sessão
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) throw error;
+        if (data.session) return data.session;
+      }
+
       const first = await supabase.auth.getSession();
       if (first.error) throw first.error;
       if (first.data.session) return first.data.session;
