@@ -2,22 +2,41 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 
+function clearStalePkceVerifier() {
+  if (typeof window === "undefined") return;
+  [window.localStorage, window.sessionStorage].forEach((storage) => {
+    try {
+      for (let i = storage.length - 1; i >= 0; i -= 1) {
+        const key = storage.key(i);
+        if (key?.includes("code-verifier")) storage.removeItem(key);
+      }
+    } catch {}
+  });
+}
+
 export function GoogleSignInButton({ label = "Entrar com Google" }: { label?: string }) {
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
     setLoading(true);
     try {
+      clearStalePkceVerifier();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
       if (error) throw error;
       // Redireciona pro Google — não precisa fazer mais nada
     } catch (e) {
-      const m = e instanceof Error ? e.message : "Falha ao iniciar login Google";
+      const m =
+        e instanceof Error && e.message.trim()
+          ? e.message
+          : "Falha ao iniciar login Google";
       toast.error(m);
       setLoading(false);
     }
