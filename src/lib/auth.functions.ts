@@ -6,9 +6,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
 const passwordSchema = z.string().min(4).max(200);
+
+function toStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
 
 // ---------- CUSTOMERS ----------
 
@@ -49,8 +54,8 @@ export const registerCustomerFn = createServerFn({ method: "POST" })
         email: created.email,
         phone: created.phone || "",
         address: created.address || null,
-        addresses: Array.isArray(created.addresses) ? created.addresses : [],
-        favorites: Array.isArray(created.favorites) ? created.favorites : [],
+        addresses: toStringArray(created.addresses),
+        favorites: toStringArray(created.favorites),
         createdAt: created.created_at,
       },
     };
@@ -80,8 +85,8 @@ export const loginCustomerFn = createServerFn({ method: "POST" })
         email: cust.email,
         phone: cust.phone || "",
         address: cust.address || null,
-        addresses: Array.isArray(cust.addresses) ? cust.addresses : [],
-        favorites: Array.isArray(cust.favorites) ? cust.favorites : [],
+        addresses: toStringArray(cust.addresses),
+        favorites: toStringArray(cust.favorites),
         createdAt: cust.created_at,
       },
     };
@@ -98,14 +103,16 @@ export const updateCustomerPasswordFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const password_hash = await bcrypt.hash(data.newPassword, 10);
-    const { error } = await supabaseAdmin
-      .from("customer_credentials")
-      .upsert(
-        { customer_id: data.customerId, password_hash },
-        { onConflict: "customer_id" },
-      );
-    if (error) return { ok: false as const, message: error.message };
-    return { ok: true as const, message: "Senha atualizada" };
+    const { data: result, error } = await supabase
+      .rpc("update_customer_password_hash", {
+        _customer_id: data.customerId,
+        _password_hash: password_hash,
+      })
+      .maybeSingle();
+    if (error || !result) {
+      return { ok: false as const, message: error?.message || "Erro ao atualizar senha" };
+    }
+    return { ok: Boolean(result.ok), message: result.message };
   });
 
 // ---------- AFFILIATES ----------
