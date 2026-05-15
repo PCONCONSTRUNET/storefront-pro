@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.upsert_customer_google(text, text, text);

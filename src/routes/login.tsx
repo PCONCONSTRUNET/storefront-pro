@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
@@ -72,16 +72,6 @@ function Page() {
             <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold mt-1 shadow-soft hover:opacity-95 active:scale-[0.99] transition-all text-sm">
               Entrar
             </button>
-
-            <div className="flex items-center gap-2 py-1">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                ou
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <GoogleSignInButton />
 
             <p className="text-center text-xs text-muted-foreground pt-0.5">
               <Link to="/esqueci-senha" className="text-primary font-semibold">

@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { X } from "lucide-react";
@@ -114,15 +114,6 @@ function Page() {
               {submitting ? "Criando..." : "Criar conta"}
             </button>
 
-            <div className="flex items-center gap-2 py-1">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                ou
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <GoogleSignInButton label="Cadastrar com Google" />
             <p className="text-center text-xs text-muted-foreground pt-0.5">
               Já tem conta?{" "}
               <Link to="/login" className="text-primary font-semibold">

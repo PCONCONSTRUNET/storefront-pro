@@ -285,10 +285,6 @@ type AppState = {
     email: string,
     password: string,
   ) => Promise<{ ok: boolean; message: string }>;
-  loginWithGoogle: (
-    email: string,
-    name: string,
-  ) => Promise<{ ok: boolean; message: string }>;
   logoutCustomer: () => void;
   updateCustomer: (
     data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>,
@@ -668,34 +664,6 @@ export const useStore = create<AppState>()(
           action: "login",
           category: "auth",
           description: `Cliente logou: ${c.name}`,
-          userId: c.id,
-        });
-        return { ok: true, message: res.message };
-      },
-      loginWithGoogle: async (email, name) => {
-        const { loginWithGoogleFn } = await import("./auth.functions");
-        const res = await loginWithGoogleFn({ data: { email, name } });
-        if (!res.ok) return { ok: false, message: res.message };
-        const c: Customer = {
-          id: res.customer.id,
-          name: res.customer.name,
-          email: res.customer.email,
-          phone: res.customer.phone,
-          password: "",
-          address: res.customer.address ?? undefined,
-          addresses: (res.customer.addresses as string[]) || [],
-          favorites: (res.customer.favorites as string[]) || [],
-          createdAt: res.customer.createdAt,
-        };
-        set((s) => ({
-          customers: [...s.customers.filter((x) => x.id !== c.id), c],
-          currentCustomerId: c.id,
-          sessions: { ...s.sessions, customer: makeSession(c.id) },
-        }));
-        cloud.logActivity({
-          action: "login",
-          category: "auth",
-          description: `Cliente logou com Google: ${c.name}`,
           userId: c.id,
         });
         return { ok: true, message: res.message };
