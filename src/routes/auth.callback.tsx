@@ -9,6 +9,43 @@ export const Route = createFileRoute("/auth/callback")({
   component: AuthCallback,
 });
 
+const GOOGLE_OAUTH_RETRY_KEY = "princesa_google_oauth_retry";
+
+function cleanAuthCallbackUrl() {
+  const cleanUrl = `${window.location.origin}/auth/callback`;
+  window.history.replaceState(window.history.state, "", cleanUrl);
+}
+
+function isPkceVerifierMissing(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.toLowerCase().includes("code verifier")
+  );
+}
+
+function getStoredPkceVerifier() {
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    try {
+      for (let i = 0; i < storage.length; i += 1) {
+        const key = storage.key(i);
+        if (key?.includes("code-verifier") && storage.getItem(key)) return true;
+      }
+    } catch {}
+  }
+  return false;
+}
+
+function clearStoredPkceVerifier() {
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    try {
+      for (let i = storage.length - 1; i >= 0; i -= 1) {
+        const key = storage.key(i);
+        if (key?.includes("code-verifier")) storage.removeItem(key);
+      }
+    } catch {}
+  }
+}
+
 function AuthCallback() {
   const navigate = useNavigate();
   const loginWithGoogle = useStore((s) => s.loginWithGoogle);
@@ -30,7 +67,13 @@ function AuthCallback() {
       // PKCE flow: troca o ?code=... por sessão
       const code = url.searchParams.get("code");
       if (code) {
+        if (!getStoredPkceVerifier()) {
+          throw new Error("GOOGLE_PKCE_RETRY");
+        }
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (isPkceVerifierMissing(error)) {
+          throw new Error("GOOGLE_PKCE_RETRY");
+        }
         if (error) throw error;
         if (data.session) return data.session;
       }
@@ -79,6 +122,8 @@ function AuthCallback() {
         const r = await loginWithGoogle(email, name);
         // Limpa a sessão Supabase — usamos só pra pegar identidade
         await supabase.auth.signOut();
+        sessionStorage.removeItem(GOOGLE_OAUTH_RETRY_KEY);
+        cleanAuthCallbackUrl();
 
         if (cancelled) return;
         if (r.ok) {
@@ -90,7 +135,31 @@ function AuthCallback() {
         }
       } catch (e) {
         if (cancelled) return;
-        const m = e instanceof Error ? e.message : "Falha ao logar";
+        cleanAuthCallbackUrl();
+        if (e instanceof Error && e.message === "GOOGLE_PKCE_RETRY") {
+          clearStoredPkceVerifier();
+          const hasRetried = sessionStorage.getItem(GOOGLE_OAUTH_RETRY_KEY);
+          if (!hasRetried) {
+            sessionStorage.setItem(GOOGLE_OAUTH_RETRY_KEY, "1");
+            setMsg("Reconectando com Google...");
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: "google",
+              options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+                queryParams: { prompt: "select_account" },
+              },
+            });
+            if (!error) return;
+          }
+          sessionStorage.removeItem(GOOGLE_OAUTH_RETRY_KEY);
+          const m = "Não consegui concluir o login. Tente entrar com Google novamente.";
+          setMsg(m);
+          toast.error(m);
+          setTimeout(() => navigate({ to: "/login" }), 1500);
+          return;
+        }
+        const m =
+          e instanceof Error && e.message.trim() ? e.message : "Falha ao logar";
         setMsg(m);
         toast.error(m);
         setTimeout(() => navigate({ to: "/login" }), 1500);
