@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { supabase } from "@/integrations/supabase/client";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
 const passwordSchema = z.string().min(4).max(200);
@@ -25,47 +25,33 @@ export const registerCustomerFn = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    // Email já cadastrado?
-    const { data: existing } = await supabaseAdmin
-      .from("customers")
-      .select("id")
-      .ilike("email", data.email)
-      .maybeSingle();
-    if (existing) return { ok: false as const, message: "E-mail já cadastrado" };
-
-    const id = crypto.randomUUID();
-    const { error: cErr } = await supabaseAdmin.from("customers").insert({
-      id,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      address: data.address ?? null,
-      addresses: [],
-      favorites: [],
-    });
-    if (cErr) return { ok: false as const, message: cErr.message };
-
     const password_hash = await bcrypt.hash(data.password, 10);
-    const { error: credErr } = await supabaseAdmin
-      .from("customer_credentials")
-      .insert({ customer_id: id, password_hash });
-    if (credErr) {
-      await supabaseAdmin.from("customers").delete().eq("id", id);
-      return { ok: false as const, message: credErr.message };
+    const { data: created, error } = await supabase
+      .rpc("create_customer_with_password_hash", {
+        _name: data.name,
+        _email: data.email,
+        _phone: data.phone,
+        _address: data.address ?? "",
+        _password_hash: password_hash,
+      })
+      .maybeSingle();
+    if (error || !created) {
+      return { ok: false as const, message: error?.message || "Erro ao criar conta" };
     }
+    if (!created.ok) return { ok: false as const, message: created.message };
 
     return {
       ok: true as const,
-      message: "Cadastro realizado!",
+      message: created.message,
       customer: {
-        id,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        address: data.address ?? null,
-        addresses: [] as string[],
-        favorites: [] as string[],
-        createdAt: new Date().toISOString(),
+        id: created.id,
+        name: created.name,
+        email: created.email,
+        phone: created.phone || "",
+        address: created.address || null,
+        addresses: Array.isArray(created.addresses) ? created.addresses : [],
+        favorites: Array.isArray(created.favorites) ? created.favorites : [],
+        createdAt: created.created_at,
       },
     };
   });
@@ -75,21 +61,14 @@ export const loginCustomerFn = createServerFn({ method: "POST" })
     z.object({ email: emailSchema, password: passwordSchema }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { data: cust } = await supabaseAdmin
-      .from("customers")
-      .select("*")
-      .ilike("email", data.email)
+    const { data: cust, error } = await supabase
+      .rpc("get_customer_auth_record", { _email: data.email })
       .maybeSingle();
-    if (!cust) return { ok: false as const, message: "Credenciais inválidas" };
+    if (error) return { ok: false as const, message: error.message };
+    if (!cust?.password_hash)
+      return { ok: false as const, message: "Credenciais inválidas" };
 
-    const { data: cred } = await supabaseAdmin
-      .from("customer_credentials")
-      .select("password_hash")
-      .eq("customer_id", cust.id)
-      .maybeSingle();
-    if (!cred) return { ok: false as const, message: "Credenciais inválidas" };
-
-    const ok = await bcrypt.compare(data.password, cred.password_hash);
+    const ok = await bcrypt.compare(data.password, cust.password_hash);
     if (!ok) return { ok: false as const, message: "Credenciais inválidas" };
 
     return {
