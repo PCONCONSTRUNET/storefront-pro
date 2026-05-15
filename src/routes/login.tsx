@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
