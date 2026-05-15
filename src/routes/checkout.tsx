@@ -57,8 +57,15 @@ function Page() {
   }
 
   const next = () => {
-    if (step === 0 && (!form.name || !form.email || !form.phone))
-      return toast.error("Preencha todos os campos");
+    if (step === 0) {
+      if (!form.name.trim() || !form.email.trim() || !form.phone.trim())
+        return toast.error("Preencha todos os campos");
+      if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+        return toast.error("E-mail inválido");
+      const digits = form.phone.replace(/\D/g, "");
+      if (digits.length < 10 || digits.length > 13)
+        return toast.error("WhatsApp inválido — informe DDD + número");
+    }
     setStep((s) => s + 1);
   };
 
@@ -229,10 +236,16 @@ function Page() {
                 onChange={(v) => setForm({ ...form, email: v })}
               />
               <Field
-                label="Telefone / WhatsApp"
+                label="WhatsApp (com DDD) — obrigatório para avisos"
+                type="tel"
                 value={form.phone}
+                placeholder="(11) 91234-5678"
                 onChange={(v) => setForm({ ...form, phone: v })}
               />
+              <p className="text-[11px] text-muted-foreground -mt-1">
+                Enviaremos o lembrete de pagamento, confirmação de compra
+                aprovada e aviso quando o pedido estiver pronto pelo WhatsApp.
+              </p>
 
               <div className="rounded-xl bg-accent/40 border border-accent p-3 text-sm mt-2">
                 <div className="font-semibold text-accent-foreground mb-0.5">
@@ -408,11 +421,13 @@ function Field({
   value,
   onChange,
   type = "text",
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
+  placeholder?: string;
 }) {
   return (
     <label className="block">
@@ -420,6 +435,7 @@ function Field({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/40 focus:bg-background transition-all"
       />
