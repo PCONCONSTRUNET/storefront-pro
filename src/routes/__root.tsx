@@ -188,6 +188,25 @@ function RootComponent() {
   const router = useRouter();
   const location = useLocation();
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (location.pathname === "/auth/callback") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const hasOAuthCallback =
+      params.has("code") ||
+      params.has("error_description") ||
+      hashParams.has("access_token") ||
+      hashParams.has("error_description");
+
+    if (hasOAuthCallback) {
+      window.location.replace(
+        `/auth/callback${window.location.search}${window.location.hash}`,
+      );
+    }
+  }, [location.pathname]);
+
   // Track allowed routes for PWA launch memory
   useEffect(() => {
     if (typeof window === "undefined") return;
