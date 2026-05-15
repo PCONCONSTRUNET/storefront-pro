@@ -22,7 +22,9 @@ function AuthCallback() {
       const urlError =
         url.searchParams.get("error_description") ||
         url.searchParams.get("error") ||
-        new URLSearchParams(url.hash.replace(/^#/, "")).get("error_description");
+        new URLSearchParams(url.hash.replace(/^#/, "")).get(
+          "error_description",
+        );
       if (urlError) throw new Error(decodeURIComponent(urlError));
 
       const first = await supabase.auth.getSession();
@@ -43,21 +45,23 @@ function AuthCallback() {
       }
 
       return await new Promise<Session | null>((resolve) => {
-          let settled = false;
-          let subscription: { unsubscribe: () => void } | null = null;
-          const finish = (session: Session | null) => {
-            if (settled) return;
-            settled = true;
-            window.clearTimeout(timeout);
-            subscription?.unsubscribe();
-            resolve(session);
-          };
-          const timeout = window.setTimeout(() => finish(null), 8000);
-          const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
+        let settled = false;
+        let subscription: { unsubscribe: () => void } | null = null;
+        const finish = (session: Session | null) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeout);
+          subscription?.unsubscribe();
+          resolve(session);
+        };
+        const timeout = window.setTimeout(() => finish(null), 8000);
+        const { data: sub } = supabase.auth.onAuthStateChange(
+          (_evt, session) => {
             if (session) finish(session);
-          });
-          subscription = sub.subscription;
-        });
+          },
+        );
+        subscription = sub.subscription;
+      });
     };
 
     (async () => {
@@ -71,7 +75,9 @@ function AuthCallback() {
         const email = session.user.email;
         const meta = session.user.user_metadata || {};
         const name =
-          meta.full_name || meta.name || (email ? email.split("@")[0] : "Cliente");
+          meta.full_name ||
+          meta.name ||
+          (email ? email.split("@")[0] : "Cliente");
 
         if (!email) throw new Error("E-mail não retornado pelo Google");
 
