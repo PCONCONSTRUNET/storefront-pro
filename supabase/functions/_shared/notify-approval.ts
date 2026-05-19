@@ -26,8 +26,11 @@ export async function notifyOrderApproved(
     try {
       await fetch(`${BOT_BASE}/webhook/notificacao`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numero: phone, mensagem, token: BOT_TOKEN }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-webhook-token": BOT_TOKEN,
+        },
+        body: JSON.stringify({ numero: phone, mensagem }),
       });
     } catch (e) {
       console.error("[notify-approval] WhatsApp falhou:", e);
