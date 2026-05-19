@@ -658,12 +658,14 @@ function Page() {
                 <Printer className="h-4 w-4" /> Imprimir
               </button>
               <button
-                onClick={() => {
-                  if (
-                    confirm(
-                      `Excluir o pedido #${String(order.id).slice(0, 8)}? Esta ação não pode ser desfeita.`,
-                    )
-                  ) {
+                onClick={async () => {
+                  const { confirmDialog } = await import("@/components/ConfirmDialog");
+                  const ok = await confirmDialog({
+                    title: "Excluir pedido?",
+                    description: `O pedido #${String(order.id).slice(0, 8)} será removido. Esta ação não pode ser desfeita.`,
+                    confirmLabel: "Excluir",
+                  });
+                  if (ok) {
                     deleteOrder(order.id);
                     setSelected(null);
                     toast.success("Pedido excluído");

@@ -117,7 +117,8 @@ function Page() {
   } = usePushNotifications({ role: 'admin' });
 
   const nukeServiceWorker = async () => {
-    if (!window.confirm("Isso vai limpar todas as configurações de notificação e recarregar a página. Continuar?")) return;
+    const { confirmDialog } = await import("@/components/ConfirmDialog");
+    if (!(await confirmDialog({ title: "Resetar notificações?", description: "Isso vai limpar todas as configurações de notificação e recarregar a página.", confirmLabel: "Continuar" }))) return;
     
     try {
       // Desregistra todos os Service Workers

@@ -27,6 +27,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
 import { AdminDeviceSyncBanner } from "@/components/AdminDeviceSyncBanner";
+import { ConfirmHost } from "@/components/ConfirmDialog";
 
 const nav = [
   {
@@ -192,6 +193,7 @@ export function AdminLayout({
         </main>
       </div>
       <EnableNotificationsPrompt />
+      <ConfirmHost />
     </div>
   );
 }

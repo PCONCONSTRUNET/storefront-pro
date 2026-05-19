@@ -399,8 +399,9 @@ function Page() {
                 <Check className="h-3.5 w-3.5" /> Marcar todas como lidas
               </button>
               <button
-                onClick={() => {
-                  if (confirm("Limpar todo o histórico?")) {
+                onClick={async () => {
+                  const { confirmDialog } = await import("@/components/ConfirmDialog");
+                  if (await confirmDialog({ title: "Limpar histórico?", description: "Todas as notificações serão removidas.", confirmLabel: "Limpar" })) {
                     clearLogs();
                     toast.success("Histórico limpo");
                   }

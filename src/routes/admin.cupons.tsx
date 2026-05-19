@@ -69,8 +69,9 @@ function Page() {
                 <Edit className="h-4 w-4" />
               </button>
               <button
-                onClick={() => {
-                  if (confirm("Excluir?")) {
+                onClick={async () => {
+                  const { confirmDialog } = await import("@/components/ConfirmDialog");
+                  if (await confirmDialog({ title: "Excluir cupom?", description: `“${c.code}” será removido.`, confirmLabel: "Excluir" })) {
                     deleteCoupon(c.code);
                     toast.success("Excluído");
                   }

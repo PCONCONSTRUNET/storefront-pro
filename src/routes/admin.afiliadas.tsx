@@ -276,12 +276,9 @@ function Page() {
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Excluir ${a.name}? Vendas dela também serão removidas.`,
-                                  )
-                                ) {
+                              onClick={async () => {
+                                const { confirmDialog } = await import("@/components/ConfirmDialog");
+                                if (await confirmDialog({ title: "Excluir afiliada?", description: `${a.name} e todas as vendas dela serão removidas.`, confirmLabel: "Excluir" })) {
                                   remove(a.id);
                                   toast.success("Afiliada removida");
                                 }
@@ -522,8 +519,9 @@ function Page() {
                         <X className="h-4 w-4" />
                       </ActionBtn>
                       <ActionBtn
-                        onClick={() => {
-                          if (confirm("Excluir esta venda?")) deleteSale(s.id);
+                        onClick={async () => {
+                          const { confirmDialog } = await import("@/components/ConfirmDialog");
+                          if (await confirmDialog({ title: "Excluir esta venda?", confirmLabel: "Excluir" })) deleteSale(s.id);
                         }}
                         title="Excluir"
                         cls="text-destructive hover:bg-destructive/10"
@@ -739,7 +737,8 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
   const totalValue = filtered.reduce((a, r) => a + Number(r.total_value || 0), 0);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Excluir este registro de retirada?")) return;
+    const { confirmDialog } = await import("@/components/ConfirmDialog");
+    if (!(await confirmDialog({ title: "Excluir registro de retirada?", confirmLabel: "Excluir" }))) return;
     try {
       const token = getAdminToken();
       if (!token) return;
