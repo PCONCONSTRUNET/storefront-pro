@@ -700,28 +700,32 @@ function RegisterSaleModal({
 
   const [data, setData] = useState({
     affiliateId: "",
-    customerName: "",
-    customerPhone: "",
-    productDescription: "",
+    quantity: "" as string, // qtd de laços vendidos (opcional)
     saleValue: 0,
+    commissionPercent: 25, // editável por venda
     status: "confirmada" as AffiliateSaleStatus,
+    notes: "",
   });
 
   const selectedAff = affiliates.find((a) => a.id === data.affiliateId);
-  const estimatedCommission = useMemo(() => {
-    // Se estiver criando uma nova, usa os valores do form de criação
+
+  // Sempre que trocar de afiliada (ou criar uma nova), prefilla a % com a dela
+  useEffect(() => {
     if (creatingNewAff) {
-      if (!data.saleValue) return 0;
-      return newAffData.commissionType === "percent"
-        ? (data.saleValue * newAffData.commissionValue) / 100
-        : newAffData.commissionValue;
+      if (newAffData.commissionType === "percent") {
+        setData((d) => ({ ...d, commissionPercent: newAffData.commissionValue }));
+      }
+      return;
     }
-    // Se estiver selecionando existente
-    if (!selectedAff || !data.saleValue) return 0;
-    return selectedAff.commissionType === "percent"
-      ? (data.saleValue * selectedAff.commissionValue) / 100
-      : selectedAff.commissionValue;
-  }, [selectedAff, creatingNewAff, newAffData, data.saleValue]);
+    if (selectedAff && selectedAff.commissionType === "percent") {
+      setData((d) => ({ ...d, commissionPercent: selectedAff.commissionValue }));
+    }
+  }, [data.affiliateId, creatingNewAff, newAffData.commissionType, newAffData.commissionValue, selectedAff]);
+
+  const estimatedCommission = useMemo(() => {
+    if (!data.saleValue) return 0;
+    return (data.saleValue * (Number(data.commissionPercent) || 0)) / 100;
+  }, [data.saleValue, data.commissionPercent]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -743,12 +747,26 @@ function RegisterSaleModal({
       finalAffId = newId;
     }
 
-    if (!finalAffId || !data.customerName || !data.saleValue) {
-      toast.error("Preencha os campos obrigatórios");
+    if (!finalAffId || !data.saleValue) {
+      toast.error("Selecione a afiliada e informe o valor total da venda");
       return;
     }
 
-    register({ ...data, affiliateId: finalAffId });
+    const affName = creatingNewAff
+      ? newAffData.name
+      : (selectedAff?.name ?? "Afiliada");
+    const qtyLabel = data.quantity ? `${data.quantity} laços` : "Venda consolidada";
+
+    register({
+      affiliateId: finalAffId,
+      customerName: affName, // venda agregada — usamos o nome da afiliada como referência
+      customerPhone: "",
+      productDescription: qtyLabel,
+      saleValue: data.saleValue,
+      commissionOverride: Math.round(estimatedCommission * 100) / 100,
+      status: data.status,
+      notes: data.notes || undefined,
+    });
     toast.success("Venda registrada e contabilizada!");
     onClose();
   };
