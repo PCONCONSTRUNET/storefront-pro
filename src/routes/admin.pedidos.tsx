@@ -157,7 +157,7 @@ function Page() {
         (o.mpPaymentId || "").toLowerCase().includes(term)
       );
     });
-  }, [orders, filter, statusFilter, methodFilter, period, term, digits]);
+  }, [orders, filter, statusFilter, deliveryFilter, methodFilter, period, term, digits]);
 
   const stats = useMemo(() => {
     const pending = orders.filter((o) => normalizeOrderStatus(o.status) === "aguardando_pagamento");
