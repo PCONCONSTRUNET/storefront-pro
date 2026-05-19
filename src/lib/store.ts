@@ -332,6 +332,7 @@ type AppState = {
     notes?: string;
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  updateDeliveryStatus: (id: string, status: DeliveryStatus) => void;
   deleteOrder: (id: string) => void;
   saveRemoteOrder: (data: {
     id: string;
