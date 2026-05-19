@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
     transaction_amount: Number(total.toFixed(2)),
     token: card.token,
     description: `Pedido Princesa de Laços #${order.id.slice(0, 8)}`,
-    installments: Number(card.installments ?? 1),
+    installments: requestedInst,
     payment_method_id: card.payment_method_id,
     notification_url: webhookUrl,
     external_reference: order.id,
