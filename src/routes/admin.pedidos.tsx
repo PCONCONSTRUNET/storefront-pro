@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
+import {
+  useStore,
+  ORDER_STATUS_LABEL,
+  getOrderStatusLabel,
+  normalizeOrderStatus,
+  type OrderStatus,
+} from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
 import { Modal } from "@/components/AdminModal";
@@ -111,19 +117,20 @@ function Page() {
             : 0;
 
     return orders.filter((o) => {
-      if (filter === "pendentes" && o.status !== "aguardando_pagamento")
+      const status = normalizeOrderStatus(o.status);
+      if (filter === "pendentes" && status !== "aguardando_pagamento")
         return false;
-      if (filter === "pagos" && o.status !== "pago") return false;
+      if (filter === "pagos" && status !== "pago") return false;
       if (
         filter === "em_andamento" &&
-        !["em_separacao", "saiu_para_entrega"].includes(o.status)
+        !["em_separacao", "saiu_para_entrega"].includes(status)
       )
         return false;
-      if (filter === "concluidos" && o.status !== "concluido") return false;
-      if (filter === "cancelados" && !["cancelado", "reembolsado"].includes(o.status))
+      if (filter === "concluidos" && status !== "concluido") return false;
+      if (filter === "cancelados" && !["cancelado", "reembolsado"].includes(status))
         return false;
 
-      if (statusFilter && o.status !== statusFilter) return false;
+      if (statusFilter && status !== statusFilter) return false;
       if (methodFilter && o.paymentMethod !== methodFilter) return false;
 
       if (periodMs && now - new Date(o.createdAt).getTime() > periodMs)
@@ -141,18 +148,18 @@ function Page() {
   }, [orders, filter, statusFilter, methodFilter, period, term, digits]);
 
   const stats = useMemo(() => {
-    const pending = orders.filter((o) => o.status === "aguardando_pagamento");
-    const paid = orders.filter((o) => o.status === "pago");
+    const pending = orders.filter((o) => normalizeOrderStatus(o.status) === "aguardando_pagamento");
+    const paid = orders.filter((o) => normalizeOrderStatus(o.status) === "pago");
     const inProgress = orders.filter((o) =>
-      ["em_separacao", "saiu_para_entrega"].includes(o.status),
+      ["em_separacao", "saiu_para_entrega"].includes(normalizeOrderStatus(o.status)),
     );
     const cancelled = orders.filter((o) =>
-      ["cancelado", "reembolsado"].includes(o.status),
+      ["cancelado", "reembolsado"].includes(normalizeOrderStatus(o.status)),
     );
     const revenue = orders
       .filter((o) =>
         ["pago", "em_separacao", "saiu_para_entrega", "concluido"].includes(
-          o.status,
+          normalizeOrderStatus(o.status),
         ),
       )
       .reduce((a, o) => a + o.total, 0);
