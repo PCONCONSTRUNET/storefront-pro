@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import type { Product } from "@/lib/data";
 import { ImageCropModal } from "@/components/ImageCropModal";
+import { Modal } from "@/components/AdminModal";
 
 export const Route = createFileRoute("/admin/produtos")({
   component: Page,
