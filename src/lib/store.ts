@@ -17,9 +17,13 @@ export {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
   normalizeOrderStatus,
+  DELIVERY_STATUS_LABEL,
+  getDeliveryStatusLabel,
+  normalizeDeliveryStatus,
   type OrderStatus,
+  type DeliveryStatus,
 } from "./orderStatus";
-import { normalizeOrderStatus, type OrderStatus } from "./orderStatus";
+import { normalizeOrderStatus, normalizeDeliveryStatus, type OrderStatus, type DeliveryStatus } from "./orderStatus";
 
 const brlFmt = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -88,6 +92,7 @@ export type Order = {
   paymentMethod: "pix" | "card" | "cash";
   deliveryMethod: "entrega" | "retirada";
   status: OrderStatus;
+  deliveryStatus: DeliveryStatus;
   createdAt: string;
   address: string;
   couponCode?: string;
@@ -327,6 +332,7 @@ type AppState = {
     notes?: string;
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  updateDeliveryStatus: (id: string, status: DeliveryStatus) => void;
   deleteOrder: (id: string) => void;
   saveRemoteOrder: (data: {
     id: string;
@@ -974,6 +980,7 @@ export const useStore = create<AppState>()(
           deliveryMethod: data.deliveryMethod,
           status:
             data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
+          deliveryStatus: "pendente",
           createdAt: new Date().toISOString(),
           address:
             data.deliveryMethod === "retirada"
@@ -1100,6 +1107,7 @@ export const useStore = create<AppState>()(
           paymentMethod: data.paymentMethod,
           deliveryMethod: data.deliveryMethod,
           status: normalizeOrderStatus(data.status),
+          deliveryStatus: "pendente",
           createdAt: new Date().toISOString(),
           address: data.address,
           notes: data.notes,
@@ -1175,6 +1183,14 @@ export const useStore = create<AppState>()(
             )
             .catch(() => {});
         }
+      },
+      updateDeliveryStatus: (id, status) => {
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === id ? { ...o, deliveryStatus: status } : o,
+          ),
+        }));
+        cloud.updateDeliveryStatus(id, status);
       },
       deleteOrder: (id) => {
         set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }));

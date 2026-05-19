@@ -5,7 +5,10 @@ import {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
   normalizeOrderStatus,
+  normalizeDeliveryStatus,
+  DELIVERY_STATUS_LABEL,
   type OrderStatus,
+  type DeliveryStatus,
 } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
@@ -82,7 +85,7 @@ type QuickFilter =
   | "cancelados";
 
 function Page() {
-  const { orders, updateOrderStatus, deleteOrder, sync, settings } = useStore();
+  const { orders, updateOrderStatus, updateDeliveryStatus, deleteOrder, sync, settings } = useStore();
   useEffect(() => {
     sync();
   }, [sync]);
@@ -405,6 +408,10 @@ function Page() {
                           <Icon className="h-3 w-3" />
                           {ORDER_STATUS_LABEL[status]}
                         </span>
+                        <span className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border bg-indigo-50 text-indigo-800 border-indigo-200">
+                          <Truck className="h-3 w-3" />
+                          {DELIVERY_STATUS_LABEL[normalizeDeliveryStatus(o.deliveryStatus)]}
+                        </span>
                         {expired && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700 border border-red-200">
                             Pix expirado
@@ -436,12 +443,19 @@ function Page() {
       </div>
 
       {order && (() => {
-        const status = normalizeOrderStatus(order.status);
-        const quickSteps: { value: OrderStatus; label: string; icon: any }[] = [
+        const paymentStatus = normalizeOrderStatus(order.status);
+        const deliveryStatus = normalizeDeliveryStatus(order.deliveryStatus);
+        const paymentSteps: { value: OrderStatus; label: string; icon: any }[] = [
           { value: "pago", label: "Pago", icon: CheckCircle2 },
+          { value: "aguardando_pagamento", label: "Aguardando", icon: Clock },
+          { value: "cancelado", label: "Cancelado", icon: XCircle },
+          { value: "reembolsado", label: "Reembolsado", icon: RefreshCw },
+        ];
+        const deliverySteps: { value: DeliveryStatus; label: string; icon: any }[] = [
+          { value: "pendente", label: "Pendente", icon: Clock },
           { value: "em_separacao", label: "Em separação", icon: Package },
           { value: "saiu_para_entrega", label: "Saiu p/ entrega", icon: Truck },
-          { value: "concluido", label: "Entregue", icon: CheckCircle2 },
+          { value: "entregue", label: "Entregue", icon: CheckCircle2 },
         ];
         return (
         <Modal
@@ -452,29 +466,30 @@ function Page() {
             {/* Status header */}
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border ${STATUS_STYLE[status]}`}
+                className={`text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border ${STATUS_STYLE[paymentStatus]}`}
               >
                 {getOrderStatusLabel(order.status)}
               </span>
-              <span className="text-[11px] text-muted-foreground">
-                {formatDate(order.createdAt)}
+              <span className="text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border bg-indigo-50 text-indigo-800 border-indigo-200">
+                <Truck className="h-3 w-3" /> {DELIVERY_STATUS_LABEL[deliveryStatus]}
               </span>
-              {order.paidAt && (
-                <span className="text-[11px] text-emerald-700">
-                  · Pago {formatDate(order.paidAt)}
-                </span>
-              )}
+              <span className="text-[11px] text-muted-foreground w-full">
+                {formatDate(order.createdAt)}
+                {order.paidAt && (
+                  <span className="text-emerald-700"> · Pago {formatDate(order.paidAt)}</span>
+                )}
+              </span>
             </div>
 
-            {/* Quick status actions */}
+            {/* Pagamento — quick actions */}
             <div className="rounded-xl border border-border p-2 bg-muted/30">
-              <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide mb-1.5 px-1">
-                Marcar como
+              <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide mb-1.5 px-1 flex items-center gap-1">
+                <CreditCard className="h-3 w-3" /> Pagamento
               </div>
               <div className="grid grid-cols-2 gap-1.5">
-                {quickSteps.map((s) => {
+                {paymentSteps.map((s) => {
                   const Icon = s.icon;
-                  const isCurrent = status === s.value;
+                  const isCurrent = paymentStatus === s.value;
                   return (
                     <button
                       key={s.value}
@@ -483,7 +498,7 @@ function Page() {
                         setBusy(true);
                         try {
                           await updateOrderStatus(order.id, s.value);
-                          toast.success(`Marcado como ${s.label}`);
+                          toast.success(`Pagamento: ${s.label}`);
                         } finally {
                           setBusy(false);
                         }
@@ -499,25 +514,41 @@ function Page() {
                   );
                 })}
               </div>
-              <details className="mt-1.5 px-1">
-                <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary">
-                  Outros status…
-                </summary>
-                <select
-                  value={status}
-                  onChange={(e) => {
-                    updateOrderStatus(order.id, e.target.value as OrderStatus);
-                    toast.success("Status atualizado");
-                  }}
-                  className="mt-1.5 w-full h-9 px-2 rounded-lg bg-card border border-border text-xs"
-                >
-                  {statuses.map((s) => (
-                    <option key={s} value={s}>
-                      {ORDER_STATUS_LABEL[s]}
-                    </option>
-                  ))}
-                </select>
-              </details>
+            </div>
+
+            {/* Entrega — quick actions independentes */}
+            <div className="rounded-xl border border-border p-2 bg-muted/30">
+              <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide mb-1.5 px-1 flex items-center gap-1">
+                <Truck className="h-3 w-3" /> Entrega
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {deliverySteps.map((s) => {
+                  const Icon = s.icon;
+                  const isCurrent = deliveryStatus === s.value;
+                  return (
+                    <button
+                      key={s.value}
+                      disabled={isCurrent || busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          await updateDeliveryStatus(order.id, s.value);
+                          toast.success(`Entrega: ${s.label}`);
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                      className={`h-9 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition ${
+                        isCurrent
+                          ? "bg-indigo-600 text-white border-indigo-600 cursor-default"
+                          : "bg-card hover:bg-indigo-500/10 hover:border-indigo-400/40 border-border"
+                      } disabled:opacity-60`}
+                    >
+                      <Icon className="h-3.5 w-3.5" /> {s.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Cliente */}

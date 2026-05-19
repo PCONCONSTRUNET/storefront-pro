@@ -26,7 +26,7 @@ import type {
   ActivityLog,
 } from "./store";
 import type { Category, Coupon, Product } from "./data";
-import { normalizeOrderStatus } from "./orderStatus";
+import { normalizeOrderStatus, normalizeDeliveryStatus } from "./orderStatus";
 
 // ---------- helpers ----------
 const log = (label: string, err: unknown) => {
@@ -211,6 +211,7 @@ const toOrder = (r: any): Order => ({
   paymentMethod: r.payment_method,
   deliveryMethod: r.delivery_method,
   status: normalizeOrderStatus(r.payment_status),
+  deliveryStatus: normalizeDeliveryStatus(r.delivery_status),
   createdAt: r.created_at,
   address: r.address || "",
   notes: r.notes || undefined,
@@ -439,6 +440,9 @@ export const cloud = {
 
   async updateOrderStatus(id: string, status: string) {
     await adminPatch("orders", { id }, { payment_status: status });
+  },
+  async updateDeliveryStatus(id: string, status: string) {
+    await adminPatch("orders", { id }, { delivery_status: status });
   },
   async deleteOrder(id: string) {
     await adminDelete("orders", { id });
