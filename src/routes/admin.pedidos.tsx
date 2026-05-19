@@ -181,22 +181,6 @@ function Page() {
     toast.success(label);
   };
 
-  const simulateApprove = async (id: string) => {
-    setBusy(true);
-    try {
-      const { error } = await supabase.functions.invoke(
-        "mp-simulate-approve",
-        { body: { order_id: id } },
-      );
-      if (error) throw error;
-      toast.success("Pedido aprovado (sandbox)");
-      await sync();
-    } catch (e: any) {
-      toast.error("Falha ao aprovar: " + (e?.message || ""));
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const exportCsv = () => {
     const header = [
