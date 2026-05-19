@@ -1,21 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { CheckCircle2, Copy, Loader2, X, FlaskConical } from "lucide-react";
+import { CheckCircle2, Copy, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { brl } from "@/lib/format";
 import {
   createPixPayment,
   fetchOrder,
-  isSandboxOrder,
-  simulateApprove,
   type CreatePixInput,
   type CreatePixResult,
   type OrderRow,
 } from "@/lib/mercadopago";
 import { playBeep } from "@/lib/sound";
 import pixIcon from "@/assets/pix-icon.png";
-
-type PixStatusProbe = Pick<OrderRow, "pix_qr_code">;
 
 type Props = {
   open: boolean;
