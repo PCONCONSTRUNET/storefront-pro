@@ -382,8 +382,34 @@ function Page() {
           payload={cardModal}
           onClose={() => setCardModal(null)}
           onSuccess={(result) => {
+            const p = cardModal;
             setCardModal(null);
             if (result.status === "approved") {
+              if (p) {
+                useStore.getState().saveRemoteOrder({
+                  id: result.order_id,
+                  customerName: p.customer.name,
+                  customerEmail: p.customer.email,
+                  customerPhone: p.customer.phone,
+                  items: p.items.map((i) => ({
+                    productId: i.productId,
+                    name: i.name,
+                    price: i.price,
+                    quantity: i.quantity,
+                    image: i.image ?? "",
+                  })),
+                  subtotal: p.totals.subtotal,
+                  discount: p.totals.discount,
+                  shipping: p.totals.shipping,
+                  total: p.totals.total,
+                  paymentMethod: "card",
+                  deliveryMethod: p.delivery,
+                  address: p.address ?? "",
+                  notes: p.notes,
+                  status: "pago",
+                  paidAt: new Date().toISOString(),
+                });
+              }
               useStore.getState().clearCart();
             }
             playBeep();
