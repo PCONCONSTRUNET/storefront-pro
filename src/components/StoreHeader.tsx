@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { Search, Bell, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useStore, selectCartCount } from "@/lib/store";
+import { useStore, selectCartCount, selectCurrentCustomer } from "@/lib/store";
 import logo from "@/assets/logo-princesa.png";
 
 const STORE_ROUTES_TO_PRELOAD = [
@@ -19,6 +19,7 @@ export function StoreHeader() {
   const router = useRouter();
   const count = useStore(selectCartCount);
   const settings = useStore((s) => s.settings);
+  const currentCustomer = useStore(selectCurrentCustomer);
   const [q, setQ] = useState("");
 
   useEffect(() => {
@@ -50,15 +51,17 @@ export function StoreHeader() {
               Acompanhar pedido
             </Link>
           </div>
-          <div className="flex items-center gap-4 opacity-90">
-            <Link to="/cadastro" className="hover:underline">
-              Cadastrar
-            </Link>
-            <span className="opacity-50">|</span>
-            <Link to="/login" className="hover:underline">
-              Entrar
-            </Link>
-          </div>
+          {!currentCustomer && (
+            <div className="flex items-center gap-4 opacity-90">
+              <Link to="/cadastro" className="hover:underline">
+                Cadastrar
+              </Link>
+              <span className="opacity-50">|</span>
+              <Link to="/login" className="hover:underline">
+                Entrar
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
