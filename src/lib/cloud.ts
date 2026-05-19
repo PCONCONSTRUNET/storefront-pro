@@ -133,6 +133,7 @@ const toProduct = (r: any): Product => ({
   active: r.active !== false,
   hidden: r.extra?.hidden || false,
   minStock: r.extra?.minStock,
+  sortOrder: r.extra?.sortOrder,
   variations: Array.isArray(r.variations) ? r.variations : [],
 });
 
