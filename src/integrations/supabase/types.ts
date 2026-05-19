@@ -86,6 +86,36 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_consignments: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          picked_up_at: string
+          quantity: number
+          total_value: number
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          picked_up_at?: string
+          quantity?: number
+          total_value?: number
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          picked_up_at?: string
+          quantity?: number
+          total_value?: number
+        }
+        Relationships: []
+      }
       affiliate_credentials: {
         Row: {
           affiliate_id: string
