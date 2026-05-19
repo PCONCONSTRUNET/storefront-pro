@@ -1,0 +1,1 @@
+insert into store_settings (id, data) values (1, jsonb_build_object('address','Rua Jaime Locatelli — Bairro Farroupilha')) on conflict (id) do update set data = store_settings.data || jsonb_build_object('address','Rua Jaime Locatelli — Bairro Farroupilha'), updated_at = now();
