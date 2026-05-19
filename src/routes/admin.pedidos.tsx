@@ -85,7 +85,7 @@ type QuickFilter =
   | "cancelados";
 
 function Page() {
-  const { orders, updateOrderStatus, deleteOrder, sync, settings } = useStore();
+  const { orders, updateOrderStatus, updateDeliveryStatus, deleteOrder, sync, settings } = useStore();
   useEffect(() => {
     sync();
   }, [sync]);
