@@ -26,14 +26,13 @@ export async function loadGatewayConfig(
     const { data } = await supabase
       .from("payment_gateway")
       .select(
-        "mp_access_token, mp_public_key, environment, max_installments, installment_fees",
+        "mp_access_token, mp_public_key, max_installments, installment_fees",
       )
       .eq("id", 1)
       .maybeSingle();
     if (data) {
       access_token = access_token ?? data.mp_access_token ?? null;
       public_key = public_key ?? data.mp_public_key ?? null;
-      environment = (data.environment as any) ?? "sandbox";
       max_installments = Number(data.max_installments ?? 3);
       installment_fees = (data.installment_fees as any) ?? {};
     }
@@ -44,7 +43,7 @@ export async function loadGatewayConfig(
   return {
     access_token,
     public_key,
-    environment,
+    environment: "production",
     max_installments,
     installment_fees,
   };
