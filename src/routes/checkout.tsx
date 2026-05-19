@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   CreditCard,
-  Banknote,
+  
   QrCode,
   Loader2,
 } from "lucide-react";
@@ -175,13 +175,6 @@ function Page() {
       sub: "Em até 3x sem juros",
       icon: CreditCard,
       enabled: settings.acceptCard,
-    },
-    {
-      id: "cash",
-      label: "Dinheiro na retirada",
-      sub: "Pague ao retirar no ateliê",
-      icon: Banknote,
-      enabled: settings.acceptCash,
     },
   ];
 
