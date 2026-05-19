@@ -920,91 +920,94 @@ function RegisterSaleModal({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Nome do Cliente *">
-            <input
-              value={data.customerName}
-              onChange={(e) =>
-                setData({ ...data, customerName: e.target.value })
-              }
-              className="input"
-              placeholder="Ex: Maria Silva"
-              required
-            />
-          </Field>
-          <Field label="WhatsApp/Telefone">
-            <input
-              value={data.customerPhone}
-              onChange={(e) =>
-                setData({ ...data, customerPhone: e.target.value })
-              }
-              className="input"
-              placeholder="(00) 00000-0000"
-            />
-          </Field>
-        </div>
-
-        <Field label="Produto ou Descrição *">
-          <input
-            value={data.productDescription}
-            onChange={(e) =>
-              setData({ ...data, productDescription: e.target.value })
-            }
-            className="input"
-            placeholder="Ex: 2x Laços G"
-            required
-          />
-        </Field>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Valor da Venda (R$) *">
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Valor Total Vendido (R$) *">
             <input
               type="number"
               step="0.01"
+              min="0"
               value={data.saleValue || ""}
               onChange={(e) =>
                 setData({ ...data, saleValue: parseFloat(e.target.value) || 0 })
               }
               className="input font-bold"
+              placeholder="0,00"
               required
             />
           </Field>
-          <Field label="Status">
-            <select
-              value={data.status}
+          <Field label="Comissão (%) *">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              value={data.commissionPercent || ""}
               onChange={(e) =>
-                setData({ ...data, status: e.target.value as any })
+                setData({
+                  ...data,
+                  commissionPercent: parseFloat(e.target.value) || 0,
+                })
               }
+              className="input font-bold"
+              placeholder="Ex: 25"
+              required
+            />
+          </Field>
+          <Field label="Qtd. de Laços">
+            <input
+              type="number"
+              min="0"
+              value={data.quantity}
+              onChange={(e) => setData({ ...data, quantity: e.target.value })}
               className="input"
-            >
-              <option value="confirmada">Paga (Confirmada)</option>
-              <option value="pendente">Pendente</option>
-            </select>
+              placeholder="Opcional"
+            />
           </Field>
         </div>
 
-        {(selectedAff || creatingNewAff) && (
-          <div className="bg-muted/40 p-3 rounded-2xl border border-border">
-            <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
+        <Field label="Status">
+          <select
+            value={data.status}
+            onChange={(e) =>
+              setData({ ...data, status: e.target.value as any })
+            }
+            className="input"
+          >
+            <option value="confirmada">Paga (Confirmada)</option>
+            <option value="pendente">Pendente</option>
+          </select>
+        </Field>
+
+        <Field label="Observações">
+          <textarea
+            value={data.notes}
+            onChange={(e) => setData({ ...data, notes: e.target.value })}
+            className="input min-h-[60px]"
+            placeholder="Ex: fechamento da semana, devolveu 3 laços, etc."
+          />
+        </Field>
+
+        {(selectedAff || creatingNewAff) && data.saleValue > 0 && (
+          <div className="bg-muted/40 p-3 rounded-2xl border border-border space-y-1">
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>Total vendido</span>
+              <span className="font-bold">{brl(data.saleValue)}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
               <span>
-                Comissão de{" "}
+                Comissão{" "}
                 {creatingNewAff
-                  ? newAffData.name || "Nova Afiliada"
+                  ? newAffData.name || "afiliada"
                   : selectedAff?.name}{" "}
-                (
-                {(creatingNewAff
-                  ? newAffData.commissionType
-                  : selectedAff?.commissionType) === "percent"
-                  ? `${creatingNewAff ? newAffData.commissionValue : selectedAff?.commissionValue}%`
-                  : "Fixo"}
-                )
+                ({data.commissionPercent}%)
               </span>
               <span className="font-bold text-gold">
                 {brl(estimatedCommission)}
               </span>
             </div>
+            <div className="border-t border-border my-1" />
             <div className="flex justify-between items-center text-sm font-bold">
-              <span>Líquido para Loja</span>
+              <span>Líquido para a Loja</span>
               <span className="text-success">
                 {brl(data.saleValue - estimatedCommission)}
               </span>
