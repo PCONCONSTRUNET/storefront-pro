@@ -19,7 +19,7 @@ export {
   normalizeOrderStatus,
   type OrderStatus,
 } from "./orderStatus";
-import { normalizeOrderStatus, type OrderStatus } from "./orderStatus";
+import { normalizeOrderStatus, normalizeDeliveryStatus, type OrderStatus, type DeliveryStatus } from "./orderStatus";
 
 const brlFmt = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
