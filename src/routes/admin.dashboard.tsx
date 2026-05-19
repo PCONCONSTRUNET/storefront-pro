@@ -12,7 +12,6 @@ import {
   TrendingUp,
   TrendingDown,
   Bell,
-  ArrowUpRight,
   Sparkles,
   Crown,
   Activity,
@@ -25,10 +24,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  BarChart,
-  Bar,
   CartesianGrid,
-  Cell,
 } from "recharts";
 
 export const Route = createFileRoute("/admin/dashboard")({
