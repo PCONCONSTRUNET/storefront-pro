@@ -93,14 +93,15 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
               paidAt: new Date().toISOString(),
             });
           }
-          useStore.getState().clearCart();
           playBeep();
           toast.success("Pagamento aprovado! 🎉");
+          // Navega ANTES de limpar o carrinho para evitar o flash de "Carrinho vazio"
+          navigate({ to: "/pedido/$id", params: { id: o.id } });
+          onClose();
+          // Limpa o carrinho depois que a navegação já saiu do /checkout
           setTimeout(() => {
-            if (cancelled) return;
-            onClose();
-            navigate({ to: "/pedido/$id", params: { id: o.id } });
-          }, 1500);
+            useStore.getState().clearCart();
+          }, 100);
           return;
         }
         if (["rejected", "cancelled", "expired"].includes(o.payment_status)) {
