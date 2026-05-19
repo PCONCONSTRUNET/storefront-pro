@@ -68,6 +68,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
         }
         setOrder(o);
         if (o.payment_status === "approved") {
+          useStore.getState().clearCart();
           playBeep();
           toast.success("Pagamento aprovado! 🎉");
           setTimeout(() => {
