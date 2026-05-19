@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   CreditCard,
-  Banknote,
+  
   QrCode,
   Loader2,
 } from "lucide-react";
