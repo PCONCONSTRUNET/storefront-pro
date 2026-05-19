@@ -341,7 +341,7 @@ type AppState = {
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
 
-  upsertProduct: (p: Product) => void;
+  upsertProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
   upsertCategory: (c: Category) => void;
   deleteCategory: (id: string) => void;
@@ -1147,13 +1147,14 @@ export const useStore = create<AppState>()(
         cloud.deleteOrder(id);
       },
 
-      upsertProduct: (p) => {
+      upsertProduct: async (p) => {
+        // Persiste primeiro no servidor; só atualiza estado local se OK.
+        await cloud.upsertProduct(p);
         set((s) => ({
           products: s.products.find((x) => x.id === p.id)
             ? s.products.map((x) => (x.id === p.id ? p : x))
             : [...s.products, p],
         }));
-        cloud.upsertProduct(p);
       },
       deleteProduct: (id) => {
         set((s) => ({ products: s.products.filter((p) => p.id !== id) }));
