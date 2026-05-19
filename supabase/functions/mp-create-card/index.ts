@@ -71,7 +71,14 @@ Deno.serve(async (req) => {
   );
   const feePct =
     Number(gateway.installment_fees?.[String(requestedInst)] ?? 0) || 0;
-  const total = Math.round(baseTotal * (1 + feePct / 100) * 100) / 100;
+  let fee = 0;
+  if (feePct > 0 && baseTotal > 0) {
+    const raw = Math.round(baseTotal * (feePct / 100) * 100) / 100;
+    // garante que qualquer % de juros gere ao menos R$ 0,01 cobrado
+    fee = Math.max(0.01, raw);
+  }
+  const total = Math.round((baseTotal + fee) * 100) / 100;
+
 
   if (total <= 0) return json({ error: "Total inválido" }, 400);
 
