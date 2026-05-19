@@ -2,6 +2,7 @@
 // POST /functions/v1/mp-create-pix
 // Body: { customer: {...}, items: [...], totals: {...}, delivery, address, notes }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { loadGatewayConfig } from "../_shared/gateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,8 +23,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST")
     return json({ error: "Método não permitido" }, 405);
 
-  const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  const SANDBOX = !MP_TOKEN;
+  // MP_TOKEN/SANDBOX serão definidos após carregar a config do gateway abaixo.
 
   let body: any;
   try {
@@ -46,6 +46,10 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  const gateway = await loadGatewayConfig(supabase);
+  const MP_TOKEN = gateway.access_token;
+  const SANDBOX = !MP_TOKEN;
 
   // 1) Cria pedido no banco
   const { data: order, error: insErr } = await supabase
