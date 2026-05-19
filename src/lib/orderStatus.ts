@@ -51,3 +51,42 @@ export function normalizeOrderStatus(status: unknown): OrderStatus {
 export function getOrderStatusLabel(status: unknown) {
   return ORDER_STATUS_LABEL[normalizeOrderStatus(status)];
 }
+
+// ---------- Delivery status (separado do pagamento) ----------
+export type DeliveryStatus =
+  | "pendente"
+  | "em_separacao"
+  | "saiu_para_entrega"
+  | "entregue";
+
+export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
+  pendente: "Pendente",
+  em_separacao: "Em separação",
+  saiu_para_entrega: "Saiu para entrega",
+  entregue: "Entregue",
+};
+
+const DELIVERY_VALUES = new Set<DeliveryStatus>([
+  "pendente",
+  "em_separacao",
+  "saiu_para_entrega",
+  "entregue",
+]);
+
+const DELIVERY_ALIASES: Record<string, DeliveryStatus> = {
+  concluido: "entregue",
+  delivered: "entregue",
+  shipped: "saiu_para_entrega",
+  separacao: "em_separacao",
+  preparing: "em_separacao",
+};
+
+export function normalizeDeliveryStatus(status: unknown): DeliveryStatus {
+  const v = String(status || "").trim().toLowerCase();
+  if (DELIVERY_VALUES.has(v as DeliveryStatus)) return v as DeliveryStatus;
+  return DELIVERY_ALIASES[v] || "pendente";
+}
+
+export function getDeliveryStatusLabel(status: unknown) {
+  return DELIVERY_STATUS_LABEL[normalizeDeliveryStatus(status)];
+}
