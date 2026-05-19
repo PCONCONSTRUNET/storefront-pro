@@ -2,20 +2,13 @@
 // dispara WhatsApp via bot da VPS e e-mail de confirmação.
 // POST /functions/v1/mp-webhook?type=payment&data.id=123
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { loadGatewayConfig } from "../_shared/gateway.ts";
 
 const BOT_BASE = "http://178.105.54.230:3005";
 const BOT_TOKEN = "princesa_secret_123";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204 });
-
-  const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  if (!MP_TOKEN) {
-    console.warn(
-      "[mp-webhook] sem MERCADOPAGO_ACCESS_TOKEN — ignorando (modo sandbox)",
-    );
-    return new Response("sandbox", { status: 200 });
-  }
 
   // MP envia ?type=payment&data.id=XXX (e/ou body com {type, data:{id}})
   const url = new URL(req.url);
@@ -41,6 +34,13 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  const gateway = await loadGatewayConfig(supabase);
+  const MP_TOKEN = gateway.access_token;
+  if (!MP_TOKEN) {
+    console.warn("[mp-webhook] sem token configurado — ignorando (sandbox)");
+    return new Response("sandbox", { status: 200 });
+  }
 
   // Idempotência: se já processamos esse evento, retorna ok
   const eventId = `mp-${paymentId}-${Date.now()}`;

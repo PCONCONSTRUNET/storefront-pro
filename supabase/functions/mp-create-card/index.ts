@@ -2,6 +2,7 @@
 // POST /functions/v1/mp-create-card
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { notifyOrderApproved } from "../_shared/notify-approval.ts";
+import { loadGatewayConfig } from "../_shared/gateway.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,8 +23,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST")
     return json({ error: "Método não permitido" }, 405);
 
-  const MP_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
-  const SANDBOX = !MP_TOKEN;
+  // MP_TOKEN/SANDBOX serão carregados da config do gateway abaixo.
 
   let body: any;
   try {
@@ -41,15 +41,20 @@ Deno.serve(async (req) => {
   if (!customer.name || !customer.email || !customer.phone) {
     return json({ error: "Dados do cliente incompletos" }, 400);
   }
-  if (!SANDBOX && (!card.token || !card.payment_method_id)) {
-    return json({ error: "Dados do cartão incompletos" }, 400);
-  }
   if (total <= 0) return json({ error: "Total inválido" }, 400);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  const gateway = await loadGatewayConfig(supabase);
+  const MP_TOKEN = gateway.access_token;
+  const SANDBOX = !MP_TOKEN;
+
+  if (!SANDBOX && (!card.token || !card.payment_method_id)) {
+    return json({ error: "Dados do cartão incompletos" }, 400);
+  }
 
   // 1) Cria pedido
   const { data: order, error: insErr } = await supabase

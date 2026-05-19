@@ -491,6 +491,36 @@ export type Database = {
           },
         ]
       }
+      payment_gateway: {
+        Row: {
+          environment: string
+          id: number
+          installment_fees: Json
+          max_installments: number
+          mp_access_token: string | null
+          mp_public_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          environment?: string
+          id?: number
+          installment_fees?: Json
+          max_installments?: number
+          mp_access_token?: string | null
+          mp_public_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          environment?: string
+          id?: number
+          installment_fees?: Json
+          max_installments?: number
+          mp_access_token?: string | null
+          mp_public_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_waitlist: {
         Row: {
           created_at: string
