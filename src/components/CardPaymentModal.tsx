@@ -427,8 +427,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
                     Juros do cartão de crédito (
                     {selected.feePct.toString().replace(".", ",")}%)
                   </span>
-                  <span>+ {brl(selected.total - baseTotal)}</span>
+                  <span>+ {brl(selected.fee)}</span>
                 </div>
+
               ) : (
                 <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>Sem juros</span>
