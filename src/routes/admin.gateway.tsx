@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/gateway")({
   component: Page,
 });
 
-type Env = "sandbox" | "production";
+
 
 const WEBHOOK_URL =
   "https://glezvjgtzplflzevclor.supabase.co/functions/v1/mp-webhook";
