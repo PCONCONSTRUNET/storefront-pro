@@ -108,31 +108,6 @@ function Page() {
       return;
     }
 
-    const shipping = 0;
-    const total = Math.max(0, totals.subtotal - totals.discount);
-    const sharedPayload = {
-      customer: { name: form.name, email: form.email, phone: form.phone },
-      items: cart.map((it) => {
-        const p = products.find((x) => x.id === it.productId);
-        return {
-          productId: it.productId,
-          name: p?.name ?? "Produto",
-          price: p?.price ?? 0,
-          quantity: it.quantity,
-          image: (p as any)?.image,
-        };
-      }),
-      totals: {
-        subtotal: totals.subtotal,
-        discount: totals.discount,
-        shipping,
-        total,
-      },
-      delivery: "retirada" as const,
-      address: settings.address,
-      notes: form.notes,
-    };
-
     // Cartão → abre modal próprio (Checkout Transparente Mercado Pago)
     if (form.payment === "card") {
       setCardModal(sharedPayload);
