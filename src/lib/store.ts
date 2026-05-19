@@ -979,6 +979,7 @@ export const useStore = create<AppState>()(
           deliveryMethod: data.deliveryMethod,
           status:
             data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
+          deliveryStatus: "pendente",
           createdAt: new Date().toISOString(),
           address:
             data.deliveryMethod === "retirada"
