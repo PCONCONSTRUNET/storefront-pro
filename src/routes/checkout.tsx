@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
 import { createPixPayment } from "@/lib/mercadopago";
 import { CardPaymentModal } from "@/components/CardPaymentModal";
+import { PixPaymentModal } from "@/components/PixPaymentModal";
+import type { CreatePixInput } from "@/lib/mercadopago";
 import mpIcon from "@/assets/mercadopago-icon.png";
 import pixIcon from "@/assets/pix-icon.png";
 import cardIcon from "@/assets/card-icon.png";
@@ -37,6 +39,7 @@ function Page() {
   const [cardModal, setCardModal] = useState<
     null | Parameters<typeof CardPaymentModal>[0]["payload"]
   >(null);
+  const [pixModal, setPixModal] = useState<CreatePixInput | null>(null);
   const [form, setForm] = useState({
     name: customer?.name || "",
     email: customer?.email || "",
