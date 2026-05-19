@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CreditCard,
   Loader2,
@@ -96,8 +97,20 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   );
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const lastBin = useRef<string>("");
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!open || typeof document === "undefined") return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
 
   // Busca a Public Key do Mercado Pago no banco
   useEffect(() => {
@@ -256,9 +269,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
     }
   };
 
-  if (!open) return null;
+  if (!open || !mounted || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in sm:p-4"
       onClick={onClose}
@@ -500,7 +513,8 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
