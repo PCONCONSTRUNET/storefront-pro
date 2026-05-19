@@ -81,9 +81,10 @@ export function ReorderModal({
       onClick={onClose}
     >
       <div
-        className="bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl shadow-soft max-h-[92vh] flex flex-col animate-modal-in"
+        className="relative overflow-hidden bg-card w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl shadow-soft max-h-[92vh] flex flex-col animate-modal-in"
         onClick={(e) => e.stopPropagation()}
       >
+        <OrderAccentBar className="top-4 bottom-4" />
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
             <h2 className="font-serif text-lg font-semibold">
