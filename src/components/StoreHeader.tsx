@@ -51,15 +51,17 @@ export function StoreHeader() {
               Acompanhar pedido
             </Link>
           </div>
-          <div className="flex items-center gap-4 opacity-90">
-            <Link to="/cadastro" className="hover:underline">
-              Cadastrar
-            </Link>
-            <span className="opacity-50">|</span>
-            <Link to="/login" className="hover:underline">
-              Entrar
-            </Link>
-          </div>
+          {!currentCustomer && (
+            <div className="flex items-center gap-4 opacity-90">
+              <Link to="/cadastro" className="hover:underline">
+                Cadastrar
+              </Link>
+              <span className="opacity-50">|</span>
+              <Link to="/login" className="hover:underline">
+                Entrar
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
