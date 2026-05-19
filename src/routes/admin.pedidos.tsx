@@ -137,7 +137,13 @@ function Page() {
         return false;
 
       if (statusFilter && status !== statusFilter) return false;
+      if (
+        deliveryFilter &&
+        normalizeDeliveryStatus(o.deliveryStatus) !== deliveryFilter
+      )
+        return false;
       if (methodFilter && o.paymentMethod !== methodFilter) return false;
+
 
       if (periodMs && now - new Date(o.createdAt).getTime() > periodMs)
         return false;
