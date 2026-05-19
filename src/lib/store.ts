@@ -1099,7 +1099,7 @@ export const useStore = create<AppState>()(
           total: data.total,
           paymentMethod: data.paymentMethod,
           deliveryMethod: data.deliveryMethod,
-          status: data.status,
+          status: normalizeOrderStatus(data.status),
           createdAt: new Date().toISOString(),
           address: data.address,
           notes: data.notes,
@@ -1109,16 +1109,19 @@ export const useStore = create<AppState>()(
         set((s) => ({ orders: [order, ...s.orders] }));
       },
       updateOrderStatus: (id, status) => {
+        const nextStatus = normalizeOrderStatus(status);
         const order = get().orders.find((o) => o.id === id);
         set((s) => ({
-          orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)),
+          orders: s.orders.map((o) =>
+            o.id === id ? { ...o, status: nextStatus } : o,
+          ),
         }));
         if (!order) return;
-        cloud.updateOrderStatus(id, status === "pago" ? "paid" : status);
+        cloud.updateOrderStatus(id, nextStatus === "pago" ? "paid" : nextStatus);
 
         // Notificações de status agora apenas para logs/admin se necessário,
         // mas o usuário pediu para focar no admin.
-        if (status === "pago") {
+        if (nextStatus === "pago") {
           try {
             useNotifications.getState().trigger(
               "pagamento_aprovado",
@@ -1131,7 +1134,7 @@ export const useStore = create<AppState>()(
             );
           } catch {}
         }
-        if (status === "pago") {
+        if (nextStatus === "pago") {
           // record sale transaction once
           const exists = get().transactions.find(
             (t) => t.description.includes(order.id) && t.category === "venda",
