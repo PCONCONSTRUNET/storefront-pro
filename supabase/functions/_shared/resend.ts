@@ -74,7 +74,6 @@ export function baseLayout(title: string, body: string) {
         <p style="margin:14px 0 8px;font-size:12px;color:#888">Siga nossas novidades</p>
         <p style="margin:0 0 16px">
           <a href="https://instagram.com/${INSTAGRAM_USER}" style="display:inline-block;margin:0 6px;padding:8px 14px;background:#fff;border:1px solid #fbcfe8;border-radius:999px;color:#be185d;text-decoration:none;font-size:12px;font-weight:600">📷 Instagram</a>
-          <a href="https://facebook.com/${FACEBOOK_USER}" style="display:inline-block;margin:0 6px;padding:8px 14px;background:#fff;border:1px solid #fbcfe8;border-radius:999px;color:#1877F2;text-decoration:none;font-size:12px;font-weight:600">f Facebook</a>
         </p>
 
         <p style="margin:14px 0 0;font-size:11px;color:#999;line-height:1.6">
