@@ -44,6 +44,7 @@ function PixPage() {
         setLoading(false);
 
         if (o.payment_status === "approved") {
+          useStore.getState().clearCart();
           playBeep();
           toast.success("Pagamento aprovado! 🎉");
           setTimeout(
