@@ -48,6 +48,22 @@ function Page() {
     payment: "pix" as "pix" | "card" | "cash",
     notes: "",
   });
+  const [installmentInfo, setInstallmentInfo] = useState<{
+    max: number;
+    maxSemJuros: number;
+  }>({ max: 1, maxSemJuros: 1 });
+
+  useEffect(() => {
+    fetchInstallmentConfig().then((cfg) => {
+      const max = Math.max(1, cfg.max_installments || 1);
+      let maxSemJuros = 1;
+      for (let n = 1; n <= max; n++) {
+        const fee = Number(cfg.installment_fees?.[String(n)] ?? 0);
+        if (fee === 0) maxSemJuros = n;
+      }
+      setInstallmentInfo({ max, maxSemJuros });
+    });
+  }, []);
 
   if (cart.length === 0 && step < 4) {
     return (
