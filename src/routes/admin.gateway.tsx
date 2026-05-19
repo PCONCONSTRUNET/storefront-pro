@@ -88,7 +88,7 @@ function Page() {
           token,
           mp_access_token: accessToken.trim(),
           mp_public_key: publicKey.trim(),
-          environment,
+          environment: "production",
           max_installments: maxInstallments,
           installment_fees: fees,
         },
