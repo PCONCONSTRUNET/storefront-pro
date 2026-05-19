@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
+import { useStore } from "@/lib/store";
 import pixIcon from "@/assets/pix-icon.png";
 
 export const Route = createFileRoute("/checkout/pix/$id")({
