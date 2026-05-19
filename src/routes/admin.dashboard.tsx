@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore } from "@/lib/store";
+import { normalizeOrderStatus, useStore } from "@/lib/store";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
@@ -42,7 +42,7 @@ function Page() {
       (o) => new Date(o.createdAt).toDateString() === today,
     );
     const monthRev = orders
-      .filter((o) => o.status !== "cancelado")
+      .filter((o) => !["cancelado", "reembolsado"].includes(normalizeOrderStatus(o.status)))
       .reduce((a, o) => a + o.total, 0);
     const ticket = orders.length ? monthRev / orders.length : 0;
     return {
