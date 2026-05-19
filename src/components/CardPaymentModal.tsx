@@ -264,7 +264,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] overflow-y-auto animate-in slide-in-from-bottom-4"
+        className="w-full sm:max-w-3xl bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
