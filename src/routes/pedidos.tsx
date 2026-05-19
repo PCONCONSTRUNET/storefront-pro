@@ -75,7 +75,7 @@ function Page() {
           <ul className="space-y-3">
             {orders.map((o) => {
               const totalQty = o.items.reduce((s, i) => s + i.quantity, 0);
-              const isPaid = o.status === "approved" || o.paymentStatus === "approved";
+              const isPaid = o.paymentStatus === "approved";
               return (
                 <li key={o.id}>
                   <Link
