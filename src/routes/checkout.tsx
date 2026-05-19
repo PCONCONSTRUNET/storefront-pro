@@ -77,40 +77,34 @@ function Page() {
   const finish = async () => {
     if (submitting) return;
 
-    // Pix → Mercado Pago (gera QR Code real)
+    const shipping = 0;
+    const total = Math.max(0, totals.subtotal - totals.discount);
+    const sharedPayload = {
+      customer: { name: form.name, email: form.email, phone: form.phone },
+      items: cart.map((it) => {
+        const p = products.find((x) => x.id === it.productId);
+        return {
+          productId: it.productId,
+          name: p?.name ?? "Produto",
+          price: p?.price ?? 0,
+          quantity: it.quantity,
+          image: (p as any)?.image,
+        };
+      }),
+      totals: {
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        shipping,
+        total,
+      },
+      delivery: "retirada" as const,
+      address: settings.address,
+      notes: form.notes,
+    };
+
+    // Pix → abre modal com QR + copia e cola + polling
     if (form.payment === "pix") {
-      setSubmitting(true);
-      try {
-        const shipping = 0;
-        const total = Math.max(0, totals.subtotal - totals.discount);
-        const result = await createPixPayment({
-          customer: { name: form.name, email: form.email, phone: form.phone },
-          items: cart.map((it) => {
-            const p = products.find((x) => x.id === it.productId);
-            return {
-              productId: it.productId,
-              name: p?.name ?? "Produto",
-              price: p?.price ?? 0,
-              quantity: it.quantity,
-              image: (p as any)?.image,
-            };
-          }),
-          totals: {
-            subtotal: totals.subtotal,
-            discount: totals.discount,
-            shipping,
-            total,
-          },
-          delivery: "retirada",
-          address: settings.address,
-          notes: form.notes,
-        });
-        playBeep();
-        navigate({ to: "/checkout/pix/$id", params: { id: result.order_id } });
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Falha ao gerar Pix");
-        setSubmitting(false);
-      }
+      setPixModal(sharedPayload);
       return;
     }
 
