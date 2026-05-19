@@ -19,6 +19,7 @@ import { createPixPayment } from "@/lib/mercadopago";
 import { CardPaymentModal } from "@/components/CardPaymentModal";
 import mpIcon from "@/assets/mercadopago-icon.png";
 import pixIcon from "@/assets/pix-icon.png";
+import cardIcon from "@/assets/card-icon.png";
 
 export const Route = createFileRoute("/checkout")({
   component: Page,
@@ -177,6 +178,7 @@ function Page() {
       label: "Cartão de crédito",
       sub: "Em até 3x sem juros",
       icon: CreditCard,
+      image: cardIcon,
       enabled: settings.acceptCard,
     },
   ];
