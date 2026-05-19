@@ -12,11 +12,10 @@ import { brl, formatDate } from "@/lib/format";
 import {
   CheckCircle2,
   ChevronLeft,
-  Copy,
-  QrCode,
   RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/pedido/$id")({
   component: Page,
