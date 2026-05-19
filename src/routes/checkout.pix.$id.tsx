@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
+import pixIcon from "@/assets/pix-icon.png";
 
 export const Route = createFileRoute("/checkout/pix/$id")({
   component: PixPage,
@@ -187,7 +188,7 @@ function PixPage() {
 
             <div className="bg-gradient-to-br from-primary to-rose text-primary-foreground rounded-2xl p-5 shadow-soft">
               <div className="flex items-center gap-2">
-                <QrCode className="h-5 w-5" />
+                <img src={pixIcon} alt="Pix" className="h-5 w-5 object-contain" />
                 <span className="font-semibold">Pague com Pix</span>
               </div>
               <p className="text-sm opacity-90 mt-1">
