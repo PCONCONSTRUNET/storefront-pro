@@ -26,7 +26,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const [pix, setPix] = useState<CreatePixResult | null>(null);
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [simulating, setSimulating] = useState(false);
+  
 
   // 1) Cria o Pix quando o modal abre
   useEffect(() => {
