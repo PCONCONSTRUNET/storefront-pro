@@ -737,7 +737,8 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
   const totalValue = filtered.reduce((a, r) => a + Number(r.total_value || 0), 0);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Excluir este registro de retirada?")) return;
+    const { confirmDialog } = await import("@/components/ConfirmDialog");
+    if (!(await confirmDialog({ title: "Excluir registro de retirada?", confirmLabel: "Excluir" }))) return;
     try {
       const token = getAdminToken();
       if (!token) return;
