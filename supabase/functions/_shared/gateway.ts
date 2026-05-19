@@ -7,7 +7,7 @@ type SupabaseClient = {
 export type GatewayConfig = {
   access_token: string | null;
   public_key: string | null;
-  environment: "sandbox" | "production";
+  environment: "production";
   max_installments: number;
   installment_fees: Record<string, number>;
 };
@@ -19,7 +19,6 @@ export async function loadGatewayConfig(
   const envPub = Deno.env.get("MERCADOPAGO_PUBLIC_KEY") || null;
   let access_token = envToken;
   let public_key = envPub;
-  let environment: "sandbox" | "production" = "sandbox";
   let max_installments = 3;
   let installment_fees: Record<string, number> = {};
 
