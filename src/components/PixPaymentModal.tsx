@@ -190,24 +190,6 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
                 </div>
               </div>
 
-              {sandbox && (
-                <div className="mb-2 rounded-lg border border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-2">
-                  <div className="flex items-center gap-1 text-amber-900 dark:text-amber-200 font-bold text-[10px]">
-                    <FlaskConical className="h-3 w-3" /> MODO SANDBOX
-                  </div>
-                  <button
-                    onClick={handleSimulate}
-                    disabled={simulating}
-                    className="mt-1.5 w-full h-8 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center justify-center gap-1 disabled:opacity-60"
-                  >
-                    {simulating ? (
-                      <><Loader2 className="h-3 w-3 animate-spin" /> Simulando...</>
-                    ) : (
-                      "Simular pagamento aprovado"
-                    )}
-                  </button>
-                </div>
-              )}
 
               {qrBase64 ? (
                 <div className="grid place-items-center bg-white rounded-lg p-2">
