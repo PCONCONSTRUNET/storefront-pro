@@ -71,11 +71,15 @@ type Props = {
 };
 
 export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
-  const total = payload.totals.total;
+  const baseTotal = payload.totals.total;
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(true);
   const [mp, setMp] = useState<any>(null);
   const [sdkErr, setSdkErr] = useState<string | null>(null);
+  const [cfg, setCfg] = useState<InstallmentConfig>({
+    max_installments: 1,
+    installment_fees: {},
+  });
 
   const [card, setCard] = useState({
     number: "",
@@ -90,9 +94,6 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const [brand, setBrand] = useState<{ name: string; thumb: string } | null>(
     null,
   );
-  const [installmentsList, setInstallmentsList] = useState<
-    Array<{ installments: number; recommended_message: string }>
-  >([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
