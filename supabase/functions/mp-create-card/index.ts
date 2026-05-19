@@ -36,12 +36,10 @@ Deno.serve(async (req) => {
   const items = Array.isArray(body.items) ? body.items : [];
   const totals = body.totals ?? {};
   const card = body.card ?? {};
-  const total = Number(totals.total ?? 0);
 
   if (!customer.name || !customer.email || !customer.phone) {
     return json({ error: "Dados do cliente incompletos" }, 400);
   }
-  if (total <= 0) return json({ error: "Total inválido" }, 400);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -61,6 +59,22 @@ Deno.serve(async (req) => {
     return json({ error: "Dados do cartão incompletos" }, 400);
   }
 
+  // Aplica taxa de parcelamento configurada no admin (sempre recalcular no servidor)
+  const subtotal = Number(totals.subtotal ?? 0);
+  const discount = Number(totals.discount ?? 0);
+  const shipping = Number(totals.shipping ?? 0);
+  const baseTotal = Math.max(0, subtotal - discount + shipping);
+  const maxInst = Math.max(1, Math.min(12, gateway.max_installments || 1));
+  const requestedInst = Math.max(
+    1,
+    Math.min(maxInst, Number(card.installments ?? 1)),
+  );
+  const feePct =
+    Number(gateway.installment_fees?.[String(requestedInst)] ?? 0) || 0;
+  const total = Math.round(baseTotal * (1 + feePct / 100) * 100) / 100;
+
+  if (total <= 0) return json({ error: "Total inválido" }, 400);
+
   // 1) Cria pedido
   const { data: order, error: insErr } = await supabase
     .from("orders")
@@ -73,13 +87,14 @@ Deno.serve(async (req) => {
       address: body.address ?? null,
       notes: body.notes ?? null,
       items,
-      subtotal: Number(totals.subtotal ?? 0),
-      discount: Number(totals.discount ?? 0),
-      shipping: Number(totals.shipping ?? 0),
+      subtotal,
+      discount,
+      shipping,
       total,
       payment_method: "card",
       payment_status: "pending",
-    })
+      extra: { installments: requestedInst, fee_pct: feePct, base_total: baseTotal } as any,
+    } as any)
     .select()
     .single();
 
