@@ -339,7 +339,7 @@ export const getGatewayConfigFn = createServerFn({ method: "POST" })
     return {
       mp_access_token: row?.mp_access_token ?? "",
       mp_public_key: row?.mp_public_key ?? "",
-      environment: (row?.environment ?? "sandbox") as "sandbox" | "production",
+      environment: "production" as const,
       max_installments: Number(row?.max_installments ?? 3),
       installment_fees: (row?.installment_fees ?? {}) as Record<string, number>,
     };
