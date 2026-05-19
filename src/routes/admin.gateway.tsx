@@ -136,24 +136,13 @@ function Page() {
             e cole as credenciais da sua aplicação.
           </p>
 
-          <Field label="Ambiente">
-            <select
-              value={environment}
-              onChange={(e) => setEnvironment(e.target.value as Env)}
-              className="w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-sm"
-            >
-              <option value="sandbox">Teste (sandbox)</option>
-              <option value="production">Produção (cobra de verdade)</option>
-            </select>
-          </Field>
-
-          <Field label={`Access Token (${environment === "sandbox" ? "TEST-..." : "APP_USR-..."})`}>
+          <Field label="Access Token (APP_USR-...)">
             <div className="flex gap-2">
               <input
                 type={showToken ? "text" : "password"}
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
-                placeholder={environment === "sandbox" ? "TEST-..." : "APP_USR-..."}
+                placeholder="APP_USR-..."
                 className="flex-1 h-11 px-3 rounded-xl bg-muted/70 border border-border text-sm font-mono"
                 autoComplete="off"
               />
@@ -172,7 +161,7 @@ function Page() {
               type="text"
               value={publicKey}
               onChange={(e) => setPublicKey(e.target.value)}
-              placeholder={environment === "sandbox" ? "TEST-pub-..." : "APP_USR-pub-..."}
+              placeholder="APP_USR-pub-..."
               className="w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-sm font-mono"
               autoComplete="off"
             />
