@@ -260,11 +260,11 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in sm:p-4"
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-3xl bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4"
+        className="w-full sm:max-w-3xl bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95dvh] sm:max-h-[calc(100dvh-2rem)] overflow-hidden flex flex-col animate-in slide-in-from-bottom-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -308,7 +308,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         )}
 
 
-        <div className="sm:grid sm:grid-cols-[1fr_1.1fr] sm:gap-2">
+        <div className="min-h-0 overflow-y-auto sm:grid sm:grid-cols-[1fr_1.1fr] sm:gap-2">
         {/* Card preview */}
         <div className="px-5 pt-5 sm:sticky sm:top-[68px] sm:self-start">
           <div className="relative rounded-2xl p-5 text-white shadow-elegant overflow-hidden bg-gradient-to-br from-primary via-rose to-primary/70">
