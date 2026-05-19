@@ -214,11 +214,15 @@ export const adminUpsertFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    const q: any = supabaseAdmin.from(data.table as WriteTable);
-    const { error } = data.onConflict
-      ? await q.upsert(data.row, { onConflict: data.onConflict })
-      : await q.upsert(data.row);
+    const { error } = await (supabase as any).rpc("admin_db_write", {
+      _token: data.token,
+      _op: "upsert",
+      _table: data.table,
+      _row: data.row,
+      _on_conflict: data.onConflict ?? null,
+      _match: null,
+      _patch: null,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
@@ -235,10 +239,15 @@ export const adminUpdateFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    let q: any = (supabaseAdmin.from(data.table as WriteTable) as any).update(data.patch);
-    for (const [k, v] of Object.entries(data.match)) q = q.eq(k, v);
-    const { error } = await q;
+    const { error } = await (supabase as any).rpc("admin_db_write", {
+      _token: data.token,
+      _op: "update",
+      _table: data.table,
+      _row: null,
+      _on_conflict: null,
+      _match: data.match,
+      _patch: data.patch,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
@@ -254,13 +263,19 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    let q: any = supabaseAdmin.from(data.table as WriteTable).delete();
-    for (const [k, v] of Object.entries(data.match)) q = q.eq(k, v);
-    const { error } = await q;
+    const { error } = await (supabase as any).rpc("admin_db_write", {
+      _token: data.token,
+      _op: "delete",
+      _table: data.table,
+      _row: null,
+      _on_conflict: null,
+      _match: data.match,
+      _patch: null,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
+
 
 // ---------- LEITURAS DO CLIENTE LOGADO (próprios dados) ----------
 // Identificação por customerId UUID — não exige password porque já houve login.
