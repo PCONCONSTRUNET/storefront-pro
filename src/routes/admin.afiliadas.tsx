@@ -519,8 +519,9 @@ function Page() {
                         <X className="h-4 w-4" />
                       </ActionBtn>
                       <ActionBtn
-                        onClick={() => {
-                          if (confirm("Excluir esta venda?")) deleteSale(s.id);
+                        onClick={async () => {
+                          const { confirmDialog } = await import("@/components/ConfirmDialog");
+                          if (await confirmDialog({ title: "Excluir esta venda?", confirmLabel: "Excluir" })) deleteSale(s.id);
                         }}
                         title="Excluir"
                         cls="text-destructive hover:bg-destructive/10"
