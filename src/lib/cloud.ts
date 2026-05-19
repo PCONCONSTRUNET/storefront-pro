@@ -211,6 +211,7 @@ const toOrder = (r: any): Order => ({
   paymentMethod: r.payment_method,
   deliveryMethod: r.delivery_method,
   status: normalizeOrderStatus(r.payment_status),
+  deliveryStatus: normalizeDeliveryStatus(r.delivery_status),
   createdAt: r.created_at,
   address: r.address || "",
   notes: r.notes || undefined,
