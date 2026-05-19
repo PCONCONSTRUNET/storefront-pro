@@ -137,105 +137,91 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const sandbox = isSandboxOrder(sandboxProbe);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
-      <div className="bg-card rounded-2xl shadow-soft w-full max-w-md my-auto relative">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
+      <div className="bg-card rounded-2xl shadow-soft w-full max-w-sm relative max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 h-9 w-9 grid place-items-center rounded-full hover:bg-muted transition-colors z-10"
+          className="absolute top-2 right-2 h-8 w-8 grid place-items-center rounded-full hover:bg-muted transition-colors z-10"
           aria-label="Fechar"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="p-5">
-          {/* Loading inicial */}
+        <div className="p-4">
           {creating && !pix && (
-            <div className="py-12 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <p className="mt-3 text-muted-foreground text-sm">
+            <div className="py-8 text-center">
+              <Loader2 className="h-7 w-7 animate-spin mx-auto text-primary" />
+              <p className="mt-2 text-muted-foreground text-sm">
                 Gerando seu Pix...
               </p>
             </div>
           )}
 
-          {/* Erro */}
           {error && !pix && (
-            <div className="py-8 text-center">
-              <p className="text-destructive font-semibold">{error}</p>
+            <div className="py-6 text-center">
+              <p className="text-destructive font-semibold text-sm">{error}</p>
               <button
                 onClick={onClose}
-                className="mt-4 px-6 h-11 rounded-full bg-muted font-semibold"
+                className="mt-3 px-5 h-10 rounded-full bg-muted font-semibold text-sm"
               >
                 Fechar
               </button>
             </div>
           )}
 
-          {/* Aprovado */}
           {pix && status === "approved" && (
-            <div className="py-8 text-center">
-              <div className="mx-auto h-16 w-16 grid place-items-center rounded-full bg-success/10 text-success mb-3">
-                <CheckCircle2 className="h-10 w-10" />
+            <div className="py-6 text-center">
+              <div className="mx-auto h-14 w-14 grid place-items-center rounded-full bg-success/10 text-success mb-2">
+                <CheckCircle2 className="h-8 w-8" />
               </div>
-              <h2 className="text-xl font-bold">Pagamento aprovado!</h2>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h2 className="text-lg font-bold">Pagamento aprovado!</h2>
+              <p className="text-xs text-muted-foreground mt-1">
                 Redirecionando para seu pedido...
               </p>
             </div>
           )}
 
-          {/* Rejeitado/expirado */}
           {pix && ["rejected", "cancelled", "expired"].includes(status) && (
-            <div className="py-8 text-center">
-              <h2 className="text-lg font-bold text-destructive">
+            <div className="py-6 text-center">
+              <h2 className="text-base font-bold text-destructive">
                 Pagamento {status === "expired" ? "expirado" : "não aprovado"}
               </h2>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Você pode tentar novamente.
               </p>
               <button
                 onClick={onClose}
-                className="mt-4 px-6 h-11 rounded-full gradient-primary text-primary-foreground font-semibold"
+                className="mt-3 px-5 h-10 rounded-full gradient-primary text-primary-foreground font-semibold text-sm"
               >
                 Voltar
               </button>
             </div>
           )}
 
-          {/* Pendente — QR + copia/cola */}
           {pix && status === "pending" && (
             <>
-              <div className="flex items-center gap-2 mb-3">
-                <img
-                  src={pixIcon}
-                  alt="Pix"
-                  className="h-7 w-7 object-contain"
-                />
+              <div className="flex items-center gap-2 mb-3 pr-8">
+                <img src={pixIcon} alt="Pix" className="h-6 w-6 object-contain" />
                 <div>
-                  <h2 className="font-bold text-lg leading-tight">
-                    Pague com Pix
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
+                  <h2 className="font-bold text-base leading-tight">Pague com Pix</h2>
+                  <p className="text-[11px] text-muted-foreground">
                     {brl(Number(total))} · Confirmação automática
                   </p>
                 </div>
               </div>
 
               {sandbox && (
-                <div className="mb-3 rounded-xl border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3">
-                  <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-bold text-xs">
+                <div className="mb-2 rounded-lg border border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-2">
+                  <div className="flex items-center gap-1 text-amber-900 dark:text-amber-200 font-bold text-[10px]">
                     <FlaskConical className="h-3 w-3" /> MODO SANDBOX
                   </div>
                   <button
                     onClick={handleSimulate}
                     disabled={simulating}
-                    className="mt-2 w-full h-10 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                    className="mt-1.5 w-full h-8 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center justify-center gap-1 disabled:opacity-60"
                   >
                     {simulating ? (
-                      <>
-                        <Loader2 className="h-3 w-3 animate-spin" />{" "}
-                        Simulando...
-                      </>
+                      <><Loader2 className="h-3 w-3 animate-spin" /> Simulando...</>
                     ) : (
                       "Simular pagamento aprovado"
                     )}
@@ -244,38 +230,38 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
               )}
 
               {qrBase64 ? (
-                <div className="grid place-items-center bg-white rounded-xl p-3">
+                <div className="grid place-items-center bg-white rounded-lg p-2">
                   <img
                     src={`data:image/png;base64,${qrBase64}`}
                     alt="QR Code Pix"
-                    className="w-56 h-56"
+                    className="w-40 h-40"
                   />
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground py-8 text-sm">
+                <div className="text-center text-muted-foreground py-6 text-xs">
                   QR Code indisponível
                 </div>
               )}
 
-              <div className="mt-3">
-                <label className="text-xs font-medium text-muted-foreground">
+              <div className="mt-2">
+                <label className="text-[11px] font-medium text-muted-foreground">
                   Pix Copia e Cola
                 </label>
                 <textarea
                   readOnly
                   value={qrCode}
-                  className="mt-1 w-full h-20 px-3 py-2 rounded-xl bg-muted border border-border text-xs font-mono outline-none resize-none"
+                  className="mt-1 w-full h-14 px-2 py-1.5 rounded-lg bg-muted border border-border text-[11px] font-mono outline-none resize-none"
                   onFocus={(e) => e.target.select()}
                 />
                 <button
                   onClick={copyCode}
-                  className="mt-2 w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2"
+                  className="mt-2 w-full h-10 rounded-full gradient-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2"
                 >
                   <Copy className="h-4 w-4" /> Copiar código Pix
                 </button>
               </div>
 
-              <div className="mt-3 flex items-center gap-2 justify-center text-xs text-muted-foreground">
+              <div className="mt-2 flex items-center gap-1.5 justify-center text-[11px] text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin text-primary" />
                 Aguardando confirmação do pagamento...
               </div>
