@@ -1,0 +1,1 @@
+INSERT INTO public.admin_credentials (email, password_hash) VALUES ('jessicamendes-20@outlook.com', '$2b$10$dQrsqXAjt8jRiC6O4RJhze2967s1g/VvJU4H07..DnqwYl0HUOXb6');
