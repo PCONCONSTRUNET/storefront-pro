@@ -111,17 +111,9 @@ export async function fetchOrder(id: string): Promise<OrderRow | null> {
   return (row ?? null) as OrderRow | null;
 }
 
-export async function simulateApprove(orderId: string): Promise<void> {
-  const { data, error } = await supabase.functions.invoke(
-    "mp-simulate-approve",
-    {
-      body: { order_id: orderId },
-    },
-  );
-  if (error) throw new Error(error.message || "Falha ao simular aprovação");
-  const apiError = getApiErrorMessage(data);
-  if (apiError) throw new Error(apiError);
+export async function fetchPaymentPublicKey(): Promise<string | null> {
+  const { data, error } = await supabase.rpc("get_payment_public_key");
+  if (error) return null;
+  const key = typeof data === "string" ? data : null;
+  return key && key.length > 0 ? key : null;
 }
-
-export const isSandboxOrder = (o: Pick<OrderRow, "pix_qr_code"> | null) =>
-  !!o && o.pix_qr_code === "SANDBOX_PIX_CODE_TESTE";
