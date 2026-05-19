@@ -117,3 +117,22 @@ export async function fetchPaymentPublicKey(): Promise<string | null> {
   const key = typeof data === "string" ? data : null;
   return key && key.length > 0 ? key : null;
 }
+
+export type InstallmentConfig = {
+  max_installments: number;
+  installment_fees: Record<string, number>;
+};
+
+export async function fetchInstallmentConfig(): Promise<InstallmentConfig> {
+  const { data, error } = await supabase.rpc(
+    "get_payment_installment_config" as never,
+  );
+  if (error || !data) return { max_installments: 1, installment_fees: {} };
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { max_installments?: number; installment_fees?: Record<string, number> }
+    | null;
+  return {
+    max_installments: Number(row?.max_installments ?? 1),
+    installment_fees: (row?.installment_fees ?? {}) as Record<string, number>,
+  };
+}
