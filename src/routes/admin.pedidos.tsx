@@ -93,7 +93,9 @@ function Page() {
   const { q: initialQ } = Route.useSearch();
   const [filter, setFilter] = useState<QuickFilter>("todos");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
+  const [deliveryFilter, setDeliveryFilter] = useState<DeliveryStatus | "">("");
   const [methodFilter, setMethodFilter] = useState<string>("");
+
   const [period, setPeriod] = useState<"todos" | "hoje" | "7d" | "30d">(
     "todos",
   );
