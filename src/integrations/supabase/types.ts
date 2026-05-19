@@ -734,6 +734,10 @@ export type Database = {
           subject_type: Database["public"]["Enums"]["reset_subject"]
         }[]
       }
+      create_admin_session: {
+        Args: { _email: string; _token: string }
+        Returns: undefined
+      }
       create_customer_with_password_hash: {
         Args: {
           _address: string
@@ -753,6 +757,21 @@ export type Database = {
           name: string
           ok: boolean
           phone: string
+        }[]
+      }
+      delete_admin_session: { Args: { _token: string }; Returns: undefined }
+      get_admin_auth_record: {
+        Args: { _email: string }
+        Returns: {
+          email: string
+          password_hash: string
+        }[]
+      }
+      get_admin_session_record: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          expires_at: string
         }[]
       }
       get_customer_auth_record: {
