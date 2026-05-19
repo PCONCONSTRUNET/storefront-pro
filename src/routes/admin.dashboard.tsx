@@ -10,12 +10,17 @@ import {
   Users,
   Package,
   TrendingUp,
+  TrendingDown,
   Bell,
+  ArrowUpRight,
+  Sparkles,
+  Crown,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -23,6 +28,7 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
+  Cell,
 } from "recharts";
 
 export const Route = createFileRoute("/admin/dashboard")({
