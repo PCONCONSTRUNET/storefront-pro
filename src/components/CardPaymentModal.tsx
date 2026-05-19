@@ -254,25 +254,25 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
           </button>
         </div>
 
-        {sdkErr && !SANDBOX && (
+        {sdkErr && (
           <div className="m-5 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             {sdkErr}
           </div>
         )}
 
-        {SANDBOX && (
-          <div className="mx-5 mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 text-xs text-amber-900 dark:text-amber-200">
+        {!keyLoading && !publicKey && (
+          <div className="mx-5 mt-4 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-xs text-destructive">
             <div className="font-bold flex items-center gap-1">
-              🧪 MODO SANDBOX (TESTE)
+              <AlertCircle className="h-4 w-4" /> Pagamento por cartão indisponível
             </div>
             <div className="mt-1">
-              Mercado Pago não configurado. Qualquer cartão será aceito e o
-              pagamento será aprovado automaticamente para testar as
-              notificações.
+              O lojista ainda não configurou as credenciais do Mercado Pago.
+              Use Pix para finalizar o pedido.
             </div>
           </div>
         )}
+
 
         {/* Card preview */}
         <div className="px-5 pt-5">
