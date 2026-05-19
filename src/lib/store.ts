@@ -13,6 +13,13 @@ import {
 } from "./data";
 import { useNotifications } from "./notifications";
 import { cloud, fetchCloudSnapshot } from "./cloud";
+export {
+  ORDER_STATUS_LABEL,
+  getOrderStatusLabel,
+  normalizeOrderStatus,
+  type OrderStatus,
+} from "./orderStatus";
+import { normalizeOrderStatus, type OrderStatus } from "./orderStatus";
 
 const brlFmt = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -59,25 +66,6 @@ export type ActivityLog = {
   metadata?: any;
   userId?: string;
   createdAt: string;
-};
-
-export type OrderStatus =
-  | "aguardando_pagamento"
-  | "pago"
-  | "em_separacao"
-  | "saiu_para_entrega"
-  | "concluido"
-  | "cancelado"
-  | "reembolsado";
-
-export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  aguardando_pagamento: "Aguardando pagamento",
-  pago: "Pago",
-  em_separacao: "Em separação",
-  saiu_para_entrega: "Saiu para entrega",
-  concluido: "Concluído",
-  cancelado: "Cancelado",
-  reembolsado: "Reembolsado",
 };
 
 export type Order = {
