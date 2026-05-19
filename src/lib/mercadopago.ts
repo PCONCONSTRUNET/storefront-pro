@@ -33,7 +33,8 @@ export type CreatePixResult = {
 type ApiErrorPayload = { error?: string };
 
 const getApiErrorMessage = (data: unknown) => {
-  if (typeof data !== "object" || data === null || !("error" in data)) return null;
+  if (typeof data !== "object" || data === null || !("error" in data))
+    return null;
   const message = (data as ApiErrorPayload).error;
   return typeof message === "string" && message.length > 0 ? message : null;
 };

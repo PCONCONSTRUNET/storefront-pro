@@ -132,8 +132,8 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const qrCode = order?.pix_qr_code ?? pix?.qr_code ?? "";
   const qrBase64 = order?.pix_qr_code_base64 ?? pix?.qr_code_base64 ?? "";
   const total = order?.total ?? pix?.total ?? 0;
-  const sandboxProbe: PixStatusProbe | null = order ??
-    (pix ? { pix_qr_code: pix.qr_code } : null);
+  const sandboxProbe: PixStatusProbe | null =
+    order ?? (pix ? { pix_qr_code: pix.qr_code } : null);
   const sandbox = isSandboxOrder(sandboxProbe);
 
   return (
@@ -206,7 +206,11 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
           {pix && status === "pending" && (
             <>
               <div className="flex items-center gap-2 mb-3">
-                <img src={pixIcon} alt="Pix" className="h-7 w-7 object-contain" />
+                <img
+                  src={pixIcon}
+                  alt="Pix"
+                  className="h-7 w-7 object-contain"
+                />
                 <div>
                   <h2 className="font-bold text-lg leading-tight">
                     Pague com Pix
@@ -229,7 +233,8 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
                   >
                     {simulating ? (
                       <>
-                        <Loader2 className="h-3 w-3 animate-spin" /> Simulando...
+                        <Loader2 className="h-3 w-3 animate-spin" />{" "}
+                        Simulando...
                       </>
                     ) : (
                       "Simular pagamento aprovado"
