@@ -15,8 +15,10 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
-import { createPixPayment } from "@/lib/mercadopago";
+
 import { CardPaymentModal } from "@/components/CardPaymentModal";
+import { PixPaymentModal } from "@/components/PixPaymentModal";
+import type { CreatePixInput } from "@/lib/mercadopago";
 import mpIcon from "@/assets/mercadopago-icon.png";
 import pixIcon from "@/assets/pix-icon.png";
 import cardIcon from "@/assets/card-icon.png";
@@ -37,6 +39,7 @@ function Page() {
   const [cardModal, setCardModal] = useState<
     null | Parameters<typeof CardPaymentModal>[0]["payload"]
   >(null);
+  const [pixModal, setPixModal] = useState<CreatePixInput | null>(null);
   const [form, setForm] = useState({
     name: customer?.name || "",
     email: customer?.email || "",
@@ -74,43 +77,6 @@ function Page() {
   const finish = async () => {
     if (submitting) return;
 
-    // Pix → Mercado Pago (gera QR Code real)
-    if (form.payment === "pix") {
-      setSubmitting(true);
-      try {
-        const shipping = 0;
-        const total = Math.max(0, totals.subtotal - totals.discount);
-        const result = await createPixPayment({
-          customer: { name: form.name, email: form.email, phone: form.phone },
-          items: cart.map((it) => {
-            const p = products.find((x) => x.id === it.productId);
-            return {
-              productId: it.productId,
-              name: p?.name ?? "Produto",
-              price: p?.price ?? 0,
-              quantity: it.quantity,
-              image: (p as any)?.image,
-            };
-          }),
-          totals: {
-            subtotal: totals.subtotal,
-            discount: totals.discount,
-            shipping,
-            total,
-          },
-          delivery: "retirada",
-          address: settings.address,
-          notes: form.notes,
-        });
-        playBeep();
-        navigate({ to: "/checkout/pix/$id", params: { id: result.order_id } });
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Falha ao gerar Pix");
-        setSubmitting(false);
-      }
-      return;
-    }
-
     const shipping = 0;
     const total = Math.max(0, totals.subtotal - totals.discount);
     const sharedPayload = {
@@ -135,6 +101,12 @@ function Page() {
       address: settings.address,
       notes: form.notes,
     };
+
+    // Pix → abre modal com QR + copia e cola + polling
+    if (form.payment === "pix") {
+      setPixModal(sharedPayload);
+      return;
+    }
 
     // Cartão → abre modal próprio (Checkout Transparente Mercado Pago)
     if (form.payment === "card") {
@@ -416,6 +388,12 @@ function Page() {
           }}
         />
       )}
+
+      <PixPaymentModal
+        open={!!pixModal}
+        payload={pixModal}
+        onClose={() => setPixModal(null)}
+      />
     </StoreLayout>
   );
 }

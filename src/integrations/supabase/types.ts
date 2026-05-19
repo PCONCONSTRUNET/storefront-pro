@@ -798,6 +798,20 @@ export type Database = {
           mp_public_key: string
         }[]
       }
+      get_pix_order_status: {
+        Args: { _id: string }
+        Returns: {
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          pix_expires_at: string
+          pix_qr_code: string
+          pix_qr_code_base64: string
+          total: number
+        }[]
+      }
       save_payment_gateway: {
         Args: {
           _environment: string
