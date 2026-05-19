@@ -1106,6 +1106,7 @@ export const useStore = create<AppState>()(
           paymentMethod: data.paymentMethod,
           deliveryMethod: data.deliveryMethod,
           status: normalizeOrderStatus(data.status),
+          deliveryStatus: "pendente",
           createdAt: new Date().toISOString(),
           address: data.address,
           notes: data.notes,
