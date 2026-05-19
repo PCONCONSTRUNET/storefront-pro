@@ -165,7 +165,10 @@ function Page() {
     {
       id: "card",
       label: "Cartão de crédito",
-      sub: "Em até 3x sem juros",
+      sub:
+        installmentInfo.maxSemJuros > 1
+          ? `Em até ${installmentInfo.maxSemJuros}x sem juros · até ${installmentInfo.max}x`
+          : `Em até ${installmentInfo.max}x`,
       icon: CreditCard,
       image: cardIcon,
       enabled: settings.acceptCard,
