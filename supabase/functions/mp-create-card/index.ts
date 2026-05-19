@@ -93,7 +93,6 @@ Deno.serve(async (req) => {
       total,
       payment_method: "card",
       payment_status: "pending",
-      extra: { installments: requestedInst, fee_pct: feePct, base_total: baseTotal } as any,
     } as any)
     .select()
     .single();
