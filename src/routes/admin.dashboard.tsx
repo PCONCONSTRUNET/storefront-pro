@@ -43,17 +43,36 @@ function Page() {
   }, [sync]);
 
   const stats = useMemo(() => {
-    const today = new Date().toDateString();
-    const ordersToday = orders.filter(
-      (o) => new Date(o.createdAt).toDateString() === today,
+    const today = new Date();
+    const todayStr = today.toDateString();
+    const yest = new Date();
+    yest.setDate(today.getDate() - 1);
+    const yestStr = yest.toDateString();
+
+    const valid = orders.filter(
+      (o) => !["cancelado", "reembolsado"].includes(normalizeOrderStatus(o.status)),
     );
-    const monthRev = orders
-      .filter((o) => !["cancelado", "reembolsado"].includes(normalizeOrderStatus(o.status)))
-      .reduce((a, o) => a + o.total, 0);
+    const ordersToday = orders.filter(
+      (o) => new Date(o.createdAt).toDateString() === todayStr,
+    );
+    const ordersYest = orders.filter(
+      (o) => new Date(o.createdAt).toDateString() === yestStr,
+    );
+    const revToday = ordersToday.reduce((a, o) => a + o.total, 0);
+    const revYest = ordersYest.reduce((a, o) => a + o.total, 0);
+    const monthRev = valid.reduce((a, o) => a + o.total, 0);
     const ticket = orders.length ? monthRev / orders.length : 0;
+
+    const deltaPct = (curr: number, prev: number) => {
+      if (prev === 0) return curr > 0 ? 100 : 0;
+      return Math.round(((curr - prev) / prev) * 100);
+    };
+
     return {
       ordersToday: ordersToday.length,
+      ordersDelta: ordersToday.length - ordersYest.length,
       monthRev,
+      revDelta: deltaPct(revToday, revYest),
       ticket,
       customers: customers.length,
     };
@@ -69,10 +88,19 @@ function Page() {
           (o) => new Date(o.createdAt).toDateString() === d.toDateString(),
         )
         .reduce((a, o) => a + o.total, 0);
-      return { day: label, total: Math.round(total) };
+      return { day: label.replace(".", ""), total: Number(total.toFixed(2)) };
     });
     return days;
   }, [orders]);
+
+  const weekTotal = useMemo(
+    () => chartData.reduce((a, d) => a + d.total, 0),
+    [chartData],
+  );
+  const peakDay = useMemo(
+    () => chartData.reduce((max, d) => (d.total > max.total ? d : max), chartData[0] || { day: "-", total: 0 }),
+    [chartData],
+  );
 
   const topProducts = useMemo(() => {
     const map = new Map<string, number>();
@@ -87,30 +115,49 @@ function Page() {
       .slice(0, 5);
   }, [orders]);
 
+  const topQty = topProducts[0]?.qty ?? 0;
+  const barColors = ["var(--primary)", "var(--gold)", "var(--accent)", "#a855f7", "#0ea5e9"];
+
   const cards = [
     {
-      label: "Faturamento",
+      label: "Faturamento total",
       value: brl(stats.monthRev),
       icon: DollarSign,
-      color: "text-success",
+      tint: "from-emerald-500/20 to-emerald-500/0",
+      iconBg: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+      delta: stats.revDelta,
+      deltaLabel: "vs ontem",
+      isPct: true,
     },
     {
       label: "Pedidos hoje",
-      value: stats.ordersToday,
+      value: String(stats.ordersToday),
       icon: ShoppingCart,
-      color: "text-primary",
+      tint: "from-primary/20 to-primary/0",
+      iconBg: "bg-primary/15 text-primary",
+      delta: stats.ordersDelta,
+      deltaLabel: "vs ontem",
+      isPct: false,
     },
     {
       label: "Ticket médio",
       value: brl(stats.ticket),
       icon: TrendingUp,
-      color: "text-gold",
+      tint: "from-amber-500/20 to-amber-500/0",
+      iconBg: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+      delta: null as number | null,
+      deltaLabel: "média geral",
+      isPct: false,
     },
     {
       label: "Clientes",
-      value: stats.customers,
+      value: String(stats.customers),
       icon: Users,
-      color: "text-primary",
+      tint: "from-fuchsia-500/20 to-fuchsia-500/0",
+      iconBg: "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400",
+      delta: null as number | null,
+      deltaLabel: "cadastrados",
+      isPct: false,
     },
   ];
 
