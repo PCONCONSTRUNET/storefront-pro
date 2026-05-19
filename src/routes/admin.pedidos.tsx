@@ -10,6 +10,7 @@ import {
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
 import { Modal } from "@/components/AdminModal";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import {
   Search,
   X,
@@ -22,7 +23,6 @@ import {
   Package,
   Truck,
   RefreshCw,
-  MessageCircle,
   Mail,
   Phone,
   MapPin,
@@ -30,6 +30,7 @@ import {
   Hash,
   DollarSign,
   Filter,
+  ListFilter,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
