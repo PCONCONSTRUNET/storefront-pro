@@ -73,41 +73,94 @@ function Page() {
           </div>
         ) : (
           <ul className="space-y-3">
-            {orders.map((o) => (
-              <li key={o.id}>
-                <Link
-                  to="/pedido/$id"
-                  params={{ id: o.id }}
-                  className="block bg-card rounded-2xl p-4 shadow-card hover:shadow-soft transition-all"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-xs text-muted-foreground">
-                        #{o.id} · {formatDate(o.createdAt)}
+            {orders.map((o) => {
+              const totalQty = o.items.reduce((s, i) => s + i.quantity, 0);
+              const isPaid = o.status === "approved" || o.paymentStatus === "approved";
+              return (
+                <li key={o.id}>
+                  <Link
+                    to="/pedido/$id"
+                    params={{ id: o.id }}
+                    className="block bg-card rounded-2xl shadow-card hover:shadow-soft transition-all overflow-hidden"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/40">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Package className="h-4 w-4 text-primary shrink-0" />
+                        <span className="text-xs text-muted-foreground truncate">
+                          #{o.id.slice(0, 8)} · {formatDate(o.createdAt)}
+                        </span>
                       </div>
-                      <div className="font-semibold mt-0.5">
-                        {o.items.length}{" "}
-                        {o.items.length === 1 ? "item" : "itens"}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-primary">
-                        {brl(o.total)}
-                      </div>
-                      <span className="text-[11px] inline-block mt-1 bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-semibold">
-                        {getOrderStatusLabel(o.status)}
+                      <span
+                        className={`text-[11px] font-semibold uppercase tracking-wide shrink-0 ${
+                          isPaid ? "text-primary" : "text-amber-600"
+                        }`}
+                      >
+                        {isPaid
+                          ? getDeliveryStatusLabel(o.deliveryStatus)
+                          : getOrderStatusLabel(o.status)}
                       </span>
                     </div>
-                  </div>
-                  <button
-                    onClick={(e) => openReorder(e, o)}
-                    className="mt-3 w-full h-10 rounded-full bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors"
-                  >
-                    <RotateCcw className="h-4 w-4" /> Comprar de novo
-                  </button>
-                </Link>
-              </li>
-            ))}
+
+                    {/* Items */}
+                    <div className="divide-y divide-border/40">
+                      {o.items.slice(0, 3).map((it, idx) => (
+                        <div key={idx} className="flex gap-3 px-4 py-3">
+                          <div className="w-16 h-16 rounded-lg bg-muted overflow-hidden shrink-0">
+                            {it.image ? (
+                              <img
+                                src={it.image}
+                                alt={it.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : null}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium line-clamp-2">
+                              {it.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              x{it.quantity}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-sm font-semibold">
+                              {brl(it.price)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {o.items.length > 3 && (
+                        <div className="px-4 py-2 text-xs text-muted-foreground flex items-center justify-end gap-1">
+                          +{o.items.length - 3} item(s)
+                          <ChevronRight className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-4 py-3 bg-muted/30 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        Total de {totalQty} {totalQty === 1 ? "item" : "itens"}:
+                      </span>
+                      <span className="text-base font-bold text-primary">
+                        {brl(o.total)}
+                      </span>
+                    </div>
+
+                    <div className="px-4 pb-3">
+                      <button
+                        onClick={(e) => openReorder(e, o)}
+                        className="w-full h-10 rounded-full bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors"
+                      >
+                        <RotateCcw className="h-4 w-4" /> Comprar de novo
+                      </button>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
