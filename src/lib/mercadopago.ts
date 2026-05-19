@@ -92,15 +92,12 @@ export type OrderRow = {
 };
 
 export async function fetchOrder(id: string): Promise<OrderRow | null> {
-  const { data, error } = await supabase
-    .from("orders")
-    .select(
-      "id, payment_status, pix_qr_code, pix_qr_code_base64, pix_expires_at, total, customer_name, customer_email, customer_phone",
-    )
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await (supabase as any).rpc("get_pix_order_status", {
+    _id: id,
+  });
   if (error) throw error;
-  return data as OrderRow | null;
+  const row = Array.isArray(data) ? data[0] : data;
+  return (row ?? null) as OrderRow | null;
 }
 
 export async function simulateApprove(orderId: string): Promise<void> {
