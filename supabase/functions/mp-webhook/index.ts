@@ -120,6 +120,14 @@ Deno.serve(async (req) => {
 
   // Notifica cliente quando aprovado (apenas 1x — claim atômico acima)
   if (justApproved) {
+    // Desconta estoque dos produtos do pedido (idempotente)
+    try {
+      await supabase.rpc("apply_order_stock_decrement", { _order_id: order.id });
+    } catch (e) {
+      console.error("[mp-webhook] stock decrement falhou:", e);
+    }
+
+
     const phone = String(order.customer_phone).replace(/\D/g, "");
     const total = Number(order.total).toLocaleString("pt-BR", {
       style: "currency",

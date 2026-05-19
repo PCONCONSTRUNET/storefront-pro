@@ -440,6 +440,20 @@ export const cloud = {
 
   async updateOrderStatus(id: string, status: string) {
     await adminPatch("orders", { id }, { payment_status: status });
+    if (status === "paid" || status === "approved" || status === "pago") {
+      try {
+        await supabase.rpc("apply_order_stock_decrement", { _order_id: id });
+      } catch (e) {
+        console.warn("[cloud] stock decrement failed", e);
+      }
+    }
+  },
+  async applyOrderStockDecrement(id: string) {
+    try {
+      await supabase.rpc("apply_order_stock_decrement", { _order_id: id });
+    } catch (e) {
+      console.warn("[cloud] stock decrement failed", e);
+    }
   },
   async updateDeliveryStatus(id: string, status: string) {
     await adminPatch("orders", { id }, { delivery_status: status });
