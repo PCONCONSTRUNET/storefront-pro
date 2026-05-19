@@ -51,7 +51,7 @@ function Page() {
         const cfg = await getFn({ data: { token } });
         setAccessToken(cfg.mp_access_token || "");
         setPublicKey(cfg.mp_public_key || "");
-        setEnvironment(cfg.environment);
+        
         setMaxInstallments(cfg.max_installments);
         const merged = defaultFees(cfg.max_installments);
         Object.entries(cfg.installment_fees || {}).forEach(([k, v]) => {
