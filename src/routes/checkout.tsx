@@ -388,6 +388,12 @@ function Page() {
           }}
         />
       )}
+
+      <PixPaymentModal
+        open={!!pixModal}
+        payload={pixModal}
+        onClose={() => setPixModal(null)}
+      />
     </StoreLayout>
   );
 }
