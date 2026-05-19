@@ -498,6 +498,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             </span>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
