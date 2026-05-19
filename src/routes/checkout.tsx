@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchInstallmentConfig } from "@/lib/mercadopago";
 import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
