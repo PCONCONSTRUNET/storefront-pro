@@ -91,39 +91,102 @@ export const adminFetchAllFn = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
   .handler(async ({ data }) => {
     await requireAdmin(data.token);
-    const [cust, affs, affSales, txs, ords, wait, logs] = await Promise.all([
-      supabaseAdmin.from("customers").select("*"),
-      supabaseAdmin.from("affiliates").select("*"),
-      supabaseAdmin
-        .from("affiliate_sales")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabaseAdmin
-        .from("transactions")
-        .select("*")
-        .order("date", { ascending: false }),
-      supabaseAdmin
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500),
-      supabaseAdmin.from("product_waitlist").select("*"),
-      supabaseAdmin
-        .from("activity_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200),
-    ]);
+    const [cust, affs, affSales, affCons, txs, ords, wait, logs] =
+      await Promise.all([
+        supabaseAdmin.from("customers").select("*"),
+        supabaseAdmin.from("affiliates").select("*"),
+        supabaseAdmin
+          .from("affiliate_sales")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabaseAdmin
+          .from("affiliate_consignments")
+          .select("*")
+          .order("picked_up_at", { ascending: false }),
+        supabaseAdmin
+          .from("transactions")
+          .select("*")
+          .order("date", { ascending: false }),
+        supabaseAdmin
+          .from("orders")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(500),
+        supabaseAdmin.from("product_waitlist").select("*"),
+        supabaseAdmin
+          .from("activity_logs")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(200),
+      ]);
     return {
       customers: cust.data || [],
       affiliates: affs.data || [],
       affiliateSales: affSales.data || [],
+      affiliateConsignments: affCons.data || [],
       transactions: txs.data || [],
       orders: ords.data || [],
       waitlist: wait.data || [],
       activityLogs: logs.data || [],
     };
   });
+
+// ---------- CONSIGNAÇÕES (retiradas de laços pela afiliada) ----------
+export const listConsignmentsFn = createServerFn({ method: "POST" })
+  .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
+  .handler(async ({ data }) => {
+    await requireAdmin(data.token);
+    const { data: rows } = await supabaseAdmin
+      .from("affiliate_consignments")
+      .select("*")
+      .order("picked_up_at", { ascending: false });
+    return { consignments: rows || [] };
+  });
+
+export const createConsignmentFn = createServerFn({ method: "POST" })
+  .inputValidator((i) =>
+    z
+      .object({
+        token: tokenSchema,
+        affiliate_id: z.string().uuid(),
+        quantity: z.number().int().min(0).max(100000),
+        total_value: z.number().min(0).max(1_000_000),
+        picked_up_at: z.string().datetime().optional(),
+        notes: z.string().trim().max(1000).optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin(data.token);
+    const { data: row, error } = await supabaseAdmin
+      .from("affiliate_consignments")
+      .insert({
+        affiliate_id: data.affiliate_id,
+        quantity: data.quantity,
+        total_value: data.total_value,
+        picked_up_at: data.picked_up_at ?? new Date().toISOString(),
+        notes: data.notes ?? null,
+      })
+      .select("*")
+      .single();
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const, row };
+  });
+
+export const deleteConsignmentFn = createServerFn({ method: "POST" })
+  .inputValidator((i) =>
+    z.object({ token: tokenSchema, id: z.string().uuid() }).parse(i),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin(data.token);
+    const { error } = await supabaseAdmin
+      .from("affiliate_consignments")
+      .delete()
+      .eq("id", data.id);
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const };
+  });
+
 
 // ---------- MUTAÇÕES GENÉRICAS (allowlist de tabelas) ----------
 const WRITE_TABLES = [
