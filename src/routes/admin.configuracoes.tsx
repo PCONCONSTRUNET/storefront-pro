@@ -32,29 +32,6 @@ function Page() {
             onChange={(v) => setS({ ...s, bannerSubtitle: v })}
           />
         </Card>
-        <Card title="Entrega e pagamento">
-          <Field
-            label="Taxa de entrega"
-            type="number"
-            value={String(s.shippingFee)}
-            onChange={(v) => setS({ ...s, shippingFee: parseFloat(v) || 0 })}
-          />
-          <Toggle
-            label="Aceitar Pix"
-            value={s.acceptPix}
-            onChange={(v) => setS({ ...s, acceptPix: v })}
-          />
-          <Toggle
-            label="Aceitar Cartão"
-            value={s.acceptCard}
-            onChange={(v) => setS({ ...s, acceptCard: v })}
-          />
-          <Toggle
-            label="Aceitar Dinheiro na entrega"
-            value={s.acceptCash}
-            onChange={(v) => setS({ ...s, acceptCash: v })}
-          />
-        </Card>
       </div>
       <div className="mt-4 flex justify-end">
         <button
