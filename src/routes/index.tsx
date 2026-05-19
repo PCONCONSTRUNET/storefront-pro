@@ -128,43 +128,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Trust strip */}
-      <section className="px-3 md:px-4 mt-3 max-w-6xl mx-auto">
-        <div className="bg-card rounded-md border border-border grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-          {[
-            {
-              icon: Truck,
-              label: "Frete fixo",
-              sub: `R$ ${settings.shippingFee.toFixed(2)}`,
-            },
-            {
-              icon: ShieldCheck,
-              label: "Compra 100% segura",
-              sub: "Pix, cartão e dinheiro",
-            },
-            { icon: Zap, label: "Envio rápido", sub: "Em até 24h" },
-            {
-              icon: Tag,
-              label: "Cupons",
-              sub: `${coupons.filter((c) => c.active).length} ativos hoje`,
-            },
-          ].map((t) => (
-            <div key={t.label} className="flex items-center gap-2 p-2.5 md:p-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 grid place-items-center text-primary shrink-0">
-                <t.icon className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-[11px] md:text-xs font-semibold leading-tight">
-                  {t.label}
-                </div>
-                <div className="text-[10px] md:text-[11px] text-muted-foreground truncate">
-                  {t.sub}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       <CategoriesScroller categories={categories} />
 
