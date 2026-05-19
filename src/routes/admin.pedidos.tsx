@@ -441,18 +441,89 @@ function Page() {
           title={`Pedido #${String(order.id).slice(0, 8)}`}
         >
           <div className="space-y-3 text-sm">
-            {/* Status badge + actions */}
+      {order && (() => {
+        const status = normalizeOrderStatus(order.status);
+        const quickSteps: { value: OrderStatus; label: string; icon: any }[] = [
+          { value: "pago", label: "Pago", icon: CheckCircle2 },
+          { value: "em_separacao", label: "Em separação", icon: Package },
+          { value: "saiu_para_entrega", label: "Saiu p/ entrega", icon: Truck },
+          { value: "concluido", label: "Entregue", icon: CheckCircle2 },
+        ];
+        return (
+        <Modal
+          onClose={() => setSelected(null)}
+          title={`Pedido #${String(order.id).slice(0, 8)}`}
+        >
+          <div className="space-y-3 text-sm">
+            {/* Status header */}
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border ${STATUS_STYLE[normalizeOrderStatus(order.status)]}`}
+                className={`text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border ${STATUS_STYLE[status]}`}
               >
                 {getOrderStatusLabel(order.status)}
               </span>
+              <span className="text-[11px] text-muted-foreground">
+                {formatDate(order.createdAt)}
+              </span>
               {order.paidAt && (
                 <span className="text-[11px] text-emerald-700">
-                  Pago em {formatDate(order.paidAt)}
+                  · Pago {formatDate(order.paidAt)}
                 </span>
               )}
+            </div>
+
+            {/* Quick status actions */}
+            <div className="rounded-xl border border-border p-2 bg-muted/30">
+              <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide mb-1.5 px-1">
+                Marcar como
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {quickSteps.map((s) => {
+                  const Icon = s.icon;
+                  const isCurrent = status === s.value;
+                  return (
+                    <button
+                      key={s.value}
+                      disabled={isCurrent || busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          await updateOrderStatus(order.id, s.value);
+                          toast.success(`Marcado como ${s.label}`);
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                      className={`h-9 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 border transition ${
+                        isCurrent
+                          ? "bg-primary text-primary-foreground border-primary cursor-default"
+                          : "bg-card hover:bg-primary/10 hover:border-primary/40 border-border"
+                      } disabled:opacity-60`}
+                    >
+                      <Icon className="h-3.5 w-3.5" /> {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <details className="mt-1.5 px-1">
+                <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary">
+                  Outros status…
+                </summary>
+                <select
+                  value={status}
+                  onChange={(e) => {
+                    updateOrderStatus(order.id, e.target.value as OrderStatus);
+                    toast.success("Status atualizado");
+                  }}
+                  className="mt-1.5 w-full h-9 px-2 rounded-lg bg-card border border-border text-xs"
+                >
+                  {statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {ORDER_STATUS_LABEL[s]}
+                    </option>
+                  ))}
+                </select>
+              </details>
             </div>
 
             {/* Cliente */}
@@ -460,22 +531,13 @@ function Page() {
               <div className="text-[11px] font-bold uppercase text-muted-foreground tracking-wide">
                 Cliente
               </div>
-              <Row icon={Hash} label="ID">
-                <button
-                  onClick={() => copy(order.id, "ID copiado")}
-                  className="font-mono text-xs hover:text-primary inline-flex items-center gap-1"
-                >
-                  {String(order.id).slice(0, 8)}…
-                  <Copy className="h-3 w-3" />
-                </button>
-              </Row>
               <Row icon={Mail} label="Nome">
                 {order.customerName}
               </Row>
               <Row icon={Mail} label="E-mail">
                 <button
                   onClick={() => copy(order.customerEmail, "E-mail copiado")}
-                  className="hover:text-primary text-left"
+                  className="hover:text-primary text-left truncate max-w-[180px]"
                 >
                   {order.customerEmail}
                 </button>
@@ -485,14 +547,17 @@ function Page() {
                   {order.customerPhone}
                   <button
                     onClick={() => onWhatsApp(order)}
-                    className="text-emerald-600 hover:text-emerald-700"
                     title="WhatsApp"
+                    className="hover:opacity-80"
                   >
-                    <MessageCircle className="h-4 w-4" />
+                    <WhatsAppIcon className="h-4 w-4" />
                   </button>
                 </span>
               </Row>
-              <Row icon={MapPin} label={order.deliveryMethod === "retirada" ? "Retirada" : "Endereço"}>
+              <Row
+                icon={MapPin}
+                label={order.deliveryMethod === "retirada" ? "Retirada" : "Endereço"}
+              >
                 <span className="text-right">{order.address || "—"}</span>
               </Row>
             </div>
@@ -505,11 +570,6 @@ function Page() {
               <Row icon={CreditCard} label="Método">
                 {order.paymentMethod.toUpperCase()}
               </Row>
-              {order.paymentStatus && (
-                <Row icon={CheckCircle2} label="Status MP">
-                  {order.paymentStatus}
-                </Row>
-              )}
               {order.mpPaymentId && (
                 <Row icon={Hash} label="MP ID">
                   <button
@@ -521,7 +581,7 @@ function Page() {
                   </button>
                 </Row>
               )}
-              {order.pixExpiresAt && (
+              {order.pixExpiresAt && status === "aguardando_pagamento" && (
                 <Row icon={Clock} label="Pix expira">
                   {formatDate(order.pixExpiresAt)}
                 </Row>
@@ -531,7 +591,7 @@ function Page() {
             {order.notes && (
               <div className="p-3 rounded-xl bg-gold/10 border border-gold/30">
                 <div className="text-[11px] font-bold text-gold uppercase tracking-wide mb-1">
-                  📝 Observações do cliente
+                  Observações do cliente
                 </div>
                 <div className="text-sm whitespace-pre-wrap">{order.notes}</div>
               </div>
@@ -552,7 +612,7 @@ function Page() {
                       <img
                         src={it.image}
                         alt=""
-                        className="w-12 h-12 rounded-lg object-cover bg-muted"
+                        className="w-10 h-10 rounded-lg object-cover bg-muted"
                       />
                     )}
                     <div className="flex-1 min-w-0">
@@ -569,49 +629,25 @@ function Page() {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            {/* Totais */}
-            <div className="rounded-xl border border-border p-3 space-y-1 text-sm">
-              <Line label="Subtotal" value={brl(order.subtotal)} />
-              {order.discount > 0 && (
+              <div className="border-t border-border p-2.5 space-y-1 text-xs bg-muted/20">
+                <Line label="Subtotal" value={brl(order.subtotal)} />
+                {order.discount > 0 && (
+                  <Line
+                    label="Desconto"
+                    value={`- ${brl(order.discount)}`}
+                    className="text-emerald-700"
+                  />
+                )}
+                {order.shipping > 0 && (
+                  <Line label="Frete" value={brl(order.shipping)} />
+                )}
                 <Line
-                  label="Desconto"
-                  value={`- ${brl(order.discount)}`}
-                  className="text-emerald-700"
+                  label="Total"
+                  value={brl(order.total)}
+                  className="font-bold text-primary text-sm pt-1 border-t border-border mt-1"
                 />
-              )}
-              {order.shipping > 0 && (
-                <Line label="Frete" value={brl(order.shipping)} />
-              )}
-              <div className="h-px bg-border my-1" />
-              <Line
-                label="Total"
-                value={brl(order.total)}
-                className="font-bold text-primary text-base"
-              />
+              </div>
             </div>
-
-            {/* Alterar status */}
-            <label className="block">
-              <span className="text-xs font-medium text-muted-foreground">
-                Alterar status
-              </span>
-              <select
-                value={normalizeOrderStatus(order.status)}
-                onChange={(e) => {
-                  updateOrderStatus(order.id, e.target.value as OrderStatus);
-                  toast.success("Status atualizado");
-                }}
-                className="mt-1 w-full h-11 px-3 rounded-xl bg-muted"
-              >
-                {statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {ORDER_STATUS_LABEL[s]}
-                  </option>
-                ))}
-              </select>
-            </label>
 
             {/* Ações */}
             <div className="grid grid-cols-2 gap-2 pt-1">
@@ -619,7 +655,7 @@ function Page() {
                 onClick={() => onWhatsApp(order)}
                 className="h-10 rounded-full bg-emerald-500/10 text-emerald-700 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-500/20"
               >
-                <MessageCircle className="h-4 w-4" /> WhatsApp
+                <WhatsAppIcon className="h-4 w-4" /> WhatsApp
               </button>
               <button
                 onClick={() => printOrderReceipt(order, settings)}
@@ -644,14 +680,10 @@ function Page() {
                 <Trash2 className="h-4 w-4" /> Excluir pedido
               </button>
             </div>
-
-            <div className="text-[10px] text-muted-foreground text-center pt-2">
-              Criado em {formatDate(order.createdAt)} ·{" "}
-              {settings?.storeName || "Loja"}
-            </div>
           </div>
         </Modal>
-      )}
+        );
+      })()}
     </AdminLayout>
   );
 }
