@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchInstallmentConfig } from "@/lib/mercadopago";
 import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
@@ -47,6 +48,22 @@ function Page() {
     payment: "pix" as "pix" | "card" | "cash",
     notes: "",
   });
+  const [installmentInfo, setInstallmentInfo] = useState<{
+    max: number;
+    maxSemJuros: number;
+  }>({ max: 1, maxSemJuros: 1 });
+
+  useEffect(() => {
+    fetchInstallmentConfig().then((cfg) => {
+      const max = Math.max(1, cfg.max_installments || 1);
+      let maxSemJuros = 1;
+      for (let n = 1; n <= max; n++) {
+        const fee = Number(cfg.installment_fees?.[String(n)] ?? 0);
+        if (fee === 0) maxSemJuros = n;
+      }
+      setInstallmentInfo({ max, maxSemJuros });
+    });
+  }, []);
 
   if (cart.length === 0 && step < 4) {
     return (
@@ -148,7 +165,10 @@ function Page() {
     {
       id: "card",
       label: "Cartão de crédito",
-      sub: "Em até 3x sem juros",
+      sub:
+        installmentInfo.maxSemJuros > 1
+          ? `Em até ${installmentInfo.maxSemJuros}x sem juros · até ${installmentInfo.max}x`
+          : `Em até ${installmentInfo.max}x`,
       icon: CreditCard,
       image: cardIcon,
       enabled: settings.acceptCard,
