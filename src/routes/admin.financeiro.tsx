@@ -376,8 +376,9 @@ function Page() {
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm("Excluir lançamento?")) {
+                        onClick={async () => {
+                          const { confirmDialog } = await import("@/components/ConfirmDialog");
+                          if (await confirmDialog({ title: "Excluir lançamento?", confirmLabel: "Excluir" })) {
                             deleteTransaction(r.txRef!.id);
                             toast.success("Removido");
                           }
@@ -391,12 +392,9 @@ function Page() {
                   )}
                   {r.affiliateSaleId && (
                     <button
-                      onClick={() => {
-                        if (
-                          confirm(
-                            "Excluir esta venda de afiliada? A comissão correspondente também será removida.",
-                          )
-                        ) {
+                      onClick={async () => {
+                        const { confirmDialog } = await import("@/components/ConfirmDialog");
+                        if (await confirmDialog({ title: "Excluir venda de afiliada?", description: "A comissão correspondente também será removida.", confirmLabel: "Excluir" })) {
                           deleteAffiliateSale(r.affiliateSaleId!);
                           toast.success("Venda removida");
                         }
