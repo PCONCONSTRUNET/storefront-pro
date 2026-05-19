@@ -276,12 +276,9 @@ function Page() {
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Excluir ${a.name}? Vendas dela também serão removidas.`,
-                                  )
-                                ) {
+                              onClick={async () => {
+                                const { confirmDialog } = await import("@/components/ConfirmDialog");
+                                if (await confirmDialog({ title: "Excluir afiliada?", description: `${a.name} e todas as vendas dela serão removidas.`, confirmLabel: "Excluir" })) {
                                   remove(a.id);
                                   toast.success("Afiliada removida");
                                 }
