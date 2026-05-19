@@ -12,11 +12,10 @@ import { brl, formatDate } from "@/lib/format";
 import {
   CheckCircle2,
   ChevronLeft,
-  Copy,
-  QrCode,
   RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/pedido/$id")({
   component: Page,
@@ -70,34 +69,8 @@ function Page() {
           <p className="text-sm opacity-90">{formatDate(order.createdAt)}</p>
         </div>
 
-        {order.paymentMethod === "pix" && status === "pago" && (
-          <div className="mt-4 bg-card rounded-2xl p-4 shadow-card">
-            <h2 className="font-semibold flex items-center gap-2">
-              <QrCode className="h-4 w-4" /> Pix simulado
-            </h2>
-            <div className="mt-3 grid place-items-center bg-muted rounded-xl p-6">
-              <div
-                className="w-32 h-32 bg-foreground/90"
-                style={{
-                  backgroundImage:
-                    "repeating-conic-gradient(var(--foreground) 0 25%, transparent 0 50%)",
-                  backgroundSize: "12px 12px",
-                }}
-              />
-            </div>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  "00020126...PIXSIMULADO" + order.id,
-                );
-                toast.success("Código copiado");
-              }}
-              className="mt-3 w-full h-10 rounded-full bg-muted text-sm font-semibold flex items-center justify-center gap-2"
-            >
-              <Copy className="h-4 w-4" /> Copiar código Pix
-            </button>
-          </div>
-        )}
+
+
 
         <div className="mt-4 bg-card rounded-2xl p-4 shadow-card">
           <h2 className="font-semibold mb-3">Acompanhamento</h2>
