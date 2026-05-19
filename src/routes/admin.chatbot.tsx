@@ -79,11 +79,8 @@ function Page() {
   }, []);
 
   const handleLogout = async () => {
-    if (
-      !confirm(
-        "Tem certeza que deseja desconectar o WhatsApp? A sessão será encerrada.",
-      )
-    )
+    const { confirmDialog } = await import("@/components/ConfirmDialog");
+    if (!(await confirmDialog({ title: "Desconectar WhatsApp?", description: "A sessão será encerrada.", confirmLabel: "Desconectar" })))
       return;
     setLoadingLogout(true);
     try {
