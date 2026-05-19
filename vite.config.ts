@@ -7,15 +7,7 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  // Disable the Cloudflare Workers build plugin so we can deploy to Vercel
-  // (or any static host) as a single-page app. Set to a truthy value if you
-  // want to switch back to a Cloudflare Workers deploy via Lovable.
-  cloudflare: false,
   tanstackStart: {
-    // Render as an SPA: build a client-only bundle + prerendered shell at
-    // /_shell so static hosts (Vercel, Netlify, GitHub Pages...) can serve
-    // every route via a fallback rewrite.
-    spa: { enabled: true },
     router: {
       codeSplittingOptions: {
         splitBehavior: ({ routeId }: { routeId: string }) => {
