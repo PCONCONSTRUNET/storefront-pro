@@ -181,7 +181,7 @@ export type StoreSettings = {
 const defaultSettings: StoreSettings = {
   storeName: "Princesa de Laços",
   whatsapp: "(11) 99999-9999",
-  address: "Rua das Flores, 123 — São Paulo/SP",
+  address: "Rua Jaime Locatelli — Bairro Farroupilha",
   instagram: "@princesadelacos",
   facebook: "/princesadelacos",
   shippingFee: 12.9,
