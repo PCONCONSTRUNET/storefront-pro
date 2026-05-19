@@ -102,19 +102,6 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
     }
   }, [open]);
 
-  const handleSimulate = async () => {
-    if (!pix) return;
-    setSimulating(true);
-    try {
-      await simulateApprove(pix.order_id);
-      toast.success("Pagamento simulado! Aguardando confirmação...");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSimulating(false);
-    }
-  };
-
   const copyCode = () => {
     const code = order?.pix_qr_code ?? pix?.qr_code;
     if (!code) return;
@@ -128,9 +115,6 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const qrCode = order?.pix_qr_code ?? pix?.qr_code ?? "";
   const qrBase64 = order?.pix_qr_code_base64 ?? pix?.qr_code_base64 ?? "";
   const total = order?.total ?? pix?.total ?? 0;
-  const sandboxProbe: PixStatusProbe | null =
-    order ?? (pix ? { pix_qr_code: pix.qr_code } : null);
-  const sandbox = isSandboxOrder(sandboxProbe);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
