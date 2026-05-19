@@ -142,7 +142,7 @@ function Home() {
       </section>
 
 
-      <CategoriesScroller categories={categories} />
+      <CategoriesScroller categories={sortedCategories} />
 
       {/* Coupons strip */}
       {coupons.filter((c) => c.active).length > 0 && (
