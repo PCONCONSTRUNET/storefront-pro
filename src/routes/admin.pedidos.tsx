@@ -408,6 +408,10 @@ function Page() {
                           <Icon className="h-3 w-3" />
                           {ORDER_STATUS_LABEL[status]}
                         </span>
+                        <span className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border bg-indigo-50 text-indigo-800 border-indigo-200">
+                          <Truck className="h-3 w-3" />
+                          {DELIVERY_STATUS_LABEL[normalizeDeliveryStatus(o.deliveryStatus)]}
+                        </span>
                         {expired && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700 border border-red-200">
                             Pix expirado
