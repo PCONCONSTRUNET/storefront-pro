@@ -407,6 +407,45 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             </label>
           )}
 
+          {selected && (
+            <div className="rounded-2xl border border-border bg-muted/40 p-3 space-y-1.5">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Valor do pedido</span>
+                <span>{brl(baseTotal)}</span>
+              </div>
+              {selected.feePct > 0 ? (
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>
+                    Juros do cartão de crédito (
+                    {selected.feePct.toString().replace(".", ",")}%)
+                  </span>
+                  <span>+ {brl(selected.total - baseTotal)}</span>
+                </div>
+              ) : (
+                <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span>Sem juros</span>
+                  <span>—</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-bold pt-1.5 border-t border-border">
+                <span>Total a pagar</span>
+                <span>{brl(selected.total)}</span>
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>Parcelamento</span>
+                <span className="font-semibold text-foreground">
+                  {selected.n}x de {brl(selected.per)}
+                </span>
+              </div>
+              {selected.feePct > 0 && (
+                <p className="text-[10px] text-muted-foreground pt-1 leading-tight">
+                  Taxa de juros do cartão de crédito aplicada conforme número
+                  de parcelas escolhido.
+                </p>
+              )}
+            </div>
+          )}
+
           {errorMsg && (
             <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
