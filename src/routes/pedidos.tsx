@@ -7,13 +7,32 @@ import {
   getOrderStatusLabel,
   type Order,
 } from "@/lib/store";
-import { getDeliveryStatusLabel } from "@/lib/orderStatus";
+import {
+  getDeliveryStatusLabel,
+  normalizeDeliveryStatus,
+  normalizeOrderStatus,
+} from "@/lib/orderStatus";
 import { StoreLayout } from "@/components/StoreLayout";
 import { OrderListSkeleton } from "@/components/Skeleton";
 import { ReorderModal } from "@/components/ReorderModal";
 import { OrderAccentBar } from "@/components/OrderAccentBar";
 import { brl, formatDate } from "@/lib/format";
-import { Package, RotateCcw, ChevronRight } from "lucide-react";
+import {
+  Package,
+  RotateCcw,
+  CheckCircle2,
+  Clock,
+  Truck,
+  PackageCheck,
+  XCircle,
+  CreditCard,
+  QrCode,
+  Banknote,
+  MapPin,
+  Sparkles,
+  Receipt,
+} from "lucide-react";
+
 
 export const Route = createFileRoute("/pedidos")({
   head: () => ({ meta: [{ title: "Meus pedidos — Princesa de Laços" }] }),
