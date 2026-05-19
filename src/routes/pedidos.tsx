@@ -11,6 +11,7 @@ import { getDeliveryStatusLabel } from "@/lib/orderStatus";
 import { StoreLayout } from "@/components/StoreLayout";
 import { OrderListSkeleton } from "@/components/Skeleton";
 import { ReorderModal } from "@/components/ReorderModal";
+import { OrderAccentBar } from "@/components/OrderAccentBar";
 import { brl, formatDate } from "@/lib/format";
 import { Package, RotateCcw, ChevronRight } from "lucide-react";
 
