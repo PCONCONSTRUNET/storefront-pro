@@ -266,3 +266,53 @@ export const updateCustomerFn = createServerFn({ method: "POST" })
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
+
+// ---------- GATEWAY DE PAGAMENTO (Mercado Pago) ----------
+export const getGatewayConfigFn = createServerFn({ method: "POST" })
+  .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
+  .handler(async ({ data }) => {
+    await requireAdmin(data.token);
+    const { data: row } = await supabaseAdmin
+      .from("payment_gateway")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+    return {
+      mp_access_token: row?.mp_access_token ?? "",
+      mp_public_key: row?.mp_public_key ?? "",
+      environment: (row?.environment ?? "sandbox") as "sandbox" | "production",
+      max_installments: Number(row?.max_installments ?? 3),
+      installment_fees: (row?.installment_fees ?? {}) as Record<string, number>,
+    };
+  });
+
+export const saveGatewayConfigFn = createServerFn({ method: "POST" })
+  .inputValidator((i) =>
+    z
+      .object({
+        token: tokenSchema,
+        mp_access_token: z.string().trim().max(500).default(""),
+        mp_public_key: z.string().trim().max(500).default(""),
+        environment: z.enum(["sandbox", "production"]),
+        max_installments: z.number().int().min(1).max(12),
+        installment_fees: z.record(z.string(), z.number().min(0).max(100)),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin(data.token);
+    const { error } = await supabaseAdmin.from("payment_gateway").upsert(
+      {
+        id: 1,
+        mp_access_token: data.mp_access_token || null,
+        mp_public_key: data.mp_public_key || null,
+        environment: data.environment,
+        max_installments: data.max_installments,
+        installment_fees: data.installment_fees,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
+    if (error) return { ok: false as const, message: error.message };
+    return { ok: true as const, message: "Configuração salva!" };
+  });

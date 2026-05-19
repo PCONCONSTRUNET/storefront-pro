@@ -9,6 +9,7 @@ import {
   DollarSign,
   Tag,
   Settings,
+  CreditCard,
   Bell,
   LogOut,
   Menu,
@@ -44,6 +45,7 @@ const nav = [
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { to: "/admin/chatbot", label: "Chatbot", icon: WhatsAppIcon },
   { to: "/admin/logs", label: "Logs de Auditoria", icon: FileText },
+  { to: "/admin/gateway", label: "Gateway", icon: CreditCard },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
