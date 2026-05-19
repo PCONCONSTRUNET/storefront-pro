@@ -108,6 +108,12 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       .finally(() => setKeyLoading(false));
   }, [open]);
 
+  // Carrega config de parcelamento do admin
+  useEffect(() => {
+    if (!open) return;
+    fetchInstallmentConfig().then(setCfg);
+  }, [open]);
+
   // Carrega o SDK quando temos a chave pública
   useEffect(() => {
     if (!open || !publicKey) return;
@@ -118,7 +124,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       .catch((e) => setSdkErr(e.message));
   }, [open, publicKey]);
 
-  // Detect brand + installments by BIN
+  // Detect brand by BIN (parcelamento vem do admin)
   useEffect(() => {
     if (!mp) return;
     const digits = onlyDigits(card.number);
@@ -126,7 +132,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
     if (bin.length < 6) {
       setPmId(null);
       setBrand(null);
-      setInstallmentsList([]);
+      setIssuerId(null);
       return;
     }
     if (bin === lastBin.current) return;
@@ -139,27 +145,44 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         if (!m) return;
         setPmId(m.id);
         setBrand({ name: m.name, thumb: m.thumb });
-
-        const inst = await mp.getInstallments({
-          amount: String(total.toFixed(2)),
-          bin,
-          paymentTypeId: "credit_card",
-        });
-        const list = inst?.[0]?.payer_costs ?? [];
-        setInstallmentsList(list);
-        if (
-          list.length &&
-          !list.find((x: any) => x.installments === card.installments)
-        ) {
-          setCard((c) => ({ ...c, installments: list[0].installments }));
+        try {
+          const inst = await mp.getInstallments({
+            amount: String(baseTotal.toFixed(2)),
+            bin,
+            paymentTypeId: "credit_card",
+          });
+          const issuers = inst?.[0]?.issuer ?? null;
+          if (issuers?.id) setIssuerId(String(issuers.id));
+        } catch {
+          /* ignore */
         }
-        const issuers = inst?.[0]?.issuer ?? null;
-        if (issuers?.id) setIssuerId(String(issuers.id));
       } catch (e) {
         console.warn("[mp] bin lookup falhou", e);
       }
     })();
-  }, [card.number, mp, total]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [card.number, mp, baseTotal]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Opções de parcela conforme admin
+  const installmentOptions = useMemo(() => {
+    const max = Math.max(1, Math.min(12, cfg.max_installments || 1));
+    const opts: Array<{
+      n: number;
+      feePct: number;
+      total: number;
+      per: number;
+    }> = [];
+    for (let n = 1; n <= max; n++) {
+      const feePct = Number(cfg.installment_fees?.[String(n)] ?? 0) || 0;
+      const total = Math.round(baseTotal * (1 + feePct / 100) * 100) / 100;
+      opts.push({ n, feePct, total, per: total / n });
+    }
+    return opts;
+  }, [cfg, baseTotal]);
+
+  const selected =
+    installmentOptions.find((o) => o.n === card.installments) ??
+    installmentOptions[0];
+  const total = selected?.total ?? baseTotal;
 
   const canSubmit = useMemo(() => {
     const baseFilled =
