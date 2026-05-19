@@ -170,14 +170,22 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       feePct: number;
       total: number;
       per: number;
+      fee: number;
     }> = [];
     for (let n = 1; n <= max; n++) {
       const feePct = Number(cfg.installment_fees?.[String(n)] ?? 0) || 0;
-      const total = Math.round(baseTotal * (1 + feePct / 100) * 100) / 100;
-      opts.push({ n, feePct, total, per: total / n });
+      let fee = 0;
+      if (feePct > 0 && baseTotal > 0) {
+        const raw = Math.round(baseTotal * (feePct / 100) * 100) / 100;
+        // garante que qualquer % de juros cobre pelo menos R$ 0,01
+        fee = Math.max(0.01, raw);
+      }
+      const total = Math.round((baseTotal + fee) * 100) / 100;
+      opts.push({ n, feePct, total, per: total / n, fee });
     }
     return opts;
   }, [cfg, baseTotal]);
+
 
   const selected =
     installmentOptions.find((o) => o.n === card.installments) ??
@@ -419,8 +427,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
                     Juros do cartão de crédito (
                     {selected.feePct.toString().replace(".", ",")}%)
                   </span>
-                  <span>+ {brl(selected.total - baseTotal)}</span>
+                  <span>+ {brl(selected.fee)}</span>
                 </div>
+
               ) : (
                 <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>Sem juros</span>
