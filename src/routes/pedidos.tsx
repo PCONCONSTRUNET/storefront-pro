@@ -23,8 +23,16 @@ function Page() {
   const hydrated = useStoreHydrated();
   const allOrders = useStore((s) => s.orders);
   const orders = customer
-    ? allOrders.filter((o) => o.customerId === customer.id)
+    ? allOrders.filter((o) => {
+        if (o.customerId === customer.id) return true;
+        const email = (customer.email || "").trim().toLowerCase();
+        return (
+          !!email &&
+          (o.customerEmail || "").trim().toLowerCase() === email
+        );
+      })
     : [];
+
   const [reorderOrder, setReorderOrder] = useState<Order | null>(null);
 
   if (hydrated && !customer) {
