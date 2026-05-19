@@ -1184,6 +1184,14 @@ export const useStore = create<AppState>()(
             .catch(() => {});
         }
       },
+      updateDeliveryStatus: (id, status) => {
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === id ? { ...o, deliveryStatus: status } : o,
+          ),
+        }));
+        cloud.updateDeliveryStatus(id, status);
+      },
       deleteOrder: (id) => {
         set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }));
         cloud.deleteOrder(id);
