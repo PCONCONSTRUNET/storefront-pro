@@ -1,6 +1,6 @@
 import logoUrl from "@/assets/logo-princesa.png";
 import type { Order, StoreSettings } from "@/lib/store";
-import { ORDER_STATUS_LABEL } from "@/lib/store";
+import { getOrderStatusLabel, normalizeOrderStatus } from "@/lib/store";
 
 const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -14,6 +14,7 @@ const esc = (s: unknown) =>
     .replace(/>/g, "&gt;");
 
 export function printOrderReceipt(order: Order, settings: StoreSettings) {
+  const status = normalizeOrderStatus(order.status);
   const logoSrc = new URL(logoUrl, window.location.origin).href;
   const shortId = String(order.id).slice(0, 8).toUpperCase();
   const itemsHtml = order.items
@@ -92,8 +93,8 @@ export function printOrderReceipt(order: Order, settings: StoreSettings) {
         <div>RECIBO DE PEDIDO</div>
         <div class="num">#${shortId}</div>
         <div>Emitido em ${fmt(new Date().toISOString())}</div>
-        <div class="badge ${order.status === "pago" || order.status === "concluido" ? "pago" : ""} ${order.status === "cancelado" || order.status === "reembolsado" ? "cancelado" : ""}">
-          ${esc(ORDER_STATUS_LABEL[order.status])}
+        <div class="badge ${status === "pago" || status === "concluido" ? "pago" : ""} ${status === "cancelado" || status === "reembolsado" ? "cancelado" : ""}">
+          ${esc(getOrderStatusLabel(status))}
         </div>
       </div>
     </header>
