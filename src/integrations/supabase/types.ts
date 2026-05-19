@@ -788,6 +788,26 @@ export type Database = {
           phone: string
         }[]
       }
+      get_payment_gateway: {
+        Args: never
+        Returns: {
+          environment: string
+          installment_fees: Json
+          max_installments: number
+          mp_access_token: string
+          mp_public_key: string
+        }[]
+      }
+      save_payment_gateway: {
+        Args: {
+          _environment: string
+          _installment_fees: Json
+          _max_installments: number
+          _mp_access_token: string
+          _mp_public_key: string
+        }
+        Returns: undefined
+      }
       update_customer_password_hash: {
         Args: { _customer_id: string; _password_hash: string }
         Returns: {

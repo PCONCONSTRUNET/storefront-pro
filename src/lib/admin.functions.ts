@@ -334,11 +334,8 @@ export const getGatewayConfigFn = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
   .handler(async ({ data }) => {
     await requireAdmin(data.token);
-    const { data: row } = await supabaseAdmin
-      .from("payment_gateway")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle();
+    const { data: rows } = await (supabase as any).rpc("get_payment_gateway");
+    const row = Array.isArray(rows) ? rows[0] : rows;
     return {
       mp_access_token: row?.mp_access_token ?? "",
       mp_public_key: row?.mp_public_key ?? "",
@@ -363,18 +360,13 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin(data.token);
-    const { error } = await supabaseAdmin.from("payment_gateway").upsert(
-      {
-        id: 1,
-        mp_access_token: data.mp_access_token || null,
-        mp_public_key: data.mp_public_key || null,
-        environment: data.environment,
-        max_installments: data.max_installments,
-        installment_fees: data.installment_fees,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "id" },
-    );
+    const { error } = await (supabase as any).rpc("save_payment_gateway", {
+      _mp_access_token: data.mp_access_token || "",
+      _mp_public_key: data.mp_public_key || "",
+      _environment: data.environment,
+      _max_installments: data.max_installments,
+      _installment_fees: data.installment_fees,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const, message: "Configuração salva!" };
   });
