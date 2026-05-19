@@ -4,7 +4,7 @@ import {
   useStore,
   useStoreHydrated,
   selectCurrentCustomer,
-  ORDER_STATUS_LABEL,
+  getOrderStatusLabel,
   type Order,
 } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
@@ -86,7 +86,7 @@ function Page() {
                         {brl(o.total)}
                       </div>
                       <span className="text-[11px] inline-block mt-1 bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-semibold">
-                        {ORDER_STATUS_LABEL[o.status]}
+                        {getOrderStatusLabel(o.status)}
                       </span>
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useStore } from "@/lib/store";
+import { normalizeOrderStatus, useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { useMemo } from "react";
 import { brl } from "@/lib/format";
@@ -28,7 +28,7 @@ function Page() {
 
   const metrics = useMemo(() => {
     const totalRev = orders
-      .filter((o) => o.status !== "cancelado")
+      .filter((o) => !["cancelado", "reembolsado"].includes(normalizeOrderStatus(o.status)))
       .reduce((a, o) => a + o.total, 0);
     const avgTicket = orders.length > 0 ? totalRev / orders.length : 0;
     const stockCritical = products.filter(

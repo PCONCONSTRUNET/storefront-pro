@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
+import {
+  useStore,
+  ORDER_STATUS_LABEL,
+  normalizeOrderStatus,
+  type OrderStatus,
+} from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ReorderModal } from "@/components/ReorderModal";
 import { brl, formatDate } from "@/lib/format";
@@ -43,7 +48,8 @@ function Page() {
     );
   }
 
-  const currentIdx = flow.indexOf(order.status);
+  const status = normalizeOrderStatus(order.status);
+  const currentIdx = flow.indexOf(status);
 
   return (
     <StoreLayout>
@@ -64,7 +70,7 @@ function Page() {
           <p className="text-sm opacity-90">{formatDate(order.createdAt)}</p>
         </div>
 
-        {order.paymentMethod === "pix" && order.status === "pago" && (
+        {order.paymentMethod === "pix" && status === "pago" && (
           <div className="mt-4 bg-card rounded-2xl p-4 shadow-card">
             <h2 className="font-semibold flex items-center gap-2">
               <QrCode className="h-4 w-4" /> Pix simulado

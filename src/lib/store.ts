@@ -13,6 +13,13 @@ import {
 } from "./data";
 import { useNotifications } from "./notifications";
 import { cloud, fetchCloudSnapshot } from "./cloud";
+export {
+  ORDER_STATUS_LABEL,
+  getOrderStatusLabel,
+  normalizeOrderStatus,
+  type OrderStatus,
+} from "./orderStatus";
+import { normalizeOrderStatus, type OrderStatus } from "./orderStatus";
 
 const brlFmt = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -59,25 +66,6 @@ export type ActivityLog = {
   metadata?: any;
   userId?: string;
   createdAt: string;
-};
-
-export type OrderStatus =
-  | "aguardando_pagamento"
-  | "pago"
-  | "em_separacao"
-  | "saiu_para_entrega"
-  | "concluido"
-  | "cancelado"
-  | "reembolsado";
-
-export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  aguardando_pagamento: "Aguardando pagamento",
-  pago: "Pago",
-  em_separacao: "Em separação",
-  saiu_para_entrega: "Saiu para entrega",
-  concluido: "Concluído",
-  cancelado: "Cancelado",
-  reembolsado: "Reembolsado",
 };
 
 export type Order = {
@@ -1111,7 +1099,7 @@ export const useStore = create<AppState>()(
           total: data.total,
           paymentMethod: data.paymentMethod,
           deliveryMethod: data.deliveryMethod,
-          status: data.status,
+          status: normalizeOrderStatus(data.status),
           createdAt: new Date().toISOString(),
           address: data.address,
           notes: data.notes,
@@ -1121,16 +1109,19 @@ export const useStore = create<AppState>()(
         set((s) => ({ orders: [order, ...s.orders] }));
       },
       updateOrderStatus: (id, status) => {
+        const nextStatus = normalizeOrderStatus(status);
         const order = get().orders.find((o) => o.id === id);
         set((s) => ({
-          orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)),
+          orders: s.orders.map((o) =>
+            o.id === id ? { ...o, status: nextStatus } : o,
+          ),
         }));
         if (!order) return;
-        cloud.updateOrderStatus(id, status === "pago" ? "paid" : status);
+        cloud.updateOrderStatus(id, nextStatus === "pago" ? "paid" : nextStatus);
 
         // Notificações de status agora apenas para logs/admin se necessário,
         // mas o usuário pediu para focar no admin.
-        if (status === "pago") {
+        if (nextStatus === "pago") {
           try {
             useNotifications.getState().trigger(
               "pagamento_aprovado",
@@ -1143,7 +1134,7 @@ export const useStore = create<AppState>()(
             );
           } catch {}
         }
-        if (status === "pago") {
+        if (nextStatus === "pago") {
           // record sale transaction once
           const exists = get().transactions.find(
             (t) => t.description.includes(order.id) && t.category === "venda",

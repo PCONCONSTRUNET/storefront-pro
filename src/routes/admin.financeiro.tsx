@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
+  normalizeOrderStatus,
   useStore,
   type Transaction,
   type TransactionCategory,
@@ -86,13 +87,14 @@ function Page() {
     const list: Row[] = [];
 
     orders.forEach((o) => {
+      const status = normalizeOrderStatus(o.status);
       const isPaid = [
         "pago",
         "em_separacao",
         "saiu_para_entrega",
         "concluido",
-      ].includes(o.status);
-      const isRefund = o.status === "reembolsado";
+      ].includes(status);
+      const isRefund = status === "reembolsado";
       if (!isPaid && !isRefund) return;
       const productSummary = o.items
         .map((it) => {
@@ -108,7 +110,7 @@ function Page() {
         amount: o.total,
         isOut: isRefund,
         kind: "pedido",
-        status: o.status,
+        status,
       });
     });
 
@@ -177,7 +179,7 @@ function Page() {
       .filter((r) => r.isOut)
       .reduce((a, r) => a + r.amount, 0);
     const pendente = orders
-      .filter((o) => o.status === "aguardando_pagamento")
+      .filter((o) => normalizeOrderStatus(o.status) === "aguardando_pagamento")
       .reduce((a, o) => a + o.total, 0);
     return { entradas, saidas, pendente, caixa: entradas - saidas };
   }, [rows, orders]);
