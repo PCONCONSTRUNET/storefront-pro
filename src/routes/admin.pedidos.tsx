@@ -366,9 +366,10 @@ function Page() {
         ) : (
           <ul className="divide-y divide-border">
             {list.map((o) => {
-              const Icon = STATUS_ICON[o.status];
+              const status = normalizeOrderStatus(o.status);
+              const Icon = STATUS_ICON[status];
               const expired =
-                o.status === "aguardando_pagamento" &&
+                status === "aguardando_pagamento" &&
                 o.pixExpiresAt &&
                 new Date(o.pixExpiresAt).getTime() < Date.now();
               return (
@@ -384,10 +385,10 @@ function Page() {
                           #{String(o.id).slice(0, 8)} · {o.customerName}
                         </span>
                         <span
-                          className={`text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border ${STATUS_STYLE[o.status]}`}
+                          className={`text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border ${STATUS_STYLE[status]}`}
                         >
                           <Icon className="h-3 w-3" />
-                          {ORDER_STATUS_LABEL[o.status]}
+                          {ORDER_STATUS_LABEL[status]}
                         </span>
                         {expired && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700 border border-red-200">
@@ -428,9 +429,9 @@ function Page() {
             {/* Status badge + actions */}
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border ${STATUS_STYLE[order.status]}`}
+                className={`text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border ${STATUS_STYLE[normalizeOrderStatus(order.status)]}`}
               >
-                {ORDER_STATUS_LABEL[order.status]}
+                {getOrderStatusLabel(order.status)}
               </span>
               {order.paidAt && (
                 <span className="text-[11px] text-emerald-700">
@@ -582,7 +583,7 @@ function Page() {
                 Alterar status
               </span>
               <select
-                value={order.status}
+                value={normalizeOrderStatus(order.status)}
                 onChange={(e) => {
                   updateOrderStatus(order.id, e.target.value as OrderStatus);
                   toast.success("Status atualizado");
