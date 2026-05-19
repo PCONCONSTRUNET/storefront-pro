@@ -435,12 +435,6 @@ function Page() {
         )}
       </div>
 
-      {order && (
-        <Modal
-          onClose={() => setSelected(null)}
-          title={`Pedido #${String(order.id).slice(0, 8)}`}
-        >
-          <div className="space-y-3 text-sm">
       {order && (() => {
         const status = normalizeOrderStatus(order.status);
         const quickSteps: { value: OrderStatus; label: string; icon: any }[] = [
