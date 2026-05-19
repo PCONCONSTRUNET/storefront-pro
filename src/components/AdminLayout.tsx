@@ -193,6 +193,7 @@ export function AdminLayout({
         </main>
       </div>
       <EnableNotificationsPrompt />
+      <ConfirmHost />
     </div>
   );
 }
