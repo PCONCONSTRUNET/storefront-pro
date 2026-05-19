@@ -157,12 +157,7 @@ function Page() {
           </div>
         </div>
 
-        <Link
-          to="/admin/login"
-          className="mt-6 block text-center text-xs text-muted-foreground underline"
-        >
-          Acesso administrativo
-        </Link>
+        {/* Acesso administrativo: rota /admin/login acessível apenas via link direto */}
       </div>
     </StoreLayout>
   );
