@@ -396,6 +396,7 @@ export type Database = {
           pix_qr_code_base64: string | null
           reminder_sent_at: string | null
           shipping: number
+          stock_decremented_at: string | null
           subtotal: number
           total: number
           updated_at: string
@@ -423,6 +424,7 @@ export type Database = {
           pix_qr_code_base64?: string | null
           reminder_sent_at?: string | null
           shipping?: number
+          stock_decremented_at?: string | null
           subtotal?: number
           total: number
           updated_at?: string
@@ -450,6 +452,7 @@ export type Database = {
           pix_qr_code_base64?: string | null
           reminder_sent_at?: string | null
           shipping?: number
+          stock_decremented_at?: string | null
           subtotal?: number
           total?: number
           updated_at?: string
@@ -750,6 +753,10 @@ export type Database = {
           _table: string
           _token: string
         }
+        Returns: Json
+      }
+      apply_order_stock_decrement: {
+        Args: { _order_id: string }
         Returns: Json
       }
       consume_password_reset_token: {
