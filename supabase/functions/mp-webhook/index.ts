@@ -81,21 +81,33 @@ Deno.serve(async (req) => {
     .maybeSingle();
   if (!order) return new Response("order not found", { status: 200 });
 
-  // Já estava aprovado? não notifica de novo
-  const wasApproved = order.payment_status === "approved";
+  // Atualiza de forma atômica: só "ganha" a notificação o webhook que
+  // realmente transicionou o status para approved (evita duplicidade
+  // quando o Mercado Pago reenvia notificações em paralelo).
+  const shouldApprove = newStatus === "approved";
+  const baseUpdate = {
+    payment_status: newStatus,
+    mp_payment_id: String(payment.id),
+    paid_at:
+      newStatus === "approved"
+        ? (payment.date_approved ?? new Date().toISOString())
+        : order.paid_at,
+  };
 
-  // Atualiza
-  await supabase
-    .from("orders")
-    .update({
-      payment_status: newStatus,
-      mp_payment_id: String(payment.id),
-      paid_at:
-        newStatus === "approved"
-          ? (payment.date_approved ?? new Date().toISOString())
-          : order.paid_at,
-    })
-    .eq("id", order.id);
+  const updateRes = shouldApprove
+    ? await supabase
+        .from("orders")
+        .update(baseUpdate)
+        .eq("id", order.id)
+        .neq("payment_status", "approved")
+        .select("id")
+    : await supabase
+        .from("orders")
+        .update(baseUpdate)
+        .eq("id", order.id)
+        .select("id");
+
+  const justApproved = shouldApprove && (updateRes.data?.length ?? 0) > 0;
 
   // Loga evento
   await supabase.from("payment_events").insert({
@@ -106,8 +118,8 @@ Deno.serve(async (req) => {
     raw_payload: payment,
   });
 
-  // Notifica cliente quando aprovado (apenas 1x)
-  if (newStatus === "approved" && !wasApproved) {
+  // Notifica cliente quando aprovado (apenas 1x — claim atômico acima)
+  if (justApproved) {
     const phone = String(order.customer_phone).replace(/\D/g, "");
     const total = Number(order.total).toLocaleString("pt-BR", {
       style: "currency",
