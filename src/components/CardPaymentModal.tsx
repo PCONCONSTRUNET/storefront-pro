@@ -381,7 +381,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             inputMode="numeric"
           />
 
-          {installmentsList.length > 0 && (
+          {installmentOptions.length > 1 && (
             <label className="block">
               <span className="text-xs font-medium text-muted-foreground">
                 Parcelas
@@ -393,9 +393,14 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
                 }
                 className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/50"
               >
-                {installmentsList.map((i) => (
-                  <option key={i.installments} value={i.installments}>
-                    {i.recommended_message}
+                {installmentOptions.map((o) => (
+                  <option key={o.n} value={o.n}>
+                    {o.n}x de {brl(o.per)}
+                    {o.feePct > 0
+                      ? ` — total ${brl(o.total)} (juros ${o.feePct
+                          .toString()
+                          .replace(".", ",")}%)`
+                      : " sem juros"}
                   </option>
                 ))}
               </select>
