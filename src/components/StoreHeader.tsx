@@ -153,9 +153,6 @@ export function StoreHeader() {
           <Link to="/perfil" className="hover:opacity-80">
             Minha conta
           </Link>
-          <span className="ml-auto text-[11px] opacity-90">
-            📦 Frete fixo R$ {settings.shippingFee.toFixed(2)} · ⚡ Envio em 24h
-          </span>
         </div>
       </nav>
     </header>
