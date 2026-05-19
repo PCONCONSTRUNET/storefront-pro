@@ -38,14 +38,17 @@ async function adminUpsert(
   onConflict?: string,
 ) {
   const token = getAdminToken();
-  if (!token) return;
-  try {
-    const r = await adminUpsertFn({
-      data: { token, table: table as any, row, onConflict },
-    });
-    if (!r.ok) log(`upsert ${table}`, r.message);
-  } catch (e) {
-    log(`upsert ${table}`, e);
+  if (!token) {
+    throw new Error(
+      "Sessão admin expirada. Faça login novamente para salvar.",
+    );
+  }
+  const r = await adminUpsertFn({
+    data: { token, table: table as any, row, onConflict },
+  });
+  if (!r.ok) {
+    log(`upsert ${table}`, r.message);
+    throw new Error(r.message || `Falha ao salvar em ${table}`);
   }
 }
 
