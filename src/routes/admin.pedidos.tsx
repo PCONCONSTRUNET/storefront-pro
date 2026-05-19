@@ -604,16 +604,6 @@ function Page() {
               >
                 <Printer className="h-4 w-4" /> Imprimir
               </button>
-              {order.status === "aguardando_pagamento" && (
-                <button
-                  disabled={busy}
-                  onClick={() => simulateApprove(order.id)}
-                  className="h-10 rounded-full bg-primary text-primary-foreground font-semibold text-xs flex items-center justify-center gap-1.5 col-span-2 disabled:opacity-50"
-                >
-                  <CheckCircle2 className="h-4 w-4" /> Marcar como pago
-                  (sandbox)
-                </button>
-              )}
               <button
                 onClick={() => {
                   if (
