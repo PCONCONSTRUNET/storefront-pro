@@ -304,7 +304,7 @@ export const cloud = {
         active: p.active,
         featured: false,
         variations: p.variations || [],
-        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock },
+        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock, sortOrder: p.sortOrder },
       },
       "id",
     );
