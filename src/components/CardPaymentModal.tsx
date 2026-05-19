@@ -70,7 +70,8 @@ type Props = {
 
 export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const total = payload.totals.total;
-  const SANDBOX = !MP_PUBLIC_KEY;
+  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [keyLoading, setKeyLoading] = useState(true);
   const [mp, setMp] = useState<any>(null);
   const [sdkErr, setSdkErr] = useState<string | null>(null);
 
@@ -95,15 +96,24 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
   const lastBin = useRef<string>("");
 
-  // Load SDK (somente fora do sandbox)
+  // Busca a Public Key do Mercado Pago no banco
   useEffect(() => {
-    if (!open || SANDBOX) return;
+    if (!open) return;
+    setKeyLoading(true);
+    fetchPaymentPublicKey()
+      .then((k) => setPublicKey(k))
+      .finally(() => setKeyLoading(false));
+  }, [open]);
+
+  // Carrega o SDK quando temos a chave pública
+  useEffect(() => {
+    if (!open || !publicKey) return;
     loadMpSdk()
       .then(() =>
-        setMp(new window.MercadoPago!(MP_PUBLIC_KEY!, { locale: "pt-BR" })),
+        setMp(new window.MercadoPago!(publicKey, { locale: "pt-BR" })),
       )
       .catch((e) => setSdkErr(e.message));
-  }, [open, SANDBOX]);
+  }, [open, publicKey]);
 
   // Detect brand + installments by BIN
   useEffect(() => {
@@ -155,9 +165,8 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       onlyDigits(card.exp).length === 4 &&
       onlyDigits(card.cvv).length >= 3 &&
       onlyDigits(card.doc).length === 11;
-    if (SANDBOX) return baseFilled && !submitting;
     return mp && pmId && baseFilled && !submitting;
-  }, [SANDBOX, mp, pmId, card, submitting]);
+  }, [mp, pmId, card, submitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,23 +174,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
     setSubmitting(true);
     setErrorMsg(null);
     try {
-      // SANDBOX: pula geração de token, manda direto pro backend que aprova auto
-      if (SANDBOX) {
-        const result = await createCardPayment({
-          ...payload,
-          card: {
-            token: "SANDBOX_TOKEN",
-            payment_method_id: "sandbox",
-            installments: card.installments,
-            payer: {
-              identification: { type: "CPF", number: onlyDigits(card.doc) },
-            },
-          },
-        });
-        toast.success("Pagamento simulado com sucesso! 🎉");
-        onSuccess(result);
-        return;
-      }
+
 
       const [mm, yy] = card.exp.split("/");
       const tokenRes = await mp.createCardToken({
