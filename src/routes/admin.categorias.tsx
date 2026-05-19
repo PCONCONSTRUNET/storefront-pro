@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
-import { Modal } from "./admin.produtos";
+import { Modal } from "@/components/AdminModal";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Category } from "@/lib/data";

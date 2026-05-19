@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore, ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
-import { Modal } from "./admin.produtos";
+import { Modal } from "@/components/AdminModal";
 import {
   Search,
   X,
