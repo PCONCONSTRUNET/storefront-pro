@@ -727,6 +727,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_db_read: {
+        Args: {
+          _limit?: number
+          _order_by?: string
+          _order_dir?: string
+          _table: string
+          _token: string
+        }
+        Returns: Json[]
+      }
+      admin_db_write: {
+        Args: {
+          _match?: Json
+          _on_conflict?: string
+          _op: string
+          _patch?: Json
+          _row?: Json
+          _table: string
+          _token: string
+        }
+        Returns: Json
+      }
       consume_password_reset_token: {
         Args: { _token: string }
         Returns: {

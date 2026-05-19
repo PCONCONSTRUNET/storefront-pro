@@ -85,49 +85,46 @@ export const updateAdminPasswordFn = createServerFn({ method: "POST" })
   });
 
 // ---------- SNAPSHOT ADMIN (todas tabelas privadas) ----------
+// Lê via RPC admin_db_read (SECURITY DEFINER) — não depende de service_role.
+async function adminRead(token: string, table: string, orderBy?: string, dir: "asc" | "desc" = "desc", limit = 1000) {
+  const { data, error } = await (supabase as any).rpc("admin_db_read", {
+    _token: token,
+    _table: table,
+    _limit: limit,
+    _order_by: orderBy ?? null,
+    _order_dir: dir,
+  });
+  if (error) throw new Error(error.message);
+  return (data as any[]) || [];
+}
+
 export const adminFetchAllFn = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
   .handler(async ({ data }) => {
     await requireAdmin(data.token);
     const [cust, affs, affSales, affCons, txs, ords, wait, logs] =
       await Promise.all([
-        supabaseAdmin.from("customers").select("*"),
-        supabaseAdmin.from("affiliates").select("*"),
-        supabaseAdmin
-          .from("affiliate_sales")
-          .select("*")
-          .order("created_at", { ascending: false }),
-        supabaseAdmin
-          .from("affiliate_consignments")
-          .select("*")
-          .order("picked_up_at", { ascending: false }),
-        supabaseAdmin
-          .from("transactions")
-          .select("*")
-          .order("date", { ascending: false }),
-        supabaseAdmin
-          .from("orders")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(500),
-        supabaseAdmin.from("product_waitlist").select("*"),
-        supabaseAdmin
-          .from("activity_logs")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(200),
+        adminRead(data.token, "customers"),
+        adminRead(data.token, "affiliates"),
+        adminRead(data.token, "affiliate_sales", "created_at", "desc"),
+        adminRead(data.token, "affiliate_consignments", "picked_up_at", "desc"),
+        adminRead(data.token, "transactions", "date", "desc"),
+        adminRead(data.token, "orders", "created_at", "desc", 500),
+        adminRead(data.token, "product_waitlist"),
+        adminRead(data.token, "activity_logs", "created_at", "desc", 200),
       ]);
     return {
-      customers: cust.data || [],
-      affiliates: affs.data || [],
-      affiliateSales: affSales.data || [],
-      affiliateConsignments: affCons.data || [],
-      transactions: txs.data || [],
-      orders: ords.data || [],
-      waitlist: wait.data || [],
-      activityLogs: logs.data || [],
+      customers: cust,
+      affiliates: affs,
+      affiliateSales: affSales,
+      affiliateConsignments: affCons,
+      transactions: txs,
+      orders: ords,
+      waitlist: wait,
+      activityLogs: logs,
     };
   });
+
 
 // ---------- CONSIGNAÇÕES (retiradas de laços pela afiliada) ----------
 export const listConsignmentsFn = createServerFn({ method: "POST" })
@@ -217,11 +214,15 @@ export const adminUpsertFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    const q: any = supabaseAdmin.from(data.table as WriteTable);
-    const { error } = data.onConflict
-      ? await q.upsert(data.row, { onConflict: data.onConflict })
-      : await q.upsert(data.row);
+    const { error } = await (supabase as any).rpc("admin_db_write", {
+      _token: data.token,
+      _op: "upsert",
+      _table: data.table,
+      _row: data.row,
+      _on_conflict: data.onConflict ?? null,
+      _match: null,
+      _patch: null,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
@@ -238,10 +239,15 @@ export const adminUpdateFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    let q: any = (supabaseAdmin.from(data.table as WriteTable) as any).update(data.patch);
-    for (const [k, v] of Object.entries(data.match)) q = q.eq(k, v);
-    const { error } = await q;
+    const { error } = await (supabase as any).rpc("admin_db_write", {
+      _token: data.token,
+      _op: "update",
+      _table: data.table,
+      _row: null,
+      _on_conflict: null,
+      _match: data.match,
+      _patch: data.patch,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
@@ -257,13 +263,19 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    let q: any = supabaseAdmin.from(data.table as WriteTable).delete();
-    for (const [k, v] of Object.entries(data.match)) q = q.eq(k, v);
-    const { error } = await q;
+    const { error } = await (supabase as any).rpc("admin_db_write", {
+      _token: data.token,
+      _op: "delete",
+      _table: data.table,
+      _row: null,
+      _on_conflict: null,
+      _match: data.match,
+      _patch: null,
+    });
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
+
 
 // ---------- LEITURAS DO CLIENTE LOGADO (próprios dados) ----------
 // Identificação por customerId UUID — não exige password porque já houve login.
