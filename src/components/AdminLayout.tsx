@@ -19,6 +19,7 @@ import {
   BarChart,
   FileText,
   HelpCircle,
+  ArrowUpDown,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
