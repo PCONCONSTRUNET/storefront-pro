@@ -5,6 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { supabase } from "@/integrations/supabase/client";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
@@ -21,14 +22,12 @@ function newToken() {
 }
 
 async function requireAdmin(token: string): Promise<string> {
-  const { data, error } = await supabaseAdmin
-    .from("admin_sessions")
-    .select("email, expires_at")
-    .eq("token", token)
+  const { data, error } = await (supabase as any)
+    .rpc("get_admin_session_record", { _token: token })
     .maybeSingle();
   if (error || !data) throw new Error("Sessão admin inválida");
   if (new Date(data.expires_at).getTime() < Date.now()) {
-    await supabaseAdmin.from("admin_sessions").delete().eq("token", token);
+    await (supabase as any).rpc("delete_admin_session", { _token: token });
     throw new Error("Sessão admin expirada");
   }
   return data.email;
@@ -42,27 +41,26 @@ export const loginAdminFn = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const { data: cred } = await supabaseAdmin
-      .from("admin_credentials")
-      .select("password_hash")
-      .eq("email", data.email)
+    const { data: cred } = await (supabase as any)
+      .rpc("get_admin_auth_record", { _email: data.email })
       .maybeSingle();
     if (!cred) return { ok: false as const, message: "Credenciais inválidas" };
     const ok = await bcrypt.compare(data.password, cred.password_hash);
     if (!ok) return { ok: false as const, message: "Credenciais inválidas" };
 
     const token = newToken();
-    await supabaseAdmin.from("admin_sessions").insert({
-      token,
-      email: data.email,
+    const { error } = await (supabase as any).rpc("create_admin_session", {
+      _email: data.email,
+      _token: token,
     });
+    if (error) return { ok: false as const, message: error.message };
     return { ok: true as const, message: "Bem-vindo!", token, email: data.email };
   });
 
 export const logoutAdminFn = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
   .handler(async ({ data }) => {
-    await supabaseAdmin.from("admin_sessions").delete().eq("token", data.token);
+    await (supabase as any).rpc("delete_admin_session", { _token: data.token });
     return { ok: true as const };
   });
 
