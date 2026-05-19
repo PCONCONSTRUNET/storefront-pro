@@ -54,7 +54,9 @@ function Page() {
   const deleteSale = useStore((s) => s.deleteAffiliateSale);
 
   const sync = useStore((s) => s.sync);
-  const [tab, setTab] = useState<"afiliadas" | "vendas">("afiliadas");
+  const [tab, setTab] = useState<"afiliadas" | "vendas" | "retiradas">(
+    "afiliadas",
+  );
 
   useEffect(() => {
     sync();
