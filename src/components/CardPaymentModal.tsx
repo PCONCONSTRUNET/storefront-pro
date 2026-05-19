@@ -11,6 +11,7 @@ import { brl } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   createCardPayment,
+  fetchPaymentPublicKey,
   type CreateCardInput,
   type CreateCardResult,
 } from "@/lib/mercadopago";
@@ -23,9 +24,6 @@ declare global {
   }
 }
 
-const MP_PUBLIC_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as
-  | string
-  | undefined;
 const SDK_URL = "https://sdk.mercadopago.com/js/v2";
 
 let sdkPromise: Promise<void> | null = null;
