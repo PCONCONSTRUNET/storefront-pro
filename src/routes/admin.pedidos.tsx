@@ -242,13 +242,23 @@ function Page() {
   return (
     <AdminLayout title="Pedidos">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
+        <StatCard
+          label="Todos"
+          value={stats.total}
+          icon={ListFilter}
+          color="slate"
+          onClick={() => setFilter("todos")}
+          active={filter === "todos"}
+        />
         <StatCard
           label="Pendentes"
           value={stats.pending}
           icon={Clock}
           color="amber"
-          onClick={() => setFilter("pendentes")}
+          onClick={() =>
+            setFilter(filter === "pendentes" ? "todos" : "pendentes")
+          }
           active={filter === "pendentes"}
         />
         <StatCard
@@ -256,7 +266,7 @@ function Page() {
           value={stats.paid}
           icon={CheckCircle2}
           color="emerald"
-          onClick={() => setFilter("pagos")}
+          onClick={() => setFilter(filter === "pagos" ? "todos" : "pagos")}
           active={filter === "pagos"}
         />
         <StatCard
@@ -264,7 +274,9 @@ function Page() {
           value={stats.inProgress}
           icon={Package}
           color="blue"
-          onClick={() => setFilter("em_andamento")}
+          onClick={() =>
+            setFilter(filter === "em_andamento" ? "todos" : "em_andamento")
+          }
           active={filter === "em_andamento"}
         />
         <StatCard
@@ -272,7 +284,9 @@ function Page() {
           value={stats.cancelled}
           icon={XCircle}
           color="red"
-          onClick={() => setFilter("cancelados")}
+          onClick={() =>
+            setFilter(filter === "cancelados" ? "todos" : "cancelados")
+          }
           active={filter === "cancelados"}
         />
       </div>
