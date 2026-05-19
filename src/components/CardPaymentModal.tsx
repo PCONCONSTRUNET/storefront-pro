@@ -264,7 +264,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] overflow-y-auto animate-in slide-in-from-bottom-4"
+        className="w-full sm:max-w-3xl bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -308,8 +308,9 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         )}
 
 
+        <div className="sm:grid sm:grid-cols-[1fr_1.1fr] sm:gap-2">
         {/* Card preview */}
-        <div className="px-5 pt-5">
+        <div className="px-5 pt-5 sm:sticky sm:top-[68px] sm:self-start">
           <div className="relative rounded-2xl p-5 text-white shadow-elegant overflow-hidden bg-gradient-to-br from-primary via-rose to-primary/70">
             <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/10" />
             <div className="absolute -left-8 -bottom-8 w-40 h-40 rounded-full bg-white/5" />
@@ -497,6 +498,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             </span>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
