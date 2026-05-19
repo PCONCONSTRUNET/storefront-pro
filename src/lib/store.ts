@@ -92,6 +92,7 @@ export type Order = {
   paymentMethod: "pix" | "card" | "cash";
   deliveryMethod: "entrega" | "retirada";
   status: OrderStatus;
+  deliveryStatus: DeliveryStatus;
   createdAt: string;
   address: string;
   couponCode?: string;
