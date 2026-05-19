@@ -841,9 +841,11 @@ export const useStore = create<AppState>()(
         const aff = get().affiliates.find((a) => a.id === data.affiliateId);
         if (!aff) return null;
         const commission =
-          aff.commissionType === "percent"
-            ? (data.saleValue * aff.commissionValue) / 100
-            : aff.commissionValue;
+          typeof data.commissionOverride === "number"
+            ? data.commissionOverride
+            : aff.commissionType === "percent"
+              ? (data.saleValue * aff.commissionValue) / 100
+              : aff.commissionValue;
         const sale: AffiliateSale = {
           id:
             typeof crypto !== "undefined" && crypto.randomUUID
