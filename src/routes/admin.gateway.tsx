@@ -36,7 +36,7 @@ function Page() {
 
   const [accessToken, setAccessToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
-  const [environment, setEnvironment] = useState<Env>("sandbox");
+  
   const [maxInstallments, setMaxInstallments] = useState(3);
   const [fees, setFees] = useState<Record<string, number>>(defaultFees(3));
 
