@@ -7,11 +7,12 @@ import {
   getOrderStatusLabel,
   type Order,
 } from "@/lib/store";
+import { getDeliveryStatusLabel } from "@/lib/orderStatus";
 import { StoreLayout } from "@/components/StoreLayout";
 import { OrderListSkeleton } from "@/components/Skeleton";
 import { ReorderModal } from "@/components/ReorderModal";
 import { brl, formatDate } from "@/lib/format";
-import { Package, RotateCcw } from "lucide-react";
+import { Package, RotateCcw, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/pedidos")({
   head: () => ({ meta: [{ title: "Meus pedidos — Princesa de Laços" }] }),
