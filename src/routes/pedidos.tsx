@@ -11,6 +11,7 @@ import { getDeliveryStatusLabel } from "@/lib/orderStatus";
 import { StoreLayout } from "@/components/StoreLayout";
 import { OrderListSkeleton } from "@/components/Skeleton";
 import { ReorderModal } from "@/components/ReorderModal";
+import { OrderAccentBar } from "@/components/OrderAccentBar";
 import { brl, formatDate } from "@/lib/format";
 import { Package, RotateCcw, ChevronRight } from "lucide-react";
 
@@ -83,10 +84,8 @@ function Page() {
                     params={{ id: o.id }}
                     className="relative block bg-card rounded-2xl shadow-card hover:shadow-soft transition-all overflow-hidden"
                   >
-                    <span
-                      aria-hidden
-                      className="absolute left-0 top-3 bottom-3 w-1 rounded-full bg-gradient-to-b from-primary via-accent to-primary/40"
-                    />
+                    <OrderAccentBar />
+
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/40">
                       <div className="flex items-center gap-2 min-w-0">
