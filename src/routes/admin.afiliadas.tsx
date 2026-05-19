@@ -168,6 +168,12 @@ function Page() {
         <TabBtn active={tab === "vendas"} onClick={() => setTab("vendas")}>
           Vendas
         </TabBtn>
+        <TabBtn
+          active={tab === "retiradas"}
+          onClick={() => setTab("retiradas")}
+        >
+          Retiradas
+        </TabBtn>
       </div>
 
       {tab === "afiliadas" && (
