@@ -693,7 +693,7 @@ function StatCard({
   label: string;
   value: number;
   icon: any;
-  color: "amber" | "emerald" | "blue" | "red";
+  color: "amber" | "emerald" | "blue" | "red" | "slate";
   onClick: () => void;
   active?: boolean;
 }) {
@@ -703,6 +703,7 @@ function StatCard({
       "from-emerald-500/15 to-emerald-500/5 text-emerald-700 border-emerald-200",
     blue: "from-blue-500/15 to-blue-500/5 text-blue-700 border-blue-200",
     red: "from-red-500/15 to-red-500/5 text-red-700 border-red-200",
+    slate: "from-slate-500/15 to-slate-500/5 text-slate-700 border-slate-200",
   };
   return (
     <button
