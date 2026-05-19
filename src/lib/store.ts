@@ -340,6 +340,24 @@ type AppState = {
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
+  saveRemoteOrder: (data: {
+    id: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    items: Order["items"];
+    subtotal: number;
+    discount: number;
+    shipping: number;
+    total: number;
+    paymentMethod: "pix" | "card" | "cash";
+    deliveryMethod: "entrega" | "retirada";
+    address: string;
+    notes?: string;
+    status: OrderStatus;
+    mpPaymentId?: string;
+    paidAt?: string;
+  }) => void;
 
   upsertProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
