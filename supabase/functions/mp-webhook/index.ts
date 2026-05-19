@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
       style: "currency",
       currency: "BRL",
     });
-    const mensagem = `Olá ${order.customer_name.split(" ")[0]}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${order.id.slice(0, 8)}\n💰 Valor: ${total}\n\nJá estamos preparando tudo com muito carinho. Em breve avisaremos quando sair para entrega! ✨`;
+    const mensagem = `Olá ${order.customer_name.split(" ")[0]}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${order.id.slice(0, 8)}\n💰 Valor: ${total}\n\n📍 Como nossos produtos já são prontos, seu pedido está *aguardando retirada no ateliê*. Vamos te chamar por aqui para combinar o melhor horário! ✨`;
 
     try {
       await fetch(`${BOT_BASE}/webhook/notificacao`, {
