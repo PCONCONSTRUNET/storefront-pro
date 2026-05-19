@@ -11,6 +11,7 @@ import {
   type OrderRow,
 } from "@/lib/mercadopago";
 import { playBeep } from "@/lib/sound";
+import { useStore } from "@/lib/store";
 import pixIcon from "@/assets/pix-icon.png";
 
 type Props = {
@@ -67,6 +68,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
         }
         setOrder(o);
         if (o.payment_status === "approved") {
+          useStore.getState().clearCart();
           playBeep();
           toast.success("Pagamento aprovado! 🎉");
           setTimeout(() => {
