@@ -355,13 +355,35 @@ function Page() {
           }
           className="h-8 px-2 rounded-full bg-card border border-border"
         >
-          <option value="">Status: todos</option>
+          <option value="">Pagamento: todos</option>
           {statuses.map((s) => (
             <option key={s} value={s}>
               {ORDER_STATUS_LABEL[s]}
             </option>
           ))}
         </select>
+        <select
+          value={deliveryFilter}
+          onChange={(e) =>
+            setDeliveryFilter(e.target.value as DeliveryStatus | "")
+          }
+          className="h-8 px-2 rounded-full bg-card border border-border"
+        >
+          <option value="">Entrega: todas</option>
+          {(
+            [
+              "pendente",
+              "em_separacao",
+              "saiu_para_entrega",
+              "entregue",
+            ] as DeliveryStatus[]
+          ).map((s) => (
+            <option key={s} value={s}>
+              {DELIVERY_STATUS_LABEL[s]}
+            </option>
+          ))}
+        </select>
+
         <select
           value={methodFilter}
           onChange={(e) => setMethodFilter(e.target.value)}
