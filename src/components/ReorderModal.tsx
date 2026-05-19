@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { brl } from "@/lib/format";
 import { X, Minus, Plus, RotateCcw, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { OrderAccentBar } from "@/components/OrderAccentBar";
 
 export function ReorderModal({
   order,
