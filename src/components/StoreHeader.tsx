@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { Search, Bell, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useStore, selectCartCount } from "@/lib/store";
+import { useStore, selectCartCount, selectCurrentCustomer } from "@/lib/store";
 import logo from "@/assets/logo-princesa.png";
 
 const STORE_ROUTES_TO_PRELOAD = [
