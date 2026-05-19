@@ -133,6 +133,7 @@ const WRITE_TABLES = [
   "coupons",
   "affiliates",
   "affiliate_sales",
+  "affiliate_consignments",
   "transactions",
   "reviews",
   "store_settings",
