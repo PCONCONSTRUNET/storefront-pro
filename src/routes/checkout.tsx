@@ -383,6 +383,9 @@ function Page() {
           onClose={() => setCardModal(null)}
           onSuccess={(result) => {
             setCardModal(null);
+            if (result.status === "approved") {
+              useStore.getState().clearCart();
+            }
             playBeep();
             navigate({ to: "/pedido/$id", params: { id: result.order_id } });
           }}
