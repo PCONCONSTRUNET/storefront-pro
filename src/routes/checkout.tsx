@@ -18,6 +18,7 @@ import { playBeep } from "@/lib/sound";
 import { createPixPayment } from "@/lib/mercadopago";
 import { CardPaymentModal } from "@/components/CardPaymentModal";
 import mpIcon from "@/assets/mercadopago-icon.png";
+import pixIcon from "@/assets/pix-icon.png";
 
 export const Route = createFileRoute("/checkout")({
   component: Page,
@@ -160,6 +161,7 @@ function Page() {
     label: string;
     sub: string;
     icon: typeof QrCode;
+    image?: string;
     enabled: boolean;
   }[] = [
     {
@@ -167,6 +169,7 @@ function Page() {
       label: "Pix",
       sub: "Aprovação imediata · 5% off",
       icon: QrCode,
+      image: pixIcon,
       enabled: settings.acceptPix,
     },
     {
@@ -285,8 +288,12 @@ function Page() {
                         : "border-border hover:border-primary/50",
                     )}
                   >
-                    <div className="w-10 h-10 rounded-full bg-muted grid place-items-center">
-                      <p.icon className="h-5 w-5 text-primary" />
+                    <div className="w-10 h-10 rounded-full bg-muted grid place-items-center overflow-hidden">
+                      {p.image ? (
+                        <img src={p.image} alt={p.label} className="h-6 w-6 object-contain" />
+                      ) : (
+                        <p.icon className="h-5 w-5 text-primary" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-sm">{p.label}</div>
@@ -384,7 +391,9 @@ function Page() {
                   <Loader2 className="h-4 w-4 animate-spin" /> Gerando Pix...
                 </>
               ) : form.payment === "pix" ? (
-                "Pagar com Pix"
+                <>
+                  <img src={pixIcon} alt="Pix" className="h-5 w-5 object-contain" /> Pagar com Pix
+                </>
               ) : (
                 "Confirmar pedido"
               )}
