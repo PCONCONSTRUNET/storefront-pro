@@ -341,7 +341,7 @@ type AppState = {
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
 
-  upsertProduct: (p: Product) => void;
+  upsertProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
   upsertCategory: (c: Category) => void;
   deleteCategory: (id: string) => void;
