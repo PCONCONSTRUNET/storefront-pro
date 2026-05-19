@@ -538,6 +538,10 @@ function Page() {
         </div>
       )}
 
+      {tab === "retiradas" && <ConsignmentsPanel affiliates={affiliates} />}
+
+
+
       {viewing && (
         <AffiliateDetailsModal
           affiliate={viewing}
