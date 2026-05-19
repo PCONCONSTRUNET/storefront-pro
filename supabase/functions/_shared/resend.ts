@@ -38,7 +38,7 @@ export const corsHeaders = {
 
 const LOGO_URL =
   Deno.env.get("EMAIL_LOGO_URL") ??
-  "https://amostrasistema.lovable.app/email-logo.png";
+  "https://amostrasistema.lovable.app/email-banner.png";
 const SITE_URL =
   Deno.env.get("SITE_URL") ?? "https://amostrasistema.lovable.app";
 const WHATSAPP_NUMBER = Deno.env.get("STORE_WHATSAPP") ?? "554888644474"; // formato wa.me
@@ -52,11 +52,8 @@ export function baseLayout(title: string, body: string) {
   const year = new Date().getFullYear();
   return `<!doctype html><html><body style="margin:0;background:#fff5f8;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#333">
     <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);margin-top:24px">
-      <div style="background:#ffffff;padding:24px 16px 8px;text-align:center">
-        <img src="${LOGO_URL}" alt="Princesa de Laços" width="220" style="display:inline-block;max-width:80%;height:auto" />
-      </div>
-      <div style="background:linear-gradient(135deg,#ec4899,#f43f5e);padding:18px;text-align:center;color:#fff">
-        <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:.3px">Princesa de Laços</h1>
+      <div style="background:#ffffff;text-align:center;line-height:0">
+        <img src="${LOGO_URL}" alt="Princesa de Laços" width="560" style="display:block;width:100%;max-width:560px;height:auto" />
       </div>
       <div style="padding:28px 24px">
         <h2 style="margin:0 0 12px;font-size:20px;color:#be185d">${title}</h2>
