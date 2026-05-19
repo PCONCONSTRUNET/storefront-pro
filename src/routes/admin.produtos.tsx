@@ -144,10 +144,14 @@ function Page() {
           <ProductForm
             product={editing}
             categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-            onSave={(p) => {
-              upsertProduct(p);
-              toast.success("Salvo!");
-              setEditing(null);
+            onSave={async (p) => {
+              try {
+                await upsertProduct(p);
+                toast.success("Salvo!");
+                setEditing(null);
+              } catch (e: any) {
+                toast.error(e?.message || "Falha ao salvar produto");
+              }
             }}
           />
         </Modal>
