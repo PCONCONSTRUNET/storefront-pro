@@ -26,6 +26,7 @@ import type {
   ActivityLog,
 } from "./store";
 import type { Category, Coupon, Product } from "./data";
+import { normalizeOrderStatus } from "./orderStatus";
 
 // ---------- helpers ----------
 const log = (label: string, err: unknown) => {
@@ -208,12 +209,7 @@ const toOrder = (r: any): Order => ({
   total: Number(r.total) || 0,
   paymentMethod: r.payment_method,
   deliveryMethod: r.delivery_method,
-  status:
-    r.payment_status === "paid"
-      ? "pago"
-      : r.payment_status === "pending"
-        ? "aguardando_pagamento"
-        : r.payment_status,
+  status: normalizeOrderStatus(r.payment_status),
   createdAt: r.created_at,
   address: r.address || "",
   notes: r.notes || undefined,
