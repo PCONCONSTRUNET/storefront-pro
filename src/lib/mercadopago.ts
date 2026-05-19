@@ -30,6 +30,15 @@ export type CreatePixResult = {
   total: number;
 };
 
+type ApiErrorPayload = { error?: string };
+
+const getApiErrorMessage = (data: unknown) => {
+  if (typeof data !== "object" || data === null || !("error" in data))
+    return null;
+  const message = (data as ApiErrorPayload).error;
+  return typeof message === "string" && message.length > 0 ? message : null;
+};
+
 export async function createPixPayment(
   input: CreatePixInput,
 ): Promise<CreatePixResult> {
@@ -37,7 +46,8 @@ export async function createPixPayment(
     body: input,
   });
   if (error) throw new Error(error.message || "Falha ao criar pagamento Pix");
-  if ((data as any)?.error) throw new Error((data as any).error);
+  const apiError = getApiErrorMessage(data);
+  if (apiError) throw new Error(apiError);
   return data as CreatePixResult;
 }
 
@@ -69,7 +79,8 @@ export async function createCardPayment(
     body: input,
   });
   if (error) throw new Error(error.message || "Falha ao processar cartão");
-  if ((data as any)?.error) throw new Error((data as any).error);
+  const apiError = getApiErrorMessage(data);
+  if (apiError) throw new Error(apiError);
   return data as CreateCardResult;
 }
 
@@ -92,7 +103,7 @@ export type OrderRow = {
 };
 
 export async function fetchOrder(id: string): Promise<OrderRow | null> {
-  const { data, error } = await (supabase as any).rpc("get_pix_order_status", {
+  const { data, error } = await supabase.rpc("get_pix_order_status", {
     _id: id,
   });
   if (error) throw error;
@@ -108,7 +119,8 @@ export async function simulateApprove(orderId: string): Promise<void> {
     },
   );
   if (error) throw new Error(error.message || "Falha ao simular aprovação");
-  if ((data as any)?.error) throw new Error((data as any).error);
+  const apiError = getApiErrorMessage(data);
+  if (apiError) throw new Error(apiError);
 }
 
 export const isSandboxOrder = (o: Pick<OrderRow, "pix_qr_code"> | null) =>

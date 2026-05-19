@@ -1,12 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  CheckCircle2,
-  Copy,
-  Loader2,
-  X,
-  FlaskConical,
-} from "lucide-react";
+import { CheckCircle2, Copy, Loader2, X, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { brl } from "@/lib/format";
 import {
@@ -21,6 +15,8 @@ import {
 import { playBeep } from "@/lib/sound";
 import pixIcon from "@/assets/pix-icon.png";
 
+type PixStatusProbe = Pick<OrderRow, "pix_qr_code">;
+
 type Props = {
   open: boolean;
   payload: CreatePixInput | null;
@@ -29,6 +25,7 @@ type Props = {
 
 export function PixPaymentModal({ open, payload, onClose }: Props) {
   const navigate = useNavigate();
+  const createRequestId = useRef(0);
   const [creating, setCreating] = useState(false);
   const [pix, setPix] = useState<CreatePixResult | null>(null);
   const [order, setOrder] = useState<OrderRow | null>(null);
@@ -37,30 +34,32 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
 
   // 1) Cria o Pix quando o modal abre
   useEffect(() => {
-    if (!open || !payload || pix || creating) return;
-    let cancelled = false;
+    if (!open || !payload) return;
+    const requestId = createRequestId.current + 1;
+    createRequestId.current = requestId;
     setCreating(true);
     setError(null);
+    setPix(null);
+    setOrder(null);
     createPixPayment(payload)
       .then((r) => {
-        if (cancelled) return;
+        if (createRequestId.current !== requestId) return;
         setPix(r);
       })
       .catch((e) => {
-        if (cancelled) return;
+        if (createRequestId.current !== requestId) return;
         setError(e instanceof Error ? e.message : "Falha ao gerar Pix");
       })
-      .finally(() => !cancelled && setCreating(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [open, payload, pix, creating]);
+      .finally(() => {
+        if (createRequestId.current === requestId) setCreating(false);
+      });
+  }, [open, payload]);
 
   // 2) Polling do status
   useEffect(() => {
     if (!open || !pix) return;
     let cancelled = false;
-    let timer: any;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const tick = async () => {
       try {
@@ -99,6 +98,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   // Reset when closed
   useEffect(() => {
     if (!open) {
+      createRequestId.current += 1;
       setPix(null);
       setOrder(null);
       setError(null);
@@ -132,7 +132,9 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const qrCode = order?.pix_qr_code ?? pix?.qr_code ?? "";
   const qrBase64 = order?.pix_qr_code_base64 ?? pix?.qr_code_base64 ?? "";
   const total = order?.total ?? pix?.total ?? 0;
-  const sandbox = isSandboxOrder(order ?? (pix ? ({ pix_qr_code: pix.qr_code } as any) : null));
+  const sandboxProbe: PixStatusProbe | null =
+    order ?? (pix ? { pix_qr_code: pix.qr_code } : null);
+  const sandbox = isSandboxOrder(sandboxProbe);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
@@ -204,7 +206,11 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
           {pix && status === "pending" && (
             <>
               <div className="flex items-center gap-2 mb-3">
-                <img src={pixIcon} alt="Pix" className="h-7 w-7 object-contain" />
+                <img
+                  src={pixIcon}
+                  alt="Pix"
+                  className="h-7 w-7 object-contain"
+                />
                 <div>
                   <h2 className="font-bold text-lg leading-tight">
                     Pague com Pix
@@ -227,7 +233,8 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
                   >
                     {simulating ? (
                       <>
-                        <Loader2 className="h-3 w-3 animate-spin" /> Simulando...
+                        <Loader2 className="h-3 w-3 animate-spin" />{" "}
+                        Simulando...
                       </>
                     ) : (
                       "Simular pagamento aprovado"
