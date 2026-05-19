@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   Copy,
   Loader2,
-  QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
 import { playBeep } from "@/lib/sound";
