@@ -382,6 +382,7 @@ export type Database = {
           customer_phone: string
           daily_summary_id: string | null
           delivery_method: string
+          delivery_status: string
           discount: number
           id: string
           items: Json
@@ -408,6 +409,7 @@ export type Database = {
           customer_phone: string
           daily_summary_id?: string | null
           delivery_method?: string
+          delivery_status?: string
           discount?: number
           id?: string
           items?: Json
@@ -434,6 +436,7 @@ export type Database = {
           customer_phone?: string
           daily_summary_id?: string | null
           delivery_method?: string
+          delivery_status?: string
           discount?: number
           id?: string
           items?: Json
