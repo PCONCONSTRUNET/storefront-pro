@@ -17,7 +17,11 @@ export {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
   normalizeOrderStatus,
+  DELIVERY_STATUS_LABEL,
+  getDeliveryStatusLabel,
+  normalizeDeliveryStatus,
   type OrderStatus,
+  type DeliveryStatus,
 } from "./orderStatus";
 import { normalizeOrderStatus, normalizeDeliveryStatus, type OrderStatus, type DeliveryStatus } from "./orderStatus";
 
