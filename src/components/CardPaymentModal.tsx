@@ -12,8 +12,10 @@ import { cn } from "@/lib/utils";
 import {
   createCardPayment,
   fetchPaymentPublicKey,
+  fetchInstallmentConfig,
   type CreateCardInput,
   type CreateCardResult,
+  type InstallmentConfig,
 } from "@/lib/mercadopago";
 import { toast } from "sonner";
 import mpIcon from "@/assets/mercadopago-icon.png";
