@@ -11,6 +11,7 @@ import {
   type OrderRow,
 } from "@/lib/mercadopago";
 import { playBeep } from "@/lib/sound";
+import { useStore } from "@/lib/store";
 import pixIcon from "@/assets/pix-icon.png";
 
 type Props = {
