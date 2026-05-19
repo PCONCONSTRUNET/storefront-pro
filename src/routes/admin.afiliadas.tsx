@@ -687,6 +687,353 @@ function Page() {
   );
 }
 
+// =====================================================================
+// PAINEL DE RETIRADAS (CONSIGNAÇÕES) — registro de quando a afiliada
+// retira laços do ateliê (qtd + valor total) — apenas controle interno.
+// =====================================================================
+type Consignment = {
+  id: string;
+  affiliate_id: string;
+  quantity: number;
+  total_value: number;
+  picked_up_at: string;
+  notes: string | null;
+  created_at: string;
+};
+
+function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
+  const [rows, setRows] = useState<Consignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterAff, setFilterAff] = useState<string>("");
+  const [creating, setCreating] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const token = getAdminToken();
+      if (!token) {
+        setRows([]);
+        return;
+      }
+      const { listConsignmentsFn } = await import("@/lib/admin.functions");
+      const res = await listConsignmentsFn({ data: { token } });
+      setRows((res?.consignments || []) as Consignment[]);
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao carregar retiradas");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const filtered = useMemo(
+    () => (filterAff ? rows.filter((r) => r.affiliate_id === filterAff) : rows),
+    [rows, filterAff],
+  );
+
+  const totalQty = filtered.reduce((a, r) => a + (r.quantity || 0), 0);
+  const totalValue = filtered.reduce((a, r) => a + Number(r.total_value || 0), 0);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Excluir este registro de retirada?")) return;
+    try {
+      const token = getAdminToken();
+      if (!token) return;
+      const { deleteConsignmentFn } = await import("@/lib/admin.functions");
+      const res = await deleteConsignmentFn({ data: { token, id } });
+      if (!res.ok) {
+        toast.error(res.message || "Falha ao excluir");
+        return;
+      }
+      toast.success("Retirada excluída");
+      load();
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao excluir");
+    }
+  };
+
+  return (
+    <div className="bg-card rounded-2xl shadow-card p-4">
+      <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+        <div>
+          <h2 className="font-bold">Retiradas de laços (consignação)</h2>
+          <p className="text-xs text-muted-foreground">
+            Registro de segurança: quem retirou, quantos laços e valor total.
+          </p>
+        </div>
+        <div className="flex gap-2 items-center">
+          <select
+            value={filterAff}
+            onChange={(e) => setFilterAff(e.target.value)}
+            className="input !h-9 !w-auto text-xs"
+          >
+            <option value="">Todas as afiliadas</option>
+            {affiliates.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => setCreating(true)}
+            className="h-9 px-3 rounded-full gradient-primary text-primary-foreground text-xs font-bold flex items-center gap-1"
+          >
+            <Plus className="h-3.5 w-3.5" /> Nova retirada
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="bg-muted/40 rounded-xl p-2 text-center">
+          <div className="text-[10px] uppercase text-muted-foreground">
+            Registros
+          </div>
+          <div className="font-bold">{filtered.length}</div>
+        </div>
+        <div className="bg-muted/40 rounded-xl p-2 text-center">
+          <div className="text-[10px] uppercase text-muted-foreground">
+            Total de laços
+          </div>
+          <div className="font-bold">{totalQty}</div>
+        </div>
+        <div className="bg-muted/40 rounded-xl p-2 text-center">
+          <div className="text-[10px] uppercase text-muted-foreground">
+            Valor total
+          </div>
+          <div className="font-bold text-gold">{brl(totalValue)}</div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center text-sm text-muted-foreground py-8">
+          Carregando...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center text-sm text-muted-foreground py-8">
+          Nenhuma retirada registrada ainda.
+        </div>
+      ) : (
+        <ul className="divide-y divide-border">
+          {filtered.map((r) => {
+            const aff = affiliates.find((a) => a.id === r.affiliate_id);
+            return (
+              <li
+                key={r.id}
+                className="py-2 flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <div className="font-semibold truncate">
+                    {aff?.name || "Afiliada removida"}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {new Date(r.picked_up_at).toLocaleString("pt-BR")}
+                    {r.notes ? ` • ${r.notes}` : ""}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold">{r.quantity} laços</div>
+                  <div className="text-xs text-gold font-semibold">
+                    {brl(Number(r.total_value))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDelete(r.id)}
+                  className="p-1.5 hover:bg-destructive/10 rounded-full text-destructive"
+                  title="Excluir"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {creating && (
+        <NewConsignmentModal
+          affiliates={affiliates}
+          onClose={() => setCreating(false)}
+          onSaved={() => {
+            setCreating(false);
+            load();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function NewConsignmentModal({
+  affiliates,
+  onClose,
+  onSaved,
+}: {
+  affiliates: Affiliate[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState({
+    affiliate_id: "",
+    quantity: 0,
+    total_value: 0,
+    picked_up_at: new Date().toISOString().slice(0, 16), // datetime-local
+    notes: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.affiliate_id || form.quantity <= 0 || form.total_value <= 0) {
+      toast.error("Preencha afiliada, quantidade e valor.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const token = getAdminToken();
+      if (!token) throw new Error("Sessão admin ausente");
+      const { createConsignmentFn } = await import("@/lib/admin.functions");
+      const res = await createConsignmentFn({
+        data: {
+          token,
+          affiliate_id: form.affiliate_id,
+          quantity: form.quantity,
+          total_value: form.total_value,
+          picked_up_at: new Date(form.picked_up_at).toISOString(),
+          notes: form.notes || undefined,
+        },
+      });
+      if (!res.ok) {
+        toast.error(res.message || "Falha ao registrar");
+        return;
+      }
+      toast.success("Retirada registrada!");
+      onSaved();
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao registrar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
+      onClick={onClose}
+    >
+      <form
+        onSubmit={submit}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-card rounded-3xl p-6 w-full max-w-md space-y-4 shadow-soft animate-modal-in border border-border"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-xl flex items-center gap-2">
+            <Plus className="h-5 w-5 text-success" /> Registrar Retirada
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 hover:bg-muted rounded-full"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <Field label="Afiliada *">
+          <select
+            value={form.affiliate_id}
+            onChange={(e) =>
+              setForm({ ...form, affiliate_id: e.target.value })
+            }
+            className="input"
+            required
+          >
+            <option value="">Selecione...</option>
+            {affiliates
+              .filter((a) => a.active)
+              .map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+          </select>
+        </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Qtd. de laços *">
+            <input
+              type="number"
+              min="1"
+              value={form.quantity || ""}
+              onChange={(e) =>
+                setForm({ ...form, quantity: parseInt(e.target.value) || 0 })
+              }
+              className="input font-bold"
+              required
+            />
+          </Field>
+          <Field label="Valor total (R$) *">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.total_value || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  total_value: parseFloat(e.target.value) || 0,
+                })
+              }
+              className="input font-bold"
+              required
+            />
+          </Field>
+        </div>
+
+        <Field label="Data e hora da retirada">
+          <input
+            type="datetime-local"
+            value={form.picked_up_at}
+            onChange={(e) =>
+              setForm({ ...form, picked_up_at: e.target.value })
+            }
+            className="input"
+          />
+        </Field>
+
+        <Field label="Observações">
+          <textarea
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            className="input min-h-[60px]"
+            placeholder="Ex: 10 laços G rosa, 5 laços P brancos..."
+          />
+        </Field>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-10 rounded-full border border-border"
+          >
+            Cancelar
+          </button>
+          <button
+            disabled={saving}
+            className="flex-1 h-10 rounded-full gradient-primary text-primary-foreground font-semibold disabled:opacity-50"
+          >
+            {saving ? "Salvando..." : "Registrar"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
+
 function RegisterSaleModal({
   onClose,
   affiliates,
