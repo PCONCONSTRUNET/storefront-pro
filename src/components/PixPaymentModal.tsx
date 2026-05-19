@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   CheckCircle2,
@@ -29,6 +29,7 @@ type Props = {
 
 export function PixPaymentModal({ open, payload, onClose }: Props) {
   const navigate = useNavigate();
+  const createRequestId = useRef(0);
   const [creating, setCreating] = useState(false);
   const [pix, setPix] = useState<CreatePixResult | null>(null);
   const [order, setOrder] = useState<OrderRow | null>(null);
@@ -37,24 +38,26 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
 
   // 1) Cria o Pix quando o modal abre
   useEffect(() => {
-    if (!open || !payload || pix || creating) return;
-    let cancelled = false;
+    if (!open || !payload) return;
+    const requestId = createRequestId.current + 1;
+    createRequestId.current = requestId;
     setCreating(true);
     setError(null);
+    setPix(null);
+    setOrder(null);
     createPixPayment(payload)
       .then((r) => {
-        if (cancelled) return;
+        if (createRequestId.current !== requestId) return;
         setPix(r);
       })
       .catch((e) => {
-        if (cancelled) return;
+        if (createRequestId.current !== requestId) return;
         setError(e instanceof Error ? e.message : "Falha ao gerar Pix");
       })
-      .finally(() => !cancelled && setCreating(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [open, payload, pix, creating]);
+      .finally(() => {
+        if (createRequestId.current === requestId) setCreating(false);
+      });
+  }, [open, payload]);
 
   // 2) Polling do status
   useEffect(() => {
@@ -99,6 +102,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   // Reset when closed
   useEffect(() => {
     if (!open) {
+      createRequestId.current += 1;
       setPix(null);
       setOrder(null);
       setError(null);
