@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  CheckCircle2,
-  Copy,
-  Loader2,
-  X,
-  FlaskConical,
-} from "lucide-react";
+import { CheckCircle2, Copy, Loader2, X, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { brl } from "@/lib/format";
 import {
@@ -20,6 +14,8 @@ import {
 } from "@/lib/mercadopago";
 import { playBeep } from "@/lib/sound";
 import pixIcon from "@/assets/pix-icon.png";
+
+type PixStatusProbe = Pick<OrderRow, "pix_qr_code">;
 
 type Props = {
   open: boolean;
@@ -63,7 +59,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   useEffect(() => {
     if (!open || !pix) return;
     let cancelled = false;
-    let timer: any;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const tick = async () => {
       try {
@@ -136,7 +132,9 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const qrCode = order?.pix_qr_code ?? pix?.qr_code ?? "";
   const qrBase64 = order?.pix_qr_code_base64 ?? pix?.qr_code_base64 ?? "";
   const total = order?.total ?? pix?.total ?? 0;
-  const sandbox = isSandboxOrder(order ?? (pix ? ({ pix_qr_code: pix.qr_code } as any) : null));
+  const sandboxProbe: PixStatusProbe | null = order ??
+    (pix ? { pix_qr_code: pix.qr_code } : null);
+  const sandbox = isSandboxOrder(sandboxProbe);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 overflow-y-auto">
