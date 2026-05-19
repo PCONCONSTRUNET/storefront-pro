@@ -12,8 +12,10 @@ import { cn } from "@/lib/utils";
 import {
   createCardPayment,
   fetchPaymentPublicKey,
+  fetchInstallmentConfig,
   type CreateCardInput,
   type CreateCardResult,
+  type InstallmentConfig,
 } from "@/lib/mercadopago";
 import { toast } from "sonner";
 import mpIcon from "@/assets/mercadopago-icon.png";
@@ -69,11 +71,15 @@ type Props = {
 };
 
 export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
-  const total = payload.totals.total;
+  const baseTotal = payload.totals.total;
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(true);
   const [mp, setMp] = useState<any>(null);
   const [sdkErr, setSdkErr] = useState<string | null>(null);
+  const [cfg, setCfg] = useState<InstallmentConfig>({
+    max_installments: 1,
+    installment_fees: {},
+  });
 
   const [card, setCard] = useState({
     number: "",
@@ -88,9 +94,6 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const [brand, setBrand] = useState<{ name: string; thumb: string } | null>(
     null,
   );
-  const [installmentsList, setInstallmentsList] = useState<
-    Array<{ installments: number; recommended_message: string }>
-  >([]);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -105,6 +108,12 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       .finally(() => setKeyLoading(false));
   }, [open]);
 
+  // Carrega config de parcelamento do admin
+  useEffect(() => {
+    if (!open) return;
+    fetchInstallmentConfig().then(setCfg);
+  }, [open]);
+
   // Carrega o SDK quando temos a chave pública
   useEffect(() => {
     if (!open || !publicKey) return;
@@ -115,7 +124,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       .catch((e) => setSdkErr(e.message));
   }, [open, publicKey]);
 
-  // Detect brand + installments by BIN
+  // Detect brand by BIN (parcelamento vem do admin)
   useEffect(() => {
     if (!mp) return;
     const digits = onlyDigits(card.number);
@@ -123,7 +132,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
     if (bin.length < 6) {
       setPmId(null);
       setBrand(null);
-      setInstallmentsList([]);
+      setIssuerId(null);
       return;
     }
     if (bin === lastBin.current) return;
@@ -136,27 +145,44 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
         if (!m) return;
         setPmId(m.id);
         setBrand({ name: m.name, thumb: m.thumb });
-
-        const inst = await mp.getInstallments({
-          amount: String(total.toFixed(2)),
-          bin,
-          paymentTypeId: "credit_card",
-        });
-        const list = inst?.[0]?.payer_costs ?? [];
-        setInstallmentsList(list);
-        if (
-          list.length &&
-          !list.find((x: any) => x.installments === card.installments)
-        ) {
-          setCard((c) => ({ ...c, installments: list[0].installments }));
+        try {
+          const inst = await mp.getInstallments({
+            amount: String(baseTotal.toFixed(2)),
+            bin,
+            paymentTypeId: "credit_card",
+          });
+          const issuers = inst?.[0]?.issuer ?? null;
+          if (issuers?.id) setIssuerId(String(issuers.id));
+        } catch {
+          /* ignore */
         }
-        const issuers = inst?.[0]?.issuer ?? null;
-        if (issuers?.id) setIssuerId(String(issuers.id));
       } catch (e) {
         console.warn("[mp] bin lookup falhou", e);
       }
     })();
-  }, [card.number, mp, total]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [card.number, mp, baseTotal]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Opções de parcela conforme admin
+  const installmentOptions = useMemo(() => {
+    const max = Math.max(1, Math.min(12, cfg.max_installments || 1));
+    const opts: Array<{
+      n: number;
+      feePct: number;
+      total: number;
+      per: number;
+    }> = [];
+    for (let n = 1; n <= max; n++) {
+      const feePct = Number(cfg.installment_fees?.[String(n)] ?? 0) || 0;
+      const total = Math.round(baseTotal * (1 + feePct / 100) * 100) / 100;
+      opts.push({ n, feePct, total, per: total / n });
+    }
+    return opts;
+  }, [cfg, baseTotal]);
+
+  const selected =
+    installmentOptions.find((o) => o.n === card.installments) ??
+    installmentOptions[0];
+  const total = selected?.total ?? baseTotal;
 
   const canSubmit = useMemo(() => {
     const baseFilled =
@@ -355,7 +381,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
             inputMode="numeric"
           />
 
-          {installmentsList.length > 0 && (
+          {installmentOptions.length > 1 && (
             <label className="block">
               <span className="text-xs font-medium text-muted-foreground">
                 Parcelas
@@ -367,9 +393,14 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
                 }
                 className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-foreground outline-none focus:ring-2 focus:ring-primary/50"
               >
-                {installmentsList.map((i) => (
-                  <option key={i.installments} value={i.installments}>
-                    {i.recommended_message}
+                {installmentOptions.map((o) => (
+                  <option key={o.n} value={o.n}>
+                    {o.n}x de {brl(o.per)}
+                    {o.feePct > 0
+                      ? ` — total ${brl(o.total)} (juros ${o.feePct
+                          .toString()
+                          .replace(".", ",")}%)`
+                      : " sem juros"}
                   </option>
                 ))}
               </select>
