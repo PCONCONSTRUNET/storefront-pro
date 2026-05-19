@@ -58,14 +58,27 @@ function useCountdown(hours: number) {
 function Home() {
   const { products, categories, settings, coupons } = useStore();
   const hydrated = useStoreHydrated();
-  const flash = useMemo(
+  const sortedCategories = useMemo(
+    () => [...categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999)),
+    [categories],
+  );
+  const sortedProducts = useMemo(
     () =>
-      products.filter((p) => p.active && !p.hidden && p.oldPrice).slice(0, 8),
+      [...products].sort(
+        (a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999),
+      ),
     [products],
   );
+  const flash = useMemo(
+    () =>
+      sortedProducts
+        .filter((p) => p.active && !p.hidden && p.oldPrice)
+        .slice(0, 8),
+    [sortedProducts],
+  );
   const all = useMemo(
-    () => products.filter((p) => p.active && !p.hidden),
-    [products],
+    () => sortedProducts.filter((p) => p.active && !p.hidden),
+    [sortedProducts],
   );
   const { h, m, s } = useCountdown(8);
 
