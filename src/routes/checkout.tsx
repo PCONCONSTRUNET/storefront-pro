@@ -176,13 +176,6 @@ function Page() {
       icon: CreditCard,
       enabled: settings.acceptCard,
     },
-    {
-      id: "cash",
-      label: "Dinheiro na retirada",
-      sub: "Pague ao retirar no ateliê",
-      icon: Banknote,
-      enabled: settings.acceptCash,
-    },
   ];
 
   return (
