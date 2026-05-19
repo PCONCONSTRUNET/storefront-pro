@@ -19,6 +19,7 @@ export function StoreHeader() {
   const router = useRouter();
   const count = useStore(selectCartCount);
   const settings = useStore((s) => s.settings);
+  const currentCustomer = useStore(selectCurrentCustomer);
   const [q, setQ] = useState("");
 
   useEffect(() => {
