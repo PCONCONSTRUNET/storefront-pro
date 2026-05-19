@@ -5,7 +5,10 @@ import {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
   normalizeOrderStatus,
+  normalizeDeliveryStatus,
+  DELIVERY_STATUS_LABEL,
   type OrderStatus,
+  type DeliveryStatus,
 } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
