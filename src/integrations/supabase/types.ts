@@ -798,6 +798,7 @@ export type Database = {
           mp_public_key: string
         }[]
       }
+      get_payment_public_key: { Args: never; Returns: string }
       get_pix_order_status: {
         Args: { _id: string }
         Returns: {
