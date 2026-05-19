@@ -93,7 +93,9 @@ function Page() {
   const { q: initialQ } = Route.useSearch();
   const [filter, setFilter] = useState<QuickFilter>("todos");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
+  const [deliveryFilter, setDeliveryFilter] = useState<DeliveryStatus | "">("");
   const [methodFilter, setMethodFilter] = useState<string>("");
+
   const [period, setPeriod] = useState<"todos" | "hoje" | "7d" | "30d">(
     "todos",
   );
@@ -135,7 +137,13 @@ function Page() {
         return false;
 
       if (statusFilter && status !== statusFilter) return false;
+      if (
+        deliveryFilter &&
+        normalizeDeliveryStatus(o.deliveryStatus) !== deliveryFilter
+      )
+        return false;
       if (methodFilter && o.paymentMethod !== methodFilter) return false;
+
 
       if (periodMs && now - new Date(o.createdAt).getTime() > periodMs)
         return false;
@@ -149,7 +157,7 @@ function Page() {
         (o.mpPaymentId || "").toLowerCase().includes(term)
       );
     });
-  }, [orders, filter, statusFilter, methodFilter, period, term, digits]);
+  }, [orders, filter, statusFilter, deliveryFilter, methodFilter, period, term, digits]);
 
   const stats = useMemo(() => {
     const pending = orders.filter((o) => normalizeOrderStatus(o.status) === "aguardando_pagamento");
@@ -347,13 +355,35 @@ function Page() {
           }
           className="h-8 px-2 rounded-full bg-card border border-border"
         >
-          <option value="">Status: todos</option>
+          <option value="">Pagamento: todos</option>
           {statuses.map((s) => (
             <option key={s} value={s}>
               {ORDER_STATUS_LABEL[s]}
             </option>
           ))}
         </select>
+        <select
+          value={deliveryFilter}
+          onChange={(e) =>
+            setDeliveryFilter(e.target.value as DeliveryStatus | "")
+          }
+          className="h-8 px-2 rounded-full bg-card border border-border"
+        >
+          <option value="">Entrega: todas</option>
+          {(
+            [
+              "pendente",
+              "em_separacao",
+              "saiu_para_entrega",
+              "entregue",
+            ] as DeliveryStatus[]
+          ).map((s) => (
+            <option key={s} value={s}>
+              {DELIVERY_STATUS_LABEL[s]}
+            </option>
+          ))}
+        </select>
+
         <select
           value={methodFilter}
           onChange={(e) => setMethodFilter(e.target.value)}
