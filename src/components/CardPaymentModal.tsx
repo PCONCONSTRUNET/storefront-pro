@@ -11,6 +11,7 @@ import { brl } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   createCardPayment,
+  fetchPaymentPublicKey,
   type CreateCardInput,
   type CreateCardResult,
 } from "@/lib/mercadopago";
@@ -23,9 +24,6 @@ declare global {
   }
 }
 
-const MP_PUBLIC_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as
-  | string
-  | undefined;
 const SDK_URL = "https://sdk.mercadopago.com/js/v2";
 
 let sdkPromise: Promise<void> | null = null;
@@ -72,7 +70,8 @@ type Props = {
 
 export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
   const total = payload.totals.total;
-  const SANDBOX = !MP_PUBLIC_KEY;
+  const [publicKey, setPublicKey] = useState<string | null>(null);
+  const [keyLoading, setKeyLoading] = useState(true);
   const [mp, setMp] = useState<any>(null);
   const [sdkErr, setSdkErr] = useState<string | null>(null);
 
@@ -97,15 +96,24 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
 
   const lastBin = useRef<string>("");
 
-  // Load SDK (somente fora do sandbox)
+  // Busca a Public Key do Mercado Pago no banco
   useEffect(() => {
-    if (!open || SANDBOX) return;
+    if (!open) return;
+    setKeyLoading(true);
+    fetchPaymentPublicKey()
+      .then((k) => setPublicKey(k))
+      .finally(() => setKeyLoading(false));
+  }, [open]);
+
+  // Carrega o SDK quando temos a chave pública
+  useEffect(() => {
+    if (!open || !publicKey) return;
     loadMpSdk()
       .then(() =>
-        setMp(new window.MercadoPago!(MP_PUBLIC_KEY!, { locale: "pt-BR" })),
+        setMp(new window.MercadoPago!(publicKey, { locale: "pt-BR" })),
       )
       .catch((e) => setSdkErr(e.message));
-  }, [open, SANDBOX]);
+  }, [open, publicKey]);
 
   // Detect brand + installments by BIN
   useEffect(() => {
@@ -157,9 +165,8 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
       onlyDigits(card.exp).length === 4 &&
       onlyDigits(card.cvv).length >= 3 &&
       onlyDigits(card.doc).length === 11;
-    if (SANDBOX) return baseFilled && !submitting;
     return mp && pmId && baseFilled && !submitting;
-  }, [SANDBOX, mp, pmId, card, submitting]);
+  }, [mp, pmId, card, submitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,23 +174,7 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
     setSubmitting(true);
     setErrorMsg(null);
     try {
-      // SANDBOX: pula geração de token, manda direto pro backend que aprova auto
-      if (SANDBOX) {
-        const result = await createCardPayment({
-          ...payload,
-          card: {
-            token: "SANDBOX_TOKEN",
-            payment_method_id: "sandbox",
-            installments: card.installments,
-            payer: {
-              identification: { type: "CPF", number: onlyDigits(card.doc) },
-            },
-          },
-        });
-        toast.success("Pagamento simulado com sucesso! 🎉");
-        onSuccess(result);
-        return;
-      }
+
 
       const [mm, yy] = card.exp.split("/");
       const tokenRes = await mp.createCardToken({
@@ -263,25 +254,25 @@ export function CardPaymentModal({ open, onClose, onSuccess, payload }: Props) {
           </button>
         </div>
 
-        {sdkErr && !SANDBOX && (
+        {sdkErr && (
           <div className="m-5 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-sm text-destructive flex gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             {sdkErr}
           </div>
         )}
 
-        {SANDBOX && (
-          <div className="mx-5 mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 text-xs text-amber-900 dark:text-amber-200">
+        {!keyLoading && !publicKey && (
+          <div className="mx-5 mt-4 p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-xs text-destructive">
             <div className="font-bold flex items-center gap-1">
-              🧪 MODO SANDBOX (TESTE)
+              <AlertCircle className="h-4 w-4" /> Pagamento por cartão indisponível
             </div>
             <div className="mt-1">
-              Mercado Pago não configurado. Qualquer cartão será aceito e o
-              pagamento será aprovado automaticamente para testar as
-              notificações.
+              O lojista ainda não configurou as credenciais do Mercado Pago.
+              Use Pix para finalizar o pedido.
             </div>
           </div>
         )}
+
 
         {/* Card preview */}
         <div className="px-5 pt-5">

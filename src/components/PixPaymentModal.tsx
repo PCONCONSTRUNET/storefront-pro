@@ -1,21 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { CheckCircle2, Copy, Loader2, X, FlaskConical } from "lucide-react";
+import { CheckCircle2, Copy, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { brl } from "@/lib/format";
 import {
   createPixPayment,
   fetchOrder,
-  isSandboxOrder,
-  simulateApprove,
   type CreatePixInput,
   type CreatePixResult,
   type OrderRow,
 } from "@/lib/mercadopago";
 import { playBeep } from "@/lib/sound";
 import pixIcon from "@/assets/pix-icon.png";
-
-type PixStatusProbe = Pick<OrderRow, "pix_qr_code">;
 
 type Props = {
   open: boolean;
@@ -30,7 +26,7 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const [pix, setPix] = useState<CreatePixResult | null>(null);
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [simulating, setSimulating] = useState(false);
+  
 
   // 1) Cria o Pix quando o modal abre
   useEffect(() => {
@@ -106,19 +102,6 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
     }
   }, [open]);
 
-  const handleSimulate = async () => {
-    if (!pix) return;
-    setSimulating(true);
-    try {
-      await simulateApprove(pix.order_id);
-      toast.success("Pagamento simulado! Aguardando confirmação...");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSimulating(false);
-    }
-  };
-
   const copyCode = () => {
     const code = order?.pix_qr_code ?? pix?.qr_code;
     if (!code) return;
@@ -132,9 +115,6 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
   const qrCode = order?.pix_qr_code ?? pix?.qr_code ?? "";
   const qrBase64 = order?.pix_qr_code_base64 ?? pix?.qr_code_base64 ?? "";
   const total = order?.total ?? pix?.total ?? 0;
-  const sandboxProbe: PixStatusProbe | null =
-    order ?? (pix ? { pix_qr_code: pix.qr_code } : null);
-  const sandbox = isSandboxOrder(sandboxProbe);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto">
@@ -210,24 +190,6 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
                 </div>
               </div>
 
-              {sandbox && (
-                <div className="mb-2 rounded-lg border border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-2">
-                  <div className="flex items-center gap-1 text-amber-900 dark:text-amber-200 font-bold text-[10px]">
-                    <FlaskConical className="h-3 w-3" /> MODO SANDBOX
-                  </div>
-                  <button
-                    onClick={handleSimulate}
-                    disabled={simulating}
-                    className="mt-1.5 w-full h-8 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs flex items-center justify-center gap-1 disabled:opacity-60"
-                  >
-                    {simulating ? (
-                      <><Loader2 className="h-3 w-3 animate-spin" /> Simulando...</>
-                    ) : (
-                      "Simular pagamento aprovado"
-                    )}
-                  </button>
-                </div>
-              )}
 
               {qrBase64 ? (
                 <div className="grid place-items-center bg-white rounded-lg p-2">
