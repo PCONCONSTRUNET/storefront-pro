@@ -668,11 +668,23 @@ export const useStore = create<AppState>()(
           favorites: (res.customer.favorites as string[]) || [],
           createdAt: res.customer.createdAt,
         };
-        set((s) => ({
-          customers: [...s.customers.filter((x) => x.id !== c.id), c],
-          currentCustomerId: c.id,
-          sessions: { ...s.sessions, customer: makeSession(c.id) },
-        }));
+        set((s) => {
+          const email = (c.email || "").trim().toLowerCase();
+          const reattachedOrders = s.orders.map((o) =>
+            o.customerId !== c.id &&
+            email &&
+            (o.customerEmail || "").trim().toLowerCase() === email
+              ? { ...o, customerId: c.id }
+              : o,
+          );
+          return {
+            customers: [...s.customers.filter((x) => x.id !== c.id), c],
+            currentCustomerId: c.id,
+            sessions: { ...s.sessions, customer: makeSession(c.id) },
+            orders: reattachedOrders,
+          };
+        });
+
         cloud.logActivity({
           action: "login",
           category: "auth",
