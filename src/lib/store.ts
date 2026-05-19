@@ -323,6 +323,7 @@ type AppState = {
       "id" | "createdAt" | "commissionEarned" | "status"
     > & {
       status?: AffiliateSaleStatus;
+      commissionOverride?: number;
     },
   ) => AffiliateSale | null;
   updateAffiliateSaleStatus: (id: string, status: AffiliateSaleStatus) => void;
