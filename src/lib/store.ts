@@ -1313,7 +1313,8 @@ export const useStore = create<AppState>()(
       },
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        // Enforce session expiry on every page load — invalid tokens force re-login.
+        // A sessão do cliente/afiliada permanece ativa até logout explícito.
+        // Só validamos a sessão de admin (área sensível).
         const sessions = state.sessions || {
           admin: null,
           customer: null,
@@ -1326,20 +1327,13 @@ export const useStore = create<AppState>()(
           patch.adminToken = null;
           nextSessions.admin = null;
         }
-        if (!isSessionValid(sessions.customer) && state.currentCustomerId) {
-          patch.currentCustomerId = null;
-          nextSessions.customer = null;
-        }
-        if (!isSessionValid(sessions.affiliate) && state.currentAffiliateId) {
-          patch.currentAffiliateId = null;
-          nextSessions.affiliate = null;
-        }
         useStore.setState({ ...patch, sessions: nextSessions });
         // Espelhar o token admin no holder global pra cloud.ts usar.
         import("./adminToken").then(({ setAdminToken }) =>
           setAdminToken(useStore.getState().adminToken),
         );
       },
+
     },
   ),
 );
