@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
-import { createPixPayment } from "@/lib/mercadopago";
+
 import { CardPaymentModal } from "@/components/CardPaymentModal";
 import { PixPaymentModal } from "@/components/PixPaymentModal";
 import type { CreatePixInput } from "@/lib/mercadopago";
