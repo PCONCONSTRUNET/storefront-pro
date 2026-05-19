@@ -133,6 +133,7 @@ const toProduct = (r: any): Product => ({
   active: r.active !== false,
   hidden: r.extra?.hidden || false,
   minStock: r.extra?.minStock,
+  sortOrder: r.extra?.sortOrder,
   variations: Array.isArray(r.variations) ? r.variations : [],
 });
 
@@ -303,7 +304,7 @@ export const cloud = {
         active: p.active,
         featured: false,
         variations: p.variations || [],
-        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock },
+        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock, sortOrder: p.sortOrder },
       },
       "id",
     );

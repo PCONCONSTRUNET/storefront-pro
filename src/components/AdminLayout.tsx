@@ -19,6 +19,7 @@ import {
   BarChart,
   FileText,
   HelpCircle,
+  ArrowUpDown,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
@@ -37,6 +38,7 @@ const nav = [
   { to: "/admin/bi", label: "B.I.", icon: BarChart },
   { to: "/admin/produtos", label: "Produtos", icon: Package },
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
+  { to: "/admin/organizar", label: "Organizar Home", icon: ArrowUpDown },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
   { to: "/admin/clientes", label: "Clientes", icon: Users },
   { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },

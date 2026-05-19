@@ -12,6 +12,7 @@ export type Product = {
   sku: string;
   active: boolean;
   hidden?: boolean;
+  sortOrder?: number;
   variations?: {
     name: string;
     options: (string | { label: string; priceDelta?: number })[];

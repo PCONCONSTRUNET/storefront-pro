@@ -35,6 +35,7 @@ import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
 import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
+import { Route as AdminOrganizarRouteImport } from './routes/admin.organizar'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -186,6 +187,11 @@ const AdminPedidosRoute = AdminPedidosRouteImport.update({
   path: '/admin/pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrganizarRoute = AdminOrganizarRouteImport.update({
+  id: '/admin/organizar',
+  path: '/admin/organizar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
   id: '/admin/notificacoes',
   path: '/admin/notificacoes',
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/organizar': typeof AdminOrganizarRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
@@ -361,6 +368,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/organizar': typeof AdminOrganizarRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
@@ -410,6 +418,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
+  '/admin/organizar': typeof AdminOrganizarRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
@@ -460,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/logs'
     | '/admin/notificacoes'
+    | '/admin/organizar'
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/afiliada/cadastro'
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/logs'
     | '/admin/notificacoes'
+    | '/admin/organizar'
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/afiliada/cadastro'
@@ -556,6 +567,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/logs'
     | '/admin/notificacoes'
+    | '/admin/organizar'
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/afiliada/cadastro'
@@ -605,6 +617,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
+  AdminOrganizarRoute: typeof AdminOrganizarRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
   AfiliadaCadastroRoute: typeof AfiliadaCadastroRoute
@@ -811,6 +824,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/organizar': {
+      id: '/admin/organizar'
+      path: '/admin/organizar'
+      fullPath: '/admin/organizar'
+      preLoaderRoute: typeof AdminOrganizarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/notificacoes': {
       id: '/admin/notificacoes'
       path: '/admin/notificacoes'
@@ -992,6 +1012,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
+  AdminOrganizarRoute: AdminOrganizarRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
   AfiliadaCadastroRoute: AfiliadaCadastroRoute,
