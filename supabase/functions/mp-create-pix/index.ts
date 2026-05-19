@@ -49,7 +49,13 @@ Deno.serve(async (req) => {
 
   const gateway = await loadGatewayConfig(supabase);
   const MP_TOKEN = gateway.access_token;
-  const SANDBOX = !MP_TOKEN;
+
+  if (!MP_TOKEN) {
+    return json(
+      { error: "Mercado Pago não configurado. Avise o lojista." },
+      400,
+    );
+  }
 
   // 1) Cria pedido no banco
   const { data: order, error: insErr } = await supabase
@@ -78,32 +84,6 @@ Deno.serve(async (req) => {
     return json({ error: "Falha ao criar pedido" }, 500);
   }
 
-  // 2) Sandbox: gera QR fake e retorna sem chamar MP
-  if (SANDBOX) {
-    const sandboxId = `SANDBOX-${order.id.slice(0, 8)}-${Date.now()}`;
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
-    // Pequeno PNG 1x1 transparente em base64 (placeholder)
-    const fakeQr =
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-    await supabase
-      .from("orders")
-      .update({
-        mp_payment_id: sandboxId,
-        pix_qr_code: "SANDBOX_PIX_CODE_TESTE",
-        pix_qr_code_base64: fakeQr,
-        pix_expires_at: expiresAt,
-      })
-      .eq("id", order.id);
-    return json({
-      order_id: order.id,
-      mp_payment_id: sandboxId,
-      qr_code: "SANDBOX_PIX_CODE_TESTE",
-      qr_code_base64: fakeQr,
-      expires_at: expiresAt,
-      total,
-      sandbox: true,
-    });
-  }
 
   // 2) Chama Mercado Pago
   const [firstName, ...rest] = String(customer.name).trim().split(/\s+/);
