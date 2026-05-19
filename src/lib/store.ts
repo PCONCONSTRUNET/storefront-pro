@@ -340,6 +340,24 @@ type AppState = {
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
+  saveRemoteOrder: (data: {
+    id: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    items: Order["items"];
+    subtotal: number;
+    discount: number;
+    shipping: number;
+    total: number;
+    paymentMethod: "pix" | "card" | "cash";
+    deliveryMethod: "entrega" | "retirada";
+    address: string;
+    notes?: string;
+    status: OrderStatus;
+    mpPaymentId?: string;
+    paidAt?: string;
+  }) => void;
 
   upsertProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
@@ -1076,6 +1094,31 @@ export const useStore = create<AppState>()(
         }
         // ... cloud persistence logic continues ...
         return order;
+      },
+      saveRemoteOrder: (data) => {
+        const state = get();
+        if (state.orders.some((o) => o.id === data.id)) return;
+        const order: Order = {
+          id: data.id,
+          customerId: state.currentCustomerId || "guest",
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          customerPhone: data.customerPhone,
+          items: data.items,
+          subtotal: data.subtotal,
+          discount: data.discount,
+          shipping: data.shipping,
+          total: data.total,
+          paymentMethod: data.paymentMethod,
+          deliveryMethod: data.deliveryMethod,
+          status: data.status,
+          createdAt: new Date().toISOString(),
+          address: data.address,
+          notes: data.notes,
+          mpPaymentId: data.mpPaymentId,
+          paidAt: data.paidAt,
+        };
+        set((s) => ({ orders: [order, ...s.orders] }));
       },
       updateOrderStatus: (id, status) => {
         const order = get().orders.find((o) => o.id === id);

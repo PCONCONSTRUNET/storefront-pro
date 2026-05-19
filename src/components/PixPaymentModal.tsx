@@ -68,6 +68,31 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
         }
         setOrder(o);
         if (o.payment_status === "approved") {
+          if (payload) {
+            useStore.getState().saveRemoteOrder({
+              id: o.id,
+              customerName: payload.customer.name,
+              customerEmail: payload.customer.email,
+              customerPhone: payload.customer.phone,
+              items: payload.items.map((i) => ({
+                productId: i.productId,
+                name: i.name,
+                price: i.price,
+                quantity: i.quantity,
+                image: i.image ?? "",
+              })),
+              subtotal: payload.totals.subtotal,
+              discount: payload.totals.discount,
+              shipping: payload.totals.shipping,
+              total: payload.totals.total,
+              paymentMethod: "pix",
+              deliveryMethod: payload.delivery,
+              address: payload.address ?? "",
+              notes: payload.notes,
+              status: "pago",
+              paidAt: new Date().toISOString(),
+            });
+          }
           useStore.getState().clearCart();
           playBeep();
           toast.success("Pagamento aprovado! 🎉");
