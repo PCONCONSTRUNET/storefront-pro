@@ -26,7 +26,7 @@ import type {
   ActivityLog,
 } from "./store";
 import type { Category, Coupon, Product } from "./data";
-import { normalizeOrderStatus } from "./orderStatus";
+import { normalizeOrderStatus, normalizeDeliveryStatus } from "./orderStatus";
 
 // ---------- helpers ----------
 const log = (label: string, err: unknown) => {
