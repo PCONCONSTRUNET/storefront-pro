@@ -71,7 +71,7 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Princesa de Laços" },
       { name: "mobile-web-app-capable", content: "yes" },
-      { title: "Princesa de Laços — Catálogo encantado" },
+      { title: "Princesa de Laços — Loja On-line" },
       {
         name: "description",
         content: "Catálogo encantado de laços, tiaras e acessórios.",
@@ -104,6 +104,13 @@ export const Route = createRootRoute({
         content:
           "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp",
       },
+      { property: "og:title", content: "Princesa de Laços — Loja On-line" },
+      { name: "twitter:title", content: "Princesa de Laços — Loja On-line" },
+      { name: "description", content: "Princesa de Laços — Loja On-line" },
+      { property: "og:description", content: "Princesa de Laços — Loja On-line" },
+      { name: "twitter:description", content: "Princesa de Laços — Loja On-line" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779231001061-princesa_de_lacos_1mb.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779231001061-princesa_de_lacos_1mb.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
