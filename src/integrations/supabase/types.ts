@@ -869,6 +869,13 @@ export type Database = {
           ok: boolean
         }[]
       }
+      verify_admin_login: {
+        Args: { _email: string; _password: string }
+        Returns: {
+          email: string
+          token: string
+        }[]
+      }
     }
     Enums: {
       payment_status:

@@ -35,13 +35,18 @@ function Page() {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
-    const r = await loginAdmin(email, pwd);
-    if (r.ok) {
-      window.history.replaceState(null, "", "/admin/dashboard");
-      navigate({ to: "/admin/dashboard", replace: true });
-      toast.success(r.message);
-    } else {
-      toast.error(r.message);
+    try {
+      const r = await loginAdmin(email, pwd);
+      if (r.ok) {
+        window.history.replaceState(null, "", "/admin/dashboard");
+        navigate({ to: "/admin/dashboard", replace: true });
+        toast.success(r.message);
+      } else {
+        toast.error(r.message);
+        setSubmitting(false);
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao entrar");
       setSubmitting(false);
     }
   };
