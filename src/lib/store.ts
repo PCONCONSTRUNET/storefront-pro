@@ -13,6 +13,7 @@ import {
 } from "./data";
 import { useNotifications } from "./notifications";
 import { cloud, fetchCloudSnapshot } from "./cloud";
+import { supabase } from "@/integrations/supabase/client";
 export {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
