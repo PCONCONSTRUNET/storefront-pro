@@ -766,25 +766,29 @@ export const useStore = create<AppState>()(
         if (c) cloud.upsertCustomer(c);
       },
       loginAdmin: async (email, password) => {
-        const { loginAdminFn } = await import("./admin.functions");
         const normalized = email.trim().toLowerCase();
-        const res = await loginAdminFn({
-          data: { email: normalized, password },
-        });
-        if (!res.ok) return { ok: false, message: res.message };
-        const { setAdminToken } = await import("./adminToken");
-        setAdminToken(res.token);
-        set((s) => ({
-          isAdmin: true,
-          adminToken: res.token,
-          sessions: { ...s.sessions, admin: makeSession(normalized) },
-        }));
-        cloud.logActivity({
-          action: "admin_login",
-          category: "auth",
-          description: `Admin logou: ${normalized}`,
-        });
-        return { ok: true, message: res.message };
+        try {
+          const { data, error } = await (supabase as any)
+            .rpc("verify_admin_login", { _email: normalized, _password: password })
+            .maybeSingle();
+          if (error) return { ok: false, message: error.message || "Erro ao entrar" };
+          if (!data?.token) return { ok: false, message: "Credenciais inválidas" };
+          const { setAdminToken } = await import("./adminToken");
+          setAdminToken(data.token);
+          set((s) => ({
+            isAdmin: true,
+            adminToken: data.token,
+            sessions: { ...s.sessions, admin: makeSession(normalized) },
+          }));
+          cloud.logActivity({
+            action: "admin_login",
+            category: "auth",
+            description: `Admin logou: ${normalized}`,
+          });
+          return { ok: true, message: "Bem-vindo!" };
+        } catch (e: any) {
+          return { ok: false, message: e?.message || "Erro de conexão" };
+        }
       },
       logoutAdmin: () => {
         const tok = get().adminToken;
