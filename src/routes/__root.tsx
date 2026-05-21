@@ -16,7 +16,6 @@ import {
 } from "@/hooks/use-devtools-guard";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
-import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
 import appCss from "../styles.css?url";
 
 const PWA_ALLOWED_ROUTES = ["/afiliada/login", "/afiliada", "/admin"];

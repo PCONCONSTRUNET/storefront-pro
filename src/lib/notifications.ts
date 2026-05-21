@@ -371,7 +371,7 @@ export const useNotifications = create<NotificationState>()(
     {
       name: "princesa-notifications-v3",
       partialize: (s) => ({
-        templates: s.templates.filter((t) => t.audience === "admin"),
+        templates: (s.templates ?? []).filter((t) => t.audience === "admin"),
         logs: s.logs,
         pushEnabled: s.pushEnabled,
       }),

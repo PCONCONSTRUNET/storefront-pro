@@ -137,7 +137,7 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
         if (Notification.permission === 'granted' && !isOptedIn) {
           console.log('[push] Permissão já concedida mas não inscrito — optIn silencioso');
           try {
-            await OS.User.PushSubscription.optIn();
+            await OS?.User?.PushSubscription?.optIn?.();
             const pid = await waitForPlayerId(5000);
             if (pid) {
               setPlayerId(pid);
@@ -145,8 +145,8 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
               // Login no OneSignal com o ID correto
               const osUserId = role === 'admin' ? 'admin-user' : userId;
               if (osUserId) {
-                await OS.login(osUserId);
-                OS.User.addTag('role', role);
+                await OS?.login?.(osUserId);
+                OS?.User?.addTag?.('role', role);
               }
             }
           } catch {/* noop */}
@@ -199,7 +199,7 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
       }
 
       // OptIn imediato + aguarda o token chegar
-      OS.User.PushSubscription.optIn().catch(() => {/* noop */});
+      OS?.User?.PushSubscription?.optIn?.().catch(() => {/* noop */});
       const pid = await waitForPlayerId(12000);
 
       if (pid) {
@@ -209,8 +209,8 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
         // Vincula ao usuário correto no OneSignal
         const osUserId = role === 'admin' ? 'admin-user' : userId;
         if (osUserId) {
-          await OS.login(osUserId);
-          OS.User.addTag('role', role);
+          await OS?.login?.(osUserId);
+          OS?.User?.addTag?.('role', role);
         }
 
         console.log('[push] ✅ inscrição completa, pid=', pid);
@@ -246,7 +246,7 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
     if (!initialized) return false;
     try {
       setLoading(true);
-      await (OneSignal as any).User.PushSubscription.optOut();
+      await (OneSignal as any)?.User?.PushSubscription?.optOut?.();
       setSubscribed(false);
       setPlayerId(null);
       return true;
