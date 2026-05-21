@@ -7,15 +7,40 @@ type SupabaseClient = {
   functions: { invoke: (n: string, opts: any) => Promise<any> };
 };
 
+function formatTotal(order: { total: number | string }) {
+  return Number(order.total).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+/** Push para admin quando um pedido entra (Pix pendente ou cartão em análise). */
+export async function notifyNewOrderAdmin(
+  supabase: SupabaseClient,
+  order: { id: string; customer_name: string; total: number | string },
+) {
+  const total = formatTotal(order);
+  const shortId = String(order.id).slice(0, 8);
+  try {
+    await supabase.functions.invoke("send-push", {
+      body: {
+        title: "🛍️ Novo pedido!",
+        message: `${order.customer_name} fez um pedido de ${total} (#${shortId}).`,
+        url: "/admin/pedidos",
+        audience: "admin",
+      },
+    });
+  } catch (e) {
+    console.error("[notify-new-order] push admin falhou:", e);
+  }
+}
+
 export async function notifyOrderApproved(
   supabase: SupabaseClient,
   order: any,
 ) {
   const phone = String(order.customer_phone ?? "").replace(/\D/g, "");
-  const total = Number(order.total).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
+  const total = formatTotal(order);
   const firstName = String(order.customer_name ?? "Cliente").split(" ")[0];
   const method = order.payment_method === "card" ? "Cartão de crédito" : "Pix";
 

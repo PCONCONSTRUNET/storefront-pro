@@ -122,105 +122,6 @@ export interface NotificationLog {
 }
 
 const DEFAULT_TEMPLATES: NotificationTemplate[] = [
-  // Cliente
-  {
-    id: "t_pedido_realizado",
-    category: "pedido_realizado",
-    audience: "cliente",
-    title: "Pedido recebido! 🎀",
-    body: "Olá {cliente}, recebemos seu pedido #{pedido} no valor de {total}. Estamos preparando com carinho!",
-    icon: "🎀",
-    enabled: true,
-    sendPush: true,
-    sendEmail: true,
-    sendInApp: true,
-  },
-  {
-    id: "t_pagamento_aprovado",
-    category: "pagamento_aprovado",
-    audience: "cliente",
-    title: "Pagamento aprovado ✨",
-    body: "Seu pagamento do pedido #{pedido} foi confirmado. Já estamos separando!",
-    icon: "💳",
-    enabled: true,
-    sendPush: true,
-    sendEmail: true,
-    sendInApp: true,
-  },
-  {
-    id: "t_pedido_em_separacao",
-    category: "pedido_em_separacao",
-    audience: "cliente",
-    title: "Separando seu pedido 📦",
-    body: "Seu pedido #{pedido} entrou em produção/separação.",
-    icon: "📦",
-    enabled: true,
-    sendPush: true,
-    sendEmail: false,
-    sendInApp: true,
-  },
-  {
-    id: "t_pedido_enviado",
-    category: "pedido_enviado",
-    audience: "cliente",
-    title: "Saiu para entrega 🚚",
-    body: "Seu pedido #{pedido} já está a caminho! Em breve chega aí.",
-    icon: "🚚",
-    enabled: true,
-    sendPush: true,
-    sendEmail: true,
-    sendInApp: true,
-  },
-  {
-    id: "t_pedido_entregue",
-    category: "pedido_entregue",
-    audience: "cliente",
-    title: "Pedido entregue 💖",
-    body: "Pedido #{pedido} entregue! Que tal nos contar o que achou? ⭐⭐⭐⭐⭐",
-    icon: "💖",
-    enabled: true,
-    sendPush: true,
-    sendEmail: false,
-    sendInApp: true,
-  },
-  {
-    id: "t_pedido_cancelado",
-    category: "pedido_cancelado",
-    audience: "cliente",
-    title: "Pedido cancelado",
-    body: "O pedido #{pedido} foi cancelado. Em caso de dúvidas, fale com a gente.",
-    icon: "❌",
-    enabled: true,
-    sendPush: false,
-    sendEmail: true,
-    sendInApp: true,
-  },
-  {
-    id: "t_carrinho_abandonado",
-    category: "carrinho_abandonado",
-    audience: "cliente",
-    title: "Esqueceu algo no carrinho? 🛒",
-    body: "Olá {cliente}, ainda dá tempo de finalizar! Use o cupom VOLTEI10 e ganhe 10% off.",
-    icon: "🛒",
-    enabled: false,
-    sendPush: true,
-    sendEmail: true,
-    sendInApp: false,
-  },
-  {
-    id: "t_promo",
-    category: "promo",
-    audience: "cliente",
-    title: "Novidade na loja! ✨",
-    body: "Acabou de chegar coleção nova de laços. Corre antes de acabar!",
-    icon: "🎉",
-    enabled: true,
-    sendPush: true,
-    sendEmail: false,
-    sendInApp: true,
-  },
-
-  // Admin
   {
     id: "t_novo_pedido_admin",
     category: "novo_pedido_admin",
@@ -267,20 +168,6 @@ const DEFAULT_TEMPLATES: NotificationTemplate[] = [
     enabled: true,
     sendPush: true,
     sendEmail: false,
-    sendInApp: true,
-  },
-
-  // Afiliada
-  {
-    id: "t_afiliada_venda_confirmada",
-    category: "afiliada_venda_confirmada",
-    audience: "afiliada",
-    title: "Comissão liberada! 💰",
-    body: "Sua venda para {cliente} foi confirmada. Comissão: {comissao}.",
-    icon: "💰",
-    enabled: true,
-    sendPush: true,
-    sendEmail: true,
     sendInApp: true,
   },
 ];
@@ -482,12 +369,25 @@ export const useNotifications = create<NotificationState>()(
       },
     }),
     {
-      name: "princesa-notifications-v2",
+      name: "princesa-notifications-v3",
       partialize: (s) => ({
-        templates: s.templates,
+        templates: s.templates.filter((t) => t.audience === "admin"),
         logs: s.logs,
         pushEnabled: s.pushEnabled,
       }),
+      migrate: (persisted) => {
+        const state = persisted as NotificationState | undefined;
+        if (!state) return persisted;
+        const adminOnly = (state.templates ?? []).filter(
+          (t) => t.audience === "admin",
+        );
+        return {
+          ...state,
+          templates:
+            adminOnly.length > 0 ? adminOnly : DEFAULT_TEMPLATES,
+        };
+      },
+      version: 1,
     },
   ),
 );

@@ -3,6 +3,7 @@
 // Body: { customer: {...}, items: [...], totals: {...}, delivery, address, notes }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadGatewayConfig } from "../_shared/gateway.ts";
+import { notifyNewOrderAdmin } from "../_shared/notify-approval.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,6 +85,7 @@ Deno.serve(async (req) => {
     return json({ error: "Falha ao criar pedido" }, 500);
   }
 
+  await notifyNewOrderAdmin(supabase, order);
 
   // 2) Chama Mercado Pago
   const [firstName, ...rest] = String(customer.name).trim().split(/\s+/);

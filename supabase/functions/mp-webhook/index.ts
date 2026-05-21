@@ -3,9 +3,7 @@
 // POST /functions/v1/mp-webhook?type=payment&data.id=123
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadGatewayConfig } from "../_shared/gateway.ts";
-
-const BOT_BASE = "http://178.105.54.230:3005";
-const BOT_TOKEN = "princesa_secret_123";
+import { notifyOrderApproved } from "../_shared/notify-approval.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204 });
@@ -118,52 +116,14 @@ Deno.serve(async (req) => {
     raw_payload: payment,
   });
 
-  // Notifica cliente quando aprovado (apenas 1x — claim atômico acima)
+  // Notifica cliente + admin quando aprovado (apenas 1x — claim atômico acima)
   if (justApproved) {
-    // Desconta estoque dos produtos do pedido (idempotente)
     try {
       await supabase.rpc("apply_order_stock_decrement", { _order_id: order.id });
     } catch (e) {
       console.error("[mp-webhook] stock decrement falhou:", e);
     }
-
-
-    const phone = String(order.customer_phone).replace(/\D/g, "");
-    const total = Number(order.total).toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
-    const mensagem = `Olá ${order.customer_name.split(" ")[0]}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${order.id.slice(0, 8)}\n💰 Valor: ${total}\n\n📍 Como nossos produtos já são prontos, seu pedido está *aguardando retirada no ateliê*. Vamos te chamar por aqui para combinar o melhor horário! ✨`;
-
-    try {
-      await fetch(`${BOT_BASE}/webhook/notificacao`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-webhook-token": BOT_TOKEN,
-        },
-        body: JSON.stringify({ numero: phone, mensagem }),
-      });
-    } catch (e) {
-      console.error("[mp-webhook] WhatsApp falhou:", e);
-    }
-
-    // E-mail de confirmação
-    try {
-      await supabase.functions.invoke("send-order-confirmation-email", {
-        body: {
-          email: order.customer_email,
-          customerName: order.customer_name,
-          orderId: order.id.slice(0, 8),
-          items: order.items,
-          total: Number(order.total),
-          paymentMethod:
-            order.payment_method === "card" ? "Cartão de crédito" : "Pix",
-        },
-      });
-    } catch (e) {
-      console.error("[mp-webhook] e-mail falhou:", e);
-    }
+    await notifyOrderApproved(supabase, order);
   }
 
   return new Response("ok", { status: 200 });

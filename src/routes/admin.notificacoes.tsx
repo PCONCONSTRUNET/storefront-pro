@@ -17,12 +17,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useStore } from "@/lib/store";
 import {
   useNotifications,
   CATEGORY_LABELS,
   AUDIENCE_LABELS,
-  type NotificationAudience,
   type NotificationTemplate,
 } from "@/lib/notifications";
 
@@ -33,8 +31,6 @@ export const Route = createFileRoute("/admin/notificacoes")({
 type Tab = "enviar" | "modelos" | "historico";
 
 function Page() {
-  const customers = useStore((s) => s.customers);
-  const affiliates = useStore((s) => s.affiliates);
   const {
     templates,
     logs,
@@ -50,10 +46,14 @@ function Page() {
   } = useNotifications();
 
   const [tab, setTab] = useState<Tab>("enviar");
+  const adminTemplates = useMemo(
+    () => templates.filter((t) => t.audience === "admin"),
+    [templates],
+  );
+
   const [form, setForm] = useState({
     title: "",
     body: "",
-    audience: "cliente" as NotificationAudience,
     channels: { push: true, email: false, inapp: true },
   });
 
@@ -62,17 +62,10 @@ function Page() {
       total: logs.length,
       unread: logs.filter((l) => !l.read).length,
       push: logs.filter((l) => l.channels.includes("push")).length,
-      activeTemplates: templates.filter((t) => t.enabled).length,
+      activeTemplates: adminTemplates.filter((t) => t.enabled).length,
     }),
-    [logs, templates],
+    [logs, adminTemplates],
   );
-
-  const audienceCount = (a: NotificationAudience) =>
-    a === "cliente"
-      ? customers.length
-      : a === "afiliada"
-        ? affiliates.length
-        : 1;
 
   const send = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,13 +84,11 @@ function Page() {
     sendManual({
       title: form.title,
       body: form.body,
-      audience: form.audience,
+      audience: "admin",
       channels,
     });
     setForm({ ...form, title: "", body: "" });
-    toast.success(
-      `Notificação enviada para ${audienceCount(form.audience)} ${form.audience === "cliente" ? "cliente(s)" : form.audience === "afiliada" ? "afiliada(s)" : "destinatário(s)"}`,
-    );
+    toast.success("Notificação enviada para o admin");
   };
 
   const [togglingPush, setTogglingPush] = useState(false);
@@ -196,7 +187,7 @@ function Page() {
           <Stat label="Via push" value={stats.push} />
           <Stat
             label="Modelos ativos"
-            value={`${stats.activeTemplates}/${templates.length}`}
+            value={`${stats.activeTemplates}/${adminTemplates.length}`}
           />
         </div>
       </div>
@@ -215,7 +206,7 @@ function Page() {
           onClick={() => setTab("modelos")}
           icon={Settings2}
         >
-          Modelos ({templates.length})
+          Modelos ({adminTemplates.length})
         </TabBtn>
         <TabBtn
           active={tab === "historico"}
@@ -263,28 +254,9 @@ function Page() {
               </span>
             </Field>
 
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Público
-              </span>
-              <div className="grid grid-cols-3 gap-2 mt-1.5">
-                {(
-                  ["cliente", "afiliada", "admin"] as NotificationAudience[]
-                ).map((a) => (
-                  <button
-                    key={a}
-                    type="button"
-                    onClick={() => setForm({ ...form, audience: a })}
-                    className={`h-14 rounded-xl border text-xs font-semibold flex flex-col items-center justify-center gap-0.5 transition-all ${form.audience === a ? "border-primary bg-primary/10 text-primary scale-[1.02]" : "border-border bg-background text-muted-foreground hover:bg-muted/40"}`}
-                  >
-                    <span className="capitalize">{AUDIENCE_LABELS[a]}s</span>
-                    <span className="text-[10px] opacity-80">
-                      {audienceCount(a)} dest.
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground rounded-xl bg-muted/50 px-3 py-2">
+              Envio manual apenas para dispositivos <b>admin</b> sincronizados.
+            </p>
 
             <div>
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -357,11 +329,11 @@ function Page() {
         <div className="bg-card rounded-2xl shadow-card p-4 animate-fade-in">
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div>
-              <h3 className="font-bold">Modelos automáticos</h3>
+              <h3 className="font-bold">Modelos automáticos (admin)</h3>
               <p className="text-xs text-muted-foreground">
                 Disparados pelos eventos da loja. Use {"{cliente}"},{" "}
-                {"{pedido}"}, {"{total}"}, {"{afiliada}"}, {"{comissao}"},{" "}
-                {"{produto}"}, {"{estoque}"} como variáveis.
+                {"{pedido}"}, {"{total}"}, {"{afiliada}"}, {"{produto}"},{" "}
+                {"{estoque}"} como variáveis.
               </p>
             </div>
             <button
@@ -376,7 +348,7 @@ function Page() {
           </div>
 
           <ul className="space-y-3">
-            {templates.map((t) => (
+            {adminTemplates.map((t) => (
               <TemplateRow
                 key={t.id}
                 template={t}
@@ -639,9 +611,6 @@ function TemplateRow({
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-sm">
               {CATEGORY_LABELS[template.category]}
-            </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted capitalize">
-              {AUDIENCE_LABELS[template.audience]}
             </span>
             {!template.enabled && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">

@@ -3,6 +3,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 import { loadGatewayConfig } from "../_shared/gateway.ts";
+import {
+  notifyNewOrderAdmin,
+  notifyOrderApproved,
+} from "../_shared/notify-approval.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -109,6 +113,7 @@ Deno.serve(async (req) => {
     return json({ error: "Falha ao criar pedido" }, 500);
   }
 
+  await notifyNewOrderAdmin(supabase, order);
 
   const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`;
 
@@ -180,6 +185,24 @@ Deno.serve(async (req) => {
           : null,
     })
     .eq("id", order.id);
+
+  // Cartão aprovado na hora: webhook não dispara notificação (pedido já está approved)
+  if (newStatus === "approved") {
+    try {
+      await supabase.rpc("apply_order_stock_decrement", {
+        _order_id: order.id,
+      });
+    } catch (e) {
+      console.error("[mp-create-card] stock decrement falhou:", e);
+    }
+    const approvedOrder = {
+      ...order,
+      payment_status: "approved",
+      mp_payment_id: String(mpData.id),
+      paid_at: mpData.date_approved ?? new Date().toISOString(),
+    };
+    await notifyOrderApproved(supabase, approvedOrder);
+  }
 
   return json({
     order_id: order.id,
