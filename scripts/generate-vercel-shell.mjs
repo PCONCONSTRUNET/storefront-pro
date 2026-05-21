@@ -15,11 +15,18 @@ if (!fs.existsSync(clientDir)) {
 const jsFile = fs.existsSync(assetsDir)
   ? fs.readdirSync(assetsDir).find((f) => f.startsWith("client-entry") && f.endsWith(".js"))
   : null;
+const fallbackJsFile = fs.existsSync(assetsDir)
+  ? fs
+      .readdirSync(assetsDir)
+      .find((f) => /^index-[A-Za-z0-9_-]+\.js$/.test(f))
+  : null;
 const cssFile = fs.existsSync(assetsDir)
   ? fs.readdirSync(assetsDir).find((f) => f.startsWith("styles-") && f.endsWith(".css"))
   : null;
 
-if (!jsFile) {
+const entryJsFile = jsFile || fallbackJsFile;
+
+if (!entryJsFile) {
   console.error("[generate-vercel-shell] JS entry não encontrado.");
   process.exit(1);
 }
@@ -38,7 +45,7 @@ const shell = `<!DOCTYPE html>
     <script>self.$_TSR={h(){this.hydrated=true;this.c&&this.c()},e(){this.streamEnded=true;this.c&&this.c()},c(){},p(fn){fn()},buffer:[],router:{manifest:{routes:{}},matches:[{i:"__root__",s:"success"},{i:"/",s:"success"}],lastMatchId:"/"}}</script>
   </head>
   <body>
-    <script type="module" src="/assets/${jsFile}"></script>
+    <script type="module" src="/assets/${entryJsFile}"></script>
   </body>
 </html>
 `;
