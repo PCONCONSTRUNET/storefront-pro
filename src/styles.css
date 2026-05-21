@@ -234,3 +234,10 @@ span[class*="onesignal"],
   top: -9999px !important;
   opacity: 0 !important;
 }
+
+/* Dificulta copiar/arrastar imagens do catálogo (complementa o devtools guard) */
+img {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}

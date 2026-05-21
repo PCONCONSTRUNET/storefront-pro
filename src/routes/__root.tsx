@@ -10,6 +10,10 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useStore, hydrateFromCloud } from "@/lib/store";
+import {
+  DEVTOOLS_GUARD_INLINE_SCRIPT,
+  useDevtoolsGuard,
+} from "@/hooks/use-devtools-guard";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPrompt";
@@ -170,6 +174,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{ __html: DEVTOOLS_GUARD_INLINE_SCRIPT }}
+        />
         {children}
         <Toaster position="top-center" richColors />
         <Scripts />
@@ -181,6 +188,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const currentCustomerId = useStore((s) => s.currentCustomerId);
   const isAdmin = useStore((s) => s.isAdmin);
+
+  useDevtoolsGuard();
 
   // Inicialização global do OneSignal
   usePushNotifications({
