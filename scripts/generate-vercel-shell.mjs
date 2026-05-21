@@ -11,35 +11,77 @@ const projectRoot = path.join(root, "..");
 const clientDir = path.join(projectRoot, "dist", "client");
 const serverAssetsDir = path.join(projectRoot, "dist", "server", "assets");
 
-function fail(msg) {
-  console.error(`[generate-vercel-shell] ${msg}`);
+function warn(msg) {
+  console.warn(`[generate-vercel-shell] ⚠ ${msg}`);
+}
+
+if (!fs.existsSync(clientDir)) {
+  console.error("[generate-vercel-shell] dist/client não encontrado — rode vite build antes.");
   process.exit(1);
 }
 
-if (!fs.existsSync(clientDir)) fail("dist/client não encontrado — rode vite build antes.");
-if (!fs.existsSync(serverAssetsDir)) fail("dist/server/assets não encontrado.");
+// --- Tenta obter o JS entry e o CSS do manifest do server ---
+let jsSrc = null;
+let cssHref = null;
 
-const manifestFile = fs
-  .readdirSync(serverAssetsDir)
-  .find((f) => f.startsWith("_tanstack-start-manifest_v-"));
-if (!manifestFile) fail("manifest TanStack Start não encontrado.");
+if (fs.existsSync(serverAssetsDir)) {
+  const manifestFile = fs
+    .readdirSync(serverAssetsDir)
+    .find((f) => f.startsWith("_tanstack-start-manifest_v-"));
 
-const manifestSrc = fs.readFileSync(
-  path.join(serverAssetsDir, manifestFile),
-  "utf8",
-);
-const clientEntryMatch = manifestSrc.match(/clientEntry:\s*"([^"]+)"/);
-if (!clientEntryMatch) fail("clientEntry não encontrado no manifest.");
+  if (manifestFile) {
+    const manifestSrc = fs.readFileSync(
+      path.join(serverAssetsDir, manifestFile),
+      "utf8",
+    );
+    const clientEntryMatch = manifestSrc.match(/clientEntry:\s*"([^"]+)"/);
+    if (clientEntryMatch) {
+      const entry = clientEntryMatch[1];
+      jsSrc = entry.startsWith("/") ? entry : `/${entry}`;
+    } else {
+      warn("clientEntry não encontrado no manifest.");
+    }
+  } else {
+    warn("manifest TanStack Start não encontrado em dist/server/assets.");
+  }
+} else {
+  warn("dist/server/assets não encontrado — tentando fallback.");
+}
 
-const clientEntry = clientEntryMatch[1];
+// --- Fallback: busca o entry JS diretamente em dist/client/assets ---
 const assetsDir = path.join(clientDir, "assets");
-const cssFile = fs
-  .readdirSync(assetsDir)
-  .find((f) => f.startsWith("styles-") && f.endsWith(".css"));
-if (!cssFile) fail("styles-*.css não encontrado em dist/client/assets.");
+if (!jsSrc && fs.existsSync(assetsDir)) {
+  const jsFile = fs
+    .readdirSync(assetsDir)
+    .find((f) => f.startsWith("client-entry") && f.endsWith(".js"));
+  if (jsFile) {
+    jsSrc = `/assets/${jsFile}`;
+    warn(`Usando fallback JS entry: ${jsSrc}`);
+  }
+}
 
-const cssHref = `/assets/${cssFile}`;
-const jsSrc = clientEntry.startsWith("/") ? clientEntry : `/${clientEntry}`;
+// --- CSS ---
+if (fs.existsSync(assetsDir)) {
+  const cssFile = fs
+    .readdirSync(assetsDir)
+    .find((f) => f.startsWith("styles-") && f.endsWith(".css"));
+  if (cssFile) {
+    cssHref = `/assets/${cssFile}`;
+  } else {
+    warn("styles-*.css não encontrado — shell será gerado sem CSS link.");
+  }
+} else {
+  warn("dist/client/assets não encontrado.");
+}
+
+if (!jsSrc) {
+  console.error("[generate-vercel-shell] Não foi possível encontrar o JS entry. Abortando.");
+  process.exit(1);
+}
+
+const cssLink = cssHref
+  ? `    <link rel="stylesheet" href="${cssHref}" />`
+  : "    <!-- CSS não encontrado -->";
 
 const shell = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -64,7 +106,7 @@ const shell = `<!DOCTYPE html>
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="stylesheet" href="${cssHref}" />
+${cssLink}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -82,4 +124,4 @@ const shell = `<!DOCTYPE html>
 const outPath = path.join(clientDir, "_shell.html");
 fs.writeFileSync(outPath, shell, "utf8");
 console.log(`[generate-vercel-shell] OK → ${outPath}`);
-console.log(`[generate-vercel-shell] JS: ${jsSrc} | CSS: ${cssHref}`);
+console.log(`[generate-vercel-shell] JS: ${jsSrc} | CSS: ${cssHref || "N/A"}`);
