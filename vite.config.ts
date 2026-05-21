@@ -13,6 +13,7 @@ export default defineConfig({
       maskPath: "/",
       prerender: {
         outputPath: "/_shell",
+        enabled: false,
       },
     },
     router: {
