@@ -382,7 +382,8 @@ function Page() {
                       </button>
                       <button
                         onClick={async () => {
-                          const { confirmDialog } = await import("@/components/ConfirmDialog");
+                          const { confirmDialog } =
+                            await import("@/components/ConfirmDialog");
                           if (
                             await confirmDialog({
                               title: "Excluir lançamento?",
@@ -403,7 +404,8 @@ function Page() {
                   {r.affiliateSaleId && (
                     <button
                       onClick={async () => {
-                        const { confirmDialog } = await import("@/components/ConfirmDialog");
+                        const { confirmDialog } =
+                          await import("@/components/ConfirmDialog");
                         if (
                           await confirmDialog({
                             title: "Excluir venda de afiliada?",
