@@ -39,13 +39,31 @@ const getApiErrorMessage = (data: unknown) => {
   return typeof message === "string" && message.length > 0 ? message : null;
 };
 
+const getInvokeErrorMessage = async (error: unknown, fallback: string) => {
+  const context =
+    typeof error === "object" && error !== null && "context" in error
+      ? (error as { context?: Response }).context
+      : null;
+  if (context) {
+    try {
+      const payload = await context.clone().json();
+      const apiError = getApiErrorMessage(payload);
+      if (apiError) return apiError;
+    } catch {
+      // mantém a mensagem padrão abaixo
+    }
+  }
+  return error instanceof Error && error.message ? error.message : fallback;
+};
+
 export async function createPixPayment(
   input: CreatePixInput,
 ): Promise<CreatePixResult> {
   const { data, error } = await supabase.functions.invoke("mp-create-pix", {
     body: input,
   });
-  if (error) throw new Error(error.message || "Falha ao criar pagamento Pix");
+  if (error)
+    throw new Error(await getInvokeErrorMessage(error, "Falha ao criar pagamento Pix"));
   const apiError = getApiErrorMessage(data);
   if (apiError) throw new Error(apiError);
   return data as CreatePixResult;
@@ -78,7 +96,8 @@ export async function createCardPayment(
   const { data, error } = await supabase.functions.invoke("mp-create-card", {
     body: input,
   });
-  if (error) throw new Error(error.message || "Falha ao processar cartão");
+  if (error)
+    throw new Error(await getInvokeErrorMessage(error, "Falha ao processar cartão"));
   const apiError = getApiErrorMessage(data);
   if (apiError) throw new Error(apiError);
   return data as CreateCardResult;
