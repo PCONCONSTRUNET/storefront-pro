@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { normalizeOrderStatus, useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { brl } from "@/lib/format";
 import { TrendingUp, Package, AlertTriangle, Activity } from "lucide-react";
 import {
@@ -24,13 +24,20 @@ export const Route = createFileRoute("/admin/bi")({
 const COLORS = ["#d177a8", "#f09433", "#25d366", "#dc2743", "#bc1888"];
 
 function Page() {
-  const { orders, products, customers } = useStore();
+  const { orders, products, customers, sync } = useStore();
+
+  useEffect(() => {
+    sync();
+  }, [sync]);
 
   const metrics = useMemo(() => {
-    const totalRev = orders
-      .filter((o) => !["cancelado", "reembolsado"].includes(normalizeOrderStatus(o.status)))
-      .reduce((a, o) => a + o.total, 0);
-    const avgTicket = orders.length > 0 ? totalRev / orders.length : 0;
+    const paidOrders = orders.filter((o) =>
+      ["pago", "em_separacao", "saiu_para_entrega", "concluido"].includes(
+        normalizeOrderStatus(o.status),
+      ),
+    );
+    const totalRev = paidOrders.reduce((a, o) => a + o.total, 0);
+    const avgTicket = paidOrders.length > 0 ? totalRev / paidOrders.length : 0;
     const stockCritical = products.filter(
       (p) => p.stock <= (p.minStock ?? 5),
     ).length;
