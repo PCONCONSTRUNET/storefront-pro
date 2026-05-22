@@ -39,6 +39,7 @@ export async function notifyOrderApproved(
   supabase: SupabaseClient,
   order: any,
 ) {
+  console.log("[notify-approval] start order=", order.id, "email=", order.customer_email, "phone=", order.customer_phone);
   const phone = String(order.customer_phone ?? "").replace(/\D/g, "");
   const total = formatTotal(order);
   const firstName = String(order.customer_name ?? "Cliente").split(" ")[0];
