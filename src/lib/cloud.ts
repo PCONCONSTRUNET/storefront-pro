@@ -10,7 +10,6 @@ import {
   adminUpsertFn,
   adminDeleteFn,
   adminUpdateFn,
-  adminFetchAllFn,
   updateCustomerFn,
 } from "./admin.functions";
 import type {
@@ -31,6 +30,16 @@ import { normalizeOrderStatus, normalizeDeliveryStatus } from "./orderStatus";
 // ---------- helpers ----------
 const log = (label: string, err: unknown) => {
   if (err) console.warn(`[cloud:${label}]`, err);
+};
+
+type AdminSnapshot = {
+  customers: Record<string, unknown>[];
+  affiliates: Record<string, unknown>[];
+  affiliateSales: Record<string, unknown>[];
+  transactions: Record<string, unknown>[];
+  orders: Record<string, unknown>[];
+  waitlist: Record<string, unknown>[];
+  activityLogs: Record<string, unknown>[];
 };
 
 async function adminUpsert(
@@ -542,12 +551,40 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
       .order("sort_order", { ascending: true }),
   ]);
 
-  // Leituras privadas só se for admin logado:
-  let admin: Awaited<ReturnType<typeof adminFetchAllFn>> | null = null;
+  // Leituras privadas só se for admin logado. Usa RPC direto para funcionar
+  // igual no preview e no domínio próprio, sem depender de server function.
+  let admin: AdminSnapshot | null = null;
   const token = getAdminToken();
   if (token) {
     try {
-      admin = await adminFetchAllFn({ data: { token } });
+      const read = async (
+        table: string,
+        orderBy?: string,
+        orderDir: "asc" | "desc" = "desc",
+        limit = 1000,
+      ) => {
+        const { data, error } = await (supabase as any).rpc("admin_db_read", {
+          _token: token,
+          _table: table,
+          _limit: limit,
+          _order_by: orderBy ?? null,
+          _order_dir: orderDir,
+        });
+        if (error) throw error;
+        return (data || []) as Record<string, unknown>[];
+      };
+      const [customers, affiliates, affiliateSales, affiliateConsignments, transactions, orders, waitlist, activityLogs] =
+        await Promise.all([
+          read("customers"),
+          read("affiliates"),
+          read("affiliate_sales", "created_at", "desc"),
+          read("affiliate_consignments", "picked_up_at", "desc"),
+          read("transactions", "date", "desc"),
+          read("orders", "created_at", "desc", 500),
+          read("product_waitlist"),
+          read("activity_logs", "created_at", "desc", 200),
+        ]);
+      admin = { customers, affiliates, affiliateSales, transactions, orders, waitlist, activityLogs };
     } catch (e) {
       console.warn("[cloud:adminFetchAll]", e);
     }

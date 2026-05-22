@@ -85,45 +85,7 @@ export const updateAdminPasswordFn = createServerFn({ method: "POST" })
   });
 
 // ---------- SNAPSHOT ADMIN (todas tabelas privadas) ----------
-// Lê via RPC admin_db_read (SECURITY DEFINER) — não depende de service_role.
-async function adminRead(token: string, table: string, orderBy?: string, dir: "asc" | "desc" = "desc", limit = 1000) {
-  const { data, error } = await (supabase as any).rpc("admin_db_read", {
-    _token: token,
-    _table: table,
-    _limit: limit,
-    _order_by: orderBy ?? null,
-    _order_dir: dir,
-  });
-  if (error) throw new Error(error.message);
-  return (data as any[]) || [];
-}
-
-export const adminFetchAllFn = createServerFn({ method: "POST" })
-  .inputValidator((i) => z.object({ token: tokenSchema }).parse(i))
-  .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    const [cust, affs, affSales, affCons, txs, ords, wait, logs] =
-      await Promise.all([
-        adminRead(data.token, "customers"),
-        adminRead(data.token, "affiliates"),
-        adminRead(data.token, "affiliate_sales", "created_at", "desc"),
-        adminRead(data.token, "affiliate_consignments", "picked_up_at", "desc"),
-        adminRead(data.token, "transactions", "date", "desc"),
-        adminRead(data.token, "orders", "created_at", "desc", 500),
-        adminRead(data.token, "product_waitlist"),
-        adminRead(data.token, "activity_logs", "created_at", "desc", 200),
-      ]);
-    return {
-      customers: cust,
-      affiliates: affs,
-      affiliateSales: affSales,
-      affiliateConsignments: affCons,
-      transactions: txs,
-      orders: ords,
-      waitlist: wait,
-      activityLogs: logs,
-    };
-  });
+// Lido diretamente por RPC no browser em cloud.ts para funcionar também no domínio próprio.
 
 
 // ---------- CONSIGNAÇÕES (retiradas de laços pela afiliada) ----------
