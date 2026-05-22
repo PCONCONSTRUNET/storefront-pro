@@ -96,7 +96,7 @@ async function adminRead(token: string, table: string, orderBy?: string, dir: "a
   if (orderBy) query = query.order(orderBy, { ascending: dir === "asc" });
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data as unknown[]) || [];
+  return (data as any[]) || [];
 }
 
 export const adminFetchAllFn = createServerFn({ method: "POST" })
