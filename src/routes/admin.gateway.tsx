@@ -22,9 +22,6 @@ function defaultFees(max: number): Record<string, number> {
 }
 
 function Page() {
-  const getFn = useServerFn(getGatewayConfigFn);
-  const saveFn = useServerFn(saveGatewayConfigFn);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showToken, setShowToken] = useState(false);
@@ -44,23 +41,29 @@ function Page() {
         return;
       }
       try {
-        const cfg = await getFn({ data: { token } });
-        setAccessToken(cfg.mp_access_token || "");
-        setPublicKey(cfg.mp_public_key || "");
-        
-        setMaxInstallments(cfg.max_installments);
-        const merged = defaultFees(cfg.max_installments);
-        Object.entries(cfg.installment_fees || {}).forEach(([k, v]) => {
-          merged[k] = Number(v) || 0;
-        });
+        const { data, error } = await (supabase as any).rpc(
+          "admin_get_payment_gateway",
+          { _token: token },
+        );
+        if (error) throw new Error(error.message);
+        const row = Array.isArray(data) ? data[0] : data;
+        setAccessToken(row?.mp_access_token || "");
+        setPublicKey(row?.mp_public_key || "");
+        const maxInst = Number(row?.max_installments ?? 3);
+        setMaxInstallments(maxInst);
+        const merged = defaultFees(maxInst);
+        Object.entries((row?.installment_fees as Record<string, number>) || {}).forEach(
+          ([k, v]) => { merged[k] = Number(v) || 0; },
+        );
         setFees(merged);
       } catch (e) {
-        toast.error("Falha ao carregar configuração");
+        console.error("[gateway] load error", e);
+        toast.error(e instanceof Error ? e.message : "Falha ao carregar configuração");
       } finally {
         setLoading(false);
       }
     })();
-  }, [getFn]);
+  }, []);
 
   const handleMaxChange = (n: number) => {
     const v = Math.max(1, Math.min(12, n));
