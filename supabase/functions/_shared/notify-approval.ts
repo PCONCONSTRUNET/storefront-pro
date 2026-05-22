@@ -80,9 +80,10 @@ export async function notifyOrderApproved(
     }
   }
 
-  // Push notification — admin (sempre) + cliente (se cadastrado com id)
+  // Push notification — admin (sempre)
+  console.log("[notify-approval] enviando push admin para pedido", order.id);
   try {
-    await supabase.functions.invoke("send-push", {
+    const adminRes = await supabase.functions.invoke("send-push", {
       body: {
         title: "Pagamento aprovado ✨",
         message: `Pedido #${String(order.id).slice(0, 8)} de ${firstName} (${total}) confirmado.`,
@@ -90,20 +91,38 @@ export async function notifyOrderApproved(
         audience: "admin",
       },
     });
+    console.log("[notify-approval] push admin response:", JSON.stringify(adminRes));
   } catch (e) {
     console.error("[notify-approval] push admin falhou:", e);
   }
 
-  if (order.customer_id) {
+  // Push notification — cliente (busca customer.id pelo e-mail)
+  let customerId: string | null = order.customer_id ?? null;
+  if (!customerId && order.customer_email) {
     try {
-      await supabase.functions.invoke("send-push", {
+      const { data: cust } = await (supabase as any)
+        .from("customers")
+        .select("id")
+        .eq("email", String(order.customer_email).toLowerCase().trim())
+        .maybeSingle();
+      customerId = cust?.id ?? null;
+    } catch (e) {
+      console.error("[notify-approval] lookup customer falhou:", e);
+    }
+  }
+
+  console.log("[notify-approval] customerId para push cliente:", customerId);
+  if (customerId) {
+    try {
+      const cliRes = await supabase.functions.invoke("send-push", {
         body: {
           title: "Pagamento aprovado 💖",
           message: `Seu pedido #${String(order.id).slice(0, 8)} foi confirmado e está aguardando retirada no ateliê.`,
           url: `/pedido/${order.id}`,
-          externalUserIds: [String(order.customer_id)],
+          externalUserIds: [String(customerId)],
         },
       });
+      console.log("[notify-approval] push cliente response:", JSON.stringify(cliRes));
     } catch (e) {
       console.error("[notify-approval] push cliente falhou:", e);
     }
