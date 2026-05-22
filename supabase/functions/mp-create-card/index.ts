@@ -59,6 +59,13 @@ Deno.serve(async (req) => {
       400,
     );
   }
+  if (!/^APP_USR-|^TEST-/.test(MP_TOKEN)) {
+    console.error("[mp-create-card] token Mercado Pago inválido/inesperado");
+    return json(
+      { error: "Token do Mercado Pago inválido. Revise o Access Token no painel admin." },
+      400,
+    );
+  }
   if (!card.token || !card.payment_method_id) {
     return json({ error: "Dados do cartão incompletos" }, 400);
   }
