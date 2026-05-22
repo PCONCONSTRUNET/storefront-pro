@@ -3,6 +3,7 @@ import { normalizeOrderStatus, useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { useEffect, useMemo } from "react";
 import { brl } from "@/lib/format";
+import type { LucideIcon } from "lucide-react";
 import { TrendingUp, Package, AlertTriangle, Activity } from "lucide-react";
 import {
   BarChart,
@@ -192,7 +193,7 @@ function BIStat({
 }: {
   label: string;
   value: string | number;
-  icon: any;
+  icon: LucideIcon;
   color: string;
 }) {
   return (
