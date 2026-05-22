@@ -15,10 +15,10 @@ export type GatewayConfig = {
 export async function loadGatewayConfig(
   supabase: SupabaseClient,
 ): Promise<GatewayConfig> {
-  const envToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN") || null;
-  const envPub = Deno.env.get("MERCADOPAGO_PUBLIC_KEY") || null;
-  let access_token = envToken;
-  let public_key = envPub;
+  const envToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN")?.trim() || null;
+  const envPub = Deno.env.get("MERCADOPAGO_PUBLIC_KEY")?.trim() || null;
+  let access_token: string | null = null;
+  let public_key: string | null = null;
   let max_installments = 3;
   let installment_fees: Record<string, number> = {};
 
@@ -31,14 +31,17 @@ export async function loadGatewayConfig(
       .eq("id", 1)
       .maybeSingle();
     if (data) {
-      access_token = access_token ?? data.mp_access_token ?? null;
-      public_key = public_key ?? data.mp_public_key ?? null;
+      access_token = String(data.mp_access_token ?? "").trim() || null;
+      public_key = String(data.mp_public_key ?? "").trim() || null;
       max_installments = Number(data.max_installments ?? 3);
       installment_fees = (data.installment_fees as any) ?? {};
     }
   } catch (e) {
     console.warn("[gateway] falha ao ler payment_gateway:", e);
   }
+
+  access_token = access_token ?? envToken;
+  public_key = public_key ?? envPub;
 
   return {
     access_token,
