@@ -107,6 +107,36 @@ Deno.serve(async (req) => {
 
   const justApproved = shouldApprove && (updateRes.data?.length ?? 0) > 0;
 
+  if (justApproved) {
+    const productSummary = Array.isArray(order.items)
+      ? order.items
+          .map((item: any) => `${Number(item.quantity ?? 1)}x ${item.name ?? item.productId ?? "Produto"}`)
+          .join(", ")
+      : null;
+
+    await supabase.from("transactions").upsert({
+      id: order.id,
+      kind: "entrada",
+      category: "venda",
+      description: `Pedido ${order.id} — ${order.customer_name}`,
+      amount: order.total,
+      date: payment.date_approved ?? new Date().toISOString(),
+      product_summary: productSummary,
+      notes: `Mercado Pago: ${payment.id}`,
+    });
+
+    await supabase.from("activity_logs").insert({
+      action: "payment_approved",
+      category: "order",
+      description: `Pagamento aprovado do pedido ${order.id} — ${order.customer_name}`,
+      metadata: {
+        order_id: order.id,
+        mp_payment_id: String(payment.id),
+        total: Number(order.total),
+      },
+    });
+  }
+
   // Loga evento
   await supabase.from("payment_events").insert({
     mp_event_id: eventId,
