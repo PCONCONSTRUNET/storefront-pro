@@ -145,6 +145,11 @@ function Page() {
       });
 
     transactions.forEach((t) => {
+      const isOrderTransaction =
+        t.category === "venda" &&
+        orders.some((o) => t.id === o.id || t.description.includes(o.id));
+      if (isOrderTransaction) return;
+
       const aff = t.affiliateId
         ? affiliates.find((a) => a.id === t.affiliateId)
         : null;
@@ -377,8 +382,14 @@ function Page() {
                       </button>
                       <button
                         onClick={async () => {
-                          const { confirmDialog } = await import("@/components/ConfirmDialog");
-                          if (await confirmDialog({ title: "Excluir lançamento?", confirmLabel: "Excluir" })) {
+                          const { confirmDialog } =
+                            await import("@/components/ConfirmDialog");
+                          if (
+                            await confirmDialog({
+                              title: "Excluir lançamento?",
+                              confirmLabel: "Excluir",
+                            })
+                          ) {
                             deleteTransaction(r.txRef!.id);
                             toast.success("Removido");
                           }
@@ -393,8 +404,16 @@ function Page() {
                   {r.affiliateSaleId && (
                     <button
                       onClick={async () => {
-                        const { confirmDialog } = await import("@/components/ConfirmDialog");
-                        if (await confirmDialog({ title: "Excluir venda de afiliada?", description: "A comissão correspondente também será removida.", confirmLabel: "Excluir" })) {
+                        const { confirmDialog } =
+                          await import("@/components/ConfirmDialog");
+                        if (
+                          await confirmDialog({
+                            title: "Excluir venda de afiliada?",
+                            description:
+                              "A comissão correspondente também será removida.",
+                            confirmLabel: "Excluir",
+                          })
+                        ) {
                           deleteAffiliateSale(r.affiliateSaleId!);
                           toast.success("Venda removida");
                         }

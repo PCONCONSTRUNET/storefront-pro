@@ -4,13 +4,18 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Activity, Shield, User, Clock, Info } from "lucide-react";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/admin/logs")({
   component: Page,
 });
 
 function Page() {
-  const { activityLogs } = useStore();
+  const { activityLogs, sync } = useStore();
+
+  useEffect(() => {
+    sync();
+  }, [sync]);
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
