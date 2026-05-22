@@ -110,7 +110,10 @@ Deno.serve(async (req) => {
   if (justApproved) {
     const productSummary = Array.isArray(order.items)
       ? order.items
-          .map((item: any) => `${Number(item.quantity ?? 1)}x ${item.name ?? item.productId ?? "Produto"}`)
+          .map(
+            (item: Record<string, unknown>) =>
+              `${Number(item.quantity ?? 1)}x ${item.name ?? item.productId ?? "Produto"}`,
+          )
           .join(", ")
       : null;
 
@@ -149,7 +152,9 @@ Deno.serve(async (req) => {
   // Notifica cliente + admin quando aprovado (apenas 1x — claim atômico acima)
   if (justApproved) {
     try {
-      await supabase.rpc("apply_order_stock_decrement", { _order_id: order.id });
+      await supabase.rpc("apply_order_stock_decrement", {
+        _order_id: order.id,
+      });
     } catch (e) {
       console.error("[mp-webhook] stock decrement falhou:", e);
     }
