@@ -145,6 +145,11 @@ function Page() {
       });
 
     transactions.forEach((t) => {
+      const isOrderTransaction =
+        t.category === "venda" &&
+        orders.some((o) => t.id === o.id || t.description.includes(o.id));
+      if (isOrderTransaction) return;
+
       const aff = t.affiliateId
         ? affiliates.find((a) => a.id === t.affiliateId)
         : null;
