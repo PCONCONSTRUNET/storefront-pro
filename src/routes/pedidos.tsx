@@ -295,7 +295,7 @@ const STEPS = [
   { key: "pending", label: "Aguardando pagamento" },
   { key: "paid", label: "Pagamento confirmado" },
   { key: "preparing", label: "Em separação" },
-  { key: "shipping", label: "Saiu para entrega" },
+  { key: "shipping", label: "Aguardando retirada" },
   { key: "done", label: "Concluído" },
 ] as const;
 
