@@ -83,18 +83,25 @@ function Page() {
     setSaving(true);
     try {
       const payload = {
-        token,
-        mp_access_token: accessToken.trim(),
-        mp_public_key: publicKey.trim(),
-        environment: "production" as const,
-        max_installments: maxInstallments,
-        installment_fees: fees,
+        _token: token,
+        _mp_access_token: accessToken.trim(),
+        _mp_public_key: publicKey.trim(),
+        _environment: "production",
+        _max_installments: maxInstallments,
+        _installment_fees: fees,
       };
-      console.log("[gateway] saving", { ...payload, token: "***", mp_access_token: payload.mp_access_token ? `len=${payload.mp_access_token.length}` : "(vazio)" });
-      const res = await saveFn({ data: payload });
-      console.log("[gateway] save response", res);
-      if (res.ok) toast.success(res.message);
-      else toast.error(res.message || "Erro ao salvar", { duration: 8000 });
+      console.log("[gateway] saving", {
+        ...payload,
+        _token: "***",
+        _mp_access_token: payload._mp_access_token ? `len=${payload._mp_access_token.length}` : "(vazio)",
+      });
+      const { error } = await (supabase as any).rpc(
+        "admin_save_payment_gateway",
+        payload,
+      );
+      console.log("[gateway] save response", { error });
+      if (error) throw new Error(error.message);
+      toast.success("Configuração salva!");
     } catch (e) {
       console.error("[gateway] save error", e);
       toast.error(e instanceof Error ? e.message : "Erro ao salvar", { duration: 8000 });
