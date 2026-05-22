@@ -377,7 +377,7 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
       return { ok: false as const, message: e instanceof Error ? `Auth: ${e.message}` : "Sessão inválida" };
     }
     try {
-      const { error } = await (supabaseAdmin as any).rpc("save_payment_gateway", {
+      const { error } = await (supabase as any).rpc("save_payment_gateway", {
         _mp_access_token: data.mp_access_token || "",
         _mp_public_key: data.mp_public_key || "",
         _environment: data.environment,
