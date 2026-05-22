@@ -8,7 +8,7 @@ import {
   saveGatewayConfigFn,
 } from "@/lib/admin.functions";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { Loader2, Eye, EyeOff, Copy, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/gateway")({
   component: Page,
