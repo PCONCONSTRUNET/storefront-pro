@@ -89,17 +89,14 @@ export const updateAdminPasswordFn = createServerFn({ method: "POST" })
   });
 
 // ---------- SNAPSHOT ADMIN (todas tabelas privadas) ----------
-// Lê via RPC admin_db_read (SECURITY DEFINER) — não depende de service_role.
+// Lê via client server depois de validar a sessão admin.
 async function adminRead(token: string, table: string, orderBy?: string, dir: "asc" | "desc" = "desc", limit = 1000) {
-  const { data, error } = await (supabase as any).rpc("admin_db_read", {
-    _token: token,
-    _table: table,
-    _limit: limit,
-    _order_by: orderBy ?? null,
-    _order_dir: dir,
-  });
+  await requireAdmin(token);
+  let query = supabaseAdmin.from(table as any).select("*").limit(limit);
+  if (orderBy) query = query.order(orderBy, { ascending: dir === "asc" });
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data as any[]) || [];
+  return (data as unknown[]) || [];
 }
 
 export const adminFetchAllFn = createServerFn({ method: "POST" })
