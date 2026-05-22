@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
 
   const justApproved = shouldApprove && (updateRes.data?.length ?? 0) > 0;
 
-  if (justApproved) {
+  if (shouldApprove) {
     const productSummary = Array.isArray(order.items)
       ? order.items
           .map(
@@ -128,16 +128,26 @@ Deno.serve(async (req) => {
       notes: `Mercado Pago: ${payment.id}`,
     });
 
-    await supabase.from("activity_logs").insert({
-      action: "payment_approved",
-      category: "order",
-      description: `Pagamento aprovado do pedido ${order.id} — ${order.customer_name}`,
-      metadata: {
-        order_id: order.id,
-        mp_payment_id: String(payment.id),
-        total: Number(order.total),
-      },
-    });
+    const { data: existingLog } = await supabase
+      .from("activity_logs")
+      .select("id")
+      .eq("action", "payment_approved")
+      .eq("metadata->>order_id", order.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (!existingLog) {
+      await supabase.from("activity_logs").insert({
+        action: "payment_approved",
+        category: "order",
+        description: `Pagamento aprovado do pedido ${order.id} — ${order.customer_name}`,
+        metadata: {
+          order_id: order.id,
+          mp_payment_id: String(payment.id),
+          total: Number(order.total),
+        },
+      });
+    }
   }
 
   // Loga evento
