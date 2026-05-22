@@ -3,11 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { toast } from "sonner";
 import { getAdminToken } from "@/lib/adminToken";
-import {
-  getGatewayConfigFn,
-  saveGatewayConfigFn,
-} from "@/lib/admin.functions";
-import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Eye, EyeOff, Copy, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/gateway")({
