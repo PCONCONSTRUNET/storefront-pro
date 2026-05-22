@@ -142,29 +142,54 @@ function Page() {
                 type={showToken ? "text" : "password"}
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
+                onFocus={() => setShowToken(true)}
                 placeholder="APP_USR-..."
                 className="flex-1 h-11 px-3 rounded-xl bg-muted/70 border border-border text-sm font-mono"
                 autoComplete="off"
+                spellCheck={false}
               />
               <button
                 type="button"
                 onClick={() => setShowToken((v) => !v)}
+                title={showToken ? "Ocultar" : "Mostrar"}
                 className="h-11 w-11 grid place-items-center rounded-xl border border-border bg-muted/70 hover:bg-muted"
               >
                 {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
+              <button
+                type="button"
+                onClick={() => { setAccessToken(""); setShowToken(true); }}
+                title="Limpar para colar novo token"
+                className="h-11 w-11 grid place-items-center rounded-xl border border-border bg-muted/70 hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Clique no <strong>X</strong> para limpar e colar um novo token.
+            </p>
           </Field>
 
           <Field label="Public Key (usada no Checkout do cartão)">
-            <input
-              type="text"
-              value={publicKey}
-              onChange={(e) => setPublicKey(e.target.value)}
-              placeholder="APP_USR-pub-..."
-              className="w-full h-11 px-3 rounded-xl bg-muted/70 border border-border text-sm font-mono"
-              autoComplete="off"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={publicKey}
+                onChange={(e) => setPublicKey(e.target.value)}
+                placeholder="APP_USR-pub-..."
+                className="flex-1 h-11 px-3 rounded-xl bg-muted/70 border border-border text-sm font-mono"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <button
+                type="button"
+                onClick={() => setPublicKey("")}
+                title="Limpar"
+                className="h-11 w-11 grid place-items-center rounded-xl border border-border bg-muted/70 hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </Field>
         </Card>
 
