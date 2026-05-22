@@ -10,7 +10,6 @@ import {
   adminUpsertFn,
   adminDeleteFn,
   adminUpdateFn,
-  adminFetchAllFn,
   updateCustomerFn,
 } from "./admin.functions";
 import type {
@@ -31,6 +30,16 @@ import { normalizeOrderStatus, normalizeDeliveryStatus } from "./orderStatus";
 // ---------- helpers ----------
 const log = (label: string, err: unknown) => {
   if (err) console.warn(`[cloud:${label}]`, err);
+};
+
+type AdminSnapshot = {
+  customers: Record<string, unknown>[];
+  affiliates: Record<string, unknown>[];
+  affiliateSales: Record<string, unknown>[];
+  transactions: Record<string, unknown>[];
+  orders: Record<string, unknown>[];
+  waitlist: Record<string, unknown>[];
+  activityLogs: Record<string, unknown>[];
 };
 
 async function adminUpsert(
