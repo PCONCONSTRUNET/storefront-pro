@@ -755,6 +755,27 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_get_payment_gateway: {
+        Args: { _token: string }
+        Returns: {
+          environment: string
+          installment_fees: Json
+          max_installments: number
+          mp_access_token: string
+          mp_public_key: string
+        }[]
+      }
+      admin_save_payment_gateway: {
+        Args: {
+          _environment: string
+          _installment_fees: Json
+          _max_installments: number
+          _mp_access_token: string
+          _mp_public_key: string
+          _token: string
+        }
+        Returns: undefined
+      }
       apply_order_stock_decrement: {
         Args: { _order_id: string }
         Returns: Json

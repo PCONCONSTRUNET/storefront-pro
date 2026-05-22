@@ -3,11 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { toast } from "sonner";
 import { getAdminToken } from "@/lib/adminToken";
-import {
-  getGatewayConfigFn,
-  saveGatewayConfigFn,
-} from "@/lib/admin.functions";
-import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Eye, EyeOff, Copy, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/gateway")({
@@ -26,9 +22,6 @@ function defaultFees(max: number): Record<string, number> {
 }
 
 function Page() {
-  const getFn = useServerFn(getGatewayConfigFn);
-  const saveFn = useServerFn(saveGatewayConfigFn);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showToken, setShowToken] = useState(false);
@@ -48,23 +41,29 @@ function Page() {
         return;
       }
       try {
-        const cfg = await getFn({ data: { token } });
-        setAccessToken(cfg.mp_access_token || "");
-        setPublicKey(cfg.mp_public_key || "");
-        
-        setMaxInstallments(cfg.max_installments);
-        const merged = defaultFees(cfg.max_installments);
-        Object.entries(cfg.installment_fees || {}).forEach(([k, v]) => {
-          merged[k] = Number(v) || 0;
-        });
+        const { data, error } = await (supabase as any).rpc(
+          "admin_get_payment_gateway",
+          { _token: token },
+        );
+        if (error) throw new Error(error.message);
+        const row = Array.isArray(data) ? data[0] : data;
+        setAccessToken(row?.mp_access_token || "");
+        setPublicKey(row?.mp_public_key || "");
+        const maxInst = Number(row?.max_installments ?? 3);
+        setMaxInstallments(maxInst);
+        const merged = defaultFees(maxInst);
+        Object.entries((row?.installment_fees as Record<string, number>) || {}).forEach(
+          ([k, v]) => { merged[k] = Number(v) || 0; },
+        );
         setFees(merged);
       } catch (e) {
-        toast.error("Falha ao carregar configuração");
+        console.error("[gateway] load error", e);
+        toast.error(e instanceof Error ? e.message : "Falha ao carregar configuração");
       } finally {
         setLoading(false);
       }
     })();
-  }, [getFn]);
+  }, []);
 
   const handleMaxChange = (n: number) => {
     const v = Math.max(1, Math.min(12, n));
@@ -84,18 +83,25 @@ function Page() {
     setSaving(true);
     try {
       const payload = {
-        token,
-        mp_access_token: accessToken.trim(),
-        mp_public_key: publicKey.trim(),
-        environment: "production" as const,
-        max_installments: maxInstallments,
-        installment_fees: fees,
+        _token: token,
+        _mp_access_token: accessToken.trim(),
+        _mp_public_key: publicKey.trim(),
+        _environment: "production",
+        _max_installments: maxInstallments,
+        _installment_fees: fees,
       };
-      console.log("[gateway] saving", { ...payload, token: "***", mp_access_token: payload.mp_access_token ? `len=${payload.mp_access_token.length}` : "(vazio)" });
-      const res = await saveFn({ data: payload });
-      console.log("[gateway] save response", res);
-      if (res.ok) toast.success(res.message);
-      else toast.error(res.message || "Erro ao salvar", { duration: 8000 });
+      console.log("[gateway] saving", {
+        ...payload,
+        _token: "***",
+        _mp_access_token: payload._mp_access_token ? `len=${payload._mp_access_token.length}` : "(vazio)",
+      });
+      const { error } = await (supabase as any).rpc(
+        "admin_save_payment_gateway",
+        payload,
+      );
+      console.log("[gateway] save response", { error });
+      if (error) throw new Error(error.message);
+      toast.success("Configuração salva!");
     } catch (e) {
       console.error("[gateway] save error", e);
       toast.error(e instanceof Error ? e.message : "Erro ao salvar", { duration: 8000 });
