@@ -371,14 +371,22 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
-    await requireAdmin(data.token);
-    const { error } = await (supabase as any).rpc("save_payment_gateway", {
-      _mp_access_token: data.mp_access_token || "",
-      _mp_public_key: data.mp_public_key || "",
-      _environment: data.environment,
-      _max_installments: data.max_installments,
-      _installment_fees: data.installment_fees,
-    });
-    if (error) return { ok: false as const, message: error.message };
-    return { ok: true as const, message: "Configuração salva!" };
+    try {
+      await requireAdmin(data.token);
+    } catch (e) {
+      return { ok: false as const, message: e instanceof Error ? `Auth: ${e.message}` : "Sessão inválida" };
+    }
+    try {
+      const { error } = await (supabaseAdmin as any).rpc("save_payment_gateway", {
+        _mp_access_token: data.mp_access_token || "",
+        _mp_public_key: data.mp_public_key || "",
+        _environment: data.environment,
+        _max_installments: data.max_installments,
+        _installment_fees: data.installment_fees,
+      });
+      if (error) return { ok: false as const, message: `DB: ${error.message}` };
+      return { ok: true as const, message: "Configuração salva!" };
+    } catch (e) {
+      return { ok: false as const, message: e instanceof Error ? `RPC: ${e.message}` : "Erro RPC" };
+    }
   });
