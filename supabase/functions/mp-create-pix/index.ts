@@ -57,6 +57,13 @@ Deno.serve(async (req) => {
       400,
     );
   }
+  if (!/^APP_USR-|^TEST-/.test(MP_TOKEN)) {
+    console.error("[mp-create-pix] token Mercado Pago inválido/inesperado");
+    return json(
+      { error: "Token do Mercado Pago inválido. Revise o Access Token no painel admin." },
+      400,
+    );
+  }
 
   // 1) Cria pedido no banco
   const { data: order, error: insErr } = await supabase
@@ -135,7 +142,7 @@ Deno.serve(async (req) => {
       .update({ payment_status: "rejected" })
       .eq("id", order.id);
     return json(
-      { error: "Mercado Pago recusou o pagamento", details: mpData },
+      { error: mpData?.message || "Mercado Pago recusou o pagamento", details: mpData },
       502,
     );
   }
