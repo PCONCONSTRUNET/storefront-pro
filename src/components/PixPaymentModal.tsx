@@ -12,6 +12,7 @@ import {
 } from "@/lib/mercadopago";
 import { playBeep } from "@/lib/sound";
 import { useStore } from "@/lib/store";
+import { sendOrderConfirmationEmail } from "@/lib/emails";
 import pixIcon from "@/assets/pix-icon.png";
 
 type Props = {
@@ -91,6 +92,18 @@ export function PixPaymentModal({ open, payload, onClose }: Props) {
               notes: payload.notes,
               status: "pago",
               paidAt: new Date().toISOString(),
+            });
+            void sendOrderConfirmationEmail({
+              email: payload.customer.email,
+              customerName: payload.customer.name,
+              orderId: o.id,
+              items: payload.items.map((i) => ({
+                name: i.name,
+                quantity: i.quantity,
+                price: i.price,
+              })),
+              total: payload.totals.total,
+              paymentMethod: "Pix",
             });
           }
           playBeep();

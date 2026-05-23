@@ -1,10 +1,14 @@
 // Dispara WhatsApp + e-mail quando um pedido é aprovado.
 // Usado pelo webhook do MP e pelo simulador de sandbox.
+import {
+  sendOrderConfirmationEmailOnce,
+} from "./order-confirmation-email.ts";
 const BOT_BASE = "http://178.105.54.230:3005";
 const BOT_TOKEN = "princesa_secret_123";
 
 type SupabaseClient = {
   functions: { invoke: (n: string, opts: any) => Promise<any> };
+  from: (table: string) => any;
 };
 
 function formatTotal(order: { total: number | string }) {
@@ -63,19 +67,18 @@ export async function notifyOrderApproved(
     }
   }
 
-  // E-mail de confirmação
+  // E-mail de confirmação (Resend direto — invoke entre edge functions falha em produção)
   if (order.customer_email) {
     try {
-      await supabase.functions.invoke("send-order-confirmation-email", {
-        body: {
-          email: order.customer_email,
-          customerName: order.customer_name,
-          orderId: String(order.id).slice(0, 8),
-          items: order.items,
-          total: Number(order.total),
-          paymentMethod: method,
-        },
+      const emailResult = await sendOrderConfirmationEmailOnce(supabase, {
+        email: order.customer_email,
+        customerName: order.customer_name,
+        orderId: String(order.id),
+        items: order.items,
+        total: Number(order.total),
+        paymentMethod: method,
       });
+      console.log("[notify-approval] e-mail:", JSON.stringify(emailResult));
     } catch (e) {
       console.error("[notify-approval] e-mail falhou:", e);
     }

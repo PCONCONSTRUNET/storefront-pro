@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
+import { sendOrderConfirmationEmail } from "@/lib/emails";
 
 import { CardPaymentModal } from "@/components/CardPaymentModal";
 import { PixPaymentModal } from "@/components/PixPaymentModal";
@@ -428,6 +429,18 @@ function Page() {
                   notes: p.notes,
                   status: "pago",
                   paidAt: new Date().toISOString(),
+                });
+                void sendOrderConfirmationEmail({
+                  email: p.customer.email,
+                  customerName: p.customer.name,
+                  orderId: result.order_id,
+                  items: p.items.map((i) => ({
+                    name: i.name,
+                    quantity: i.quantity,
+                    price: i.price,
+                  })),
+                  total: p.totals.total,
+                  paymentMethod: "Cartão de crédito",
                 });
               }
               useStore.getState().clearCart();

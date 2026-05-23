@@ -14,10 +14,20 @@ type OrderPayload = {
 
 async function safeInvoke(fn: string, body: Record<string, unknown>) {
   try {
-    const { error } = await supabase.functions.invoke(fn, { body });
-    if (error) console.warn(`[email] ${fn}:`, error.message);
+    const { data, error } = await supabase.functions.invoke(fn, { body });
+    if (error) {
+      console.warn(`[email] ${fn}:`, error.message);
+      return false;
+    }
+    const payload = data as { error?: string; ok?: boolean } | null;
+    if (payload?.error) {
+      console.warn(`[email] ${fn}:`, payload.error);
+      return false;
+    }
+    return true;
   } catch (e) {
     console.warn(`[email] ${fn} falhou`, e);
+    return false;
   }
 }
 
