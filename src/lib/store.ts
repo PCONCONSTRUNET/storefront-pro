@@ -14,6 +14,10 @@ import {
 import { useNotifications } from "./notifications";
 import { cloud, fetchCloudSnapshot } from "./cloud";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  detectAndAlertNewOrders,
+  resetAdminOrderAlert,
+} from "./adminOrderAlert";
 export {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
@@ -793,6 +797,7 @@ export const useStore = create<AppState>()(
       },
       logoutAdmin: () => {
         const tok = get().adminToken;
+        resetAdminOrderAlert();
         import("./adminToken").then(({ setAdminToken }) =>
           setAdminToken(null),
         );
@@ -1260,6 +1265,7 @@ export const useStore = create<AppState>()(
       sync: async () => {
         const snap = await fetchCloudSnapshot();
         const cur = get();
+        detectAndAlertNewOrders(cur.orders, snap.orders, cur.isAdmin);
         const isPlaceholder = (url: string) =>
           !url || url === "" || url === "null" || url.length < 5;
         const mergedProducts = cur.products.map((p) => {

@@ -63,12 +63,21 @@ export function AdminLayout({
   const hydrated = useStoreHydrated();
   const isAdmin = useStore((s) => s.isAdmin);
   const logout = useStore((s) => s.logoutAdmin);
+  const sync = useStore((s) => s.sync);
   const path = useRouterState({ select: (r) => r.location.pathname });
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (hydrated && !isAdmin) navigate({ to: "/admin/login" });
   }, [hydrated, isAdmin, navigate]);
+
+  // Poll cloud orders so new checkouts trigger the admin notification blip.
+  useEffect(() => {
+    if (!isAdmin) return;
+    void sync();
+    const interval = window.setInterval(() => void sync(), 10_000);
+    return () => window.clearInterval(interval);
+  }, [isAdmin, sync]);
   if (!isAdmin)
     return (
       <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">

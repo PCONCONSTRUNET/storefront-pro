@@ -36,6 +36,21 @@ function tone(
   osc.stop(t + duration + 0.02);
 }
 
+/** Short notification blip for admin (new order, etc.). */
+export function playAdminNotificationBlip() {
+  const c = getCtx();
+  if (!c) return;
+  const fire = () => {
+    tone(880, 0.07, 0, "sine", 0.42);
+    tone(1175, 0.09, 0.06, "sine", 0.38);
+  };
+  if (c.state === "suspended") {
+    c.resume().then(fire).catch(fire);
+  } else {
+    fire();
+  }
+}
+
 /** Two-tone confirmation beep (like a barcode scanner). */
 export function playBeep() {
   const c = getCtx();
