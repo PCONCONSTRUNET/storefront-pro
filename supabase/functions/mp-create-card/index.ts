@@ -32,7 +32,18 @@ Deno.serve(async (req) => {
   if (req.method !== "POST")
     return json({ error: "Método não permitido" }, 405);
 
+  // Rate limit: 5 req/min por IP
+  const ip = getClientIp(req);
+  const rl = await checkRateLimit({
+    bucket: "mp-create-card",
+    identifier: ip,
+    maxRequests: 5,
+    windowSeconds: 60,
+  });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds, corsHeaders);
+
   // MP_TOKEN/SANDBOX serão carregados da config do gateway abaixo.
+
 
   let body: any;
   try {
