@@ -7,6 +7,11 @@ import {
   notifyNewOrderAdmin,
   notifyOrderApproved,
 } from "../_shared/notify-approval.ts";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitResponse,
+} from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
