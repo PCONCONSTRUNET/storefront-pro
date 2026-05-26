@@ -11,9 +11,8 @@ import { requireAdminAuth } from "./adminAuth.middleware";
 import {
   setAdminSessionCookie,
   clearAdminSessionCookie,
-  ADMIN_COOKIE,
+  getAdminSessionCookie,
 } from "./adminAuth.server";
-import { getCookie } from "@tanstack/react-start/server";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
 
@@ -102,7 +101,7 @@ export const loginAdminFn = createServerFn({ method: "POST" })
     if (error) return { ok: false as const, message: error.message };
 
     // Token vive APENAS em cookie httpOnly — nunca retorna ao browser.
-    setAdminSessionCookie(token);
+    await setAdminSessionCookie(token);
     await audit(data.email, "admin.login.success", "Login admin realizado");
     return { ok: true as const, message: "Bem-vindo!", email: data.email };
   });
@@ -110,27 +109,27 @@ export const loginAdminFn = createServerFn({ method: "POST" })
 
 export const logoutAdminFn = createServerFn({ method: "POST" })
   .handler(async () => {
-    const token = getCookie(ADMIN_COOKIE);
+    const token = await getAdminSessionCookie();
     if (token) {
       await (supabaseAdmin as any)
         .rpc("delete_admin_session", { _token: token })
         .then(() => {})
         .catch(() => {});
     }
-    clearAdminSessionCookie();
+    await clearAdminSessionCookie();
     return { ok: true as const };
   });
 
 // Bootstrap do frontend: revalida cookie e retorna email se sessão ativa.
 export const getAdminSessionFn = createServerFn({ method: "GET" }).handler(
   async () => {
-    const token = getCookie(ADMIN_COOKIE);
+    const token = await getAdminSessionCookie();
     if (!token) return { email: null as string | null };
     const { data } = await (supabaseAdmin as any)
       .rpc("get_admin_session_record", { _token: token })
       .maybeSingle();
     if (!data || new Date(data.expires_at).getTime() < Date.now()) {
-      clearAdminSessionCookie();
+      await clearAdminSessionCookie();
       return { email: null as string | null };
     }
     return { email: data.email as string };

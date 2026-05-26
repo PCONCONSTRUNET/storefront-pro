@@ -8,8 +8,8 @@ import {
   ADMIN_COOKIE,
   setAdminSessionCookie,
   clearAdminSessionCookie,
+  getAdminSessionCookie,
 } from "./adminAuth.server";
-import { getCookie } from "@tanstack/react-start/server";
 
 const ROTATE_AFTER_MS = 30 * 60 * 1000; // rotaciona token a cada 30 min
 
@@ -24,7 +24,7 @@ function newAdminToken() {
 export const requireAdminAuth = createMiddleware({
   type: "function",
 }).server(async ({ next }) => {
-  const token = getCookie(ADMIN_COOKIE);
+  const token = await getAdminSessionCookie();
   if (!token) {
     throw new Response("Unauthorized: sessão admin ausente", { status: 401 });
   }
@@ -32,7 +32,7 @@ export const requireAdminAuth = createMiddleware({
     .rpc("get_admin_session_record", { _token: token })
     .maybeSingle();
   if (error || !data) {
-    clearAdminSessionCookie();
+    await clearAdminSessionCookie();
     throw new Response("Unauthorized: sessão admin inválida", { status: 401 });
   }
   if (new Date(data.expires_at).getTime() < Date.now()) {
@@ -40,7 +40,7 @@ export const requireAdminAuth = createMiddleware({
       .rpc("delete_admin_session", { _token: token })
       .then(() => {})
       .catch(() => {});
-    clearAdminSessionCookie();
+    await clearAdminSessionCookie();
     throw new Response("Unauthorized: sessão admin expirada", { status: 401 });
   }
 
@@ -62,7 +62,7 @@ export const requireAdminAuth = createMiddleware({
       .then(() => {})
       .catch(() => {});
   }
-  setAdminSessionCookie(activeToken);
+  await setAdminSessionCookie(activeToken);
   return next({
     context: { adminToken: activeToken, adminEmail: data.email as string },
   });
