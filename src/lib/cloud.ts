@@ -429,7 +429,6 @@ export const cloud = {
 
   async upsertReview(r: Review) {
     // Reviews podem ser criadas por clientes via insert público; updates só admin.
-    const token = getAdminToken();
     const row = {
       id: r.id,
       product_id: r.productId,
@@ -439,7 +438,7 @@ export const cloud = {
       comment: r.comment,
       photos: r.photos || [],
     };
-    if (token) {
+    if (isAdminLogged()) {
       await adminUpsert("reviews", row, "id");
     } else {
       const { error } = await supabase.from("reviews").insert(row);
