@@ -13,35 +13,7 @@ import {
   clearAdminSessionCookie,
   getAdminSessionCookie,
 } from "./adminAuth.server";
-
-const emailSchema = z.string().trim().toLowerCase().email().max(255);
-
-// ---------- helpers ----------
-function newToken() {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function audit(
-  email: string | null,
-  action: string,
-  description: string,
-  metadata: Record<string, unknown> = {},
-) {
-  try {
-    await supabaseAdmin.from("activity_logs").insert({
-      action,
-      category: "admin",
-      description,
-      metadata: { admin_email: email, ...metadata },
-    });
-  } catch (e) {
-    console.error("[audit] failed:", e);
-  }
-}
+import { emailSchema, newToken, audit } from "./adminHelpers.server";
 
 // ---------- LOGIN / LOGOUT ----------
 export const loginAdminFn = createServerFn({ method: "POST" })
