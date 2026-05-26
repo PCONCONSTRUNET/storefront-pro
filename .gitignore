@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Auto-gerados pelo build (Vercel Edge wrapper)
+api/_server/
+api/index.js
