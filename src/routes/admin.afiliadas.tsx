@@ -735,10 +735,8 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
     const { confirmDialog } = await import("@/components/ConfirmDialog");
     if (!(await confirmDialog({ title: "Excluir registro de retirada?", confirmLabel: "Excluir" }))) return;
     try {
-      const token = getAdminToken();
-      if (!token) return;
       const { deleteConsignmentFn } = await import("@/lib/admin.functions");
-      const res = await deleteConsignmentFn({ data: { token, id } });
+      const res = await deleteConsignmentFn({ data: { id } });
       if (!res.ok) {
         toast.error(res.message || "Falha ao excluir");
         return;
