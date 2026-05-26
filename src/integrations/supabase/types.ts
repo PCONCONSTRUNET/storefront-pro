@@ -865,6 +865,7 @@ export type Database = {
         Returns: {
           email: string
           expires_at: string
+          last_rotated_at: string
         }[]
       }
       get_customer_auth_record: {
