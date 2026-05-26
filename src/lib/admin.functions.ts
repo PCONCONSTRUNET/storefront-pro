@@ -406,11 +406,10 @@ export const getSyncStatusFn = createServerFn({ method: "POST" })
     await requireAdmin(data.token);
 
     async function tableStats(table: string, tsCol = "updated_at") {
+      const client = supabaseAdmin as any;
       const [{ count }, latest] = await Promise.all([
-        supabaseAdmin
-          .from(table)
-          .select("*", { count: "exact", head: true }),
-        supabaseAdmin
+        client.from(table).select("*", { count: "exact", head: true }),
+        client
           .from(table)
           .select(tsCol)
           .order(tsCol, { ascending: false })
@@ -426,13 +425,13 @@ export const getSyncStatusFn = createServerFn({ method: "POST" })
     const [orders, paidOrders, transactions, activityLogs, paymentEvents, lastWebhook] =
       await Promise.all([
         tableStats("orders", "updated_at"),
-        supabaseAdmin
+        (supabaseAdmin as any)
           .from("orders")
           .select("paid_at", { count: "exact" })
           .eq("payment_status", "paid")
           .order("paid_at", { ascending: false })
           .limit(1)
-          .then((r) => ({
+          .then((r: any) => ({
             count: r.count ?? 0,
             lastAt: (r.data?.[0] as any)?.paid_at ?? null,
           })),
