@@ -1,0 +1,2 @@
+GRANT EXECUTE ON FUNCTION public.create_admin_session(text, text) TO service_role, authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.check_rate_limit(text, text, integer, integer) TO service_role, authenticated, anon;
