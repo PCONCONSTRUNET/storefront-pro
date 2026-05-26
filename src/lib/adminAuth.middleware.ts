@@ -3,35 +3,13 @@
 //   - cookie "princesa_admin_session" httpOnly + Secure + SameSite=Strict
 //   - validação no servidor a cada chamada via get_admin_session_record
 import { createMiddleware } from "@tanstack/react-start";
-import {
-  getCookie,
-  setCookie,
-  deleteCookie,
-} from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
-export const ADMIN_COOKIE = "princesa_admin_session";
-
-const ONE_DAY_SECONDS = 60 * 60 * 24;
-
-export function setAdminSessionCookie(token: string) {
-  setCookie(ADMIN_COOKIE, token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    path: "/",
-    maxAge: ONE_DAY_SECONDS,
-  });
-}
-
-export function clearAdminSessionCookie() {
-  deleteCookie(ADMIN_COOKIE, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    path: "/",
-  });
-}
+import {
+  ADMIN_COOKIE,
+  setAdminSessionCookie,
+  clearAdminSessionCookie,
+} from "./adminAuth.server";
+import { getCookie } from "@tanstack/react-start/server";
 
 const ROTATE_AFTER_MS = 30 * 60 * 1000; // rotaciona token a cada 30 min
 
@@ -90,3 +68,4 @@ export const requireAdminAuth = createMiddleware({
   });
 });
 
+export { ADMIN_COOKIE };
