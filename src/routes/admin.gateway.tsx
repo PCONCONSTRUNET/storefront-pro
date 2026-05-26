@@ -70,30 +70,19 @@ function Page() {
   };
 
   const save = async () => {
-    const token = getAdminToken();
-    if (!token) return toast.error("Sessão admin expirada — faça login novamente");
     setSaving(true);
     try {
-      const payload = {
-        _token: token,
-        _mp_access_token: accessToken.trim(),
-        _mp_public_key: publicKey.trim(),
-        _environment: "production",
-        _max_installments: maxInstallments,
-        _installment_fees: fees,
-      };
-      console.log("[gateway] saving", {
-        ...payload,
-        _token: "***",
-        _mp_access_token: payload._mp_access_token ? `len=${payload._mp_access_token.length}` : "(vazio)",
+      const res = await saveGatewayConfigFn({
+        data: {
+          mp_access_token: accessToken.trim(),
+          mp_public_key: publicKey.trim(),
+          environment: "production",
+          max_installments: maxInstallments,
+          installment_fees: fees,
+        },
       });
-      const { error } = await (supabase as any).rpc(
-        "admin_save_payment_gateway",
-        payload,
-      );
-      console.log("[gateway] save response", { error });
-      if (error) throw new Error(error.message);
-      toast.success("Configuração salva!");
+      if (!res.ok) throw new Error(res.message);
+      toast.success(res.message || "Configuração salva!");
     } catch (e) {
       console.error("[gateway] save error", e);
       toast.error(e instanceof Error ? e.message : "Erro ao salvar", { duration: 8000 });
