@@ -22,16 +22,16 @@ function newToken() {
 }
 
 async function requireAdmin(token: string): Promise<string> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (supabaseAdmin as any)
     .rpc("get_admin_session_record", { _token: token })
     .maybeSingle();
   if (error || !data) throw new Error("Sessão admin inválida");
   if (new Date(data.expires_at).getTime() < Date.now()) {
-    await (supabase as any).rpc("delete_admin_session", { _token: token });
+    await (supabaseAdmin as any).rpc("delete_admin_session", { _token: token });
     throw new Error("Sessão admin expirada");
   }
   // Sliding session: estende +24h a cada uso (best-effort, ignora erro)
-  (supabase as any)
+  (supabaseAdmin as any)
     .rpc("refresh_admin_session", { _token: token })
     .then(() => {})
     .catch(() => {});
@@ -396,4 +396,86 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
     } catch (e) {
       return { ok: false as const, message: e instanceof Error ? `RPC: ${e.message}` : "Erro RPC" };
     }
+  });
+
+// ---------- SYNC STATUS PANEL ----------
+// Retorna contadores e timestamps das principais tabelas + último webhook MP.
+export const getSyncStatusFn = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.object({ token: tokenSchema }).parse(input))
+  .handler(async ({ data }) => {
+    await requireAdmin(data.token);
+
+    async function tableStats(table: string, tsCol = "updated_at") {
+      const client = supabaseAdmin as any;
+      const [{ count }, latest] = await Promise.all([
+        client.from(table).select("*", { count: "exact", head: true }),
+        client
+          .from(table)
+          .select(tsCol)
+          .order(tsCol, { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      return {
+        count: count ?? 0,
+        lastAt: (latest.data as any)?.[tsCol] ?? null,
+      };
+    }
+
+    const [orders, paidOrders, transactions, activityLogs, paymentEvents, lastWebhook] =
+      await Promise.all([
+        tableStats("orders", "updated_at"),
+        (supabaseAdmin as any)
+          .from("orders")
+          .select("paid_at", { count: "exact" })
+          .eq("payment_status", "paid")
+          .order("paid_at", { ascending: false })
+          .limit(1)
+          .then((r: any) => ({
+            count: r.count ?? 0,
+            lastAt: (r.data?.[0] as any)?.paid_at ?? null,
+          })),
+        tableStats("transactions", "created_at"),
+        tableStats("activity_logs", "created_at"),
+        tableStats("payment_events", "processed_at"),
+        supabaseAdmin
+          .from("payment_events")
+          .select("mp_event_id, mp_payment_id, order_id, event_type, processed_at, raw_payload")
+          .order("processed_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+          .then((r) => r.data),
+      ]);
+
+    let lastWebhookStatus: string | null = null;
+    if (lastWebhook?.order_id) {
+      const { data: o } = await supabaseAdmin
+        .from("orders")
+        .select("payment_status")
+        .eq("id", lastWebhook.order_id)
+        .maybeSingle();
+      lastWebhookStatus = (o as any)?.payment_status ?? null;
+    }
+
+    return {
+      ok: true as const,
+      serverTime: new Date().toISOString(),
+      tables: {
+        orders,
+        paidOrders,
+        transactions,
+        activityLogs,
+        paymentEvents,
+      },
+      lastWebhook: lastWebhook
+        ? {
+            mpEventId: lastWebhook.mp_event_id,
+            mpPaymentId: lastWebhook.mp_payment_id,
+            orderId: lastWebhook.order_id,
+            eventType: lastWebhook.event_type,
+            processedAt: lastWebhook.processed_at,
+            orderStatus: lastWebhookStatus,
+          }
+        : null,
+    };
   });
