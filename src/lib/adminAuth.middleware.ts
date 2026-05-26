@@ -40,7 +40,7 @@ export const requireAdminAuth = createMiddleware({
       .rpc("delete_admin_session", { _token: token })
       .then(() => {})
       .catch(() => {});
-    clearAdminSessionCookie();
+    await clearAdminSessionCookie();
     throw new Response("Unauthorized: sessão admin expirada", { status: 401 });
   }
 
@@ -62,7 +62,7 @@ export const requireAdminAuth = createMiddleware({
       .then(() => {})
       .catch(() => {});
   }
-  setAdminSessionCookie(activeToken);
+  await setAdminSessionCookie(activeToken);
   return next({
     context: { adminToken: activeToken, adminEmail: data.email as string },
   });
