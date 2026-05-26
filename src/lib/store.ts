@@ -1345,10 +1345,28 @@ export const useStore = create<AppState>()(
           nextSessions.admin = null;
         }
         useStore.setState({ ...patch, sessions: nextSessions });
-        // Espelhar o token admin no holder global pra cloud.ts usar.
-        import("./adminToken").then(({ setAdminToken }) =>
-          setAdminToken(useStore.getState().adminToken),
-        );
+        // Revalida sessão admin via cookie httpOnly no servidor.
+        // Se cookie expirou/inválido, força logout no front.
+        if (typeof window !== "undefined") {
+          import("./admin.functions").then(({ getAdminSessionFn }) =>
+            getAdminSessionFn()
+              .then((r) => {
+                const serverHasAdmin = Boolean(r?.email);
+                const localSaysAdmin = useStore.getState().isAdmin;
+                if (localSaysAdmin && !serverHasAdmin) {
+                  useStore.setState({
+                    isAdmin: false,
+                    adminToken: null,
+                    sessions: {
+                      ...useStore.getState().sessions,
+                      admin: null,
+                    },
+                  });
+                }
+              })
+              .catch(() => {}),
+          );
+        }
       },
 
     },
