@@ -67,7 +67,7 @@ copyRec(serverDir, path.join(funcDir, "_server"));
 // Bridge Node http <-> Web fetch(Request, env, ctx) usado pelo worker-entry
 const bridge = `// AUTO-GERADO por scripts/generate-vercel-shell.mjs
 // Node 22 já expõe Request/Response/Headers/ReadableStream globais.
-import worker from "./_server/assets/${workerEntry}";
+import { workerEntry as worker } from "./_server/assets/${workerEntry}";
 
 const ctx = { waitUntil() {}, passThroughOnException() {} };
 
