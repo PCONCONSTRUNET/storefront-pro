@@ -17,7 +17,7 @@ export async function setAdminSessionCookie(token: string) {
   setCookie(ADMIN_COOKIE, token, {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
+    sameSite: "none",
     path: "/",
     maxAge: ONE_DAY_SECONDS,
   });
@@ -28,7 +28,7 @@ export async function clearAdminSessionCookie() {
   deleteCookie(ADMIN_COOKIE, {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
+    sameSite: "none",
     path: "/",
   });
 }
