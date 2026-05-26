@@ -1,24 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist/client",
-  "cleanUrls": false,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/OneSignalSDKWorker.js",
-      "headers": [
-        { "key": "Service-Worker-Allowed", "value": "/" },
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
-      ]
-    }
-  ],
-  "rewrites": [
-    { "source": "/admin/manifest.json", "destination": "/manifest-admin.json" },
-    { "source": "/afiliada/manifest.json", "destination": "/manifest-afiliada.json" },
-    { "source": "/_serverFn/(.*)", "destination": "/api/ssr" },
-    { "source": "/_build/(.*)", "destination": "/api/ssr" },
-    { "source": "/((?!api/|assets/|favicon\\.ico|manifest\\.json|manifest-admin\\.json|manifest-afiliada\\.json|icon-512\\.png|OneSignalSDKWorker\\.js|OneSignalSDKUpdaterWorker\\.js|_shell|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/api/ssr" }
-  ]
+  "installCommand": "npm install --legacy-peer-deps"
 }
