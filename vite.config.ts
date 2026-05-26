@@ -7,6 +7,8 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // Desabilita o plugin Cloudflare — geramos saída Node 22 para Vercel.
+  cloudflare: false,
   tanstackStart: {
     router: {
       codeSplittingOptions: {
