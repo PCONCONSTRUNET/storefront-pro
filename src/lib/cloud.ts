@@ -1,15 +1,14 @@
 // Cloud sync — leituras públicas via supabase anon (RLS permite só o que é público),
-// e TODAS as mutações + leituras sensíveis via server functions admin (supabaseAdmin).
-//
-// Escritas admin exigem adminToken (definido após loginAdmin no store). Sem token,
-// a chamada é silenciosamente ignorada — admin não logado não consegue escrever.
+// e TODAS as mutações + leituras sensíveis via server functions admin que validam
+// a sessão pelo cookie httpOnly "princesa_admin_session". Sem cookie válido,
+// as funções retornam 401 e a chamada é silenciosamente ignorada.
 
 import { supabase } from "@/integrations/supabase/client";
-import { getAdminToken } from "./adminToken";
 import {
   adminUpsertFn,
   adminDeleteFn,
   adminUpdateFn,
+  adminReadTableFn,
   updateCustomerFn,
 } from "./admin.functions";
 import { applyOrderStockDecrementFn } from "./secured.functions";
@@ -43,19 +42,29 @@ type AdminSnapshot = {
   activityLogs: Record<string, unknown>[];
 };
 
+// Checa se o usuário está logado como admin no store (sem expor token).
+function isAdminLogged(): boolean {
+  try {
+    // import dinâmico evita ciclo entre store ↔ cloud
+    const { useStore } = require("./store");
+    return Boolean(useStore.getState().isAdmin);
+  } catch {
+    return false;
+  }
+}
+
 async function adminUpsert(
   table: string,
   row: Record<string, any>,
   onConflict?: string,
 ) {
-  const token = getAdminToken();
-  if (!token) {
+  if (!isAdminLogged()) {
     throw new Error(
       "Sessão admin expirada. Faça login novamente para salvar.",
     );
   }
   const r = await adminUpsertFn({
-    data: { token, table: table as any, row, onConflict },
+    data: { table: table as any, row, onConflict },
   });
   if (!r.ok) {
     log(`upsert ${table}`, r.message);
@@ -64,11 +73,10 @@ async function adminUpsert(
 }
 
 async function adminDelete(table: string, match: Record<string, any>) {
-  const token = getAdminToken();
-  if (!token) return;
+  if (!isAdminLogged()) return;
   try {
     const r = await adminDeleteFn({
-      data: { token, table: table as any, match },
+      data: { table: table as any, match },
     });
     if (!r.ok) log(`delete ${table}`, r.message);
   } catch (e) {
@@ -81,11 +89,10 @@ async function adminPatch(
   match: Record<string, any>,
   patch: Record<string, any>,
 ) {
-  const token = getAdminToken();
-  if (!token) return;
+  if (!isAdminLogged()) return;
   try {
     const r = await adminUpdateFn({
-      data: { token, table: table as any, match, patch },
+      data: { table: table as any, match, patch },
     });
     if (!r.ok) log(`update ${table}`, r.message);
   } catch (e) {
