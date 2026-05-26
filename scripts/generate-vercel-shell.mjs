@@ -1,16 +1,16 @@
 // Pós-build: gera saída no formato Vercel Build Output API v3
-// (https://vercel.com/docs/build-output-api/v3) para forçar a Vercel
-// a servir o app sem depender de detecção de framework, vercel.json
-// rewrites, ou da pasta /api convencional.
+// (https://vercel.com/docs/build-output-api/v3) usando Node.js 22 runtime
+// (Edge não suporta node:stream / node:crypto que o bundle TanStack usa).
 //
 // Estrutura gerada:
 //   .vercel/output/
-//     config.json                     -> rotas (assets diretos, fallback p/ função SSR)
-//     static/                         -> conteúdo de dist/client (assets, favicons, manifests)
+//     config.json
+//     static/                         <- dist/client
 //     functions/ssr.func/
-//       .vc-config.json               -> { runtime: "edge", entrypoint: "index.js" }
-//       index.js                      -> wrapper que chama worker.fetch()
-//       _server/...                   -> bundle do server-entry do TanStack Start
+//       .vc-config.json               <- runtime: nodejs22.x
+//       package.json                  <- { "type": "module" }
+//       index.mjs                     <- bridge Node http <-> worker.fetch()
+//       _server/...                   <- bundle TanStack Start
 
 import fs from "fs";
 import path from "path";
@@ -33,7 +33,6 @@ if (!fs.existsSync(serverDir)) {
   process.exit(1);
 }
 
-// Helpers --------------------------------------------------------------------
 const copyRec = (src, dst) => {
   fs.mkdirSync(dst, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
@@ -44,15 +43,14 @@ const copyRec = (src, dst) => {
   }
 };
 
-// Limpa saída anterior --------------------------------------------------------
 if (fs.existsSync(outDir)) fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 
-// 1) Static -------------------------------------------------------------------
+// 1) Static
 copyRec(clientDir, staticDir);
-console.log(`[vercel-boa] static/ ← dist/client (${fs.readdirSync(staticDir).length} itens top-level)`);
+console.log(`[vercel-boa] static/ ← dist/client`);
 
-// 2) Função SSR (Edge) --------------------------------------------------------
+// 2) Função SSR (Node 22)
 const serverAssetsDir = path.join(serverDir, "assets");
 const workerEntry = fs.existsSync(serverAssetsDir)
   ? fs.readdirSync(serverAssetsDir).find((f) => f.startsWith("worker-entry") && f.endsWith(".js"))
@@ -64,43 +62,112 @@ if (!workerEntry) {
 }
 
 fs.mkdirSync(funcDir, { recursive: true });
+copyRec(serverDir, path.join(funcDir, "_server"));
 
-// Copia todo o dist/server para dentro da func
-const funcServerDir = path.join(funcDir, "_server");
-copyRec(serverDir, funcServerDir);
-
-// Wrapper Edge - usa a mesma API fetch(request, env, ctx) do Worker
-const handlerJs = `// AUTO-GERADO por scripts/generate-vercel-shell.mjs
+// Bridge Node http <-> Web fetch(Request, env, ctx) usado pelo worker-entry
+const bridge = `// AUTO-GERADO por scripts/generate-vercel-shell.mjs
+// Node 22 já expõe Request/Response/Headers/ReadableStream globais.
 import worker from "./_server/assets/${workerEntry}";
 
 const ctx = { waitUntil() {}, passThroughOnException() {} };
 
-export default async function handler(request) {
-  const env = (typeof process !== "undefined" && process.env) ? process.env : {};
+function buildRequest(req) {
+  const proto = req.headers["x-forwarded-proto"] || "https";
+  const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
+  const url = new URL(req.url || "/", proto + "://" + host);
+
+  const headers = new Headers();
+  for (const [k, v] of Object.entries(req.headers)) {
+    if (v == null) continue;
+    if (Array.isArray(v)) {
+      for (const vv of v) headers.append(k, vv);
+    } else {
+      headers.set(k, String(v));
+    }
+  }
+
+  const method = req.method || "GET";
+  const hasBody = method !== "GET" && method !== "HEAD";
+
+  let body;
+  if (hasBody) {
+    body = new ReadableStream({
+      start(controller) {
+        req.on("data", (chunk) => controller.enqueue(new Uint8Array(chunk)));
+        req.on("end", () => controller.close());
+        req.on("error", (err) => controller.error(err));
+      },
+    });
+  }
+
+  return new Request(url, {
+    method,
+    headers,
+    body,
+    duplex: hasBody ? "half" : undefined,
+  });
+}
+
+async function writeResponse(response, res) {
+  res.statusCode = response.status;
+  response.headers.forEach((value, key) => {
+    res.setHeader(key, value);
+  });
+
+  if (!response.body) {
+    res.end();
+    return;
+  }
+
+  const reader = response.body.getReader();
   try {
-    return await worker.fetch(request, env, ctx);
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) res.write(Buffer.from(value));
+    }
+  } finally {
+    res.end();
+  }
+}
+
+export default async function handler(req, res) {
+  try {
+    const request = buildRequest(req);
+    const env = process.env;
+    const response = await worker.fetch(request, env, ctx);
+    await writeResponse(response, res);
   } catch (err) {
     console.error("[ssr] fatal", err);
-    return new Response("Internal Server Error", { status: 500 });
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      res.setHeader("content-type", "text/plain; charset=utf-8");
+    }
+    res.end("Internal Server Error");
   }
 }
 `;
-fs.writeFileSync(path.join(funcDir, "index.js"), handlerJs, "utf8");
+fs.writeFileSync(path.join(funcDir, "index.mjs"), bridge, "utf8");
 
-// .vc-config.json — declara Edge runtime
+// package.json com type module pra Node entender ESM no .mjs/.js
+fs.writeFileSync(
+  path.join(funcDir, "package.json"),
+  JSON.stringify({ type: "module" }, null, 2),
+  "utf8",
+);
+
+// .vc-config.json — Node 22 runtime
 const vcConfig = {
-  runtime: "edge",
-  entrypoint: "index.js",
+  runtime: "nodejs22.x",
+  handler: "index.mjs",
+  launcherType: "Nodejs",
+  shouldAddHelpers: false,
+  supportsResponseStreaming: true,
 };
 fs.writeFileSync(path.join(funcDir, ".vc-config.json"), JSON.stringify(vcConfig, null, 2), "utf8");
-console.log(`[vercel-boa] functions/ssr.func/ ← edge (entry: ${workerEntry})`);
+console.log(`[vercel-boa] functions/ssr.func/ ← nodejs22.x (entry: ${workerEntry})`);
 
-// 3) config.json — rotas ------------------------------------------------------
-// Ordem importa:
-//  - assets com cache imutável
-//  - service workers sem cache
-//  - "filesystem" tenta servir arquivos estáticos primeiro
-//  - tudo o resto cai na função SSR
+// 3) config.json
 const config = {
   version: 3,
   routes: [
@@ -125,5 +192,4 @@ const config = {
 };
 fs.writeFileSync(path.join(outDir, "config.json"), JSON.stringify(config, null, 2), "utf8");
 console.log(`[vercel-boa] config.json escrito`);
-
 console.log(`[vercel-boa] OK → .vercel/output/`);
