@@ -6,15 +6,20 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// noExternal só no build de produção (Vercel). No dev quebra CJS como react/index.js.
+const isBuild = process.argv.includes("build");
+
 export default defineConfig({
   // Desabilita o plugin Cloudflare — geramos saída Node 22 para Vercel.
   cloudflare: false,
-  // Bundla TODOS os deps no SSR pra função Vercel ser self-contained (sem node_modules).
-  vite: {
-    ssr: {
-      noExternal: true,
-    },
-  },
+  vite: isBuild
+    ? {
+        ssr: {
+          // Bundla TODOS os deps no SSR pra função Vercel ser self-contained.
+          noExternal: true,
+        },
+      }
+    : {},
   tanstackStart: {
     router: {
       codeSplittingOptions: {
