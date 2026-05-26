@@ -530,4 +530,22 @@ export const getSyncStatusFn = createServerFn({ method: "POST" })
           }
         : null,
     };
+    } catch (e) {
+      console.error("[getSyncStatusFn] failed:", e);
+      const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      return {
+        ok: true as const,
+        serverTime: new Date().toISOString(),
+        tables: {
+          orders: { count: 0, lastAt: null },
+          paidOrders: { count: 0, lastAt: null },
+          transactions: { count: 0, lastAt: null },
+          activityLogs: { count: 0, lastAt: null },
+          paymentEvents: { count: 0, lastAt: null },
+        },
+        lastWebhook: null,
+        error: msg,
+      };
+    }
   });
+
