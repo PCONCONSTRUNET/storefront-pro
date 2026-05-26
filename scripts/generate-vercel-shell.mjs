@@ -192,4 +192,12 @@ const config = {
 };
 fs.writeFileSync(path.join(outDir, "config.json"), JSON.stringify(config, null, 2), "utf8");
 console.log(`[vercel-boa] config.json escrito`);
+
+// 4) Limpa dist/ pra Vercel NÃO tentar re-detectar framework e criar Edge Function própria
+const distDir = path.join(projectRoot, "dist");
+if (fs.existsSync(distDir)) {
+  fs.rmSync(distDir, { recursive: true, force: true });
+  console.log(`[vercel-boa] dist/ removido (evita auto-detecção da Vercel)`);
+}
+
 console.log(`[vercel-boa] OK → .vercel/output/`);
