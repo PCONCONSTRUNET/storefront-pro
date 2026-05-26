@@ -7,8 +7,8 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { supabase } from "@/integrations/supabase/client";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireAdminAuth } from "./adminAuth.middleware";
 import {
+  requireAdminAuth,
   setAdminSessionCookie,
   clearAdminSessionCookie,
   getAdminSessionCookie,
@@ -137,24 +137,24 @@ export const getAdminSessionFn = createServerFn({ method: "GET" }).handler(
 );
 
 export const updateAdminPasswordFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z.object({ newPassword: z.string().min(6).max(200) }).parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const ctx = await requireAdminAuth();
     const password_hash = await bcrypt.hash(data.newPassword, 10);
     const { error } = await supabaseAdmin
       .from("admin_credentials")
       .update({ password_hash, updated_at: new Date().toISOString() })
-      .eq("email", context.adminEmail);
+      .eq("email", ctx.adminEmail);
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const, message: "Senha atualizada" };
   });
 
 // ---------- CONSIGNAÇÕES ----------
 export const listConsignmentsFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .handler(async () => {
+    await requireAdminAuth();
     const { data: rows } = await supabaseAdmin
       .from("affiliate_consignments")
       .select("*")
@@ -163,7 +163,6 @@ export const listConsignmentsFn = createServerFn({ method: "POST" })
   });
 
 export const createConsignmentFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z
       .object({
@@ -176,6 +175,7 @@ export const createConsignmentFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
+    await requireAdminAuth();
     const { data: row, error } = await supabaseAdmin
       .from("affiliate_consignments")
       .insert({
@@ -192,9 +192,9 @@ export const createConsignmentFn = createServerFn({ method: "POST" })
   });
 
 export const deleteConsignmentFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
+    await requireAdminAuth();
     const { error } = await supabaseAdmin
       .from("affiliate_consignments")
       .delete()
@@ -222,7 +222,6 @@ const WRITE_TABLES = [
 ] as const;
 
 export const adminUpsertFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z
       .object({
@@ -232,9 +231,10 @@ export const adminUpsertFn = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const ctx = await requireAdminAuth();
     const { error } = await (supabaseAdmin as any).rpc("admin_db_write", {
-      _token: context.adminToken,
+      _token: ctx.adminToken,
       _op: "upsert",
       _table: data.table,
       _row: data.row,
@@ -247,7 +247,6 @@ export const adminUpsertFn = createServerFn({ method: "POST" })
   });
 
 export const adminUpdateFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z
       .object({
@@ -257,9 +256,10 @@ export const adminUpdateFn = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const ctx = await requireAdminAuth();
     const { error } = await (supabaseAdmin as any).rpc("admin_db_write", {
-      _token: context.adminToken,
+      _token: ctx.adminToken,
       _op: "update",
       _table: data.table,
       _row: null,
@@ -272,7 +272,6 @@ export const adminUpdateFn = createServerFn({ method: "POST" })
   });
 
 export const adminDeleteFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z
       .object({
@@ -281,9 +280,10 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const ctx = await requireAdminAuth();
     const { error } = await (supabaseAdmin as any).rpc("admin_db_write", {
-      _token: context.adminToken,
+      _token: ctx.adminToken,
       _op: "delete",
       _table: data.table,
       _row: null,
@@ -293,7 +293,7 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
     });
     if (error) return { ok: false as const, message: error.message };
     await audit(
-      context.adminEmail,
+      ctx.adminEmail,
       "admin.delete",
       `Exclusão em ${data.table}`,
       { table: data.table, match: data.match },
@@ -314,7 +314,6 @@ const READ_TABLES = [
 ] as const;
 
 export const adminReadTableFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z
       .object({
@@ -325,11 +324,12 @@ export const adminReadTableFn = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const ctx = await requireAdminAuth();
     const { data: rows, error } = await (supabaseAdmin as any).rpc(
       "admin_db_read",
       {
-        _token: context.adminToken,
+        _token: ctx.adminToken,
         _table: data.table,
         _limit: data.limit,
         _order_by: data.orderBy ?? null,
@@ -401,8 +401,8 @@ export const updateCustomerFn = createServerFn({ method: "POST" })
 
 // ---------- GATEWAY DE PAGAMENTO ----------
 export const getGatewayConfigFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .handler(async () => {
+    await requireAdminAuth();
     const { data: rows } = await (supabase as any).rpc("get_payment_gateway");
     const row = Array.isArray(rows) ? rows[0] : rows;
     return {
@@ -415,7 +415,6 @@ export const getGatewayConfigFn = createServerFn({ method: "POST" })
   });
 
 export const saveGatewayConfigFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .inputValidator((i) =>
     z
       .object({
@@ -427,7 +426,8 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
       })
       .parse(i),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
+    const ctx = await requireAdminAuth();
     try {
       const { error } = await (supabaseAdmin as any).rpc("save_payment_gateway", {
         _mp_access_token: data.mp_access_token || "",
@@ -438,7 +438,7 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
       });
       if (error) return { ok: false as const, message: `DB: ${error.message}` };
       await audit(
-        context.adminEmail,
+        ctx.adminEmail,
         "admin.gateway.save",
         "Configuração do gateway de pagamento alterada",
         {
@@ -459,8 +459,8 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
 
 // ---------- SYNC STATUS ----------
 export const getSyncStatusFn = createServerFn({ method: "POST" })
-  .middleware([requireAdminAuth])
   .handler(async () => {
+    await requireAdminAuth();
     try {
 
     async function tableStats(table: string, tsCol = "updated_at") {
