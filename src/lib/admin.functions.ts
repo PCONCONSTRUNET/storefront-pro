@@ -256,6 +256,9 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
+    // Captura email antes do delete para o audit log
+    let email: string | null = null;
+    try { email = await requireAdmin(data.token); } catch { /* RPC abaixo também valida */ }
     const { error } = await (supabase as any).rpc("admin_db_write", {
       _token: data.token,
       _op: "delete",
@@ -266,6 +269,10 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       _patch: null,
     });
     if (error) return { ok: false as const, message: error.message };
+    await audit(email, "admin.delete", `Exclusão em ${data.table}`, {
+      table: data.table,
+      match: data.match,
+    });
     return { ok: true as const };
   });
 
