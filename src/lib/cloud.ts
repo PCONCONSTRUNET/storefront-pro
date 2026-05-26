@@ -12,6 +12,7 @@ import {
   adminUpdateFn,
   updateCustomerFn,
 } from "./admin.functions";
+import { applyOrderStockDecrementFn } from "./secured.functions";
 import type {
   Affiliate,
   AffiliateSale,
@@ -451,7 +452,7 @@ export const cloud = {
     await adminPatch("orders", { id }, { payment_status: status });
     if (status === "paid" || status === "approved" || status === "pago") {
       try {
-        await supabase.rpc("apply_order_stock_decrement", { _order_id: id });
+        await applyOrderStockDecrementFn({ data: { orderId: id } });
       } catch (e) {
         console.warn("[cloud] stock decrement failed", e);
       }
@@ -459,7 +460,7 @@ export const cloud = {
   },
   async applyOrderStockDecrement(id: string) {
     try {
-      await supabase.rpc("apply_order_stock_decrement", { _order_id: id });
+      await applyOrderStockDecrementFn({ data: { orderId: id } });
     } catch (e) {
       console.warn("[cloud] stock decrement failed", e);
     }
