@@ -5,6 +5,54 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadGatewayConfig } from "../_shared/gateway.ts";
 import { notifyOrderApproved } from "../_shared/notify-approval.ts";
 
+// Verifica assinatura do Mercado Pago (HMAC-SHA256).
+// Doc: https://www.mercadopago.com.br/developers/pt/docs/your-integrations/notifications/webhooks#editor_4
+async function verifyMpSignature(
+  req: Request,
+  paymentId: string | null,
+  secret: string,
+): Promise<boolean> {
+  const sigHeader = req.headers.get("x-signature");
+  const requestId = req.headers.get("x-request-id");
+  if (!sigHeader || !requestId || !paymentId) return false;
+
+  // x-signature: "ts=1700000000,v1=abc123..."
+  const parts = Object.fromEntries(
+    sigHeader.split(",").map((p) => {
+      const [k, ...v] = p.trim().split("=");
+      return [k, v.join("=")];
+    }),
+  );
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${paymentId};request-id:${requestId};ts:${ts};`;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(manifest),
+  );
+  const expected = Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Comparação em tempo constante
+  if (expected.length !== v1.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= expected.charCodeAt(i) ^ v1.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204 });
 
@@ -27,6 +75,20 @@ Deno.serve(async (req) => {
     return new Response("ignored", { status: 200 });
   }
   if (!paymentId) return new Response("no payment id", { status: 200 });
+
+  // Verificação de assinatura HMAC (obrigatória se MERCADOPAGO_WEBHOOK_SECRET estiver configurado)
+  const webhookSecret = Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET")?.trim();
+  if (webhookSecret) {
+    const ok = await verifyMpSignature(req, String(paymentId), webhookSecret);
+    if (!ok) {
+      console.warn("[mp-webhook] assinatura inválida — request rejeitado");
+      return new Response("invalid signature", { status: 401 });
+    }
+  } else {
+    console.warn(
+      "[mp-webhook] MERCADOPAGO_WEBHOOK_SECRET não configurado — verificação desativada (INSEGURO)",
+    );
+  }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
