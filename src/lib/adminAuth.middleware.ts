@@ -8,8 +8,8 @@ import {
   ADMIN_COOKIE,
   setAdminSessionCookie,
   clearAdminSessionCookie,
+  getAdminSessionCookie,
 } from "./adminAuth.server";
-import { getCookie } from "@tanstack/react-start/server";
 
 const ROTATE_AFTER_MS = 30 * 60 * 1000; // rotaciona token a cada 30 min
 
