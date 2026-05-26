@@ -22,16 +22,16 @@ function newToken() {
 }
 
 async function requireAdmin(token: string): Promise<string> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (supabaseAdmin as any)
     .rpc("get_admin_session_record", { _token: token })
     .maybeSingle();
   if (error || !data) throw new Error("Sessão admin inválida");
   if (new Date(data.expires_at).getTime() < Date.now()) {
-    await (supabase as any).rpc("delete_admin_session", { _token: token });
+    await (supabaseAdmin as any).rpc("delete_admin_session", { _token: token });
     throw new Error("Sessão admin expirada");
   }
   // Sliding session: estende +24h a cada uso (best-effort, ignora erro)
-  (supabase as any)
+  (supabaseAdmin as any)
     .rpc("refresh_admin_session", { _token: token })
     .then(() => {})
     .catch(() => {});
