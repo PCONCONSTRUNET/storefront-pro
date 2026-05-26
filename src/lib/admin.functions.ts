@@ -68,9 +68,15 @@ export const loginAdminFn = createServerFn({ method: "POST" })
     const { data: cred } = await (supabase as any)
       .rpc("get_admin_auth_record", { _email: data.email })
       .maybeSingle();
-    if (!cred) return { ok: false as const, message: "Credenciais inválidas" };
+    if (!cred) {
+      await audit(data.email, "admin.login.failed", "Tentativa de login admin com email inexistente");
+      return { ok: false as const, message: "Credenciais inválidas" };
+    }
     const ok = await bcrypt.compare(data.password, cred.password_hash);
-    if (!ok) return { ok: false as const, message: "Credenciais inválidas" };
+    if (!ok) {
+      await audit(data.email, "admin.login.failed", "Senha incorreta no login admin");
+      return { ok: false as const, message: "Credenciais inválidas" };
+    }
 
     const token = newToken();
     const { error } = await (supabase as any).rpc("create_admin_session", {
@@ -78,6 +84,7 @@ export const loginAdminFn = createServerFn({ method: "POST" })
       _token: token,
     });
     if (error) return { ok: false as const, message: error.message };
+    await audit(data.email, "admin.login.success", "Login admin realizado");
     return { ok: true as const, message: "Bem-vindo!", token, email: data.email };
   });
 
