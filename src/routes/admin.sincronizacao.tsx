@@ -37,7 +37,9 @@ type SyncStatus = {
     processedAt: string;
     orderStatus: string | null;
   } | null;
+  error?: string;
 };
+
 
 function fmt(ts: string | null) {
   if (!ts) return "—";
