@@ -1,6 +1,7 @@
 // Cria um pagamento com Cartão (token gerado no front via SDK MP) e salva o pedido.
 // POST /functions/v1/mp-create-card
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { z } from "https://esm.sh/zod@3.23.8";
 
 import { loadGatewayConfig } from "../_shared/gateway.ts";
 import {
@@ -12,6 +13,35 @@ import {
   getClientIp,
   rateLimitResponse,
 } from "../_shared/rate-limit.ts";
+
+const cardBodySchema = z.object({
+  customer: z.object({
+    name: z.string().trim().min(1).max(255),
+    email: z.string().trim().email().max(255),
+    phone: z.string().trim().min(8).max(30),
+  }),
+  items: z.array(z.record(z.string(), z.any())).min(1).max(200),
+  totals: z.object({
+    subtotal: z.number().min(0).max(1_000_000).optional(),
+    discount: z.number().min(0).max(1_000_000).optional(),
+    shipping: z.number().min(0).max(1_000_000).optional(),
+  }),
+  card: z.object({
+    token: z.string().min(10).max(200),
+    payment_method_id: z.string().min(1).max(50),
+    installments: z.number().int().min(1).max(12).optional(),
+    issuer_id: z.union([z.string(), z.number()]).optional(),
+    payer: z.object({
+      identification: z.object({
+        type: z.string().max(20),
+        number: z.string().max(30),
+      }).optional(),
+    }).optional(),
+  }),
+  delivery: z.enum(["entrega", "retirada"]).optional(),
+  address: z.string().trim().max(1000).optional().nullable(),
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
