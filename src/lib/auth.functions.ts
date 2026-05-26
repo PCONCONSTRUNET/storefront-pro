@@ -5,7 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { supabase } from "@/integrations/supabase/client";
+
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
@@ -31,7 +31,7 @@ export const registerCustomerFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const password_hash = await bcrypt.hash(data.password, 10);
-    const { data: created, error } = await supabase
+    const { data: created, error } = await supabaseAdmin
       .rpc("create_customer_with_password_hash", {
         _name: data.name,
         _email: data.email,
@@ -66,7 +66,8 @@ export const loginCustomerFn = createServerFn({ method: "POST" })
     z.object({ email: emailSchema, password: passwordSchema }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { data: cust, error } = await supabase
+    // Busca o hash via service_role (anon não pode mais ler password_hash)
+    const { data: cust, error } = await supabaseAdmin
       .rpc("get_customer_auth_record", { _email: data.email })
       .maybeSingle();
     if (error) return { ok: false as const, message: error.message };
@@ -103,7 +104,7 @@ export const updateCustomerPasswordFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const password_hash = await bcrypt.hash(data.newPassword, 10);
-    const { data: result, error } = await supabase
+    const { data: result, error } = await supabaseAdmin
       .rpc("update_customer_password_hash", {
         _customer_id: data.customerId,
         _password_hash: password_hash,
