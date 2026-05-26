@@ -4,6 +4,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { loadGatewayConfig } from "../_shared/gateway.ts";
 import { notifyNewOrderAdmin } from "../_shared/notify-approval.ts";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitResponse,
+} from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +28,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST")
     return json({ error: "Método não permitido" }, 405);
+
+  // Rate limit: 5 req/min por IP
+  const ip = getClientIp(req);
+  const rl = await checkRateLimit({
+    bucket: "mp-create-pix",
+    identifier: ip,
+    maxRequests: 5,
+    windowSeconds: 60,
+  });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds, corsHeaders);
 
   // MP_TOKEN/SANDBOX serão definidos após carregar a config do gateway abaixo.
 

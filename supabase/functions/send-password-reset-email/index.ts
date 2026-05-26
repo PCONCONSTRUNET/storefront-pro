@@ -1,4 +1,9 @@
 import { sendEmail, corsHeaders, baseLayout } from "../_shared/resend.ts";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitResponse,
+} from "../_shared/rate-limit.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS")
@@ -6,6 +11,27 @@ Deno.serve(async (req) => {
   try {
     const { email, resetUrl } = await req.json();
     if (!email || !resetUrl) throw new Error("email e resetUrl obrigatórios");
+
+    // Rate limit: 3 req/hora por email + 10/hora por IP
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const emailRl = await checkRateLimit({
+      bucket: "password-reset-email",
+      identifier: normalizedEmail,
+      maxRequests: 3,
+      windowSeconds: 3600,
+    });
+    if (!emailRl.allowed)
+      return rateLimitResponse(emailRl.retryAfterSeconds, corsHeaders);
+
+    const ipRl = await checkRateLimit({
+      bucket: "password-reset-ip",
+      identifier: getClientIp(req),
+      maxRequests: 10,
+      windowSeconds: 3600,
+    });
+    if (!ipRl.allowed)
+      return rateLimitResponse(ipRl.retryAfterSeconds, corsHeaders);
+
     const html = baseLayout(
       "Redefinir sua senha",
       `<p>Recebemos um pedido para redefinir a senha da sua conta.</p>

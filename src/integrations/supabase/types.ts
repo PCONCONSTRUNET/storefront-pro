@@ -638,6 +638,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          bucket: string
+          count: number
+          id: string
+          identifier: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          count?: number
+          id?: string
+          identifier: string
+          window_start?: string
+        }
+        Update: {
+          bucket?: string
+          count?: number
+          id?: string
+          identifier?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -779,6 +803,19 @@ export type Database = {
       apply_order_stock_decrement: {
         Args: { _order_id: string }
         Returns: Json
+      }
+      check_rate_limit: {
+        Args: {
+          _bucket: string
+          _identifier: string
+          _max_requests: number
+          _window_seconds: number
+        }
+        Returns: {
+          allowed: boolean
+          current_count: number
+          retry_after_seconds: number
+        }[]
       }
       consume_password_reset_token: {
         Args: { _token: string }
