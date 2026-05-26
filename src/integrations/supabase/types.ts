@@ -672,9 +672,13 @@ export type Database = {
           customer_id: string | null
           customer_name: string
           id: string
+          order_id: string | null
           photos: Json
           product_id: string
           rating: number
+          variation: string | null
+          verified: boolean
+          videos: Json
         }
         Insert: {
           comment?: string | null
@@ -682,9 +686,13 @@ export type Database = {
           customer_id?: string | null
           customer_name: string
           id?: string
+          order_id?: string | null
           photos?: Json
           product_id: string
           rating?: number
+          variation?: string | null
+          verified?: boolean
+          videos?: Json
         }
         Update: {
           comment?: string | null
@@ -692,9 +700,13 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string
           id?: string
+          order_id?: string | null
           photos?: Json
           product_id?: string
           rating?: number
+          variation?: string | null
+          verified?: boolean
+          videos?: Json
         }
         Relationships: []
       }
@@ -852,6 +864,15 @@ export type Database = {
           phone: string
         }[]
       }
+      customer_review_eligibility: {
+        Args: { _customer_id: string; _product_id: string }
+        Returns: {
+          already_reviewed: boolean
+          eligible: boolean
+          order_id: string
+          variation: string
+        }[]
+      }
       delete_admin_session: { Args: { _token: string }; Returns: undefined }
       get_admin_auth_record: {
         Args: { _email: string }
@@ -931,6 +952,21 @@ export type Database = {
           _mp_public_key: string
         }
         Returns: undefined
+      }
+      submit_verified_review: {
+        Args: {
+          _comment: string
+          _customer_id: string
+          _photos: Json
+          _product_id: string
+          _rating: number
+          _videos: Json
+        }
+        Returns: {
+          id: string
+          message: string
+          ok: boolean
+        }[]
       }
       update_customer_password_hash: {
         Args: { _customer_id: string; _password_hash: string }
