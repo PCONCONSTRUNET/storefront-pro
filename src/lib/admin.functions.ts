@@ -30,7 +30,31 @@ async function requireAdmin(token: string): Promise<string> {
     await (supabase as any).rpc("delete_admin_session", { _token: token });
     throw new Error("Sessão admin expirada");
   }
+  // Sliding session: estende +24h a cada uso (best-effort, ignora erro)
+  (supabase as any)
+    .rpc("refresh_admin_session", { _token: token })
+    .then(() => {})
+    .catch(() => {});
   return data.email;
+}
+
+// Audit log helper (best-effort, nunca derruba a operação principal)
+async function audit(
+  email: string | null,
+  action: string,
+  description: string,
+  metadata: Record<string, unknown> = {},
+) {
+  try {
+    await supabaseAdmin.from("activity_logs").insert({
+      action,
+      category: "admin",
+      description,
+      metadata: { admin_email: email, ...metadata },
+    });
+  } catch (e) {
+    console.error("[audit] failed:", e);
+  }
 }
 
 // ---------- LOGIN / LOGOUT ----------
