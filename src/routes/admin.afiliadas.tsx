@@ -709,13 +709,8 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
   const load = async () => {
     setLoading(true);
     try {
-      const token = getAdminToken();
-      if (!token) {
-        setRows([]);
-        return;
-      }
       const { listConsignmentsFn } = await import("@/lib/admin.functions");
-      const res = await listConsignmentsFn({ data: { token } });
+      const res = await listConsignmentsFn();
       setRows((res?.consignments || []) as Consignment[]);
     } catch (e: any) {
       toast.error(e?.message || "Falha ao carregar retiradas");
