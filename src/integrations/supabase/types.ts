@@ -935,6 +935,19 @@ export type Database = {
           token: string
         }[]
       }
+      verify_customer_login: {
+        Args: { _email: string; _password: string }
+        Returns: {
+          address: string
+          addresses: Json
+          created_at: string
+          email: string
+          favorites: Json
+          id: string
+          name: string
+          phone: string
+        }[]
+      }
     }
     Enums: {
       payment_status:
