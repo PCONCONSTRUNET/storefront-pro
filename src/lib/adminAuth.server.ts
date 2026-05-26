@@ -8,8 +8,8 @@ export const ADMIN_COOKIE = "princesa_admin_session";
 const ONE_DAY_SECONDS = 60 * 60 * 24;
 const SERVER_MOD = "@tanstack/react-start/server";
 
-async function srv() {
-  return (await import(/* @vite-ignore */ SERVER_MOD)) as typeof import("@tanstack/react-start/server");
+async function srv(): Promise<any> {
+  return await import(/* @vite-ignore */ SERVER_MOD);
 }
 
 export async function setAdminSessionCookie(token: string) {
