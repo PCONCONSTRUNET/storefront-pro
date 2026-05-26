@@ -7,13 +7,13 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { supabase } from "@/integrations/supabase/client";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireAdminAuth } from "./adminAuth.middleware";
 import {
-  requireAdminAuth,
   setAdminSessionCookie,
   clearAdminSessionCookie,
-} from "./adminAuth.middleware";
+  ADMIN_COOKIE,
+} from "./adminAuth.server";
 import { getCookie } from "@tanstack/react-start/server";
-import { ADMIN_COOKIE } from "./adminAuth.middleware";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
 
