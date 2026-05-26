@@ -461,6 +461,8 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
 export const getSyncStatusFn = createServerFn({ method: "POST" })
   .middleware([requireAdminAuth])
   .handler(async () => {
+    try {
+
     async function tableStats(table: string, tsCol = "updated_at") {
       const client = supabaseAdmin as any;
       const [{ count }, latest] = await Promise.all([
