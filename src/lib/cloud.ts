@@ -270,7 +270,6 @@ export const cloud = {
   async upsertCustomer(c: Customer) {
     // Atualização de cliente vem do próprio cliente OU do admin.
     // Se admin, vai pelo proxy; se cliente comum, vai pelo updateCustomerFn.
-    const token = getAdminToken();
     const row = {
       id: c.id,
       name: c.name,
@@ -280,7 +279,7 @@ export const cloud = {
       addresses: c.addresses || [],
       favorites: c.favorites || [],
     };
-    if (token) {
+    if (isAdminLogged()) {
       await adminUpsert("customers", row, "id");
       return;
     }
