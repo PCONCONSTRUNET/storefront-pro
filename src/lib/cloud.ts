@@ -557,27 +557,29 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
       .order("sort_order", { ascending: true }),
   ]);
 
-  // Leituras privadas só se for admin logado. Usa RPC direto para funcionar
-  // igual no preview e no domínio próprio, sem depender de server function.
+  // Leituras privadas só se for admin logado — auth via cookie httpOnly.
   let admin: AdminSnapshot | null = null;
-  const token = getAdminToken();
-  if (token) {
+  if (isAdminLogged()) {
     try {
       const read = async (
-        table: string,
+        table:
+          | "customers"
+          | "affiliates"
+          | "affiliate_sales"
+          | "affiliate_consignments"
+          | "transactions"
+          | "orders"
+          | "product_waitlist"
+          | "activity_logs",
         orderBy?: string,
         orderDir: "asc" | "desc" = "desc",
         limit = 1000,
       ) => {
-        const { data, error } = await (supabase as any).rpc("admin_db_read", {
-          _token: token,
-          _table: table,
-          _limit: limit,
-          _order_by: orderBy ?? null,
-          _order_dir: orderDir,
+        const r = await adminReadTableFn({
+          data: { table, limit, orderBy: orderBy ?? null, orderDir },
         });
-        if (error) throw error;
-        return (data || []) as Record<string, unknown>[];
+        if (!r.ok) throw new Error(r.message || "admin read failed");
+        return r.rows as Record<string, unknown>[];
       };
       const [customers, affiliates, affiliateSales, affiliateConsignments, transactions, orders, waitlist, activityLogs] =
         await Promise.all([
@@ -590,6 +592,7 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
           read("product_waitlist"),
           read("activity_logs", "created_at", "desc", 200),
         ]);
+      void affiliateConsignments;
       admin = { customers, affiliates, affiliateSales, transactions, orders, waitlist, activityLogs };
     } catch (e) {
       console.warn("[cloud:adminFetchAll]", e);
