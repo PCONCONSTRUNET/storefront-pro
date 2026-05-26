@@ -17,7 +17,8 @@
   "rewrites": [
     { "source": "/admin/manifest.json", "destination": "/manifest-admin.json" },
     { "source": "/afiliada/manifest.json", "destination": "/manifest-afiliada.json" },
-    { "source": "/", "destination": "/_shell.html" },
-    { "source": "/((?!api/|_build/|assets/|_shell|favicon\\.ico|manifest\\.json|icon-512\\.png|OneSignalSDKWorker\\.js|OneSignalSDKUpdaterWorker\\.js|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/_shell.html" }
+    { "source": "/_serverFn/(.*)", "destination": "/api" },
+    { "source": "/_build/(.*)", "destination": "/api" },
+    { "source": "/((?!api/|assets/|favicon\\.ico|manifest\\.json|manifest-admin\\.json|manifest-afiliada\\.json|icon-512\\.png|OneSignalSDKWorker\\.js|OneSignalSDKUpdaterWorker\\.js|_shell|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/api" }
   ]
 }
