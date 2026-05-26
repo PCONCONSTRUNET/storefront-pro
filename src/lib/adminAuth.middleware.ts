@@ -33,6 +33,16 @@ export function clearAdminSessionCookie() {
   });
 }
 
+const ROTATE_AFTER_MS = 30 * 60 * 1000; // rotaciona token a cada 30 min
+
+function newAdminToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export const requireAdminAuth = createMiddleware({
   type: "function",
 }).server(async ({ next }) => {
@@ -55,13 +65,28 @@ export const requireAdminAuth = createMiddleware({
     clearAdminSessionCookie();
     throw new Response("Unauthorized: sessão admin expirada", { status: 401 });
   }
-  // Sliding session: estende +24h a cada uso e renova o cookie no browser
-  (supabaseAdmin as any)
-    .rpc("refresh_admin_session", { _token: token })
-    .then(() => {})
-    .catch(() => {});
-  setAdminSessionCookie(token);
+
+  let activeToken = token;
+  // Rotação: troca o token periodicamente para limitar a janela de uso caso vaze
+  const lastRotated = (data as any).last_rotated_at
+    ? new Date((data as any).last_rotated_at).getTime()
+    : 0;
+  if (Date.now() - lastRotated > ROTATE_AFTER_MS) {
+    const newTok = newAdminToken();
+    const { data: rotated } = await (supabaseAdmin as any)
+      .rpc("rotate_admin_session", { _old_token: token, _new_token: newTok })
+      .maybeSingle();
+    if (rotated) activeToken = newTok;
+  } else {
+    // Sliding session: estende +24h a cada uso
+    (supabaseAdmin as any)
+      .rpc("refresh_admin_session", { _token: token })
+      .then(() => {})
+      .catch(() => {});
+  }
+  setAdminSessionCookie(activeToken);
   return next({
-    context: { adminToken: token, adminEmail: data.email as string },
+    context: { adminToken: activeToken, adminEmail: data.email as string },
   });
 });
+

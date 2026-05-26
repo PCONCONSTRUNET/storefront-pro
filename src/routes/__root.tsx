@@ -65,11 +65,31 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       {
+        httpEquiv: "Content-Security-Policy",
+        content: [
+          "default-src 'self'",
+          "base-uri 'self'",
+          "object-src 'none'",
+          "frame-ancestors 'self'",
+          "form-action 'self'",
+          // Inline necessário para devtools-guard e scripts do TanStack Start
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.mercadopago.com https://cdn.onesignal.com https://*.onesignal.com https://*.os.tc",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "font-src 'self' data: https://fonts.gstatic.com",
+          "img-src 'self' data: blob: https:",
+          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mercadopago.com https://api.mercadolibre.com https://*.onesignal.com wss://*.onesignal.com https://*.os.tc",
+          "frame-src https://*.mercadopago.com https://*.mercadolibre.com https://*.onesignal.com",
+          "worker-src 'self' blob:",
+          "manifest-src 'self'",
+        ].join("; "),
+      },
+      {
         name: "viewport",
         content:
           "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
       },
       { name: "theme-color", content: "#d177a8" },
+
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Princesa de Laços" },
