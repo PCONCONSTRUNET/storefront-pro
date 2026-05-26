@@ -74,9 +74,9 @@ export default async function handler(request) {
 }
 `;
   fs.mkdirSync(apiDir, { recursive: true });
-  fs.writeFileSync(path.join(apiDir, "index.js"), handlerJs, "utf8");
+  fs.writeFileSync(path.join(apiDir, "ssr.js"), handlerJs, "utf8");
   console.log(
-    `[vercel-edge] OK → api/index.js (entry: ${workerEntry}, ${fs.readdirSync(apiServerDir).length} top-level items copiados)`,
+    `[vercel-edge] OK → api/ssr.js (entry: ${workerEntry}, ${fs.readdirSync(apiServerDir).length} top-level items copiados)`,
   );
 } else {
   console.warn(
