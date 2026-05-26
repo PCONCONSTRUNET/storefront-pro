@@ -371,8 +371,9 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
+    let email: string;
     try {
-      await requireAdmin(data.token);
+      email = await requireAdmin(data.token);
     } catch (e) {
       return { ok: false as const, message: e instanceof Error ? `Auth: ${e.message}` : "Sessão inválida" };
     }
@@ -385,6 +386,12 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
         _installment_fees: data.installment_fees,
       });
       if (error) return { ok: false as const, message: `DB: ${error.message}` };
+      await audit(email, "admin.gateway.save", "Configuração do gateway de pagamento alterada", {
+        environment: data.environment,
+        max_installments: data.max_installments,
+        has_access_token: Boolean(data.mp_access_token),
+        has_public_key: Boolean(data.mp_public_key),
+      });
       return { ok: true as const, message: "Configuração salva!" };
     } catch (e) {
       return { ok: false as const, message: e instanceof Error ? `RPC: ${e.message}` : "Erro RPC" };
