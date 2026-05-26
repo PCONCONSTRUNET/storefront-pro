@@ -2,6 +2,7 @@
 // POST /functions/v1/mp-create-pix
 // Body: { customer: {...}, items: [...], totals: {...}, delivery, address, notes }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { z } from "https://esm.sh/zod@3.23.8";
 import { loadGatewayConfig } from "../_shared/gateway.ts";
 import { notifyNewOrderAdmin } from "../_shared/notify-approval.ts";
 import {
@@ -9,6 +10,25 @@ import {
   getClientIp,
   rateLimitResponse,
 } from "../_shared/rate-limit.ts";
+
+const pixBodySchema = z.object({
+  customer: z.object({
+    name: z.string().trim().min(1).max(255),
+    email: z.string().trim().email().max(255),
+    phone: z.string().trim().min(8).max(30),
+    document: z.string().trim().max(20).optional().nullable(),
+  }),
+  items: z.array(z.record(z.string(), z.any())).min(1).max(200),
+  totals: z.object({
+    subtotal: z.number().min(0).max(1_000_000).optional(),
+    discount: z.number().min(0).max(1_000_000).optional(),
+    shipping: z.number().min(0).max(1_000_000).optional(),
+    total: z.number().min(0.01).max(1_000_000),
+  }),
+  delivery: z.enum(["entrega", "retirada"]).optional(),
+  address: z.string().trim().max(1000).optional().nullable(),
+  notes: z.string().trim().max(2000).optional().nullable(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
