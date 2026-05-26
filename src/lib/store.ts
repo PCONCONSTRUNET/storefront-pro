@@ -46,7 +46,11 @@ export type Review = {
   customerName: string;
   rating: number; // 1-5
   comment: string;
-  photos: string[]; // data URLs
+  photos: string[];
+  videos: string[];
+  verified: boolean;
+  variation?: string;
+  orderId?: string;
   createdAt: string;
 };
 
@@ -89,6 +93,7 @@ export type Order = {
     price: number;
     quantity: number;
     image: string;
+    variation?: string;
   }[];
   subtotal: number;
   discount: number;
@@ -373,12 +378,13 @@ type AppState = {
   ) => void;
   deleteTransaction: (id: string) => void;
 
-  addReview: (
-    r: Omit<Review, "id" | "createdAt" | "customerId" | "customerName">,
-  ) => {
-    ok: boolean;
-    message: string;
-  };
+  addReview: (r: {
+    productId: string;
+    rating: number;
+    comment: string;
+    photos: string[];
+    videos: string[];
+  }) => Promise<{ ok: boolean; message: string }>;
   deleteReview: (id: string) => void;
 
   joinWaitlist: (
@@ -514,7 +520,7 @@ export const useStore = create<AppState>()(
         cloud.deleteTransaction(id);
       },
 
-      addReview: (data) => {
+      addReview: async (data) => {
         const state = get();
         const customer = state.customers.find(
           (c) => c.id === state.currentCustomerId,
@@ -522,23 +528,34 @@ export const useStore = create<AppState>()(
         if (!customer) return { ok: false, message: "Faça login para avaliar" };
         if (!data.rating || data.rating < 1 || data.rating > 5)
           return { ok: false, message: "Selecione uma nota" };
-        if (!data.comment.trim() && data.photos.length === 0)
-          return {
-            ok: false,
-            message: "Escreva um comentário ou envie uma foto",
-          };
+        if (!data.comment.trim() && data.photos.length === 0 && data.videos.length === 0)
+          return { ok: false, message: "Escreva um comentário ou envie mídia" };
+
+        const res = await cloud.submitVerifiedReview({
+          customerId: customer.id,
+          productId: data.productId,
+          rating: data.rating,
+          comment: data.comment.trim(),
+          photos: data.photos,
+          videos: data.videos,
+        });
+        if (!res.ok) return { ok: false, message: res.message };
+
         const review: Review = {
-          id: `rev_${Date.now()}`,
+          id: res.id || `rev_${Date.now()}`,
           productId: data.productId,
           customerId: customer.id,
           customerName: customer.name,
           rating: data.rating,
           comment: data.comment.trim(),
           photos: data.photos,
+          videos: data.videos,
+          verified: true,
+          variation: res.variation,
+          orderId: res.orderId,
           createdAt: new Date().toISOString(),
         };
         set((s) => ({ reviews: [review, ...s.reviews] }));
-        cloud.upsertReview(review);
         return { ok: true, message: "Avaliação publicada!" };
       },
       deleteReview: (id) => {
@@ -963,7 +980,8 @@ export const useStore = create<AppState>()(
             price: p.price,
             quantity: ci.quantity,
             image: p.image,
-          };
+            variation: ci.variation,
+          } as Order["items"][number];
         });
         const subtotal = items.reduce((a, b) => a + b.price * b.quantity, 0);
         const coupon = state.coupons.find(

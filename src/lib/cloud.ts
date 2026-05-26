@@ -211,6 +211,10 @@ const toReview = (r: any): Review => ({
   rating: r.rating,
   comment: r.comment || "",
   photos: Array.isArray(r.photos) ? r.photos : [],
+  videos: Array.isArray(r.videos) ? r.videos : [],
+  verified: !!r.verified,
+  variation: r.variation || undefined,
+  orderId: r.order_id || undefined,
   createdAt: r.created_at,
 });
 
@@ -428,7 +432,7 @@ export const cloud = {
   },
 
   async upsertReview(r: Review) {
-    // Reviews podem ser criadas por clientes via insert público; updates só admin.
+    // Mantido para admin/edição. Clientes devem usar submitVerifiedReview.
     const row = {
       id: r.id,
       product_id: r.productId,
@@ -437,6 +441,10 @@ export const cloud = {
       rating: r.rating,
       comment: r.comment,
       photos: r.photos || [],
+      videos: r.videos || [],
+      verified: r.verified ?? false,
+      variation: r.variation || null,
+      order_id: r.orderId || null,
     };
     if (isAdminLogged()) {
       await adminUpsert("reviews", row, "id");
@@ -447,6 +455,60 @@ export const cloud = {
   },
   async deleteReview(id: string) {
     await adminDelete("reviews", { id });
+  },
+
+  async checkReviewEligibility(customerId: string, productId: string) {
+    const { data, error } = await supabase.rpc("customer_review_eligibility", {
+      _customer_id: customerId,
+      _product_id: productId,
+    });
+    if (error) {
+      console.warn("[cloud] eligibility", error);
+      return { eligible: false, orderId: null as string | null, variation: null as string | null, alreadyReviewed: false };
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      eligible: !!row?.eligible,
+      orderId: (row?.order_id as string | null) ?? null,
+      variation: (row?.variation as string | null) ?? null,
+      alreadyReviewed: !!row?.already_reviewed,
+    };
+  },
+
+  async uploadReviewMedia(file: File, customerId: string): Promise<string> {
+    const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+    const rand = Math.random().toString(36).slice(2, 10);
+    const path = `${customerId}/${Date.now()}_${rand}.${ext}`;
+    const { error } = await supabase.storage
+      .from("review-media")
+      .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+    if (error) throw error;
+    const { data } = supabase.storage.from("review-media").getPublicUrl(path);
+    return data.publicUrl;
+  },
+
+  async submitVerifiedReview(input: {
+    customerId: string;
+    productId: string;
+    rating: number;
+    comment: string;
+    photos: string[];
+    videos: string[];
+  }): Promise<{ ok: boolean; message: string; id?: string; variation?: string; orderId?: string }> {
+    const { data, error } = await supabase.rpc("submit_verified_review", {
+      _customer_id: input.customerId,
+      _product_id: input.productId,
+      _rating: input.rating,
+      _comment: input.comment,
+      _photos: input.photos as any,
+      _videos: input.videos as any,
+    });
+    if (error) return { ok: false, message: error.message || "Erro ao publicar" };
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row?.ok) return { ok: false, message: row?.message || "Erro ao publicar" };
+    // Busca elegibilidade para preencher variation/orderId localmente
+    const elig = await this.checkReviewEligibility(input.customerId, input.productId);
+    return { ok: true, message: row.message, id: row.id, variation: elig.variation || undefined, orderId: elig.orderId || undefined };
   },
 
   async upsertSettings(s: StoreSettings) {
