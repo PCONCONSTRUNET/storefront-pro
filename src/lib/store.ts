@@ -46,7 +46,11 @@ export type Review = {
   customerName: string;
   rating: number; // 1-5
   comment: string;
-  photos: string[]; // data URLs
+  photos: string[];
+  videos: string[];
+  verified: boolean;
+  variation?: string;
+  orderId?: string;
   createdAt: string;
 };
 

@@ -211,6 +211,10 @@ const toReview = (r: any): Review => ({
   rating: r.rating,
   comment: r.comment || "",
   photos: Array.isArray(r.photos) ? r.photos : [],
+  videos: Array.isArray(r.videos) ? r.videos : [],
+  verified: !!r.verified,
+  variation: r.variation || undefined,
+  orderId: r.order_id || undefined,
   createdAt: r.created_at,
 });
 
