@@ -1,3 +1,4 @@
+import { z } from "https://esm.sh/zod@3.23.8";
 import { sendEmail, corsHeaders, baseLayout } from "../_shared/resend.ts";
 import {
   checkRateLimit,
@@ -5,12 +6,24 @@ import {
   rateLimitResponse,
 } from "../_shared/rate-limit.ts";
 
+const bodySchema = z.object({
+  email: z.string().trim().email().max(255),
+  resetUrl: z.string().trim().url().max(2000),
+});
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS")
     return new Response(null, { headers: corsHeaders });
   try {
-    const { email, resetUrl } = await req.json();
-    if (!email || !resetUrl) throw new Error("email e resetUrl obrigatórios");
+    const rawBody = await req.json().catch(() => null);
+    const parsed = bodySchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: "Dados inválidos" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const { email, resetUrl } = parsed.data;
 
     // Rate limit: 3 req/hora por email + 10/hora por IP
     const normalizedEmail = String(email).trim().toLowerCase();

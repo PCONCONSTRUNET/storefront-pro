@@ -910,6 +910,7 @@ export type Database = {
           total: number
         }[]
       }
+      refresh_admin_session: { Args: { _token: string }; Returns: undefined }
       save_payment_gateway: {
         Args: {
           _environment: string

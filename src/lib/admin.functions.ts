@@ -30,7 +30,31 @@ async function requireAdmin(token: string): Promise<string> {
     await (supabase as any).rpc("delete_admin_session", { _token: token });
     throw new Error("Sessão admin expirada");
   }
+  // Sliding session: estende +24h a cada uso (best-effort, ignora erro)
+  (supabase as any)
+    .rpc("refresh_admin_session", { _token: token })
+    .then(() => {})
+    .catch(() => {});
   return data.email;
+}
+
+// Audit log helper (best-effort, nunca derruba a operação principal)
+async function audit(
+  email: string | null,
+  action: string,
+  description: string,
+  metadata: Record<string, unknown> = {},
+) {
+  try {
+    await supabaseAdmin.from("activity_logs").insert({
+      action,
+      category: "admin",
+      description,
+      metadata: { admin_email: email, ...metadata },
+    });
+  } catch (e) {
+    console.error("[audit] failed:", e);
+  }
 }
 
 // ---------- LOGIN / LOGOUT ----------
@@ -44,9 +68,15 @@ export const loginAdminFn = createServerFn({ method: "POST" })
     const { data: cred } = await (supabase as any)
       .rpc("get_admin_auth_record", { _email: data.email })
       .maybeSingle();
-    if (!cred) return { ok: false as const, message: "Credenciais inválidas" };
+    if (!cred) {
+      await audit(data.email, "admin.login.failed", "Tentativa de login admin com email inexistente");
+      return { ok: false as const, message: "Credenciais inválidas" };
+    }
     const ok = await bcrypt.compare(data.password, cred.password_hash);
-    if (!ok) return { ok: false as const, message: "Credenciais inválidas" };
+    if (!ok) {
+      await audit(data.email, "admin.login.failed", "Senha incorreta no login admin");
+      return { ok: false as const, message: "Credenciais inválidas" };
+    }
 
     const token = newToken();
     const { error } = await (supabase as any).rpc("create_admin_session", {
@@ -54,6 +84,7 @@ export const loginAdminFn = createServerFn({ method: "POST" })
       _token: token,
     });
     if (error) return { ok: false as const, message: error.message };
+    await audit(data.email, "admin.login.success", "Login admin realizado");
     return { ok: true as const, message: "Bem-vindo!", token, email: data.email };
   });
 
@@ -225,6 +256,9 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
+    // Captura email antes do delete para o audit log
+    let email: string | null = null;
+    try { email = await requireAdmin(data.token); } catch { /* RPC abaixo também valida */ }
     const { error } = await (supabase as any).rpc("admin_db_write", {
       _token: data.token,
       _op: "delete",
@@ -235,6 +269,10 @@ export const adminDeleteFn = createServerFn({ method: "POST" })
       _patch: null,
     });
     if (error) return { ok: false as const, message: error.message };
+    await audit(email, "admin.delete", `Exclusão em ${data.table}`, {
+      table: data.table,
+      match: data.match,
+    });
     return { ok: true as const };
   });
 
@@ -333,8 +371,9 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ data }) => {
+    let email: string;
     try {
-      await requireAdmin(data.token);
+      email = await requireAdmin(data.token);
     } catch (e) {
       return { ok: false as const, message: e instanceof Error ? `Auth: ${e.message}` : "Sessão inválida" };
     }
@@ -347,6 +386,12 @@ export const saveGatewayConfigFn = createServerFn({ method: "POST" })
         _installment_fees: data.installment_fees,
       });
       if (error) return { ok: false as const, message: `DB: ${error.message}` };
+      await audit(email, "admin.gateway.save", "Configuração do gateway de pagamento alterada", {
+        environment: data.environment,
+        max_installments: data.max_installments,
+        has_access_token: Boolean(data.mp_access_token),
+        has_public_key: Boolean(data.mp_public_key),
+      });
       return { ok: true as const, message: "Configuração salva!" };
     } catch (e) {
       return { ok: false as const, message: e instanceof Error ? `RPC: ${e.message}` : "Erro RPC" };
