@@ -181,11 +181,4 @@ const config = {
 fs.writeFileSync(path.join(outDir, "config.json"), JSON.stringify(config, null, 2), "utf8");
 console.log(`[vercel] config.json escrito`);
 
-// 4) Limpa dist/ pra Vercel NÃO re-detectar framework
-const distDir = path.join(projectRoot, "dist");
-if (fs.existsSync(distDir)) {
-  fs.rmSync(distDir, { recursive: true, force: true });
-  console.log(`[vercel] dist/ removido`);
-}
-
 console.log(`[vercel] OK → .vercel/output/`);
