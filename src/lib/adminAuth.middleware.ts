@@ -26,14 +26,14 @@ export const requireAdminAuth = createMiddleware({
 }).server(async ({ next }) => {
   const token = await getAdminSessionCookie();
   if (!token) {
-    throw new Response("Unauthorized: sessão admin ausente", { status: 401 });
+    throw new Error("Unauthorized: sessão admin ausente (cookie não enviado)");
   }
   const { data, error } = await (supabaseAdmin as any)
     .rpc("get_admin_session_record", { _token: token })
     .maybeSingle();
   if (error || !data) {
     await clearAdminSessionCookie();
-    throw new Response("Unauthorized: sessão admin inválida", { status: 401 });
+    throw new Error(`Unauthorized: sessão admin inválida${error ? ` (${error.message})` : ""}`);
   }
   if (new Date(data.expires_at).getTime() < Date.now()) {
     await (supabaseAdmin as any)
@@ -41,7 +41,7 @@ export const requireAdminAuth = createMiddleware({
       .then(() => {})
       .catch(() => {});
     await clearAdminSessionCookie();
-    throw new Response("Unauthorized: sessão admin expirada", { status: 401 });
+    throw new Error("Unauthorized: sessão admin expirada");
   }
 
   let activeToken = token;
