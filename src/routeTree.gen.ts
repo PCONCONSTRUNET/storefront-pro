@@ -33,6 +33,7 @@ import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
 import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro'
+import { Route as AdminSincronizacaoRouteImport } from './routes/admin.sincronizacao'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
 import { Route as AdminOrganizarRouteImport } from './routes/admin.organizar'
@@ -175,6 +176,11 @@ const AfiliadaLoginRoute = AfiliadaLoginRouteImport.update({
 const AfiliadaCadastroRoute = AfiliadaCadastroRouteImport.update({
   id: '/afiliada/cadastro',
   path: '/afiliada/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSincronizacaoRoute = AdminSincronizacaoRouteImport.update({
+  id: '/admin/sincronizacao',
+  path: '/admin/sincronizacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProdutosRoute = AdminProdutosRouteImport.update({
@@ -322,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/admin/organizar': typeof AdminOrganizarRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/sincronizacao': typeof AdminSincronizacaoRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
   '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByTo {
   '/admin/organizar': typeof AdminOrganizarRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/sincronizacao': typeof AdminSincronizacaoRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
   '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -421,6 +429,7 @@ export interface FileRoutesById {
   '/admin/organizar': typeof AdminOrganizarRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/sincronizacao': typeof AdminSincronizacaoRoute
   '/afiliada/cadastro': typeof AfiliadaCadastroRoute
   '/afiliada/login': typeof AfiliadaLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
@@ -472,6 +481,7 @@ export interface FileRouteTypes {
     | '/admin/organizar'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/sincronizacao'
     | '/afiliada/cadastro'
     | '/afiliada/login'
     | '/categoria/$slug'
@@ -521,6 +531,7 @@ export interface FileRouteTypes {
     | '/admin/organizar'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/sincronizacao'
     | '/afiliada/cadastro'
     | '/afiliada/login'
     | '/categoria/$slug'
@@ -570,6 +581,7 @@ export interface FileRouteTypes {
     | '/admin/organizar'
     | '/admin/pedidos'
     | '/admin/produtos'
+    | '/admin/sincronizacao'
     | '/afiliada/cadastro'
     | '/afiliada/login'
     | '/categoria/$slug'
@@ -620,6 +632,7 @@ export interface RootRouteChildren {
   AdminOrganizarRoute: typeof AdminOrganizarRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
+  AdminSincronizacaoRoute: typeof AdminSincronizacaoRoute
   AfiliadaCadastroRoute: typeof AfiliadaCadastroRoute
   AfiliadaLoginRoute: typeof AfiliadaLoginRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
@@ -808,6 +821,13 @@ declare module '@tanstack/react-router' {
       path: '/afiliada/cadastro'
       fullPath: '/afiliada/cadastro'
       preLoaderRoute: typeof AfiliadaCadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/sincronizacao': {
+      id: '/admin/sincronizacao'
+      path: '/admin/sincronizacao'
+      fullPath: '/admin/sincronizacao'
+      preLoaderRoute: typeof AdminSincronizacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/produtos': {
@@ -1015,6 +1035,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOrganizarRoute: AdminOrganizarRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
+  AdminSincronizacaoRoute: AdminSincronizacaoRoute,
   AfiliadaCadastroRoute: AfiliadaCadastroRoute,
   AfiliadaLoginRoute: AfiliadaLoginRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
