@@ -37,7 +37,9 @@ type SyncStatus = {
     processedAt: string;
     orderStatus: string | null;
   } | null;
+  error?: string;
 };
+
 
 function fmt(ts: string | null) {
   if (!ts) return "—";
@@ -156,11 +158,13 @@ function SyncPage() {
           </button>
         </div>
 
-        {err && (
-          <div className="bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-xl p-3 text-sm flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" /> {err}
+        {(err || data?.error) && (
+          <div className="bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-xl p-3 text-sm flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <span className="break-all">{err || data?.error}</span>
           </div>
         )}
+
 
         {data && (
           <>
