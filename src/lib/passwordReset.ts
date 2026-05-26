@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { consumeResetTokenFn } from "./secured.functions";
 
 export type ResetSubject = "admin" | "customer" | "affiliate";
 
@@ -32,10 +33,10 @@ export function buildResetUrl(token: string) {
 export async function consumeResetToken(
   token: string,
 ): Promise<{ subjectType: ResetSubject; subjectEmail: string } | null> {
-  const { data, error } = await supabase.rpc("consume_password_reset_token", {
-    _token: token,
-  });
-  if (error || !data || data.length === 0) return null;
-  const row = data[0] as { subject_type: ResetSubject; subject_email: string };
-  return { subjectType: row.subject_type, subjectEmail: row.subject_email };
+  const result = await consumeResetTokenFn({ data: { token } });
+  if (!result) return null;
+  return {
+    subjectType: result.subjectType as ResetSubject,
+    subjectEmail: result.subjectEmail,
+  };
 }
