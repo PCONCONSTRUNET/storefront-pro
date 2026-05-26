@@ -28,7 +28,7 @@ import {
 import { toast } from "sonner";
 import { downloadCSV, downloadPDF } from "@/lib/export";
 import { playBeep } from "@/lib/sound";
-import { getAdminToken } from "@/lib/adminToken";
+
 
 export const Route = createFileRoute("/admin/afiliadas")({
   component: Page,
@@ -709,13 +709,8 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
   const load = async () => {
     setLoading(true);
     try {
-      const token = getAdminToken();
-      if (!token) {
-        setRows([]);
-        return;
-      }
       const { listConsignmentsFn } = await import("@/lib/admin.functions");
-      const res = await listConsignmentsFn({ data: { token } });
+      const res = await listConsignmentsFn();
       setRows((res?.consignments || []) as Consignment[]);
     } catch (e: any) {
       toast.error(e?.message || "Falha ao carregar retiradas");
@@ -740,10 +735,8 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
     const { confirmDialog } = await import("@/components/ConfirmDialog");
     if (!(await confirmDialog({ title: "Excluir registro de retirada?", confirmLabel: "Excluir" }))) return;
     try {
-      const token = getAdminToken();
-      if (!token) return;
       const { deleteConsignmentFn } = await import("@/lib/admin.functions");
-      const res = await deleteConsignmentFn({ data: { token, id } });
+      const res = await deleteConsignmentFn({ data: { id } });
       if (!res.ok) {
         toast.error(res.message || "Falha ao excluir");
         return;
@@ -892,12 +885,9 @@ function NewConsignmentModal({
     }
     setSaving(true);
     try {
-      const token = getAdminToken();
-      if (!token) throw new Error("Sessão admin ausente");
       const { createConsignmentFn } = await import("@/lib/admin.functions");
       const res = await createConsignmentFn({
         data: {
-          token,
           affiliate_id: form.affiliate_id,
           quantity: form.quantity,
           total_value: form.total_value,

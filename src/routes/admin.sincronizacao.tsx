@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { getSyncStatusFn } from "@/lib/admin.functions";
-import { getAdminToken } from "@/lib/adminToken";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/sincronizacao")({
@@ -120,15 +120,10 @@ function SyncPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = getAdminToken();
-    if (!token) {
-      setErr("Sessão admin não encontrada");
-      return;
-    }
     setLoading(true);
     setErr(null);
     try {
-      const r = await getSyncStatusFn({ data: { token } });
+      const r = await getSyncStatusFn();
       setData(r as SyncStatus);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar");

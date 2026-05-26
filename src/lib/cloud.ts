@@ -1,15 +1,14 @@
 // Cloud sync — leituras públicas via supabase anon (RLS permite só o que é público),
-// e TODAS as mutações + leituras sensíveis via server functions admin (supabaseAdmin).
-//
-// Escritas admin exigem adminToken (definido após loginAdmin no store). Sem token,
-// a chamada é silenciosamente ignorada — admin não logado não consegue escrever.
+// e TODAS as mutações + leituras sensíveis via server functions admin que validam
+// a sessão pelo cookie httpOnly "princesa_admin_session". Sem cookie válido,
+// as funções retornam 401 e a chamada é silenciosamente ignorada.
 
 import { supabase } from "@/integrations/supabase/client";
-import { getAdminToken } from "./adminToken";
 import {
   adminUpsertFn,
   adminDeleteFn,
   adminUpdateFn,
+  adminReadTableFn,
   updateCustomerFn,
 } from "./admin.functions";
 import { applyOrderStockDecrementFn } from "./secured.functions";
@@ -43,19 +42,29 @@ type AdminSnapshot = {
   activityLogs: Record<string, unknown>[];
 };
 
+// Checa se o usuário está logado como admin no store (sem expor token).
+function isAdminLogged(): boolean {
+  try {
+    // import dinâmico evita ciclo entre store ↔ cloud
+    const { useStore } = require("./store");
+    return Boolean(useStore.getState().isAdmin);
+  } catch {
+    return false;
+  }
+}
+
 async function adminUpsert(
   table: string,
   row: Record<string, any>,
   onConflict?: string,
 ) {
-  const token = getAdminToken();
-  if (!token) {
+  if (!isAdminLogged()) {
     throw new Error(
       "Sessão admin expirada. Faça login novamente para salvar.",
     );
   }
   const r = await adminUpsertFn({
-    data: { token, table: table as any, row, onConflict },
+    data: { table: table as any, row, onConflict },
   });
   if (!r.ok) {
     log(`upsert ${table}`, r.message);
@@ -64,11 +73,10 @@ async function adminUpsert(
 }
 
 async function adminDelete(table: string, match: Record<string, any>) {
-  const token = getAdminToken();
-  if (!token) return;
+  if (!isAdminLogged()) return;
   try {
     const r = await adminDeleteFn({
-      data: { token, table: table as any, match },
+      data: { table: table as any, match },
     });
     if (!r.ok) log(`delete ${table}`, r.message);
   } catch (e) {
@@ -81,11 +89,10 @@ async function adminPatch(
   match: Record<string, any>,
   patch: Record<string, any>,
 ) {
-  const token = getAdminToken();
-  if (!token) return;
+  if (!isAdminLogged()) return;
   try {
     const r = await adminUpdateFn({
-      data: { token, table: table as any, match, patch },
+      data: { table: table as any, match, patch },
     });
     if (!r.ok) log(`update ${table}`, r.message);
   } catch (e) {
@@ -263,7 +270,6 @@ export const cloud = {
   async upsertCustomer(c: Customer) {
     // Atualização de cliente vem do próprio cliente OU do admin.
     // Se admin, vai pelo proxy; se cliente comum, vai pelo updateCustomerFn.
-    const token = getAdminToken();
     const row = {
       id: c.id,
       name: c.name,
@@ -273,7 +279,7 @@ export const cloud = {
       addresses: c.addresses || [],
       favorites: c.favorites || [],
     };
-    if (token) {
+    if (isAdminLogged()) {
       await adminUpsert("customers", row, "id");
       return;
     }
@@ -423,7 +429,6 @@ export const cloud = {
 
   async upsertReview(r: Review) {
     // Reviews podem ser criadas por clientes via insert público; updates só admin.
-    const token = getAdminToken();
     const row = {
       id: r.id,
       product_id: r.productId,
@@ -433,7 +438,7 @@ export const cloud = {
       comment: r.comment,
       photos: r.photos || [],
     };
-    if (token) {
+    if (isAdminLogged()) {
       await adminUpsert("reviews", row, "id");
     } else {
       const { error } = await supabase.from("reviews").insert(row);
@@ -552,27 +557,29 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
       .order("sort_order", { ascending: true }),
   ]);
 
-  // Leituras privadas só se for admin logado. Usa RPC direto para funcionar
-  // igual no preview e no domínio próprio, sem depender de server function.
+  // Leituras privadas só se for admin logado — auth via cookie httpOnly.
   let admin: AdminSnapshot | null = null;
-  const token = getAdminToken();
-  if (token) {
+  if (isAdminLogged()) {
     try {
       const read = async (
-        table: string,
+        table:
+          | "customers"
+          | "affiliates"
+          | "affiliate_sales"
+          | "affiliate_consignments"
+          | "transactions"
+          | "orders"
+          | "product_waitlist"
+          | "activity_logs",
         orderBy?: string,
         orderDir: "asc" | "desc" = "desc",
         limit = 1000,
       ) => {
-        const { data, error } = await (supabase as any).rpc("admin_db_read", {
-          _token: token,
-          _table: table,
-          _limit: limit,
-          _order_by: orderBy ?? null,
-          _order_dir: orderDir,
+        const r = await adminReadTableFn({
+          data: { table, limit, orderBy: orderBy ?? null, orderDir },
         });
-        if (error) throw error;
-        return (data || []) as Record<string, unknown>[];
+        if (!r.ok) throw new Error(r.message || "admin read failed");
+        return r.rows as Record<string, unknown>[];
       };
       const [customers, affiliates, affiliateSales, affiliateConsignments, transactions, orders, waitlist, activityLogs] =
         await Promise.all([
@@ -585,6 +592,7 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
           read("product_waitlist"),
           read("activity_logs", "created_at", "desc", 200),
         ]);
+      void affiliateConsignments;
       admin = { customers, affiliates, affiliateSales, transactions, orders, waitlist, activityLogs };
     } catch (e) {
       console.warn("[cloud:adminFetchAll]", e);

@@ -773,16 +773,14 @@ export const useStore = create<AppState>()(
       loginAdmin: async (email, password) => {
         const normalized = email.trim().toLowerCase();
         try {
-          const { data, error } = await (supabase as any)
-            .rpc("verify_admin_login", { _email: normalized, _password: password })
-            .maybeSingle();
-          if (error) return { ok: false, message: error.message || "Erro ao entrar" };
-          if (!data?.token) return { ok: false, message: "Credenciais inválidas" };
-          const { setAdminToken } = await import("./adminToken");
-          setAdminToken(data.token);
+          const { loginAdminFn } = await import("./admin.functions");
+          const res = await loginAdminFn({
+            data: { email: normalized, password },
+          });
+          if (!res.ok) return { ok: false, message: res.message };
           set((s) => ({
             isAdmin: true,
-            adminToken: data.token,
+            adminToken: null, // cookie httpOnly — token nunca toca o JS
             sessions: { ...s.sessions, admin: makeSession(normalized) },
           }));
           cloud.logActivity({
@@ -790,22 +788,16 @@ export const useStore = create<AppState>()(
             category: "auth",
             description: `Admin logou: ${normalized}`,
           });
-          return { ok: true, message: "Bem-vindo!" };
+          return { ok: true, message: res.message || "Bem-vindo!" };
         } catch (e: any) {
           return { ok: false, message: e?.message || "Erro de conexão" };
         }
       },
       logoutAdmin: () => {
-        const tok = get().adminToken;
         resetAdminOrderAlert();
-        import("./adminToken").then(({ setAdminToken }) =>
-          setAdminToken(null),
+        import("./admin.functions").then(({ logoutAdminFn }) =>
+          logoutAdminFn().catch(() => {}),
         );
-        if (tok) {
-          import("./admin.functions").then(({ logoutAdminFn }) =>
-            logoutAdminFn({ data: { token: tok } }).catch(() => {}),
-          );
-        }
         set((s) => ({
           isAdmin: false,
           adminToken: null,
@@ -1353,10 +1345,28 @@ export const useStore = create<AppState>()(
           nextSessions.admin = null;
         }
         useStore.setState({ ...patch, sessions: nextSessions });
-        // Espelhar o token admin no holder global pra cloud.ts usar.
-        import("./adminToken").then(({ setAdminToken }) =>
-          setAdminToken(useStore.getState().adminToken),
-        );
+        // Revalida sessão admin via cookie httpOnly no servidor.
+        // Se cookie expirou/inválido, força logout no front.
+        if (typeof window !== "undefined") {
+          import("./admin.functions").then(({ getAdminSessionFn }) =>
+            getAdminSessionFn()
+              .then((r) => {
+                const serverHasAdmin = Boolean(r?.email);
+                const localSaysAdmin = useStore.getState().isAdmin;
+                if (localSaysAdmin && !serverHasAdmin) {
+                  useStore.setState({
+                    isAdmin: false,
+                    adminToken: null,
+                    sessions: {
+                      ...useStore.getState().sessions,
+                      admin: null,
+                    },
+                  });
+                }
+              })
+              .catch(() => {}),
+          );
+        }
       },
 
     },

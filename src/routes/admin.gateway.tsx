@@ -2,8 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { toast } from "sonner";
-import { getAdminToken } from "@/lib/adminToken";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  getGatewayConfigFn,
+  saveGatewayConfigFn,
+} from "@/lib/admin.functions";
 import { Loader2, Eye, EyeOff, Copy, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/gateway")({
@@ -35,18 +37,8 @@ function Page() {
 
   useEffect(() => {
     (async () => {
-      const token = getAdminToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       try {
-        const { data, error } = await (supabase as any).rpc(
-          "admin_get_payment_gateway",
-          { _token: token },
-        );
-        if (error) throw new Error(error.message);
-        const row = Array.isArray(data) ? data[0] : data;
+        const row = await getGatewayConfigFn();
         setAccessToken(row?.mp_access_token || "");
         setPublicKey(row?.mp_public_key || "");
         const maxInst = Number(row?.max_installments ?? 3);
@@ -78,30 +70,19 @@ function Page() {
   };
 
   const save = async () => {
-    const token = getAdminToken();
-    if (!token) return toast.error("Sessão admin expirada — faça login novamente");
     setSaving(true);
     try {
-      const payload = {
-        _token: token,
-        _mp_access_token: accessToken.trim(),
-        _mp_public_key: publicKey.trim(),
-        _environment: "production",
-        _max_installments: maxInstallments,
-        _installment_fees: fees,
-      };
-      console.log("[gateway] saving", {
-        ...payload,
-        _token: "***",
-        _mp_access_token: payload._mp_access_token ? `len=${payload._mp_access_token.length}` : "(vazio)",
+      const res = await saveGatewayConfigFn({
+        data: {
+          mp_access_token: accessToken.trim(),
+          mp_public_key: publicKey.trim(),
+          environment: "production",
+          max_installments: maxInstallments,
+          installment_fees: fees,
+        },
       });
-      const { error } = await (supabase as any).rpc(
-        "admin_save_payment_gateway",
-        payload,
-      );
-      console.log("[gateway] save response", { error });
-      if (error) throw new Error(error.message);
-      toast.success("Configuração salva!");
+      if (!res.ok) throw new Error(res.message);
+      toast.success(res.message || "Configuração salva!");
     } catch (e) {
       console.error("[gateway] save error", e);
       toast.error(e instanceof Error ? e.message : "Erro ao salvar", { duration: 8000 });
