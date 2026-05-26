@@ -26,10 +26,9 @@ function Page() {
     try {
       const account = findAccountByEmail(email);
       if (!account) {
-        // Por segurança, não revelar se existe ou não — mas neste app local
-        // dizemos ao usuário para usar o mesmo dispositivo do cadastro.
-        toast.error(
-          "Não encontramos essa conta neste dispositivo. A redefinição precisa ser feita no mesmo navegador onde a conta foi criada.",
+        // Resposta uniforme: não revelar se o email existe
+        toast.success(
+          "Se este email estiver cadastrado, enviamos o link de recuperação.",
         );
         return;
       }
