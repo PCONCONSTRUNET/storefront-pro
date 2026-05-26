@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { getSyncStatusFn } from "@/lib/admin.functions";
-import { getAdminToken } from "@/lib/adminToken";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/sincronizacao")({
