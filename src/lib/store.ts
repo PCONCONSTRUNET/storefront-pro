@@ -93,6 +93,7 @@ export type Order = {
     price: number;
     quantity: number;
     image: string;
+    variation?: string;
   }[];
   subtotal: number;
   discount: number;
@@ -979,7 +980,8 @@ export const useStore = create<AppState>()(
             price: p.price,
             quantity: ci.quantity,
             image: p.image,
-          };
+            variation: ci.variation,
+          } as Order["items"][number];
         });
         const subtotal = items.reduce((a, b) => a + b.price * b.quantity, 0);
         const coupon = state.coupons.find(
