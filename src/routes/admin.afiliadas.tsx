@@ -885,12 +885,9 @@ function NewConsignmentModal({
     }
     setSaving(true);
     try {
-      const token = getAdminToken();
-      if (!token) throw new Error("Sessão admin ausente");
       const { createConsignmentFn } = await import("@/lib/admin.functions");
       const res = await createConsignmentFn({
         data: {
-          token,
           affiliate_id: form.affiliate_id,
           quantity: form.quantity,
           total_value: form.total_value,
