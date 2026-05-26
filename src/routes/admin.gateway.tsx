@@ -37,18 +37,8 @@ function Page() {
 
   useEffect(() => {
     (async () => {
-      const token = getAdminToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       try {
-        const { data, error } = await (supabase as any).rpc(
-          "admin_get_payment_gateway",
-          { _token: token },
-        );
-        if (error) throw new Error(error.message);
-        const row = Array.isArray(data) ? data[0] : data;
+        const row = await getGatewayConfigFn();
         setAccessToken(row?.mp_access_token || "");
         setPublicKey(row?.mp_public_key || "");
         const maxInst = Number(row?.max_installments ?? 3);
