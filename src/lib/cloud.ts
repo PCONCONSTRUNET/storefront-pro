@@ -43,15 +43,20 @@ type AdminSnapshot = {
 };
 
 // Checa se o usuário está logado como admin no store (sem expor token).
+// Lê direto do localStorage persistido pelo Zustand pra evitar require()
+// (que não existe em bundle ESM de produção na Vercel) e ciclo store↔cloud.
 function isAdminLogged(): boolean {
   try {
-    // import dinâmico evita ciclo entre store ↔ cloud
-    const { useStore } = require("./store");
-    return Boolean(useStore.getState().isAdmin);
+    if (typeof window === "undefined") return false;
+    const raw = window.localStorage.getItem("princesa-store-v1");
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return Boolean(parsed?.state?.isAdmin);
   } catch {
     return false;
   }
 }
+
 
 async function adminUpsert(
   table: string,
