@@ -102,8 +102,8 @@ Deno.serve(async (req) => {
     return new Response("sandbox", { status: 200 });
   }
 
-  // Idempotência: se já processamos esse evento, retorna ok
-  const eventId = `mp-${paymentId}-${Date.now()}`;
+  // Idempotência: eventId determinístico para deduplicação via UNIQUE na tabela
+  const eventId = `mp-${paymentId}`;
 
   // Busca status atualizado direto no MP
   const mpRes = await fetch(
