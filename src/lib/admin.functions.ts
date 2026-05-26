@@ -52,6 +52,27 @@ export const loginAdminFn = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    // Rate limit: 5 tentativas / 5 min por e-mail (defesa contra brute-force)
+    const { data: rl } = await (supabaseAdmin as any).rpc("check_rate_limit", {
+      _bucket: "admin_login",
+      _identifier: data.email,
+      _max_requests: 5,
+      _window_seconds: 300,
+    });
+    const rlRow = Array.isArray(rl) ? rl[0] : rl;
+    if (rlRow && rlRow.allowed === false) {
+      await audit(
+        data.email,
+        "admin.login.rate_limited",
+        "Login admin bloqueado por rate limit",
+        { retry_after_seconds: rlRow.retry_after_seconds },
+      );
+      return {
+        ok: false as const,
+        message: `Muitas tentativas. Tente novamente em ${rlRow.retry_after_seconds}s.`,
+      };
+    }
+
     const { data: cred } = await (supabaseAdmin as any)
       .rpc("get_admin_auth_record", { _email: data.email })
       .maybeSingle();
@@ -85,6 +106,7 @@ export const loginAdminFn = createServerFn({ method: "POST" })
     await audit(data.email, "admin.login.success", "Login admin realizado");
     return { ok: true as const, message: "Bem-vindo!", email: data.email };
   });
+
 
 export const logoutAdminFn = createServerFn({ method: "POST" })
   .handler(async () => {
