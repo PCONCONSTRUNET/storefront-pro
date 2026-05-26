@@ -11,9 +11,8 @@ import { requireAdminAuth } from "./adminAuth.middleware";
 import {
   setAdminSessionCookie,
   clearAdminSessionCookie,
-  ADMIN_COOKIE,
+  getAdminSessionCookie,
 } from "./adminAuth.server";
-import { getCookie } from "@tanstack/react-start/server";
 
 const emailSchema = z.string().trim().toLowerCase().email().max(255);
 
