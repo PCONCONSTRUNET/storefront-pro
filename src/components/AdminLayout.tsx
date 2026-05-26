@@ -20,6 +20,7 @@ import {
   FileText,
   HelpCircle,
   ArrowUpDown,
+  Activity,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
@@ -48,6 +49,7 @@ const nav = [
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { to: "/admin/chatbot", label: "Chatbot", icon: WhatsAppIcon },
   { to: "/admin/logs", label: "Logs de Auditoria", icon: FileText },
+  { to: "/admin/sincronizacao", label: "Sincronização", icon: Activity },
   { to: "/admin/gateway", label: "Gateway", icon: CreditCard },
   { to: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
