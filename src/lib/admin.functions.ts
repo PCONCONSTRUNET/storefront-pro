@@ -315,8 +315,8 @@ export const adminReadTableFn = createServerFn({ method: "POST" })
         _order_dir: data.orderDir,
       },
     );
-    if (error) return { ok: false as const, message: error.message, rows: [] };
-    return { ok: true as const, rows: (rows || []) as Record<string, unknown>[] };
+    if (error) return { ok: false as const, message: error.message, rows: [] as any[] };
+    return { ok: true as const, rows: (rows || []) as any[] };
   });
 
 // ---------- LEITURAS DO CLIENTE LOGADO (próprios dados) ----------
