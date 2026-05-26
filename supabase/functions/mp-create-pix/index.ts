@@ -61,22 +61,25 @@ Deno.serve(async (req) => {
 
   // MP_TOKEN/SANDBOX serão definidos após carregar a config do gateway abaixo.
 
-  let body: any;
+  let rawBody: unknown;
   try {
-    body = await req.json();
+    rawBody = await req.json();
   } catch {
     return json({ error: "JSON inválido" }, 400);
   }
 
-  const customer = body.customer ?? {};
-  const items = Array.isArray(body.items) ? body.items : [];
-  const totals = body.totals ?? {};
-  const total = Number(totals.total ?? 0);
-
-  if (!customer.name || !customer.email || !customer.phone) {
-    return json({ error: "Dados do cliente incompletos" }, 400);
+  const parsed = pixBodySchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return json(
+      { error: "Dados inválidos", issues: parsed.error.issues.slice(0, 5) },
+      400,
+    );
   }
-  if (total <= 0) return json({ error: "Total inválido" }, 400);
+  const body = parsed.data;
+  const customer = body.customer;
+  const items = body.items;
+  const totals = body.totals;
+  const total = Number(totals.total);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
