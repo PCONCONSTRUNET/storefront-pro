@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.get_admin_auth_record(text) TO service_role, authenticated, anon;
