@@ -70,18 +70,21 @@ export type Database = {
           created_at: string
           email: string
           expires_at: string
+          last_rotated_at: string
           token: string
         }
         Insert: {
           created_at?: string
           email: string
           expires_at?: string
+          last_rotated_at?: string
           token: string
         }
         Update: {
           created_at?: string
           email?: string
           expires_at?: string
+          last_rotated_at?: string
           token?: string
         }
         Relationships: []
@@ -911,6 +914,13 @@ export type Database = {
         }[]
       }
       refresh_admin_session: { Args: { _token: string }; Returns: undefined }
+      rotate_admin_session: {
+        Args: { _new_token: string; _old_token: string }
+        Returns: {
+          email: string
+          expires_at: string
+        }[]
+      }
       save_payment_gateway: {
         Args: {
           _environment: string
