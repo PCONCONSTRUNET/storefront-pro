@@ -889,19 +889,25 @@ function NewConsignmentModal({
         toast.error("Preencha o nome da nova afiliada");
         return;
       }
-      const newId = crypto.randomUUID();
-      setSaving(true);
-      await upsertAffiliate({
+      const newId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `aff_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      const newAffObj = {
         id: newId,
         name: newAffData.name,
         email: `${newId}@pendente.com`,
         password: "123",
         phone: "",
-        commissionType: "percent",
+        commissionType: "percent" as const,
         commissionValue: 10,
         active: true,
         createdAt: new Date().toISOString(),
-      });
+      };
+      setSaving(true);
+      upsertAffiliate(newAffObj);
+      const { cloud } = await import("@/lib/cloud");
+      await cloud.upsertAffiliate(newAffObj);
       finalAffId = newId;
     }
 
@@ -1154,12 +1160,18 @@ function RegisterSaleModal({
         toast.error("Preencha os dados da nova afiliada");
         return;
       }
-      const newId = crypto.randomUUID();
-      await upsertAffiliate({
+      const newId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `aff_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      const newAffObj = {
         ...newAffData,
         id: newId,
         createdAt: new Date().toISOString(),
-      });
+      };
+      upsertAffiliate(newAffObj);
+      const { cloud } = await import("@/lib/cloud");
+      await cloud.upsertAffiliate(newAffObj);
       finalAffId = newId;
     }
 
