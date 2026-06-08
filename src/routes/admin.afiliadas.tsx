@@ -889,7 +889,7 @@ function NewConsignmentModal({
         toast.error("Preencha o nome da nova afiliada");
         return;
       }
-      const newId = `aff_${Date.now()}`;
+      const newId = crypto.randomUUID();
       upsertAffiliate({
         id: newId,
         name: newAffData.name,
@@ -1153,7 +1153,7 @@ function RegisterSaleModal({
         toast.error("Preencha os dados da nova afiliada");
         return;
       }
-      const newId = `aff_${Date.now()}`;
+      const newId = crypto.randomUUID();
       upsertAffiliate({
         ...newAffData,
         id: newId,
