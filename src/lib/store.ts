@@ -318,7 +318,7 @@ type AppState = {
     ok: boolean;
     message: string;
   }>;
-  upsertAffiliate: (a: Affiliate) => void;
+  upsertAffiliate: (a: Affiliate) => Promise<void>;
   deleteAffiliate: (id: string) => void;
   registerAffiliateSale: (
     s: Omit<
@@ -865,13 +865,13 @@ export const useStore = create<AppState>()(
         }));
         return { ok: true, message: res.message };
       },
-      upsertAffiliate: (a) => {
+      upsertAffiliate: async (a) => {
         set((s) => ({
           affiliates: s.affiliates.find((x) => x.id === a.id)
             ? s.affiliates.map((x) => (x.id === a.id ? a : x))
             : [...s.affiliates, a],
         }));
-        cloud.upsertAffiliate(a);
+        await cloud.upsertAffiliate(a);
       },
       deleteAffiliate: (id) => {
         set((s) => ({

@@ -890,7 +890,8 @@ function NewConsignmentModal({
         return;
       }
       const newId = crypto.randomUUID();
-      upsertAffiliate({
+      setSaving(true);
+      await upsertAffiliate({
         id: newId,
         name: newAffData.name,
         email: `${newId}@pendente.com`,
@@ -1142,7 +1143,7 @@ function RegisterSaleModal({
     return (data.saleValue * (Number(data.commissionPercent) || 0)) / 100;
   }, [data.saleValue, data.commissionPercent]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let finalAffId = data.affiliateId;
@@ -1154,7 +1155,7 @@ function RegisterSaleModal({
         return;
       }
       const newId = crypto.randomUUID();
-      upsertAffiliate({
+      await upsertAffiliate({
         ...newAffData,
         id: newId,
         createdAt: new Date().toISOString(),
