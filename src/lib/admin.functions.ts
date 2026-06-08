@@ -164,7 +164,7 @@ export const createConsignmentFn = createServerFn({ method: "POST" })
   });
 
 /** Cria uma afiliada temporária (somente nome) + retirada em uma única operação
- *  no servidor usando supabaseAdmin — ignora RLS por completo. */
+ *  usando RPC SECURITY DEFINER — bypassa RLS sem precisar da service_role key. */
 export const createConsignmentWithNewAffiliateFn = createServerFn({ method: "POST" })
   .inputValidator((i) =>
     z
@@ -180,39 +180,22 @@ export const createConsignmentWithNewAffiliateFn = createServerFn({ method: "POS
   .handler(async ({ data }) => {
     await requireAdminAuth();
 
-    // Gera um ID único para a afiliada
-    const newId = crypto.randomUUID();
-    const email = `${newId}@pendente.com`;
+    const { data: result, error } = await supabase.rpc(
+      "admin_create_affiliate_consignment" as any,
+      {
+        p_affiliate_name: data.affiliateName,
+        p_quantity: data.quantity,
+        p_total_value: data.total_value,
+        p_picked_up_at: data.picked_up_at ?? new Date().toISOString(),
+        p_notes: data.notes ?? null,
+      },
+    );
 
-    // 1) Insere a afiliada usando supabaseAdmin (bypassa RLS)
-    const { error: affError } = await supabaseAdmin
-      .from("affiliates")
-      .insert({
-        id: newId,
-        name: data.affiliateName,
-        email,
-        phone: "",
-        commission_type: "percent",
-        commission_value: 10,
-        active: true,
-      });
-    if (affError) return { ok: false as const, message: `Erro ao criar afiliada: ${affError.message}` };
+    if (error) return { ok: false as const, message: error.message };
+    const res = result as any;
+    if (!res?.ok) return { ok: false as const, message: res?.message || "Falha ao registrar" };
 
-    // 2) Insere a retirada com o ID recém criado
-    const { data: row, error: conError } = await supabaseAdmin
-      .from("affiliate_consignments")
-      .insert({
-        affiliate_id: newId,
-        quantity: data.quantity,
-        total_value: data.total_value,
-        picked_up_at: data.picked_up_at ?? new Date().toISOString(),
-        notes: data.notes ?? null,
-      })
-      .select("*")
-      .single();
-    if (conError) return { ok: false as const, message: `Erro ao registrar retirada: ${conError.message}` };
-
-    return { ok: true as const, row, affiliateId: newId };
+    return { ok: true as const, row: res.row, affiliateId: res.affiliate_id as string };
   });
 
 export const deleteConsignmentFn = createServerFn({ method: "POST" })
