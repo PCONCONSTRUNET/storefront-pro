@@ -238,7 +238,9 @@ function Page() {
                       >
                         <td className="py-2 pr-2 font-medium">{a.name}</td>
                         <td className="py-2 pr-2 text-muted-foreground">
-                          {a.email}
+                          {a.email?.endsWith("@pendente.com")
+                            ? <span className="text-muted-foreground/50 italic text-xs">Não informado</span>
+                            : a.email}
                         </td>
                         <td className="py-2 pr-2">
                           {a.commissionType === "percent"
@@ -1669,12 +1671,18 @@ function AffiliateDetailsModal({
                 <Phone className="h-3.5 w-3.5" /> WhatsApp
               </a>
             )}
-            <a
-              href={`mailto:${affiliate.email}`}
-              className="h-10 rounded-xl bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center gap-1 hover:bg-primary/20 transition-colors"
-            >
-              <Mail className="h-3.5 w-3.5" /> E-mail
-            </a>
+            {!affiliate.email?.endsWith("@pendente.com") ? (
+              <a
+                href={`mailto:${affiliate.email}`}
+                className="h-10 rounded-xl bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center gap-1 hover:bg-primary/20 transition-colors"
+              >
+                <Mail className="h-3.5 w-3.5" /> E-mail
+              </a>
+            ) : (
+              <div className="h-10 rounded-xl bg-muted/50 text-muted-foreground text-xs font-semibold flex items-center justify-center gap-1">
+                <Mail className="h-3.5 w-3.5" /> Não informado
+              </div>
+            )}
             <button
               onClick={() => {
                 const link = `${window.location.origin}/afiliada/login`;
