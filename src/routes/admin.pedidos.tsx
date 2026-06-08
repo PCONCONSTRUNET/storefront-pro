@@ -190,7 +190,7 @@ function Page() {
   const onWhatsApp = (o: typeof orders[number]) => {
     const phone = o.customerPhone.replace(/\D/g, "");
     const txt = encodeURIComponent(
-      `Olá ${o.customerName.split(" ")[0]}! Sobre seu pedido #${String(o.id).slice(0, 8)}…`,
+      `Olá ${o.customerName.split(" ")[0]}! Sobre seu pedido #${String(o.id).slice(0, 5).toUpperCase()}…`,
     );
     window.open(`https://wa.me/55${phone}?text=${txt}`, "_blank");
   };
@@ -430,7 +430,7 @@ function Page() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm truncate">
-                          #{String(o.id).slice(0, 8)} · {o.customerName}
+                          #{String(o.id).slice(0, 5).toUpperCase()} · {o.customerName}
                         </span>
                         <span
                           className={`text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border ${STATUS_STYLE[status]}`}
@@ -490,7 +490,7 @@ function Page() {
         return (
         <Modal
           onClose={() => setSelected(null)}
-          title={`Pedido #${String(order.id).slice(0, 8)}`}
+          title={`Pedido #${String(order.id).slice(0, 5).toUpperCase()}`}
         >
           <div className="space-y-3 text-sm">
             {/* Status header */}
@@ -723,7 +723,7 @@ function Page() {
                   const { confirmDialog } = await import("@/components/ConfirmDialog");
                   const ok = await confirmDialog({
                     title: "Excluir pedido?",
-                    description: `O pedido #${String(order.id).slice(0, 8)} será removido. Esta ação não pode ser desfeita.`,
+                    description: `O pedido #${String(order.id).slice(0, 5).toUpperCase()} será removido. Esta ação não pode ser desfeita.`,
                     confirmLabel: "Excluir",
                   });
                   if (ok) {

@@ -105,7 +105,7 @@ function Page() {
       list.push({
         id: `order-${o.id}`,
         date: o.createdAt,
-        description: `Pedido #${o.id} · ${o.customerName}`,
+        description: `Pedido #${o.id.slice(0, 5).toUpperCase()} · ${o.customerName}`,
         meta: productSummary,
         amount: o.total,
         isOut: isRefund,
