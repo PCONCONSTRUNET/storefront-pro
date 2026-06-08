@@ -885,30 +885,50 @@ function NewConsignmentModal({
     let finalAffId = form.affiliate_id;
 
     if (creatingNewAff) {
-      if (!newAffData.name) {
+      if (!newAffData.name.trim()) {
         toast.error("Preencha o nome da nova afiliada");
         return;
       }
-      const newId =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `aff_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      const newAffObj = {
-        id: newId,
-        name: newAffData.name,
-        email: `${newId}@pendente.com`,
-        password: "123",
-        phone: "",
-        commissionType: "percent" as const,
-        commissionValue: 10,
-        active: true,
-        createdAt: new Date().toISOString(),
-      };
+      if (form.quantity <= 0) {
+        toast.error("Preencha a quantidade de laços.");
+        return;
+      }
       setSaving(true);
-      upsertAffiliate(newAffObj);
-      const { cloud } = await import("@/lib/cloud");
-      await cloud.upsertAffiliate(newAffObj);
-      finalAffId = newId;
+      try {
+        const { createConsignmentWithNewAffiliateFn } = await import("@/lib/admin.functions");
+        const res = await createConsignmentWithNewAffiliateFn({
+          data: {
+            affiliateName: newAffData.name.trim(),
+            quantity: form.quantity,
+            total_value: form.total_value,
+            picked_up_at: new Date(form.picked_up_at).toISOString(),
+            notes: form.notes || undefined,
+          },
+        });
+        if (!res.ok) {
+          toast.error(res.message || "Falha ao registrar");
+          return;
+        }
+        // Sincroniza a nova afiliada no estado local
+        upsertAffiliate({
+          id: res.affiliateId,
+          name: newAffData.name.trim(),
+          email: `${res.affiliateId}@pendente.com`,
+          password: "",
+          phone: "",
+          commissionType: "percent",
+          commissionValue: 10,
+          active: true,
+          createdAt: new Date().toISOString(),
+        });
+        toast.success("Retirada registrada!");
+        onSaved();
+      } catch (e: any) {
+        toast.error(e?.message || "Falha ao registrar");
+      } finally {
+        setSaving(false);
+      }
+      return;
     }
 
     if (!finalAffId || form.quantity <= 0) {

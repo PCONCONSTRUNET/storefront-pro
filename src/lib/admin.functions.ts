@@ -163,6 +163,58 @@ export const createConsignmentFn = createServerFn({ method: "POST" })
     return { ok: true as const, row };
   });
 
+/** Cria uma afiliada temporária (somente nome) + retirada em uma única operação
+ *  no servidor usando supabaseAdmin — ignora RLS por completo. */
+export const createConsignmentWithNewAffiliateFn = createServerFn({ method: "POST" })
+  .inputValidator((i) =>
+    z
+      .object({
+        affiliateName: z.string().trim().min(1).max(200),
+        quantity: z.number().int().min(0).max(100000),
+        total_value: z.number().min(0).max(1_000_000),
+        picked_up_at: z.string().datetime().optional(),
+        notes: z.string().trim().max(1000).optional(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    await requireAdminAuth();
+
+    // Gera um ID único para a afiliada
+    const newId = crypto.randomUUID();
+    const email = `${newId}@pendente.com`;
+
+    // 1) Insere a afiliada usando supabaseAdmin (bypassa RLS)
+    const { error: affError } = await supabaseAdmin
+      .from("affiliates")
+      .insert({
+        id: newId,
+        name: data.affiliateName,
+        email,
+        phone: "",
+        commission_type: "percent",
+        commission_value: 10,
+        active: true,
+      });
+    if (affError) return { ok: false as const, message: `Erro ao criar afiliada: ${affError.message}` };
+
+    // 2) Insere a retirada com o ID recém criado
+    const { data: row, error: conError } = await supabaseAdmin
+      .from("affiliate_consignments")
+      .insert({
+        affiliate_id: newId,
+        quantity: data.quantity,
+        total_value: data.total_value,
+        picked_up_at: data.picked_up_at ?? new Date().toISOString(),
+        notes: data.notes ?? null,
+      })
+      .select("*")
+      .single();
+    if (conError) return { ok: false as const, message: `Erro ao registrar retirada: ${conError.message}` };
+
+    return { ok: true as const, row, affiliateId: newId };
+  });
+
 export const deleteConsignmentFn = createServerFn({ method: "POST" })
   .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ data }) => {
