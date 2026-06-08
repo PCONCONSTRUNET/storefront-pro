@@ -868,6 +868,9 @@ function NewConsignmentModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const upsertAffiliate = useStore((s) => s.upsertAffiliate);
+  const [creatingNewAff, setCreatingNewAff] = useState(false);
+  const [newAffData, setNewAffData] = useState({ name: "" });
   const [form, setForm] = useState({
     affiliate_id: "",
     quantity: 0,
@@ -879,16 +882,39 @@ function NewConsignmentModal({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.affiliate_id || form.quantity <= 0 || form.total_value <= 0) {
-      toast.error("Preencha afiliada, quantidade e valor.");
+    let finalAffId = form.affiliate_id;
+
+    if (creatingNewAff) {
+      if (!newAffData.name) {
+        toast.error("Preencha o nome da nova afiliada");
+        return;
+      }
+      const newId = `aff_${Date.now()}`;
+      upsertAffiliate({
+        id: newId,
+        name: newAffData.name,
+        email: `${newId}@pendente.com`,
+        password: "123",
+        phone: "",
+        commissionType: "percent",
+        commissionValue: 10,
+        active: true,
+        createdAt: new Date().toISOString(),
+      });
+      finalAffId = newId;
+    }
+
+    if (!finalAffId || form.quantity <= 0) {
+      toast.error("Preencha afiliada e quantidade de laços.");
       return;
     }
+
     setSaving(true);
     try {
       const { createConsignmentFn } = await import("@/lib/admin.functions");
       const res = await createConsignmentFn({
         data: {
-          affiliate_id: form.affiliate_id,
+          affiliate_id: finalAffId,
           quantity: form.quantity,
           total_value: form.total_value,
           picked_up_at: new Date(form.picked_up_at).toISOString(),
@@ -931,25 +957,66 @@ function NewConsignmentModal({
           </button>
         </div>
 
-        <Field label="Afiliada *">
-          <select
-            value={form.affiliate_id}
-            onChange={(e) =>
-              setForm({ ...form, affiliate_id: e.target.value })
-            }
-            className="input"
-            required
-          >
-            <option value="">Selecione...</option>
-            {affiliates
-              .filter((a) => a.active)
-              .map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-          </select>
-        </Field>
+        <div className="space-y-3">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <Field label="Selecione a Afiliada *">
+                <select
+                  value={form.affiliate_id}
+                  disabled={creatingNewAff}
+                  onChange={(e) =>
+                    setForm({ ...form, affiliate_id: e.target.value })
+                  }
+                  className="input disabled:opacity-50"
+                  required={!creatingNewAff}
+                >
+                  <option value="">Selecione...</option>
+                  {affiliates
+                    .filter((a) => a.active)
+                    .map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                </select>
+              </Field>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setCreatingNewAff(!creatingNewAff);
+                if (!creatingNewAff) setForm({ ...form, affiliate_id: "" });
+              }}
+              className={cn(
+                "h-10 px-3 rounded-xl border border-border text-xs font-bold transition-colors whitespace-nowrap",
+                creatingNewAff
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80",
+              )}
+            >
+              {creatingNewAff ? "Selecionar Existente" : "+ Nova"}
+            </button>
+          </div>
+
+          {creatingNewAff && (
+            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 space-y-3 animate-in slide-in-from-top-2 duration-300">
+              <div className="text-[11px] font-bold text-primary uppercase tracking-wider">
+                Nova Afiliada
+              </div>
+              <Field label="Nome da Afiliada *">
+                <input
+                  value={newAffData.name}
+                  onChange={(e) =>
+                    setNewAffData({ ...newAffData, name: e.target.value })
+                  }
+                  className="input bg-card"
+                  placeholder="Nome completo"
+                  required
+                />
+              </Field>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Qtd. de laços *">
@@ -964,7 +1031,7 @@ function NewConsignmentModal({
               required
             />
           </Field>
-          <Field label="Valor total (R$) *">
+          <Field label="Valor total (R$)">
             <input
               type="number"
               step="0.01"
@@ -977,7 +1044,6 @@ function NewConsignmentModal({
                 })
               }
               className="input font-bold"
-              required
             />
           </Field>
         </div>
