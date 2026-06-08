@@ -69,3 +69,31 @@ $$;
 
 -- Permite que a chave anon chame esta função (ela própria valida auth via cookie na camada app)
 GRANT EXECUTE ON FUNCTION public.admin_create_affiliate_consignment TO anon, authenticated;
+
+-- Função para inserir retirada de afiliada JÁ EXISTENTE (bypassa RLS)
+CREATE OR REPLACE FUNCTION public.admin_insert_consignment(
+  p_affiliate_id  uuid,
+  p_quantity      integer,
+  p_total_value   numeric,
+  p_picked_up_at  timestamptz DEFAULT now(),
+  p_notes         text        DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_row jsonb;
+BEGIN
+  INSERT INTO public.affiliate_consignments (affiliate_id, quantity, total_value, picked_up_at, notes)
+  VALUES (p_affiliate_id, p_quantity, p_total_value, p_picked_up_at, p_notes)
+  RETURNING to_jsonb(affiliate_consignments.*) INTO v_row;
+
+  RETURN jsonb_build_object('ok', true, 'row', v_row);
+EXCEPTION WHEN OTHERS THEN
+  RETURN jsonb_build_object('ok', false, 'message', SQLERRM);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_insert_consignment TO anon, authenticated;

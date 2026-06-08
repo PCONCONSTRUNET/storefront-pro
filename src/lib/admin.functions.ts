@@ -148,19 +148,20 @@ export const createConsignmentFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdminAuth();
-    const { data: row, error } = await supabaseAdmin
-      .from("affiliate_consignments")
-      .insert({
-        affiliate_id: data.affiliate_id,
-        quantity: data.quantity,
-        total_value: data.total_value,
-        picked_up_at: data.picked_up_at ?? new Date().toISOString(),
-        notes: data.notes ?? null,
-      })
-      .select("*")
-      .single();
+    const { data: result, error } = await supabase.rpc(
+      "admin_insert_consignment" as any,
+      {
+        p_affiliate_id: data.affiliate_id,
+        p_quantity: data.quantity,
+        p_total_value: data.total_value,
+        p_picked_up_at: data.picked_up_at ?? new Date().toISOString(),
+        p_notes: data.notes ?? null,
+      },
+    );
     if (error) return { ok: false as const, message: error.message };
-    return { ok: true as const, row };
+    const res = result as any;
+    if (!res?.ok) return { ok: false as const, message: res?.message || "Falha ao registrar" };
+    return { ok: true as const, row: res.row };
   });
 
 /** Cria uma afiliada temporária (somente nome) + retirada em uma única operação
