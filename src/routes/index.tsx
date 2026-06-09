@@ -399,7 +399,7 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
 
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-3 px-3 scroll-pl-3 md:mx-0 md:px-0 md:scroll-pl-0"
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-3 px-3 scroll-pl-3 md:mx-0 md:px-0 md:scroll-pl-0"
       >
         {products.map((p) => (
           <div
@@ -410,6 +410,17 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
           </div>
         ))}
       </div>
+      
+      {/* Indicador de rolagem mobile */}
+      {products.length > 2 && (
+        <div className="flex md:hidden items-center justify-center gap-1.5 mt-1 pb-3 text-muted-foreground/50">
+          <ChevronLeft className="w-3 h-3" />
+          <span className="text-[10px] font-semibold uppercase tracking-wider">
+            Deslize para ver mais
+          </span>
+          <ChevronRight className="w-3 h-3" />
+        </div>
+      )}
 
       <button
         onClick={() => scrollBy(1)}
