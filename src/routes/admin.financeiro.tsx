@@ -43,6 +43,7 @@ type Row = {
   affiliateName?: string;
   txRef?: Transaction;
   affiliateSaleId?: string;
+  customerEmail?: string;
 };
 
 const CATEGORY_LABEL: Record<TransactionCategory, string> = {
@@ -113,6 +114,7 @@ function Page() {
         isOut: isRefund,
         kind: "pedido",
         status,
+        customerEmail: o.customerEmail,
       });
     });
 
@@ -1062,79 +1064,72 @@ function TransactionDetailsModal({
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-2xl p-5 w-full max-w-sm overflow-hidden animate-modal-in"
+        className="bg-card rounded-3xl p-5 w-full max-w-sm overflow-hidden animate-modal-in shadow-xl relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">Detalhes da Movimentação</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-muted"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="pr-8 mb-6">
+          <h3 className="font-bold text-xl text-foreground">Detalhes da Transação</h3>
+          <div className="text-sm text-muted-foreground mt-0.5">
+            {formatDate(row.date)}
+          </div>
         </div>
 
         <div className="space-y-4">
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Data e Hora
-            </div>
-            <div className="text-sm font-medium">{formatDate(row.date)}</div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Descrição
-            </div>
-            <div className="text-sm font-medium">{row.description}</div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Tipo
-            </div>
-            <div className="text-sm font-medium">
+          <div className="bg-muted/30 rounded-2xl p-4 flex flex-col items-center justify-center border border-border/50 text-center">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
               {row.isOut ? "Saída (Despesa)" : "Entrada (Receita)"}
             </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Valor
-            </div>
             <div
-              className={`text-xl font-bold ${
-                row.isOut ? "text-destructive" : "text-success"
+              className={`text-3xl font-black tracking-tight ${
+                row.isOut ? "text-destructive" : "text-emerald-600"
               }`}
             >
               {row.isOut ? "− " : "+ "}
               {brl(row.amount)}
             </div>
-          </div>
-
-          {row.meta && (
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Informações Adicionais
-              </div>
-              <div className="text-sm font-medium text-muted-foreground">
-                {row.meta}
-              </div>
-            </div>
-          )}
-
-          {row.status && (
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Status
-              </div>
-              <div className="text-sm font-medium capitalize">
+            {row.status && (
+              <div className="mt-2 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-background border border-border shadow-sm">
                 {row.status.replace(/_/g, " ")}
               </div>
+            )}
+          </div>
+
+          <div className="space-y-3 px-1">
+            <div>
+              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                Descrição
+              </div>
+              <div className="text-sm font-semibold">{row.description}</div>
             </div>
-          )}
+
+            {row.customerEmail && (
+              <div>
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                  E-mail do Cliente
+                </div>
+                <div className="text-sm font-medium">{row.customerEmail}</div>
+              </div>
+            )}
+
+            {row.meta && (
+              <div className="pt-2 border-t border-border/50">
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                  Itens / Informações
+                </div>
+                <div className="text-sm font-medium text-muted-foreground leading-relaxed">
+                  {row.meta}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
