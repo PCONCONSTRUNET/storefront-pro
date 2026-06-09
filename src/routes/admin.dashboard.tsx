@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useStore } from "@/lib/store";
+import { useStore, normalizeOrderStatus } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
 import {
