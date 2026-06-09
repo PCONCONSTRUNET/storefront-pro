@@ -522,8 +522,16 @@ function Page() {
                         manual
                       </span>
                     )}
-                    {!r.isCompleted && r.status && (
-                      <span className="text-[9px] uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                    {r.status && (
+                      <span className={`text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full
+                        ${
+                          ['pago', 'concluido', 'confirmada'].includes(r.status)
+                            ? 'bg-success/10 text-success'
+                            : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(r.status)
+                              ? 'bg-gold/10 text-gold'
+                              : 'bg-destructive/10 text-destructive'
+                        }
+                      `}>
                         {r.status.replace(/_/g, " ")}
                       </span>
                     )}
