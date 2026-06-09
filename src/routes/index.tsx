@@ -404,7 +404,7 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
         {products.map((p) => (
           <div
             key={p.id}
-            className="w-[140px] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
+            className="w-[42vw] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
           >
             <ProductCard product={p} />
           </div>
