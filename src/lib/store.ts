@@ -1478,6 +1478,20 @@ export function hydrateFromCloud(): Promise<void> {
   if (_hydratingFromCloud) return _hydratingFromCloud;
   _hydratingFromCloud = (async () => {
     try {
+      // CRITICAL: Aguarda a hidratação do IndexedDB terminar ANTES de buscar
+      // dados na nuvem. Sem isso, uma race condition fazia o cloud chegar antes
+      // do IDB, resultando em cur.customers = [] e deslogando o cliente.
+      if (!useStore.persist.hasHydrated()) {
+        await new Promise<void>((resolve) => {
+          const unsub = useStore.persist.onFinishHydration(() => {
+            unsub();
+            resolve();
+          });
+          // safety timeout: se o IDB demorar mais de 3s, continua mesmo assim
+          setTimeout(resolve, 3000);
+        });
+      }
+
       const snap = await fetchCloudSnapshot();
       const cur = useStore.getState();
       // Merge by id: prefer cloud rows, keep any local-only items the cloud doesn't know yet.
