@@ -49,6 +49,7 @@ import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
 import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminBiRouteImport } from './routes/admin.bi'
+import { Route as AdminAvaliacoesRouteImport } from './routes/admin.avaliacoes'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
 import { Route as CheckoutPixIdRouteImport } from './routes/checkout.pix.$id'
 import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
@@ -258,6 +259,11 @@ const AdminBiRoute = AdminBiRouteImport.update({
   path: '/admin/bi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAvaliacoesRoute = AdminAvaliacoesRouteImport.update({
+  id: '/admin/avaliacoes',
+  path: '/admin/avaliacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
   id: '/admin/afiliadas',
   path: '/admin/afiliadas',
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/suporte': typeof SuporteRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
+  '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/chatbot': typeof AdminChatbotRoute
@@ -363,6 +370,7 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/suporte': typeof SuporteRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
+  '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/chatbot': typeof AdminChatbotRoute
@@ -414,6 +422,7 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/suporte': typeof SuporteRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
+  '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
   '/admin/chatbot': typeof AdminChatbotRoute
@@ -466,6 +475,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/suporte'
     | '/admin/afiliadas'
+    | '/admin/avaliacoes'
     | '/admin/bi'
     | '/admin/categorias'
     | '/admin/chatbot'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/suporte'
     | '/admin/afiliadas'
+    | '/admin/avaliacoes'
     | '/admin/bi'
     | '/admin/categorias'
     | '/admin/chatbot'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/suporte'
     | '/admin/afiliadas'
+    | '/admin/avaliacoes'
     | '/admin/bi'
     | '/admin/categorias'
     | '/admin/chatbot'
@@ -617,6 +629,7 @@ export interface RootRouteChildren {
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SuporteRoute: typeof SuporteRoute
   AdminAfiliadasRoute: typeof AdminAfiliadasRoute
+  AdminAvaliacoesRoute: typeof AdminAvaliacoesRoute
   AdminBiRoute: typeof AdminBiRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
   AdminChatbotRoute: typeof AdminChatbotRoute
@@ -935,6 +948,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/avaliacoes': {
+      id: '/admin/avaliacoes'
+      path: '/admin/avaliacoes'
+      fullPath: '/admin/avaliacoes'
+      preLoaderRoute: typeof AdminAvaliacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/afiliadas': {
       id: '/admin/afiliadas'
       path: '/admin/afiliadas'
@@ -1020,6 +1040,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   SuporteRoute: SuporteRoute,
   AdminAfiliadasRoute: AdminAfiliadasRoute,
+  AdminAvaliacoesRoute: AdminAvaliacoesRoute,
   AdminBiRoute: AdminBiRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
   AdminChatbotRoute: AdminChatbotRoute,

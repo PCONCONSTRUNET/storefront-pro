@@ -120,25 +120,32 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   const onPickFiles = async (files: FileList | null, kind: "photo" | "video") => {
     if (!files || !files.length || !currentCustomerId) return;
-    const maxPhotos = 5;
-    const maxVideos = 2;
-    const remaining = kind === "photo" ? maxPhotos - photos.length : maxVideos - videos.length;
-    if (remaining <= 0) {
-      toast.error(kind === "photo" ? `Máx. ${maxPhotos} fotos` : `Máx. ${maxVideos} vídeos`);
+    
+    // Total media limit is 1
+    if (photos.length + videos.length >= 1) {
+      toast.error("Você já enviou a quantidade máxima (1 mídia)");
       return;
     }
-    const limitBytes = kind === "photo" ? 5 * 1024 * 1024 : 30 * 1024 * 1024;
-    const arr = Array.from(files).slice(0, remaining);
-    const tooBig = arr.find((f) => f.size > limitBytes);
-    if (tooBig) {
-      toast.error(kind === "photo" ? "Cada foto até 5MB" : "Cada vídeo até 30MB");
+
+    const limitBytes = kind === "photo" ? 15 * 1024 * 1024 : 50 * 1024 * 1024; // Let photo sizes be larger before compression
+    const file = files[0]; // take only the first one
+
+    if (file.size > limitBytes) {
+      toast.error(kind === "photo" ? "A foto deve ter até 15MB" : "O vídeo deve ter até 50MB");
       return;
     }
+
     setUploading(true);
     try {
-      const urls = await Promise.all(arr.map((f) => cloud.uploadReviewMedia(f, currentCustomerId)));
-      if (kind === "photo") setPhotos((p) => [...p, ...urls]);
-      else setVideos((v) => [...v, ...urls]);
+      let fileToUpload = file;
+      if (kind === "photo") {
+        const { compressImage } = await import("@/lib/imageCompression");
+        fileToUpload = await compressImage(file, 1080, 1080, 0.75);
+      }
+
+      const url = await cloud.uploadReviewMedia(fileToUpload, currentCustomerId);
+      if (kind === "photo") setPhotos([url]); // replace just in case
+      else setVideos([url]);
     } catch (e: any) {
       toast.error(e?.message || "Falha ao enviar mídia");
     } finally {
@@ -317,7 +324,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                   </button>
                 </div>
               ))}
-              {photos.length < 5 && (
+              {photos.length + videos.length < 1 && (
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
@@ -327,7 +334,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
                 </button>
               )}
-              {videos.length < 2 && (
+              {photos.length + videos.length < 1 && (
                 <button
                   type="button"
                   onClick={() => videoRef.current?.click()}
@@ -341,7 +348,6 @@ export function ProductReviews({ productId }: { productId: string }) {
                 ref={fileRef}
                 type="file"
                 accept="image/*"
-                multiple
                 className="hidden"
                 onChange={(e) => {
                   onPickFiles(e.target.files, "photo");
@@ -352,7 +358,6 @@ export function ProductReviews({ productId }: { productId: string }) {
                 ref={videoRef}
                 type="file"
                 accept="video/*"
-                multiple
                 className="hidden"
                 onChange={(e) => {
                   onPickFiles(e.target.files, "video");
@@ -360,7 +365,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                 }}
               />
               <span className="text-[11px] text-muted-foreground ml-auto">
-                {photos.length}/5 fotos · {videos.length}/2 vídeos
+                {photos.length + videos.length}/1 mídia
               </span>
             </div>
             <button

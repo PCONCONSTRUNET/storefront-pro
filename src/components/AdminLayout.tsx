@@ -21,6 +21,7 @@ import {
   HelpCircle,
   ArrowUpDown,
   Activity,
+  Star,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
@@ -43,6 +44,7 @@ const nav = [
   { to: "/admin/organizar", label: "Organizar Home", icon: ArrowUpDown },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
   { to: "/admin/clientes", label: "Clientes", icon: Users },
+  { to: "/admin/avaliacoes", label: "Avaliações", icon: Star },
   { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },
   { to: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
