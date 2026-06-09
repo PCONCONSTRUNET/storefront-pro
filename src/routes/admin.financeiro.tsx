@@ -44,6 +44,7 @@ type Row = {
   txRef?: Transaction;
   affiliateSaleId?: string;
   customerEmail?: string;
+  isCompleted: boolean;
 };
 
 const CATEGORY_LABEL: Record<TransactionCategory, string> = {
@@ -98,7 +99,6 @@ function Page() {
         "concluido",
       ].includes(status);
       const isRefund = status === "reembolsado";
-      if (!isPaid && !isRefund) return;
       const productSummary = o.items
         .map((it) => {
           const p = products.find((pp) => pp.id === it.productId);
@@ -115,13 +115,14 @@ function Page() {
         kind: "pedido",
         status,
         customerEmail: o.customerEmail,
+        isCompleted: isPaid || isRefund,
       });
     });
 
     affiliateSales
-      .filter((s) => s.status === "confirmada")
       .forEach((s) => {
         const aff = affiliates.find((a) => a.id === s.affiliateId);
+        const isCompleted = s.status === "confirmada";
         list.push({
           id: `affsale-${s.id}`,
           date: s.createdAt,
@@ -132,6 +133,8 @@ function Page() {
           kind: "comissao",
           affiliateName: aff?.name,
           affiliateSaleId: s.id,
+          status: s.status,
+          isCompleted,
         });
         if (s.commissionEarned > 0) {
           list.push({
@@ -144,6 +147,8 @@ function Page() {
             kind: "comissao",
             affiliateName: aff?.name,
             affiliateSaleId: s.id,
+            status: s.status,
+            isCompleted,
           });
         }
       });
@@ -174,6 +179,7 @@ function Page() {
         kind: "manual",
         affiliateName: aff?.name,
         txRef: t,
+        isCompleted: true,
       });
     });
 
@@ -182,10 +188,10 @@ function Page() {
 
   const totals = useMemo(() => {
     const entradas = rows
-      .filter((r) => !r.isOut)
+      .filter((r) => !r.isOut && r.isCompleted)
       .reduce((a, r) => a + r.amount, 0);
     const saidas = rows
-      .filter((r) => r.isOut)
+      .filter((r) => r.isOut && r.isCompleted)
       .reduce((a, r) => a + r.amount, 0);
     const pendente = orders
       .filter((o) => normalizeOrderStatus(o.status) === "aguardando_pagamento")
@@ -343,8 +349,9 @@ function Page() {
                 className="cursor-pointer p-4 flex justify-between items-start gap-3 relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm"
               >
                 <div
-                  className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
-                  style={{ backgroundColor: r.isOut ? "#ef4444" : "#22c55e" }}
+                  className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl ${
+                    !r.isCompleted ? "bg-muted-foreground/30" : r.isOut ? "bg-destructive" : "bg-success"
+                  }`}
                 />
                 <div className="min-w-0 flex-1 ml-1">
                   <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
@@ -360,6 +367,11 @@ function Page() {
                         manual
                       </span>
                     )}
+                    {!r.isCompleted && r.status && (
+                      <span className="text-[9px] uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                        {r.status.replace(/_/g, " ")}
+                      </span>
+                    )}
                   </div>
                   {r.meta && (
                     <div className="text-xs text-muted-foreground mt-0.5 break-words">
@@ -372,7 +384,13 @@ function Page() {
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <div
-                    className={`font-bold whitespace-nowrap ${r.isOut ? "text-destructive" : "text-success"}`}
+                    className={`font-bold whitespace-nowrap ${
+                      !r.isCompleted
+                        ? "text-muted-foreground"
+                        : r.isOut
+                          ? "text-destructive"
+                          : "text-success"
+                    } ${r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada" ? "line-through opacity-60" : ""}`}
                   >
                     {r.isOut ? "− " : "+ "}
                     {brl(r.amount)}
