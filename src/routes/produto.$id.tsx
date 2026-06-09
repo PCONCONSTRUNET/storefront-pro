@@ -37,17 +37,20 @@ function Page() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistLoading, setWaitlistLoading] = useState(false);
 
-  const priceDelta = (() => {
+  // Preço da opção selecionada (valor absoluto, não acréscimo)
+  const selectedOptionPrice = (() => {
     const flatIdx = selected["_flat"];
-    if (flatIdx == null || !product?.variations) return 0;
+    if (flatIdx == null || !product?.variations) return null;
     const allOpts = product.variations.flatMap((v: any) =>
       (v.options ?? []).map((o: any) =>
-        typeof o === "object" ? (o.priceDelta ?? 0) : 0
+        typeof o === "object" ? (o.priceDelta ?? null) : null
       )
     );
-    return allOpts[flatIdx] ?? 0;
+    const val = allOpts[flatIdx];
+    return val != null && val > 0 ? val : null;
   })();
-  const finalPrice = (product?.price ?? 0) + priceDelta;
+
+  const finalPrice = selectedOptionPrice ?? (product?.price ?? 0);
 
   if (!product) {
     return (
@@ -240,8 +243,8 @@ function Page() {
                         >
                           {o.label}
                           {o.delta > 0 && (
-                            <span className="ml-1 text-xs opacity-80 font-normal">
-                              +{o.delta.toFixed(2).replace(".", ",")}
+                            <span className="ml-1 text-xs text-muted-foreground font-normal">
+                              {brl(o.delta)}
                             </span>
                           )}
                         </button>
@@ -249,8 +252,8 @@ function Page() {
                     })}
                   </div>
                   {selected["_flat"] != null && allOpts[selected["_flat"]]?.delta > 0 && (
-                    <div className="mt-2 text-xs text-primary font-medium">
-                      Acréscimo: +{brl(allOpts[selected["_flat"]].delta)}
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Preço desta opção: {brl(allOpts[selected["_flat"]].delta)}
                     </div>
                   )}
                 </div>

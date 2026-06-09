@@ -396,7 +396,7 @@ function FlatVariationsEditor({
       {opts.length > 0 && (
         <div className="flex gap-2 px-1">
           <span className="flex-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Nome da opção</span>
-          <span className="w-24 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide text-right">Acréscimo (R$)</span>
+          <span className="w-24 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide text-right">Preço (R$)</span>
           <span className="w-5" />
         </div>
       )}
