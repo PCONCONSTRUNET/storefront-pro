@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { normalizeOrderStatus, useStore } from "@/lib/store";
-import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
 import {
@@ -10,8 +9,8 @@ import {
   Users,
   Package,
   TrendingUp,
+  TrendingUp,
   TrendingDown,
-  Bell,
   Sparkles,
   Crown,
   Activity,
@@ -157,127 +156,8 @@ function Page() {
     },
   ];
 
-  const { 
-    playerId: osId, 
-    subscribed: osActive, 
-    loading: syncing, 
-    enable: forceSync,
-    permission: osPermission
-  } = usePushNotifications({ role: 'admin' });
-
-  const nukeServiceWorker = async () => {
-    const { confirmDialog } = await import("@/components/ConfirmDialog");
-    if (!(await confirmDialog({ title: "Resetar notificações?", description: "Isso vai limpar todas as configurações de notificação e recarregar a página.", confirmLabel: "Continuar" }))) return;
-    
-    try {
-      // Desregistra todos os Service Workers
-      if ("serviceWorker" in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          await registration.unregister();
-        }
-      }
-      
-      // Limpa dados do OneSignal no localStorage e IndexedDB
-      localStorage.removeItem("push_prompt_accepted");
-      localStorage.removeItem("push_prompt_dismissed_at");
-      
-      // Limpa bancos de dados do OneSignal (IndexedDB)
-      const dbs = await window.indexedDB.databases();
-      dbs.forEach(db => {
-        if (db.name?.includes("OneSignal")) {
-          window.indexedDB.deleteDatabase(db.name);
-        }
-      });
-
-      window.alert("Sistema limpo! A página vai recarregar. Ative as notificações novamente ao voltar.");
-      window.location.reload();
-    } catch (err) {
-      console.error("Erro ao limpar:", err);
-      window.location.reload();
-    }
-  };
-
-  const testNotification = async () => {
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      if (!osId) {
-        toast.error("Dispositivo não registrado ainda.");
-        return;
-      }
-
-      const { error } = await supabase.functions.invoke("send-push", {
-        body: {
-          title: "Teste Admin Push 🚀",
-          message: `Recebido! ${new Date().toLocaleTimeString()}`,
-          subscriptionIds: [osId],
-          externalUserIds: ["admin-user"],
-        },
-      });
-
-      if (error) throw error;
-      toast.success(`Push enviado para o ID: ${osId.slice(0, 8)}...`);
-    } catch (err) {
-      console.error("[push-test]", err);
-      toast.error(`Erro: ${(err as Error).message}`);
-    }
-  };
-
   return (
     <AdminLayout title="Dashboard">
-      {/* Barra de Diagnóstico Push - Reforçada para Mobile */}
-      <div className="mb-6 bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-2xl border-2 border-indigo-500/20 shadow-lg relative z-[999] pointer-events-auto">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-widest flex items-center gap-2">
-            <Bell className="h-3 w-3" /> Status do Push
-          </div>
-          <div
-            className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${osActive ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}
-          >
-            {osActive ? "CONECTADO" : "DESCONECTADO"}
-          </div>
-        </div>
-
-        <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
-          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">
-            Subscription ID
-          </span>
-          {osId}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nukeServiceWorker();
-            }}
-            className="h-11 bg-destructive/10 text-destructive rounded-xl font-bold text-[10px] shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-destructive/20"
-          >
-            Limpar Tudo
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              window.alert("Sincronizando... aguarde o aviso de sucesso.");
-              forceSync();
-            }}
-            disabled={syncing}
-            className="h-11 bg-white dark:bg-white/10 text-foreground rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-border"
-          >
-            {syncing ? "..." : "Sincronizar"}
-          </button>
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            testNotification();
-          }}
-          className="w-full h-11 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
-        >
-          <TrendingUp className="h-4 w-4" /> Testar Push
-        </button>
-      </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {cards.map((c) => {

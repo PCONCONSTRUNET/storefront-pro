@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 import {
   Bell,
   Send,
@@ -15,6 +16,7 @@ import {
   Trash2,
   BellRing,
   Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -141,306 +143,127 @@ function Page() {
     }
   };
 
+  const { 
+    playerId: osId, 
+    subscribed: osActive, 
+    loading: syncing, 
+    enable: forceSync,
+    permission: osPermission
+  } = usePushNotifications({ role: 'admin' });
+
+  const nukeServiceWorker = async () => {
+    const { confirmDialog } = await import("@/components/ConfirmDialog");
+    if (!(await confirmDialog({ title: "Resetar notificações?", description: "Isso vai limpar todas as configurações de notificação e recarregar a página.", confirmLabel: "Continuar" }))) return;
+    
+    try {
+      // Desregistra todos os Service Workers
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      
+      // Limpa dados do OneSignal no localStorage e IndexedDB
+      localStorage.removeItem("push_prompt_accepted");
+      localStorage.removeItem("push_prompt_dismissed_at");
+      
+      // Limpa bancos de dados do OneSignal (IndexedDB)
+      const dbs = await window.indexedDB.databases();
+      dbs.forEach(db => {
+        if (db.name?.includes("OneSignal")) {
+          window.indexedDB.deleteDatabase(db.name);
+        }
+      });
+
+      window.alert("Sistema limpo! A página vai recarregar. Ative as notificações novamente ao voltar.");
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao limpar:", err);
+      window.location.reload();
+    }
+  };
+
+  const testNotification = async () => {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      if (!osId) {
+        toast.error("Dispositivo não registrado ainda.");
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke("send-push", {
+        body: {
+          title: "Teste Admin Push 🚀",
+          message: `Recebido! ${new Date().toLocaleTimeString()}`,
+          subscriptionIds: [osId],
+          externalUserIds: ["admin-user"],
+        },
+      });
+
+      if (error) throw error;
+      toast.success(`Push enviado para o ID: ${osId.slice(0, 8)}...`);
+    } catch (err) {
+      console.error("[push-test]", err);
+      toast.error(`Erro: ${(err as Error).message}`);
+    }
+  };
+
   return (
     <AdminLayout title="Notificações">
-      {/* Hero / status */}
-      <div className="relative overflow-hidden rounded-3xl gradient-primary text-primary-foreground shadow-soft mb-4 animate-fade-in">
-        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-gold/30 blur-3xl pointer-events-none" />
-        <div className="relative p-5 flex flex-wrap items-center gap-4 justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur grid place-items-center">
-              <BellRing className="h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="font-display text-2xl leading-tight">
-                Central de notificações
-              </h2>
-              <p className="text-xs opacity-90">
-                Push, e-mail e in-app — tudo em um só lugar.
-              </p>
-            </div>
+      {/* Barra de Diagnóstico Push - Reforçada para Mobile */}
+      <div className="bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-2xl border-2 border-indigo-500/20 shadow-lg relative z-[999] pointer-events-auto">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-widest flex items-center gap-2">
+            <Bell className="h-3 w-3" /> Status do Push
           </div>
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur px-4 py-2 rounded-2xl border border-white/10">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold uppercase opacity-70">
-                Status do Push
-              </span>
-              <PushBadge state={pushPermission} />
-            </div>
-            <div className="w-px h-8 bg-white/20" />
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold uppercase opacity-70 mb-1">
-                Notificações
-              </span>
-              <Switch
-                checked={pushEnabled}
-                onChange={togglePush}
-                className={`bg-white/20 ${togglingPush ? "opacity-50 pointer-events-none" : ""}`}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="relative grid grid-cols-2 md:grid-cols-4 gap-2 px-5 pb-5">
-          <Stat label="Enviadas" value={stats.total} />
-          <Stat label="Não lidas" value={stats.unread} highlight />
-          <Stat label="Via push" value={stats.push} />
-          <Stat
-            label="Modelos ativos"
-            value={`${stats.activeTemplates}/${adminTemplates.length}`}
-          />
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-4 overflow-x-auto">
-        <TabBtn
-          active={tab === "enviar"}
-          onClick={() => setTab("enviar")}
-          icon={Send}
-        >
-          Enviar
-        </TabBtn>
-        <TabBtn
-          active={tab === "modelos"}
-          onClick={() => setTab("modelos")}
-          icon={Settings2}
-        >
-          Modelos ({adminTemplates.length})
-        </TabBtn>
-        <TabBtn
-          active={tab === "historico"}
-          onClick={() => setTab("historico")}
-          icon={History}
-        >
-          Histórico ({logs.length})
-        </TabBtn>
-      </div>
-
-      {tab === "enviar" && (
-        <div className="grid lg:grid-cols-[1fr_360px] gap-4 animate-fade-in">
-          <form
-            onSubmit={send}
-            className="bg-card rounded-2xl p-5 shadow-card space-y-4"
+          <div
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${osActive ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}
           >
-            <h3 className="font-bold flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" /> Notificação manual
-            </h3>
-
-            <Field label="Título">
-              <input
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                maxLength={60}
-                className="input"
-                placeholder="Ex: Promoção relâmpago 🎀"
-              />
-              <span className="text-[10px] text-muted-foreground">
-                {form.title.length}/60
-              </span>
-            </Field>
-
-            <Field label="Mensagem">
-              <textarea
-                value={form.body}
-                onChange={(e) => setForm({ ...form, body: e.target.value })}
-                rows={4}
-                maxLength={160}
-                className="input min-h-[96px] py-2"
-                placeholder="Escreva uma mensagem curta e direta..."
-              />
-              <span className="text-[10px] text-muted-foreground">
-                {form.body.length}/160
-              </span>
-            </Field>
-
-            <p className="text-xs text-muted-foreground rounded-xl bg-muted/50 px-3 py-2">
-              Envio manual apenas para dispositivos <b>admin</b> sincronizados.
-            </p>
-
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Canais
-              </span>
-              <div className="grid grid-cols-3 gap-2 mt-1.5">
-                <ChannelToggle
-                  icon={Smartphone}
-                  label="Push"
-                  active={form.channels.push}
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      channels: { ...form.channels, push: !form.channels.push },
-                    })
-                  }
-                />
-                <ChannelToggle
-                  icon={Mail}
-                  label="E-mail"
-                  active={form.channels.email}
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      channels: {
-                        ...form.channels,
-                        email: !form.channels.email,
-                      },
-                    })
-                  }
-                />
-                <ChannelToggle
-                  icon={MessageSquare}
-                  label="In-app"
-                  active={form.channels.inapp}
-                  onClick={() =>
-                    setForm({
-                      ...form,
-                      channels: {
-                        ...form.channels,
-                        inapp: !form.channels.inapp,
-                      },
-                    })
-                  }
-                />
-              </div>
-            </div>
-
-            <button className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.98] transition-transform">
-              <Send className="h-4 w-4" /> Enviar agora
-            </button>
-            <p className="text-[11px] text-muted-foreground text-center">
-              Push via OneSignal ativo ✅ — notificações serão entregues aos
-              dispositivos cadastrados.
-            </p>
-          </form>
-
-          {/* Preview */}
-          <div className="space-y-3">
-            <h3 className="font-bold text-sm">Pré-visualização</h3>
-            <NotificationPreview
-              title={form.title || "Título da notificação"}
-              body={form.body || "A mensagem aparece aqui..."}
-            />
+            {osActive ? "CONECTADO" : "DESCONECTADO"}
           </div>
         </div>
-      )}
 
-      {tab === "modelos" && (
-        <div className="bg-card rounded-2xl shadow-card p-4 animate-fade-in">
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <div>
-              <h3 className="font-bold">Modelos automáticos (admin)</h3>
-              <p className="text-xs text-muted-foreground">
-                Disparados pelos eventos da loja. Use {"{cliente}"},{" "}
-                {"{pedido}"}, {"{total}"}, {"{afiliada}"}, {"{produto}"},{" "}
-                {"{estoque}"} como variáveis.
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                resetTemplates();
-                toast.success("Modelos restaurados");
-              }}
-              className="h-9 px-3 rounded-full bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1"
-            >
-              <RefreshCw className="h-3.5 w-3.5" /> Restaurar padrão
-            </button>
-          </div>
-
-          <ul className="space-y-3">
-            {adminTemplates.map((t) => (
-              <TemplateRow
-                key={t.id}
-                template={t}
-                onChange={(patch) => updateTemplate(t.id, patch)}
-              />
-            ))}
-          </ul>
+        <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
+          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">
+            Subscription ID
+          </span>
+          {osId}
         </div>
-      )}
 
-      {tab === "historico" && (
-        <div className="bg-card rounded-2xl shadow-card p-4 animate-fade-in">
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <h3 className="font-bold">Histórico de envios</h3>
-            <div className="flex gap-2">
-              <button
-                onClick={markAllRead}
-                className="h-9 px-3 rounded-full bg-muted hover:bg-muted/70 text-xs font-semibold flex items-center gap-1"
-              >
-                <Check className="h-3.5 w-3.5" /> Marcar todas como lidas
-              </button>
-              <button
-                onClick={async () => {
-                  const { confirmDialog } = await import("@/components/ConfirmDialog");
-                  if (await confirmDialog({ title: "Limpar histórico?", description: "Todas as notificações serão removidas.", confirmLabel: "Limpar" })) {
-                    clearLogs();
-                    toast.success("Histórico limpo");
-                  }
-                }}
-                className="h-9 px-3 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-semibold flex items-center gap-1"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Limpar
-              </button>
-            </div>
-          </div>
-
-          {logs.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12">
-              Nenhuma notificação enviada ainda.
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {logs.map((l) => (
-                <li
-                  key={l.id}
-                  className={`relative overflow-hidden rounded-xl p-3 border transition-colors ${l.read ? "bg-background border-border" : "bg-primary/5 border-primary/30"}`}
-                >
-                  <div className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl ${l.read ? "bg-muted" : "bg-primary"}`} />
-                  <div className="flex items-start justify-between gap-2 ml-1">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm">{l.title}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                          {CATEGORY_LABELS[l.category]}
-                        </span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/40 text-foreground capitalize">
-                          {AUDIENCE_LABELS[l.audience]}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {l.body}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5 text-[10px] text-muted-foreground">
-                        <span>
-                          {new Date(l.sentAt).toLocaleString("pt-BR")}
-                        </span>
-                        <span>·</span>
-                        <span className="flex items-center gap-1">
-                          {l.channels.includes("push") && (
-                            <Smartphone className="h-3 w-3" />
-                          )}
-                          {l.channels.includes("email") && (
-                            <Mail className="h-3 w-3" />
-                          )}
-                          {l.channels.includes("inapp") && (
-                            <MessageSquare className="h-3 w-3" />
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                    {!l.read && (
-                      <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nukeServiceWorker();
+            }}
+            className="h-11 bg-destructive/10 text-destructive rounded-xl font-bold text-[10px] shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-destructive/20"
+          >
+            Limpar Tudo
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              window.alert("Sincronizando... aguarde o aviso de sucesso.");
+              forceSync();
+            }}
+            disabled={syncing}
+            className="h-11 bg-white dark:bg-white/10 text-foreground rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-border"
+          >
+            {syncing ? "..." : "Sincronizar"}
+          </button>
         </div>
-      )}
 
-      <style>{`.input{margin-top:4px;width:100%;height:44px;padding:0 14px;border-radius:14px;background:var(--background);border:1px solid var(--border);outline:none;transition:all .2s ease;font-size:14px}.input:focus{border-color:color-mix(in oklab,var(--primary) 60%,transparent);box-shadow:0 0 0 4px color-mix(in oklab,var(--primary) 15%,transparent)}.input::placeholder{color:color-mix(in oklab,var(--muted-foreground) 70%,transparent)}`}</style>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            testNotification();
+          }}
+          className="w-full h-11 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+        >
+          <TrendingUp className="h-4 w-4" /> Testar Push
+        </button>
+      </div>
     </AdminLayout>
   );
 }

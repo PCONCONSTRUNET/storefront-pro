@@ -494,7 +494,7 @@ function Page() {
               <li
                 key={r.id}
                 onClick={() => setViewingRow(r)}
-                className="cursor-pointer p-4 mb-3 flex gap-4 bg-[#1c1c1e] text-white rounded-[28px] shadow-lg border border-white/5 hover:bg-[#252527] transition-colors relative"
+                className="cursor-pointer p-4 mb-3 flex gap-4 bg-[#1c1c1e] text-white rounded-[28px] shadow-lg border border-white/10 hover:bg-[#252527] transition-colors relative"
               >
                 <div className="w-[52px] h-[52px] rounded-[16px] bg-[#0E5C3B] flex flex-col items-center justify-center shrink-0 shadow-inner">
                   {r.kind === "pedido" ? (
@@ -504,26 +504,26 @@ function Page() {
                   ) : (
                     <>
                       <span className="text-white font-bold text-xl leading-none">{storeSettings.storeName.charAt(0)}</span>
-                      <span className="text-white/80 text-[7px] mt-1 tracking-wider uppercase font-semibold">Loja</span>
+                      <span className="text-white text-[7px] mt-1 tracking-wider uppercase font-bold">Loja</span>
                     </>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0 pt-0.5">
                   <div className="flex justify-between items-start gap-2 mb-1">
-                    <h4 className="font-semibold text-[15px] leading-tight text-white truncate">
+                    <h4 className="font-bold text-[15px] leading-tight text-white truncate">
                       {r.description}
                       {r.kind === "manual" && (
-                        <span className="ml-2 text-[8px] uppercase tracking-wide bg-white/10 text-white/70 px-1.5 py-0.5 rounded-full">
+                        <span className="ml-2 text-[8px] uppercase tracking-wide bg-white/20 text-white px-1.5 py-0.5 rounded-full font-bold">
                           manual
                         </span>
                       )}
                     </h4>
-                    <span className="text-[12px] text-white/40 shrink-0 mt-0.5">{formatDate(r.date)}</span>
+                    <span className="text-[12px] text-white/80 font-medium shrink-0 mt-0.5">{formatDate(r.date)}</span>
                   </div>
                   
-                  <div className="text-[14px] text-white/80 leading-snug">
-                    {r.meta && <div className="truncate mb-1.5 text-[13px]">{r.meta}</div>}
+                  <div className="text-[14px] text-white leading-snug">
+                    {r.meta && <div className="truncate mb-1.5 text-[13px] font-medium text-white/90">{r.meta}</div>}
                     
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-2">
@@ -545,19 +545,19 @@ function Page() {
                       <div className="flex items-center gap-3">
                         <div
                           className={`font-bold whitespace-nowrap text-[15px] ${
-                            !r.isCompleted
-                              ? "text-white/50"
+                            r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada"
+                              ? "text-white/50 line-through opacity-60"
                               : r.isOut
                                 ? "text-red-400"
                                 : "text-green-400"
-                          } ${r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada" ? "line-through opacity-60" : ""}`}
+                          }`}
                         >
                           {r.isOut ? "− " : "+ "}
                           {brl(r.amount)}
                         </div>
                         
                         {(r.txRef || r.affiliateSaleId) && (
-                          <div className="flex items-center gap-1 border-l border-white/10 pl-3">
+                          <div className="flex items-center gap-1 border-l border-white/20 pl-3">
                             {r.txRef && (
                               <>
                                 <button
@@ -566,7 +566,7 @@ function Page() {
                                     setEditing(r.txRef!);
                                     setShowForm(true);
                                   }}
-                                  className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 transition-colors"
+                                  className="p-1.5 rounded-lg hover:bg-white/20 text-white/80 transition-colors"
                                   title="Editar"
                                 >
                                   <Pencil className="h-3.5 w-3.5" />
