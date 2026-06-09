@@ -42,6 +42,7 @@ function Page() {
     null | Parameters<typeof CardPaymentModal>[0]["payload"]
   >(null);
   const [pixModal, setPixModal] = useState<CreatePixInput | null>(null);
+  const [showCardMaintenance, setShowCardMaintenance] = useState(false);
   const [form, setForm] = useState({
     name: customer?.name || "",
     email: customer?.email || "",
@@ -277,7 +278,7 @@ function Page() {
                     key={p.id}
                     onClick={() => {
                       if (p.id === "card") {
-                        toast.error("Método em manutenção. Pague via Pix.");
+                        setShowCardMaintenance(true);
                         return;
                       }
                       setForm({ ...form, payment: p.id });
@@ -462,6 +463,66 @@ function Page() {
         payload={pixModal}
         onClose={() => setPixModal(null)}
       />
+
+      {/* Modal de manutenção do cartão */}
+      {showCardMaintenance && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          onClick={() => setShowCardMaintenance(false)}
+        >
+          <div
+            className="bg-card rounded-3xl p-7 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ícone */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <span className="text-3xl">🔧</span>
+              </div>
+            </div>
+
+            {/* Título */}
+            <h2 className="text-xl font-bold text-center text-foreground mb-2">
+              Pagamento com cartão
+            </h2>
+            <p className="text-sm text-muted-foreground text-center mb-1">
+              Em manutenção
+            </p>
+
+            {/* Divisor */}
+            <hr className="border-border my-4" />
+
+            {/* Mensagem */}
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-5 text-sm text-center text-foreground">
+              Pagamento via cartão está temporariamente indisponível.
+              <br />
+              <span className="font-semibold text-primary">
+                Pague com Pix e ganhe 5% de desconto! 🎉
+              </span>
+            </div>
+
+            {/* Botão Pix */}
+            <button
+              onClick={() => {
+                setForm((f) => ({ ...f, payment: "pix" }));
+                setShowCardMaintenance(false);
+              }}
+              className="w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all mb-3"
+            >
+              <img src={pixIcon} alt="Pix" className="h-5 w-5 object-contain" />
+              Pagar com Pix
+            </button>
+
+            {/* Fechar */}
+            <button
+              onClick={() => setShowCardMaintenance(false)}
+              className="w-full h-10 rounded-full border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </StoreLayout>
   );
 }
