@@ -398,16 +398,33 @@ type AppState = {
   sync: () => Promise<void>;
 };
 
-// Storage via IndexedDB para evitar o limite de 5MB do localStorage
 const idbStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    return (await get(name)) || null;
+    try {
+      const val = await get(name);
+      if (val) return val;
+    } catch (e) {
+      console.warn("IndexedDB get falhou, tentando localStorage", e);
+    }
+    return localStorage.getItem(name) || null;
   },
   setItem: async (name: string, value: string): Promise<void> => {
-    await set(name, value);
+    try {
+      await set(name, value);
+    } catch (e) {
+      console.warn("IndexedDB set falhou", e);
+    }
+    try {
+      localStorage.setItem(name, value);
+    } catch (e) {
+      // Ignora erro de cota
+    }
   },
   removeItem: async (name: string): Promise<void> => {
-    await del(name);
+    try {
+      await del(name);
+    } catch (e) {}
+    localStorage.removeItem(name);
   },
 };
 
@@ -1415,7 +1432,6 @@ export function useStoreHydrated() {
       if (active) setHydrated(true);
     };
     const unsub = useStore.persist.onFinishHydration(markHydrated);
-    Promise.resolve(useStore.persist.rehydrate()).then(markHydrated);
     return () => {
       active = false;
       unsub();
