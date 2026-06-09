@@ -29,7 +29,8 @@ const empty = (): Product => ({
   price: 0,
   image: "",
   gallery: [],
-  category: "lacos",
+  category: "",
+  categories: [],
   stock: 0,
   minStock: 5,
   sku: "",
@@ -91,14 +92,15 @@ function Page() {
               <div className="flex-1 min-w-0 ml-3 md:ml-0">
                 <div className="font-medium text-sm truncate">{p.name}</div>
                 <div className="text-xs text-muted-foreground">SKU {p.sku}</div>
-                {/* Category badges */}
+                {/* Category badges — only show categories that exist in catMap */}
                 {(() => {
-                  const cats = (p.categories?.length ? p.categories : (p.category ? [p.category] : []));
+                  const cats = (p.categories?.length ? p.categories : (p.category ? [p.category] : []))
+                    .filter((cid) => !!catMap[cid]); // hide orphan IDs not in admin categories
                   return cats.length > 0 ? (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {cats.map((cid) => (
                         <span key={cid} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary leading-none">
-                          {catMap[cid] || cid}
+                          {catMap[cid]}
                         </span>
                       ))}
                     </div>
