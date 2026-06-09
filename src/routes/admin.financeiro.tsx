@@ -43,6 +43,7 @@ type Row = {
   affiliateName?: string;
   txRef?: Transaction;
   affiliateSaleId?: string;
+  customerEmail?: string;
 };
 
 const CATEGORY_LABEL: Record<TransactionCategory, string> = {
@@ -113,6 +114,7 @@ function Page() {
         isOut: isRefund,
         kind: "pedido",
         status,
+        customerEmail: o.customerEmail,
       });
     });
 
@@ -1044,6 +1046,201 @@ function AffiliateReport({
             </table>
           </div>
         </>
+        commission: acc.commission + r.commissionConfirmed,
+        paid: acc.paid + r.commissionPaid,
+        toPay: acc.toPay + r.commissionToPay,
+      }),
+      { sales: 0, revenue: 0, commission: 0, paid: 0, toPay: 0 },
+    );
+
+    return { rows, totals };
+  }, [affiliates, affiliateSales, transactions, from, to]);
+
+  const head = [
+    "Afiliada",
+    "Vendas",
+    "Confirmadas",
+    "Pendentes",
+    "Canceladas",
+    "Faturamento (R$)",
+    "Comissão (R$)",
+    "Paga (R$)",
+    "A pagar (R$)",
+  ];
+  const exportCsv = () => {
+    if (report.rows.length === 0) {
+      toast.error("Sem dados no período");
+      return;
+    }
+    const body = report.rows.map((r) => [
+      r.name,
+      r.salesCount,
+      r.confirmedCount,
+      r.pendingCount,
+      r.canceledCount,
+      r.revenueConfirmed.toFixed(2).replace(".", ","),
+      r.commissionConfirmed.toFixed(2).replace(".", ","),
+      r.commissionPaid.toFixed(2).replace(".", ","),
+      r.commissionToPay.toFixed(2).replace(".", ","),
+    ]);
+    const totals = [
+      "TOTAIS",
+      report.totals.sales,
+      "",
+      "",
+      "",
+      report.totals.revenue.toFixed(2).replace(".", ","),
+      report.totals.commission.toFixed(2).replace(".", ","),
+      report.totals.paid.toFixed(2).replace(".", ","),
+      report.totals.toPay.toFixed(2).replace(".", ","),
+    ];
+    downloadCSV(`afiliadas-${from}-a-${to}.csv`, [head, ...body, totals]);
+    toast.success("CSV baixado");
+  };
+
+  const exportPdf = () => {
+    if (report.rows.length === 0) {
+      toast.error("Sem dados no período");
+      return;
+    }
+    downloadPDF({
+      filename: `afiliadas-${from}-a-${to}.pdf`,
+      title: "Relatório por Afiliada",
+      subtitle: `Período: ${new Date(from).toLocaleDateString("pt-BR")} a ${new Date(to).toLocaleDateString("pt-BR")}`,
+      head,
+      body: report.rows.map((r) => [
+        r.name,
+        r.salesCount,
+        r.confirmedCount,
+        r.pendingCount,
+        r.canceledCount,
+        brl(r.revenueConfirmed),
+        brl(r.commissionConfirmed),
+        brl(r.commissionPaid),
+        brl(r.commissionToPay),
+      ]),
+      foot: [
+        "TOTAIS",
+        report.totals.sales,
+        "",
+        "",
+        "",
+        brl(report.totals.revenue),
+        brl(report.totals.commission),
+        brl(report.totals.paid),
+        brl(report.totals.toPay),
+      ],
+    });
+    toast.success("PDF baixado");
+  };
+
+  return (
+    <div className="bg-card rounded-2xl shadow-card mt-4 overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+        <div className="font-bold flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" /> Relatório por afiliada
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="text-xs flex items-center gap-1">
+            <span className="text-muted-foreground">De</span>
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => onFromChange(e.target.value)}
+              className="h-8 px-2 rounded-lg bg-background border border-border text-xs"
+            />
+          </label>
+          <label className="text-xs flex items-center gap-1">
+            <span className="text-muted-foreground">Até</span>
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => onToChange(e.target.value)}
+              className="h-8 px-2 rounded-lg bg-background border border-border text-xs"
+            />
+          </label>
+          <button
+            onClick={exportCsv}
+            className="text-xs flex items-center gap-1 bg-muted hover:bg-muted/70 px-3 py-1.5 rounded-full font-semibold"
+          >
+            <Download className="h-3.5 w-3.5" /> CSV
+          </button>
+          <button
+            onClick={exportPdf}
+            className="text-xs flex items-center gap-1 bg-foreground text-background px-3 py-1.5 rounded-full font-semibold"
+          >
+            <FileText className="h-3.5 w-3.5" /> PDF
+          </button>
+        </div>
+      </div>
+
+      {report.rows.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground text-sm">
+          Nenhuma venda de afiliada no período.
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40 text-xs text-muted-foreground">
+                <tr>
+                  <th className="text-left px-4 py-2">Afiliada</th>
+                  <th className="text-center px-2 py-2">Vendas</th>
+                  <th className="text-right px-2 py-2">Faturamento</th>
+                  <th className="text-right px-2 py-2">Comissão</th>
+                  <th className="text-right px-2 py-2">Paga</th>
+                  <th className="text-right px-4 py-2">A pagar</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {report.rows.map((r) => (
+                  <tr key={r.id}>
+                    <td className="px-4 py-2 font-medium">
+                      {r.name}
+                      <div className="text-[10px] text-muted-foreground">
+                        {r.confirmedCount} conf. · {r.pendingCount} pend. ·{" "}
+                        {r.canceledCount} canc.
+                      </div>
+                    </td>
+                    <td className="text-center px-2 py-2">{r.salesCount}</td>
+                    <td className="text-right px-2 py-2">
+                      {brl(r.revenueConfirmed)}
+                    </td>
+                    <td className="text-right px-2 py-2 text-gold font-semibold">
+                      {brl(r.commissionConfirmed)}
+                    </td>
+                    <td className="text-right px-2 py-2 text-success">
+                      {brl(r.commissionPaid)}
+                    </td>
+                    <td className="text-right px-4 py-2 font-bold">
+                      {brl(r.commissionToPay)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="bg-muted/30 font-bold text-sm">
+                <tr>
+                  <td className="px-4 py-2">Totais</td>
+                  <td className="text-center px-2 py-2">
+                    {report.totals.sales}
+                  </td>
+                  <td className="text-right px-2 py-2">
+                    {brl(report.totals.revenue)}
+                  </td>
+                  <td className="text-right px-2 py-2 text-gold">
+                    {brl(report.totals.commission)}
+                  </td>
+                  <td className="text-right px-2 py-2 text-success">
+                    {brl(report.totals.paid)}
+                  </td>
+                  <td className="text-right px-4 py-2">
+                    {brl(report.totals.toPay)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
@@ -1062,79 +1259,72 @@ function TransactionDetailsModal({
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-2xl p-5 w-full max-w-sm overflow-hidden animate-modal-in"
+        className="bg-card rounded-3xl p-5 w-full max-w-sm overflow-hidden animate-modal-in shadow-xl relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">Detalhes da Movimentação</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-muted"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="pr-8 mb-6">
+          <h3 className="font-bold text-xl text-foreground">Detalhes da Transação</h3>
+          <div className="text-sm text-muted-foreground mt-0.5">
+            {formatDate(row.date)}
+          </div>
         </div>
 
         <div className="space-y-4">
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Data e Hora
-            </div>
-            <div className="text-sm font-medium">{formatDate(row.date)}</div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Descrição
-            </div>
-            <div className="text-sm font-medium">{row.description}</div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Tipo
-            </div>
-            <div className="text-sm font-medium">
+          <div className="bg-muted/30 rounded-2xl p-4 flex flex-col items-center justify-center border border-border/50 text-center">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
               {row.isOut ? "Saída (Despesa)" : "Entrada (Receita)"}
             </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Valor
-            </div>
             <div
-              className={`text-xl font-bold ${
-                row.isOut ? "text-destructive" : "text-success"
+              className={`text-3xl font-black tracking-tight ${
+                row.isOut ? "text-destructive" : "text-emerald-600"
               }`}
             >
               {row.isOut ? "− " : "+ "}
               {brl(row.amount)}
             </div>
-          </div>
-
-          {row.meta && (
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Informações Adicionais
-              </div>
-              <div className="text-sm font-medium text-muted-foreground">
-                {row.meta}
-              </div>
-            </div>
-          )}
-
-          {row.status && (
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                Status
-              </div>
-              <div className="text-sm font-medium capitalize">
+            {row.status && (
+              <div className="mt-2 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-background border border-border shadow-sm">
                 {row.status.replace(/_/g, " ")}
               </div>
+            )}
+          </div>
+
+          <div className="space-y-3 px-1">
+            <div>
+              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                Descrição
+              </div>
+              <div className="text-sm font-semibold">{row.description}</div>
             </div>
-          )}
+
+            {row.customerEmail && (
+              <div>
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                  E-mail do Cliente
+                </div>
+                <div className="text-sm font-medium">{row.customerEmail}</div>
+              </div>
+            )}
+
+            {row.meta && (
+              <div className="pt-2 border-t border-border/50">
+                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
+                  Itens / Informações
+                </div>
+                <div className="text-sm font-medium text-muted-foreground leading-relaxed">
+                  {row.meta}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
