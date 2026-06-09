@@ -255,16 +255,7 @@ function Home() {
                     </Link>
                   </div>
                   {/* Carousel */}
-                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-3 px-3 md:mx-0 md:px-0">
-                    {catProducts.map((p) => (
-                      <div
-                        key={p.id}
-                        className="w-[140px] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
-                      >
-                        <ProductCard product={p} />
-                      </div>
-                    ))}
-                  </div>
+                  <ProductRowCarousel products={catProducts} />
                 </div>
               );
             })}
@@ -382,5 +373,51 @@ function CategoriesScroller({
         </div>
       </div>
     </section>
+  );
+}
+
+function ProductRowCarousel({ products }: { products: Product[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollBy = (dir: number) => {
+    if (scrollRef.current) {
+      const clientWidth = scrollRef.current.clientWidth;
+      const scrollAmount = clientWidth * 0.8 * dir;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <button
+        onClick={() => scrollBy(-1)}
+        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-background/90 backdrop-blur border border-border shadow-soft items-center justify-center z-10 text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+        aria-label="Rolar para esquerda"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-3 px-3 md:mx-0 md:px-0"
+      >
+        {products.map((p) => (
+          <div
+            key={p.id}
+            className="w-[140px] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
+          >
+            <ProductCard product={p} />
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => scrollBy(1)}
+        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-background/90 backdrop-blur border border-border shadow-soft items-center justify-center z-10 text-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+        aria-label="Rolar para direita"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+    </div>
   );
 }
