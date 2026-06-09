@@ -1293,27 +1293,27 @@ export const useStore = create<AppState>()(
         detectAndAlertNewOrders(cur.orders, snap.orders, cur.isAdmin);
         const isPlaceholder = (url: string) =>
           !url || url === "" || url === "null" || url.length < 5;
-        const mergedProducts = cur.products.map((p) => {
-          const remote = snap.products.find((rp) => rp.id === p.id);
-          if (!remote) return p;
+        const mergedProducts = snap.products.map((remote) => {
+          const local = cur.products.find((p) => p.id === remote.id);
+          if (!local) return remote;
 
           // CRITICAL: If local has a valid illustration, KEEP IT.
           // The database doesn't have real photos yet, so we prioritize the AI-generated ones.
-          const localIsIllustration = p.image?.startsWith("/products/");
+          const localIsIllustration = local.image?.startsWith("/products/");
           const remoteIsRealImage = remote.image?.startsWith("http") || remote.image?.startsWith("data:");
 
           return {
             ...remote,
             image:
               localIsIllustration && !remoteIsRealImage
-                ? p.image
-                : remote.image || p.image,
+                ? local.image
+                : remote.image || local.image,
             gallery:
               localIsIllustration && !remoteIsRealImage
-                ? p.gallery
+                ? local.gallery
                 : remote.gallery && remote.gallery.length > 0
                   ? remote.gallery
-                  : p.gallery,
+                  : local.gallery,
           };
         });
         set((s) => ({
