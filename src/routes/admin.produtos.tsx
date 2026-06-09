@@ -552,26 +552,66 @@ function GalleryEditor({
   const addFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const arr = Array.from(files);
-    const tooBig = arr.find((f) => f.size > 5 * 1024 * 1024);
-    if (tooBig) {
-      toast.error("Cada imagem deve ter no máximo 5MB");
-      return;
+    
+    // Mostra um toast de carregamento se forem muitas/grandes
+    const toastId = toast.loading("Processando imagens...");
+
+    try {
+      const dataUrls = await Promise.all(
+        arr.map(
+          (f) =>
+            new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                  const canvas = document.createElement("canvas");
+                  const MAX_WIDTH = 1200;
+                  const MAX_HEIGHT = 1200;
+                  let width = img.width;
+                  let height = img.height;
+
+                  if (width > height) {
+                    if (width > MAX_WIDTH) {
+                      height *= MAX_WIDTH / width;
+                      width = MAX_WIDTH;
+                    }
+                  } else {
+                    if (height > MAX_HEIGHT) {
+                      width *= MAX_HEIGHT / height;
+                      height = MAX_HEIGHT;
+                    }
+                  }
+
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext("2d");
+                  if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    // Comprime para WebP (muito mais leve que PNG/JPEG original)
+                    resolve(canvas.toDataURL("image/webp", 0.8));
+                  } else {
+                    resolve(event.target?.result as string); // fallback
+                  }
+                };
+                img.onerror = () => reject(new Error("Falha ao ler imagem"));
+                img.src = event.target?.result as string;
+              };
+              reader.onerror = () => reject(new Error("Falha ao ler arquivo"));
+              reader.readAsDataURL(f);
+            }),
+        ),
+      );
+      
+      onChange([...gallery, ...dataUrls]);
+      toast.success(
+        `${dataUrls.length} foto${dataUrls.length > 1 ? "s" : ""} adicionada${dataUrls.length > 1 ? "s" : ""}`,
+        { id: toastId }
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao processar imagem", { id: toastId });
     }
-    const dataUrls = await Promise.all(
-      arr.map(
-        (f) =>
-          new Promise<string>((res, rej) => {
-            const r = new FileReader();
-            r.onload = () => res(r.result as string);
-            r.onerror = rej;
-            r.readAsDataURL(f);
-          }),
-      ),
-    );
-    onChange([...gallery, ...dataUrls]);
-    toast.success(
-      `${dataUrls.length} foto${dataUrls.length > 1 ? "s" : ""} adicionada${dataUrls.length > 1 ? "s" : ""}`,
-    );
   };
 
   useEffect(() => {
