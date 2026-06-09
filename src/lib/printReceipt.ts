@@ -85,7 +85,8 @@ export function printOrderReceipt(order: Order, settings: StoreSettings) {
           <h1>${esc(settings.storeName)}</h1>
           <div class="meta">
             ${esc(settings.address)}<br/>
-            ${esc(settings.whatsapp)} ${settings.instagram ? "· " + esc(settings.instagram) : ""}
+            ${esc(settings.email || "jessicamendes-20@outlook.com")}<br/>
+            ${esc(settings.whatsapp || "(48) 8864-4474")} ${settings.instagram ? "· " + esc(settings.instagram) : ""}
           </div>
         </div>
       </div>
@@ -140,7 +141,7 @@ export function printOrderReceipt(order: Order, settings: StoreSettings) {
 
     <footer>
       Obrigado por comprar com a ${esc(settings.storeName)} 💖<br/>
-      Em caso de dúvidas, fale conosco no WhatsApp ${esc(settings.whatsapp)}.
+      Em caso de dúvidas, fale conosco no WhatsApp ${esc(settings.whatsapp || "(48) 8864-4474")} ou por e-mail ${esc(settings.email || "jessicamendes-20@outlook.com")}.
     </footer>
   </div>
   <script>setTimeout(function(){ try { window.focus(); window.print(); } catch(e){} }, 400);</script>

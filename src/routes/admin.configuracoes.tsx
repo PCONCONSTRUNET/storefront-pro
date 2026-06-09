@@ -32,6 +32,18 @@ function Page() {
             onChange={(v) => setS({ ...s, bannerSubtitle: v })}
           />
         </Card>
+        <Card title="Contato">
+          <Field
+            label="WhatsApp"
+            value={s.whatsapp || ""}
+            onChange={(v) => setS({ ...s, whatsapp: v })}
+          />
+          <Field
+            label="E-mail"
+            value={s.email || ""}
+            onChange={(v) => setS({ ...s, email: v })}
+          />
+        </Card>
         <Card title="Sistema">
           <div className="text-sm text-muted-foreground mb-3">
             Se o sistema foi atualizado recentemente e as mudanças não apareceram, você pode forçar a atualização limpando o cache do navegador.
