@@ -607,12 +607,16 @@ function TransactionForm({
           </select>
         </Field>
 
-        <Field label="Descrição *">
+        <Field label={kind === "saida" ? "Motivo da saída *" : "Descrição *"}>
           <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="input"
-            placeholder="Ex.: Venda balcão · cliente Maria"
+            placeholder={
+              kind === "saida"
+                ? "Ex.: Compra de embalagens, Conta de luz..."
+                : "Ex.: Venda balcão · cliente Maria"
+            }
             required
           />
         </Field>
