@@ -350,7 +350,15 @@ function Page() {
               >
                 <div
                   className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl ${
-                    !r.isCompleted ? "bg-muted-foreground/30" : r.isOut ? "bg-destructive" : "bg-success"
+                    !r.isCompleted
+                      ? r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada"
+                        ? "bg-destructive"
+                        : r.status === "aguardando_pagamento" || r.status === "pendente"
+                          ? "bg-yellow-500"
+                          : "bg-muted-foreground/30"
+                      : r.isOut
+                        ? "bg-destructive"
+                        : "bg-success"
                   }`}
                 />
                 <div className="min-w-0 flex-1 ml-1">
