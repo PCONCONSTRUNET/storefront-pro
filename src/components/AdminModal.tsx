@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export function Modal({
   children,
@@ -10,9 +11,25 @@ export function Modal({
   onClose: () => void;
   title: string;
 }) {
-  return (
+  // Lock body scroll and prevent page from jumping
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  // Escape key closes modal
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-overlay-in"
+      className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4 animate-overlay-in"
       onClick={onClose}
     >
       <div
@@ -31,6 +48,7 @@ export function Modal({
         </div>
         <div className="p-3 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
