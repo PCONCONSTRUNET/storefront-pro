@@ -39,18 +39,19 @@ function Page() {
   }, [sync]);
 
   useEffect(() => {
-    if (!localStorage.getItem("system_cleanup_done_v4")) {
+    if (!localStorage.getItem("system_cleanup_done_v5")) {
       const wipe = async () => {
         try {
-          toast.loading("Realizando limpeza geral do banco de dados...", { id: "nuke" });
+          toast.loading("Realizando limpeza geral do banco de dados (pode demorar alguns segundos)...", { id: "nuke" });
           const st = useStore.getState();
-          const p1 = Promise.all(st.orders.map((o) => adminDeleteFn({ data: { table: "orders", match: { id: o.id } } })));
-          const p2 = Promise.all(st.customers.map((c) => adminDeleteFn({ data: { table: "customers", match: { id: c.id } } })));
-          const p3 = Promise.all(st.transactions.map((t) => adminDeleteFn({ data: { table: "transactions", match: { id: t.id } } })));
-          const p4 = Promise.all(st.affiliates.map((a) => adminDeleteFn({ data: { table: "affiliates", match: { id: a.id } } })));
-          const p5 = Promise.all(st.affiliateSales.map((s) => adminDeleteFn({ data: { table: "affiliate_sales", match: { id: s.id } } })));
-          const p6 = Promise.all(st.reviews.map((r) => adminDeleteFn({ data: { table: "reviews", match: { id: r.id } } })));
-          await Promise.all([p1, p2, p3, p4, p5, p6]);
+          
+          // Execute sequentially to avoid blocking the browser network queue
+          for (const o of st.orders) { await adminDeleteFn({ data: { table: "orders", match: { id: o.id } } }); }
+          for (const c of st.customers) { await adminDeleteFn({ data: { table: "customers", match: { id: c.id } } }); }
+          for (const t of st.transactions) { await adminDeleteFn({ data: { table: "transactions", match: { id: t.id } } }); }
+          for (const a of st.affiliates) { await adminDeleteFn({ data: { table: "affiliates", match: { id: a.id } } }); }
+          for (const s of st.affiliateSales) { await adminDeleteFn({ data: { table: "affiliate_sales", match: { id: s.id } } }); }
+          for (const r of st.reviews) { await adminDeleteFn({ data: { table: "reviews", match: { id: r.id } } }); }
           
           useStore.setState({
             orders: [],
@@ -63,7 +64,7 @@ function Page() {
             activityLogs: []
           });
           
-          localStorage.setItem("system_cleanup_done_v4", "true");
+          localStorage.setItem("system_cleanup_done_v5", "true");
           toast.success("Limpeza concluída! Produtos, Categorias e Gateway mantidos.", { id: "nuke" });
         } catch(e) {
           console.error(e);
