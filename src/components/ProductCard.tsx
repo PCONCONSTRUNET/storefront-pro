@@ -14,20 +14,29 @@ export function ProductCard({ product }: { product: Product }) {
     ? Math.round((1 - product.price / product.oldPrice) * 100)
     : 0;
   const reviews = useStore((s) => s.reviews);
+  const orders = useStore((s) => s.orders);
+
   const productReviews = reviews.filter((r) => r.productId === product.id);
-  // Pseudo-random but stable based on id, for the demo
-  const seed = product.id.charCodeAt(1) || 3;
-  const sold = 50 + ((seed * 37) % 950);
+  
+  const sold = orders.reduce((acc, o) => {
+    if (['pago', 'concluido', 'em_separacao', 'saiu_para_entrega'].includes(o.status)) {
+      const it = o.items.find(i => i.productId === product.id);
+      if (it) return acc + it.quantity;
+    }
+    return acc;
+  }, 0);
+
   const realCount = productReviews.length;
   const realAvg = realCount
     ? productReviews.reduce((a, r) => a + r.rating, 0) / realCount
     : 0;
-  const rating =
-    realCount > 0
-      ? realAvg.toFixed(1)
-      : (4 + ((seed * 13) % 10) / 10).toFixed(1);
-  const freeShip = seed % 3 === 0;
-  const bestSeller = discount >= 25;
+  const rating = realCount > 0 ? realAvg.toFixed(1) : "0.0";
+  
+  // We hide free shipping since there is no real flag for it yet.
+  const freeShip = false;
+  // A real best seller can be defined if it has more than a few sales, 
+  // or we can keep it based on high discounts if requested. We'll use real sales.
+  const bestSeller = sold >= 5;
 
   return (
     <article className="group relative bg-card rounded-md overflow-hidden border border-border hover:border-primary/40 hover:shadow-soft transition-all flex flex-col">
@@ -106,15 +115,21 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-0.5">
-          <span className="flex items-center gap-0.5">
-            <Star className="h-3 w-3 fill-gold text-gold" /> {rating}
-            {realCount > 0 && (
-              <span className="text-muted-foreground/70">({realCount})</span>
+        {(realCount > 0 || sold > 0) ? (
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-0.5">
+            {realCount > 0 ? (
+              <span className="flex items-center gap-0.5">
+                <Star className="h-3 w-3 fill-gold text-gold" /> {rating}
+                <span className="text-muted-foreground/70">({realCount})</span>
+              </span>
+            ) : (
+              <span /> /* Empty span to keep 'sold' aligned to the right if needed, or we can just leave it */
             )}
-          </span>
-          <span>{sold} vendidos</span>
-        </div>
+            {sold > 0 && <span>{sold} {sold === 1 ? 'vendido' : 'vendidos'}</span>}
+          </div>
+        ) : (
+          <div className="h-[18px] mt-0.5" /> /* Placeholder para manter o tamanho do card constante */
+        )}
         <Link
           to="/produto/$id"
           params={{ id: product.id }}
