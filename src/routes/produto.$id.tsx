@@ -235,15 +235,15 @@ function Page() {
                           key={o.label + idx}
                           type="button"
                           onClick={() => setSelected({ _flat: idx })}
-                          className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
+                          className={`px-4 py-2.5 rounded-xl border-2 text-sm transition-all flex items-center justify-center gap-1.5 ${
                             isSel
-                              ? "border-primary bg-primary/10 text-primary font-semibold shadow-sm"
-                              : "border-border hover:border-primary hover:bg-primary/5"
+                              ? "border-primary bg-primary/10 text-primary font-bold shadow-md scale-[1.02]"
+                              : "border-primary/20 bg-background text-foreground/80 hover:border-primary/50 hover:bg-primary/5 hover:text-foreground font-medium shadow-sm"
                           }`}
                         >
                           {o.label}
                           {o.delta > 0 && (
-                            <span className="ml-1 text-xs text-muted-foreground font-normal">
+                            <span className="text-xs opacity-80 font-normal">
                               {brl(o.delta)}
                             </span>
                           )}
@@ -252,8 +252,9 @@ function Page() {
                     })}
                   </div>
                   {selected["_flat"] != null && allOpts[selected["_flat"]]?.delta > 0 && (
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      Preço desta opção: {brl(allOpts[selected["_flat"]].delta)}
+                    <div className="mt-3 p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-foreground/80">Valor escolhido:</span>
+                      <span className="text-sm font-bold text-primary">{brl(allOpts[selected["_flat"]].delta)}</span>
                     </div>
                   )}
                 </div>
