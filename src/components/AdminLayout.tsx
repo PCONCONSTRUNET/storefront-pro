@@ -199,11 +199,11 @@ export function AdminLayout({
           </div>
         </header>
         <main key={path} className="flex-1 p-4 md:p-6 animate-page-in">
-          <AdminDeviceSyncBanner />
+          {path === "/admin/dashboard" && <AdminDeviceSyncBanner />}
           {children}
         </main>
       </div>
-      <EnableNotificationsPrompt />
+      {path === "/admin/dashboard" && <EnableNotificationsPrompt />}
       <ConfirmHost />
     </div>
   );

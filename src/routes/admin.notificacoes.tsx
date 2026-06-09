@@ -394,9 +394,10 @@ function Page() {
               {logs.map((l) => (
                 <li
                   key={l.id}
-                  className={`rounded-xl p-3 border transition-colors ${l.read ? "bg-background border-border" : "bg-primary/5 border-primary/30"}`}
+                  className={`relative overflow-hidden rounded-xl p-3 border transition-colors ${l.read ? "bg-background border-border" : "bg-primary/5 border-primary/30"}`}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl ${l.read ? "bg-muted" : "bg-primary"}`} />
+                  <div className="flex items-start justify-between gap-2 ml-1">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm">{l.title}</span>
@@ -602,8 +603,9 @@ function TemplateRow({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <li className="rounded-xl border border-border bg-background overflow-hidden">
-      <div className="flex items-center gap-3 p-3">
+    <li className="relative rounded-xl border border-border bg-background overflow-hidden">
+      <div className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl" style={{ backgroundColor: template.enabled ? "#22c55e" : "#ef4444" }} />
+      <div className="flex items-center gap-3 p-3 ml-1">
         <div className="w-10 h-10 rounded-xl bg-accent/40 grid place-items-center text-xl shrink-0">
           {template.icon}
         </div>

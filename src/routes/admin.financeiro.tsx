@@ -74,6 +74,8 @@ function Page() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
 
+  const [viewingRow, setViewingRow] = useState<Row | null>(null);
+
   const todayISO = new Date().toISOString().slice(0, 10);
   const monthAgoISO = (() => {
     const d = new Date();
@@ -335,13 +337,14 @@ function Page() {
             {filteredRows.map((r) => (
               <li
                 key={r.id}
-                className="p-4 flex justify-between items-start gap-3 relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm"
+                onClick={() => setViewingRow(r)}
+                className="cursor-pointer p-4 flex justify-between items-start gap-3 relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm"
               >
                 <div
-                  className="absolute top-0 left-0 bottom-0 w-1.5"
+                  className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
                   style={{ backgroundColor: r.isOut ? "#ef4444" : "#22c55e" }}
                 />
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 ml-1">
                   <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
                     {r.kind === "comissao" && (
                       <Users className="h-3.5 w-3.5 text-primary" />
@@ -375,7 +378,8 @@ function Page() {
                   {r.txRef && (
                     <div className="flex gap-1">
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setEditing(r.txRef!);
                           setShowForm(true);
                         }}
@@ -385,7 +389,8 @@ function Page() {
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.stopPropagation();
                           const { confirmDialog } =
                             await import("@/components/ConfirmDialog");
                           if (
@@ -407,7 +412,8 @@ function Page() {
                   )}
                   {r.affiliateSaleId && (
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.stopPropagation();
                         const { confirmDialog } =
                           await import("@/components/ConfirmDialog");
                         if (
@@ -441,6 +447,13 @@ function Page() {
         onFromChange={setReportFrom}
         onToChange={setReportTo}
       />
+
+      {viewingRow && (
+        <TransactionDetailsModal
+          row={viewingRow}
+          onClose={() => setViewingRow(null)}
+        />
+      )}
 
       {showForm && (
         <TransactionForm

@@ -16842,7 +16842,7 @@ function getResponse() {
 }
 var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-D9Nb2vGU.js");
+  const { tsrStartManifest } = await import("./assets/_tanstack-start-manifest_v-CXCiGiLN.js");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -16869,71 +16869,75 @@ async function getStartManifest(matchedRoutes) {
 const manifest = {
   "4cd1137d4a9547e649b153ae4582f66cf4b4502333e787c042bd2d77cbe36e07": {
     functionName: "loginAdminFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "8cd101c8bfdc1c73f5d751a7c552865b745589d09d322b0f09940956378255a8": {
     functionName: "logoutAdminFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "da169f2845db285175ef90650fd40bf97a73acd58c7683f00218e21c0fb36972": {
     functionName: "getAdminSessionFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "f0d4ba22cc43b4cf3748f32a7bc429d40a75034d0645217947d551c1f6396b95": {
     functionName: "updateAdminPasswordFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "56f0053b0fd1a9cbe6e0b50d8437832033f8707ac0648eb9d31cf26a4b453f98": {
     functionName: "listConsignmentsFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "de47b526321169d7670ec9c27e4cbeb805da9f61f8f50dc452ac798f44217685": {
     functionName: "createConsignmentFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
+  },
+  "a5de0762612a5290d103d8cc2722d93e83ccacd25fdf9a81983f3c8488050bbc": {
+    functionName: "createConsignmentWithNewAffiliateFn_createServerFn_handler",
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "61831abf388d29380b8e2c9b2d159d91f51d7f4405d094e225af5784f6128ed4": {
     functionName: "deleteConsignmentFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "c76b670af0495621df1ce9096d88e3fcdb4049094b1e4b4a4c639ebbc4e2d16e": {
     functionName: "adminUpsertFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "dec5d397510dfd42d4eba8191abaf4d96952804816e3079352354af055d153b3": {
     functionName: "adminUpdateFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "681c4da494dfcab2c0336b1e290da6aff240b78fc06f4f1b9f7f0e6997f91b44": {
     functionName: "adminDeleteFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "6007c43c8f3d27d336ce59ced25cf9181e9fa99c88ed9fcfadc8c352b7690370": {
     functionName: "adminReadTableFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "101449e6e43aa2778ac33990b55916cad71277d2e761d7f3475cc6a185596381": {
     functionName: "getCustomerOrdersFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "cb9695bbfe8c9facb52acc4c57e391af26654c9ac5255d50fefef628a5b914af": {
     functionName: "getAffiliateSalesFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "f05367ec6ac4781a99a167046b0e5551266ead16297da18f1ebdd27da951b505": {
     functionName: "updateCustomerFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "b88d6db9944f9ac9c1da3f54caa183718683f53d405b448ae1eab266127982e4": {
     functionName: "getGatewayConfigFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "8ea26b377af4d41862a014aa8a8f36574a2b4a771de46093a59cbb52f0c13c31": {
     functionName: "saveGatewayConfigFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "653b1d3b26214e4c9698b4606868138a9d3cb9f754d723ff79bf1ae1662e8bbc": {
     functionName: "getSyncStatusFn_createServerFn_handler",
-    importer: () => import("./assets/admin.functions-DqExxYKV.js")
+    importer: () => import("./assets/admin.functions-j3wSt-TD.js")
   },
   "174d847d55767cfb0d892cff8e85ce14b3d79f59b30a3e291c98c582d2414603": {
     functionName: "registerCustomerFn_createServerFn_handler",
@@ -17716,7 +17720,7 @@ var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-    import("./assets/router-CnaK_EO9.js").then((n2) => n2.ai),
+    import("./assets/router-CbsSSRKz.js").then((n2) => n2.ai),
     import("./assets/start-HYkvq4Ni.js"),
     import("./assets/__23tanstack-start-plugin-adapters-Cwee5PKy.js")
   ]);

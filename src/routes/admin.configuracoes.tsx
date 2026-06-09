@@ -32,6 +32,34 @@ function Page() {
             onChange={(v) => setS({ ...s, bannerSubtitle: v })}
           />
         </Card>
+        <Card title="Sistema">
+          <div className="text-sm text-muted-foreground mb-3">
+            Se o sistema foi atualizado recentemente e as mudanças não apareceram, você pode forçar a atualização limpando o cache do navegador.
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                if ("serviceWorker" in navigator) {
+                  const regs = await navigator.serviceWorker.getRegistrations();
+                  for (let r of regs) {
+                    await r.unregister();
+                  }
+                }
+                if ("caches" in window) {
+                  const keys = await caches.keys();
+                  for (let k of keys) {
+                    await caches.delete(k);
+                  }
+                }
+              } catch (e) {}
+              window.location.reload();
+            }}
+            className="w-full h-11 rounded-full border border-border flex items-center justify-center gap-2 hover:bg-muted font-semibold text-sm transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            Forçar atualização
+          </button>
+        </Card>
       </div>
       <div className="mt-4 flex justify-end">
         <button

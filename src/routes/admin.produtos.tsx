@@ -72,16 +72,20 @@ function Page() {
           <span>Status</span>
           <span></span>
         </div>
-        <ul className="divide-y divide-border">
+        <ul className="p-2 space-y-2">
           {list.map((p) => (
             <li
               key={p.id}
-              className="md:grid md:grid-cols-[60px_1fr_120px_100px_80px_100px] gap-3 px-4 py-3 items-center flex"
+              className="relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm md:grid md:grid-cols-[60px_1fr_120px_100px_80px_100px] gap-3 px-4 py-3 items-center flex"
             >
+              <div
+                className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
+                style={{ backgroundColor: p.active ? (p.stock <= 0 ? "#f59e0b" : "#22c55e") : "#94a3b8" }}
+              />
               <img
                 src={p.image}
                 alt=""
-                className="w-12 h-12 rounded-lg object-cover bg-muted"
+                className="w-12 h-12 rounded-lg object-cover bg-muted ml-1"
               />
               <div className="flex-1 min-w-0 ml-3 md:ml-0">
                 <div className="font-medium text-sm truncate">{p.name}</div>

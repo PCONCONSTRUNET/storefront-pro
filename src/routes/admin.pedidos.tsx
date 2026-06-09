@@ -412,7 +412,7 @@ function Page() {
             Nenhum pedido encontrado.
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="p-2 space-y-2">
             {list.map((o) => {
               const status = normalizeOrderStatus(o.status);
               const Icon = STATUS_ICON[status];
@@ -424,9 +424,18 @@ function Page() {
                 <li
                   key={o.id}
                   onClick={() => setSelected(o.id)}
-                  className="p-3 hover:bg-muted/40 cursor-pointer"
+                  className="p-3 relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm cursor-pointer"
                 >
-                  <div className="flex justify-between items-start gap-3">
+                  <div
+                    className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
+                    style={{
+                      backgroundColor:
+                        status === "cancelado" || status === "reembolsado" ? "#ef4444" :
+                        status === "concluido" || status === "pago" ? "#22c55e" :
+                        status === "saiu_para_entrega" || status === "em_separacao" ? "#3b82f6" : "#f59e0b",
+                    }}
+                  />
+                  <div className="flex justify-between items-start gap-3 ml-1">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm truncate">

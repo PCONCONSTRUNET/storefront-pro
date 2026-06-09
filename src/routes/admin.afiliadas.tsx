@@ -207,97 +207,101 @@ function Page() {
                 : "Nenhum resultado para a busca."}
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-muted-foreground border-b border-border">
-                    <th className="py-2 pr-2">Nome</th>
-                    <th className="py-2 pr-2">E-mail</th>
-                    <th className="py-2 pr-2">Comissão</th>
-                    <th className="py-2 pr-2">Status</th>
-                    <th className="py-2 pr-2">Pagas</th>
-                    <th className="py-2 pr-2">Comissão paga</th>
-                    <th className="py-2 pr-2"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAffiliates.map((a) => {
-                    const paid = sales.filter(
-                      (s) =>
-                        s.affiliateId === a.id && s.status === "confirmada",
-                    );
-                    const earned = paid.reduce(
-                      (acc, s) => acc + s.commissionEarned,
-                      0,
-                    );
-                    return (
-                      <tr
-                        key={a.id}
-                        onClick={() => setViewing(a)}
-                        className="border-b border-border last:border-0 cursor-pointer hover:bg-muted/40 transition-colors"
-                      >
-                        <td className="py-2 pr-2 font-medium">{a.name}</td>
-                        <td className="py-2 pr-2 text-muted-foreground">
-                          {a.email?.endsWith("@pendente.com")
-                            ? <span className="text-muted-foreground/50 italic text-xs">Não informado</span>
-                            : a.email}
-                        </td>
-                        <td className="py-2 pr-2">
+            <ul className="p-2 space-y-2">
+              {filteredAffiliates.map((a) => {
+                const paid = sales.filter(
+                  (s) => s.affiliateId === a.id && s.status === "confirmada",
+                );
+                const earned = paid.reduce(
+                  (acc, s) => acc + s.commissionEarned,
+                  0,
+                );
+                return (
+                  <li
+                    key={a.id}
+                    onClick={() => setViewing(a)}
+                    className="cursor-pointer relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm p-4 flex flex-wrap items-center gap-3"
+                  >
+                    <div
+                      className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
+                      style={{ backgroundColor: a.active ? "#22c55e" : "#ef4444" }}
+                    />
+                    <div className="w-10 h-10 rounded-full gradient-primary text-primary-foreground grid place-items-center font-bold ml-1 shrink-0">
+                      {a.name[0]?.toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="font-semibold text-sm flex items-center gap-2">
+                        {a.name}
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-normal ${a.active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}
+                        >
+                          {a.active ? "Ativa" : "Inativa"}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {a.email?.endsWith("@pendente.com") ? (
+                          <span className="text-muted-foreground/50 italic text-[11px]">Não informado</span>
+                        ) : (
+                          a.email
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 text-xs shrink-0 items-center justify-end sm:justify-start w-full sm:w-auto">
+                      <div>
+                        <div className="text-muted-foreground uppercase tracking-wide text-[10px] font-semibold">Comissão</div>
+                        <div className="font-medium">
                           {a.commissionType === "percent"
                             ? `${a.commissionValue}%`
                             : brl(a.commissionValue)}
-                        </td>
-                        <td className="py-2 pr-2">
-                          <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full ${a.active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}`}
-                          >
-                            {a.active ? "Ativa" : "Inativa"}
-                          </span>
-                        </td>
-                        <td className="py-2 pr-2">{paid.length}</td>
-                        <td className="py-2 pr-2 text-gold font-semibold">
-                          {brl(earned)}
-                        </td>
-                        <td
-                          className="py-2 pr-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="flex gap-1 justify-end">
-                            <button
-                              onClick={() => setViewing(a)}
-                              title="Ver detalhes"
-                              className="p-1.5 rounded-lg hover:bg-muted"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => setEditing({ ...a })}
-                              title="Editar"
-                              className="p-1.5 rounded-lg hover:bg-muted"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={async () => {
-                                const { confirmDialog } = await import("@/components/ConfirmDialog");
-                                if (await confirmDialog({ title: "Excluir afiliada?", description: `${a.name} e todas as vendas dela serão removidas.`, confirmLabel: "Excluir" })) {
-                                  remove(a.id);
-                                  toast.success("Afiliada removida");
-                                }
-                              }}
-                              title="Excluir"
-                              className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-muted-foreground uppercase tracking-wide text-[10px] font-semibold">Pagas</div>
+                        <div className="font-medium">{paid.length}</div>
+                      </div>
+                      <div className="text-right sm:text-left">
+                        <div className="text-muted-foreground uppercase tracking-wide text-[10px] font-semibold">Ganhos</div>
+                        <div className="font-semibold text-gold">{brl(earned)}</div>
+                      </div>
+                    </div>
+
+                    <div
+                      className="flex gap-1 ml-auto shrink-0 w-full sm:w-auto justify-end mt-2 sm:mt-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => setViewing(a)}
+                        title="Ver detalhes"
+                        className="p-1.5 rounded-lg hover:bg-muted"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditing({ ...a })}
+                        title="Editar"
+                        className="p-1.5 rounded-lg hover:bg-muted"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const { confirmDialog } = await import("@/components/ConfirmDialog");
+                          if (await confirmDialog({ title: "Excluir afiliada?", description: `${a.name} e todas as vendas dela serão removidas.`, confirmLabel: "Excluir" })) {
+                            remove(a.id);
+                            toast.success("Afiliada removida");
+                          }
+                        }}
+                        title="Excluir"
+                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
 
           <p className="text-[11px] text-muted-foreground mt-3">
@@ -458,15 +462,24 @@ function Page() {
               Nenhuma venda registrada.
             </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="p-2 space-y-2">
               {filteredSales.map((s) => {
                 const aff = affiliates.find((a) => a.id === s.affiliateId);
                 return (
                   <li
                     key={s.id}
-                    className="py-3 flex flex-wrap items-start gap-3"
+                    className="relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm py-3 px-4 flex flex-wrap items-start gap-3"
                   >
-                    <div className="flex-1 min-w-[220px]">
+                    <div
+                      className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
+                      style={{
+                        backgroundColor:
+                          s.status === "cancelada" ? "#ef4444" :
+                          s.status === "confirmada" ? "#22c55e" :
+                          "#f59e0b",
+                      }}
+                    />
+                    <div className="flex-1 min-w-[220px] ml-1">
                       <div className="text-sm font-semibold">
                         {s.customerName}{" "}
                         <span className="text-xs text-muted-foreground font-normal">
@@ -811,15 +824,16 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
           Nenhuma retirada registrada ainda.
         </div>
       ) : (
-        <ul className="divide-y divide-border">
+        <ul className="p-2 space-y-2">
           {filtered.map((r) => {
             const aff = affiliates.find((a) => a.id === r.affiliate_id);
             return (
               <li
                 key={r.id}
-                className="py-2 flex items-center justify-between gap-3"
+                className="relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm p-3 flex flex-wrap items-center gap-3"
               >
-                <div className="min-w-0">
+                <div className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl bg-primary" />
+                <div className="min-w-0 flex-1 ml-1">
                   <div className="font-semibold truncate">
                     {aff?.name || "Afiliada removida"}
                   </div>
@@ -836,7 +850,7 @@ function ConsignmentsPanel({ affiliates }: { affiliates: Affiliate[] }) {
                 </div>
                 <button
                   onClick={() => handleDelete(r.id)}
-                  className="p-1.5 hover:bg-destructive/10 rounded-full text-destructive"
+                  className="p-1.5 hover:bg-destructive/10 rounded-lg text-destructive ml-2"
                   title="Excluir"
                 >
                   <Trash2 className="h-4 w-4" />
