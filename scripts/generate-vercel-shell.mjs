@@ -160,6 +160,15 @@ const config = {
   version: 3,
   routes: [
     {
+      src: "^/.*$",
+      headers: { 
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "pragma": "no-cache",
+        "expires": "0"
+      },
+      continue: true,
+    },
+    {
       src: "^/assets/(.*)$",
       headers: { "cache-control": "public, max-age=31536000, immutable" },
       continue: true,
@@ -168,7 +177,6 @@ const config = {
       src: "^/(OneSignalSDKWorker|OneSignalSDKUpdaterWorker)\\.js$",
       headers: {
         "service-worker-allowed": "/",
-        "cache-control": "no-cache, no-store, must-revalidate",
       },
       continue: true,
     },
@@ -179,6 +187,6 @@ const config = {
   ],
 };
 fs.writeFileSync(path.join(outDir, "config.json"), JSON.stringify(config, null, 2), "utf8");
-console.log(`[vercel] config.json escrito`);
+console.log(`[vercel] config.json escrito com no-cache (exceto assets)`);
 
 console.log(`[vercel] OK → .vercel/output/`);
