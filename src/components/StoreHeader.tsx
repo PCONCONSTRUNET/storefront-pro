@@ -76,19 +76,19 @@ export function StoreHeader() {
         </Link>
 
         <form onSubmit={onSearch} className="flex-1 min-w-0 relative">
-          <div className="flex items-stretch shadow-sm h-9 md:h-10">
+          <div className="flex items-stretch shadow-sm h-9 md:h-10 w-full min-w-0">
             <input
               type="text"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar laços, tiaras, kits..."
-              className="flex-1 pl-3 pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground appearance-none bg-white border-y-2 border-l-2 border-white m-0"
+              placeholder="Buscar laços, tiaras..."
+              className="flex-1 min-w-0 pl-3 pr-2 text-sm text-foreground outline-none placeholder:text-muted-foreground appearance-none bg-white border-y-2 border-l-2 border-white m-0"
               style={{ WebkitAppearance: 'none', borderRadius: '6px 0 0 6px' }}
             />
             <button
               type="submit"
               aria-label="Buscar"
-              className="px-4 bg-primary hover:opacity-95 active:scale-95 transition-all grid place-items-center border-y-2 border-r-2 border-white"
+              className="shrink-0 px-4 bg-primary hover:opacity-95 active:scale-95 transition-all grid place-items-center border-y-2 border-r-2 border-white"
               style={{ borderRadius: '0 6px 6px 0' }}
             >
               <Search className="h-4 w-4 text-primary-foreground" />
