@@ -494,130 +494,120 @@ function Page() {
               <li
                 key={r.id}
                 onClick={() => setViewingRow(r)}
-                className="cursor-pointer p-4 flex justify-between items-start gap-3 relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm"
+                className="cursor-pointer p-4 mb-3 flex gap-4 bg-[#1c1c1e] text-white rounded-[28px] shadow-lg border border-white/5 hover:bg-[#252527] transition-colors relative"
               >
-                <div
-                  className={`absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl ${
-                    !r.isCompleted
-                      ? r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada"
-                        ? "bg-destructive"
-                        : r.status === "aguardando_pagamento" || r.status === "pendente"
-                          ? "bg-yellow-500"
-                          : "bg-muted-foreground/30"
-                      : r.isOut
-                        ? "bg-destructive"
-                        : "bg-success"
-                  }`}
-                />
-                <div className="min-w-0 flex-1 ml-1">
-                  <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
-                    {r.kind === "comissao" && (
-                      <Users className="h-3.5 w-3.5 text-primary" />
-                    )}
-                    {r.kind === "pedido" && (
-                      <ShoppingBag className="h-3.5 w-3.5 text-primary" />
-                    )}
-                    {r.description}
-                    {r.kind === "manual" && (
-                      <span className="text-[9px] uppercase tracking-wide bg-muted px-1.5 py-0.5 rounded-full">
-                        manual
-                      </span>
-                    )}
-                    {r.status && (
-                      <span className={`text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full
-                        ${
-                          ['pago', 'concluido', 'confirmada'].includes(r.status)
-                            ? 'bg-success/10 text-success'
-                            : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(r.status)
-                              ? 'bg-gold/10 text-gold'
-                              : 'bg-destructive/10 text-destructive'
-                        }
-                      `}>
-                        {r.status.replace(/_/g, " ")}
-                      </span>
-                    )}
-                  </div>
-                  {r.meta && (
-                    <div className="text-xs text-muted-foreground mt-0.5 break-words">
-                      {r.meta}
-                    </div>
+                <div className="w-[52px] h-[52px] rounded-[16px] bg-[#0E5C3B] flex flex-col items-center justify-center shrink-0 shadow-inner">
+                  {r.kind === "pedido" ? (
+                    <ShoppingBag className="h-5 w-5 text-white" />
+                  ) : r.kind === "comissao" ? (
+                    <Users className="h-5 w-5 text-white" />
+                  ) : (
+                    <>
+                      <span className="text-white font-bold text-xl leading-none">{storeSettings.storeName.charAt(0)}</span>
+                      <span className="text-white/80 text-[7px] mt-1 tracking-wider uppercase font-semibold">Loja</span>
+                    </>
                   )}
-                  <div className="text-[11px] text-muted-foreground mt-1">
-                    {formatDate(r.date)}
-                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <div
-                    className={`font-bold whitespace-nowrap ${
-                      !r.isCompleted
-                        ? "text-muted-foreground"
-                        : r.isOut
-                          ? "text-destructive"
-                          : "text-success"
-                    } ${r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada" ? "line-through opacity-60" : ""}`}
-                  >
-                    {r.isOut ? "− " : "+ "}
-                    {brl(r.amount)}
+
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <div className="flex justify-between items-start gap-2 mb-1">
+                    <h4 className="font-semibold text-[15px] leading-tight text-white truncate">
+                      {r.description}
+                      {r.kind === "manual" && (
+                        <span className="ml-2 text-[8px] uppercase tracking-wide bg-white/10 text-white/70 px-1.5 py-0.5 rounded-full">
+                          manual
+                        </span>
+                      )}
+                    </h4>
+                    <span className="text-[12px] text-white/40 shrink-0 mt-0.5">{formatDate(r.date)}</span>
                   </div>
-                  {r.txRef && (
-                    <div className="flex gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditing(r.txRef!);
-                          setShowForm(true);
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
-                        title="Editar"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const { confirmDialog } =
-                            await import("@/components/ConfirmDialog");
-                          if (
-                            await confirmDialog({
-                              title: "Excluir lançamento?",
-                              confirmLabel: "Excluir",
-                            })
-                          ) {
-                            deleteTransaction(r.txRef!.id);
-                            toast.success("Removido");
-                          }
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                  
+                  <div className="text-[14px] text-white/80 leading-snug">
+                    {r.meta && <div className="truncate mb-1.5 text-[13px]">{r.meta}</div>}
+                    
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-2">
+                        {r.status && (
+                          <span className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full
+                            ${
+                              ['pago', 'concluido', 'confirmada'].includes(r.status)
+                                ? 'bg-green-500/20 text-green-400'
+                                : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(r.status)
+                                  ? 'bg-yellow-500/20 text-yellow-400'
+                                  : 'bg-red-500/20 text-red-400'
+                            }
+                          `}>
+                            {r.status.replace(/_/g, " ")}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`font-bold whitespace-nowrap text-[15px] ${
+                            !r.isCompleted
+                              ? "text-white/50"
+                              : r.isOut
+                                ? "text-red-400"
+                                : "text-green-400"
+                          } ${r.status === "cancelado" || r.status === "falhou" || r.status === "cancelada" ? "line-through opacity-60" : ""}`}
+                        >
+                          {r.isOut ? "− " : "+ "}
+                          {brl(r.amount)}
+                        </div>
+                        
+                        {(r.txRef || r.affiliateSaleId) && (
+                          <div className="flex items-center gap-1 border-l border-white/10 pl-3">
+                            {r.txRef && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditing(r.txRef!);
+                                    setShowForm(true);
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 transition-colors"
+                                  title="Editar"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    const { confirmDialog } = await import("@/components/ConfirmDialog");
+                                    if (await confirmDialog({ title: "Excluir lançamento?", confirmLabel: "Excluir" })) {
+                                      deleteTransaction(r.txRef!.id);
+                                      toast.success("Removido");
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors"
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </>
+                            )}
+                            {r.affiliateSaleId && (
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const { confirmDialog } = await import("@/components/ConfirmDialog");
+                                  if (await confirmDialog({ title: "Excluir venda de afiliada?", description: "A comissão correspondente também será removida.", confirmLabel: "Excluir" })) {
+                                    deleteAffiliateSale(r.affiliateSaleId!);
+                                    toast.success("Venda removida");
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg hover:bg-red-500/20 text-red-400 transition-colors"
+                                title="Excluir venda de afiliada"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  {r.affiliateSaleId && (
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const { confirmDialog } =
-                          await import("@/components/ConfirmDialog");
-                        if (
-                          await confirmDialog({
-                            title: "Excluir venda de afiliada?",
-                            description:
-                              "A comissão correspondente também será removida.",
-                            confirmLabel: "Excluir",
-                          })
-                        ) {
-                          deleteAffiliateSale(r.affiliateSaleId!);
-                          toast.success("Venda removida");
-                        }
-                      }}
-                      className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
-                      title="Excluir venda de afiliada"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  )}
+                  </div>
                 </div>
               </li>
             ))}
