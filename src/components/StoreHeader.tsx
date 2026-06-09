@@ -81,7 +81,7 @@ export function StoreHeader() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar laços, tiaras, kits..."
-              className="flex-1 h-9 md:h-10 px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              className="flex-1 h-9 md:h-10 px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground appearance-none rounded-none bg-transparent"
             />
             <button
               type="submit"
