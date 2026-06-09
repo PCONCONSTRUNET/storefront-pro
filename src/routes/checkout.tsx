@@ -275,7 +275,13 @@ function Page() {
                 .map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => setForm({ ...form, payment: p.id })}
+                    onClick={() => {
+                      if (p.id === "card") {
+                        toast.error("Método em manutenção. Pague via Pix.");
+                        return;
+                      }
+                      setForm({ ...form, payment: p.id });
+                    }}
                     className={cn(
                       "w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
                       form.payment === p.id
