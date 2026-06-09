@@ -41,8 +41,20 @@ export function playAdminNotificationBlip() {
   const c = getCtx();
   if (!c) return;
   const fire = () => {
-    tone(880, 0.07, 0, "sine", 0.42);
-    tone(1175, 0.09, 0.06, "sine", 0.38);
+    // "Venda Aprovada" Gateway / POS Sound (Loud & Bright)
+    // 3 quick ascending notes (C6, E6, G6)
+    const vol = 0.9;
+    const bright = 0.25;
+    
+    // C6
+    tone(1046.50, 0.1, 0, "sine", vol);
+    tone(1046.50, 0.1, 0, "square", bright);
+    // E6
+    tone(1318.51, 0.1, 0.1, "sine", vol);
+    tone(1318.51, 0.1, 0.1, "square", bright);
+    // G6 (rings out)
+    tone(1567.98, 0.4, 0.2, "sine", vol);
+    tone(1567.98, 0.4, 0.2, "square", bright);
   };
   if (c.state === "suspended") {
     c.resume().then(fire).catch(fire);
