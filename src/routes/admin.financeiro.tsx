@@ -56,6 +56,7 @@ type Row = {
   txRef?: Transaction;
   affiliateSaleId?: string;
   customerEmail?: string;
+  mpPaymentId?: string;
   isCompleted: boolean;
 };
 
@@ -146,6 +147,7 @@ function Page() {
         kind: "pedido",
         status,
         customerEmail: o.customerEmail,
+        mpPaymentId: o.mpPaymentId,
         isCompleted: isPaid || isRefund,
       });
     });
@@ -1349,9 +1351,24 @@ Autenticação: ${row.id.toUpperCase()}`;
           {row.status && (
             <div className="flex justify-between items-center pb-4 border-b border-border/50">
               <span className="text-sm text-muted-foreground">Status</span>
-              <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground">
+              <span className={`text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full
+                ${
+                  ['pago', 'concluido', 'confirmada'].includes(row.status)
+                    ? 'bg-success/10 text-success'
+                    : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(row.status)
+                      ? 'bg-gold/10 text-gold'
+                      : 'bg-destructive/10 text-destructive'
+                }
+              `}>
                 {row.status.replace(/_/g, " ")}
               </span>
+            </div>
+          )}
+
+          {row.mpPaymentId && (
+            <div className="flex justify-between items-center pb-4 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">ID Mercado Pago</span>
+              <span className="text-sm font-mono bg-muted/50 px-2 py-0.5 rounded text-muted-foreground">{row.mpPaymentId}</span>
             </div>
           )}
 
