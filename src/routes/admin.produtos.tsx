@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
@@ -574,6 +574,22 @@ function GalleryEditor({
     );
   };
 
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      // Ignora se o usuário estiver colando texto dentro de um input ou textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        return;
+      }
+      if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
+        e.preventDefault();
+        addFiles(e.clipboardData.files);
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [addFiles]);
+
   const addUrl = () => {
     const u = url.trim();
     if (!u) return;
@@ -690,7 +706,7 @@ function GalleryEditor({
           }}
         />
         <p className="text-[10px] text-muted-foreground text-center mt-1">
-          ou arraste e solte aqui · até 5MB cada
+          arraste e solte ou dê Ctrl+V para colar · até 5MB cada
         </p>
       </div>
 
