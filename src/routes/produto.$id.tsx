@@ -18,6 +18,7 @@ import {
   Zap,
   Truck,
   ShieldCheck,
+  Store,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -342,7 +343,7 @@ function Page() {
 
             <div className="mt-6 grid grid-cols-2 gap-2 text-xs">
               <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-2">
-                <Truck className="h-4 w-4 text-primary" /> Frete fixo R$ 12,90
+                <Store className="h-4 w-4 text-primary" /> Retirada no ateliê
               </div>
               <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" /> Compra
