@@ -241,30 +241,35 @@ function Page() {
   }, [dateFilteredRows, orders, reportFrom, reportTo]);
 
   const chartData = useMemo(() => {
-    const groups: Record<string, { entradas: number; saidas: number }> = {};
+    const groups: Record<string, { entradas: number; saidas: number; pendentes: number }> = {};
     const start = new Date(reportFrom + "T12:00:00Z");
     const end = new Date(reportTo + "T12:00:00Z");
     
     if (end.getTime() - start.getTime() <= 60 * 24 * 60 * 60 * 1000) {
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const k = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-        groups[k] = { entradas: 0, saidas: 0 };
+        groups[k] = { entradas: 0, saidas: 0, pendentes: 0 };
       }
     }
     
     dateFilteredRows.forEach((r) => {
-      if (!r.isCompleted) return;
       const d = new Date(r.date);
       const k = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-      if (!groups[k]) groups[k] = { entradas: 0, saidas: 0 };
-      if (r.isOut) groups[k].saidas += r.amount;
-      else groups[k].entradas += r.amount;
+      if (!groups[k]) groups[k] = { entradas: 0, saidas: 0, pendentes: 0 };
+      
+      if (r.isCompleted) {
+        if (r.isOut) groups[k].saidas += r.amount;
+        else groups[k].entradas += r.amount;
+      } else if (r.status === "aguardando_pagamento" || r.status === "pendente") {
+        if (!r.isOut) groups[k].pendentes += r.amount;
+      }
     });
 
     return Object.entries(groups).map(([date, data]) => ({
       date,
       Entradas: data.entradas,
       Saídas: data.saidas,
+      Pendentes: data.pendentes,
     }));
   }, [dateFilteredRows, reportFrom, reportTo]);
 
@@ -371,6 +376,7 @@ function Page() {
                 <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
                 <Bar dataKey="Entradas" fill="#22c55e" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 <Bar dataKey="Saídas" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Pendentes" fill="#eab308" radius={[4, 4, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
