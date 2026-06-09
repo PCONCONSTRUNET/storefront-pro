@@ -216,31 +216,71 @@ function Home() {
         </section>
       )}
 
-      {/* All products - "Para você" */}
-      <section className="mt-4 max-w-6xl mx-auto pb-6">
-        <div className="mx-3 md:mx-4">
-          <div className="flex items-center justify-center mb-3 relative">
-            <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-            <h2 className="relative bg-background px-4 text-xs md:text-sm font-bold text-primary uppercase tracking-widest">
-              ✨ Selecionado para você ✨
-            </h2>
+      {/* Products by Category */}
+      <section className="mt-4 max-w-6xl mx-auto pb-6 space-y-8">
+        {!hydrated ? (
+          <div className="mx-3 md:mx-4">
+            <ProductGridSkeleton count={10} />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3">
-            {!hydrated ? (
-              <ProductGridSkeleton count={10} />
-            ) : (
-              all.map((p) => <ProductCard key={p.id} product={p} />)
+        ) : (
+          <>
+            {sortedCategories.map((cat) => {
+              const catProducts = all.filter(
+                (p) =>
+                  p.categories?.includes(cat.id) || p.category === cat.id
+              );
+              if (catProducts.length === 0) return null;
+
+              return (
+                <div key={cat.id} className="mx-3 md:mx-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg md:text-xl font-bold text-foreground flex items-center gap-2">
+                      {cat.image?.startsWith("http") ||
+                      cat.image?.startsWith("data:") ? (
+                        <img
+                          src={cat.image}
+                          alt=""
+                          className="w-6 h-6 rounded-full object-cover shadow-sm border border-border"
+                        />
+                      ) : (
+                        <span>{cat.image || "🎀"}</span>
+                      )}
+                      {cat.name}
+                    </h2>
+                    <Link
+                      to="/categorias"
+                      className="text-xs md:text-sm font-semibold text-primary hover:underline"
+                    >
+                      Ver mais &gt;
+                    </Link>
+                  </div>
+                  {/* Carousel */}
+                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-3 px-3 md:mx-0 md:px-0">
+                    {catProducts.map((p) => (
+                      <div
+                        key={p.id}
+                        className="w-[140px] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
+                      >
+                        <ProductCard product={p} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {all.length > 0 && (
+              <div className="mt-8 text-center">
+                <Link
+                  to="/categorias"
+                  className="inline-flex items-center gap-1 text-sm text-primary font-semibold hover:underline"
+                >
+                  Explorar todo o catálogo <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
             )}
-          </div>
-          <div className="mt-6 text-center">
-            <Link
-              to="/categorias"
-              className="inline-flex items-center gap-1 text-sm text-primary font-semibold hover:underline"
-            >
-              Ver mais produtos <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
+          </>
+        )}
       </section>
     </StoreLayout>
   );
