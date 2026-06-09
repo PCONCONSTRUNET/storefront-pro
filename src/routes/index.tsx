@@ -399,12 +399,12 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
 
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-3 px-3 md:mx-0 md:px-0"
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-3 px-3 scroll-pl-3 md:mx-0 md:px-0 md:scroll-pl-0"
       >
         {products.map((p) => (
           <div
             key={p.id}
-            className="w-[42vw] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
+            className="w-[46vw] sm:w-[160px] md:w-[200px] shrink-0 snap-start"
           >
             <ProductCard product={p} />
           </div>
