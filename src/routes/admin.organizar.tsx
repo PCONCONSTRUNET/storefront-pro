@@ -138,7 +138,13 @@ function Page() {
                 <span className="text-[10px] w-6 text-center font-bold text-muted-foreground">
                   {i + 1}
                 </span>
-                <span className="text-2xl">{c.image}</span>
+                <span className="text-2xl w-8 h-8 grid place-items-center">
+                  {c.image?.startsWith("http") || c.image?.startsWith("data:") || c.image?.startsWith("/") ? (
+                    <img src={c.image} alt="" className="w-6 h-6 object-contain" />
+                  ) : (
+                    c.image
+                  )}
+                </span>
                 <span className="flex-1 font-medium text-sm truncate">
                   {c.name}
                 </span>

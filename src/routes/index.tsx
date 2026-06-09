@@ -327,8 +327,12 @@ function CategoriesScroller({
               params={{ slug: c.id }}
               className="shrink-0 snap-start flex flex-col items-center gap-1.5 group p-2 rounded-md hover:bg-muted transition-colors w-[72px] md:w-[88px]"
             >
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform">
-                {c.image}
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full gradient-soft grid place-items-center text-2xl md:text-3xl group-hover:scale-110 transition-transform overflow-hidden">
+                {c.image?.startsWith("http") || c.image?.startsWith("data:") || c.image?.startsWith("/") ? (
+                  <img src={c.image} alt="" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
+                ) : (
+                  c.image
+                )}
               </div>
               <span className="text-[10px] md:text-xs font-medium text-foreground text-center line-clamp-1">
                 {c.name}

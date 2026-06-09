@@ -40,7 +40,13 @@ function Page() {
               key={c.id}
               className="bg-card rounded-2xl p-4 shadow-card text-center"
             >
-              <div className="text-4xl">{c.image}</div>
+              <div className="text-4xl h-12 flex items-center justify-center">
+                {c.image?.startsWith("http") || c.image?.startsWith("data:") || c.image?.startsWith("/") ? (
+                  <img src={c.image} alt="" className="w-10 h-10 object-contain" />
+                ) : (
+                  c.image
+                )}
+              </div>
               <div className="font-semibold mt-2">{c.name}</div>
               <div className="text-xs text-muted-foreground">
                 Ordem: {c.order}
@@ -85,11 +91,50 @@ function Page() {
               value={editing.name}
               onChange={(v) => setEditing({ ...editing, name: v })}
             />
-            <Field
-              label="Emoji / ícone"
-              value={editing.image}
-              onChange={(v) => setEditing({ ...editing, image: v })}
-            />
+            <div className="block">
+              <span className="text-xs font-medium text-muted-foreground mb-1 block">Emoji ou Imagem do ícone</span>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={editing.image}
+                  onChange={(e) => setEditing({ ...editing, image: e.target.value })}
+                  placeholder="Emoji ou URL"
+                  className="flex-1 h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40"
+                />
+                <label className="cursor-pointer h-11 px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-sm font-semibold border border-border transition-colors">
+                  Upload
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    // Limite simples de resize para ícone
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      const img = new Image();
+                      img.onload = () => {
+                        const canvas = document.createElement("canvas");
+                        const size = 128; // tamanho de ícone
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext("2d");
+                        if (ctx) {
+                           // manter aspecto
+                           const scale = Math.min(size / img.width, size / img.height);
+                           const w = img.width * scale;
+                           const h = img.height * scale;
+                           ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+                           setEditing({ ...editing, image: canvas.toDataURL("image/webp") });
+                        } else {
+                           setEditing({ ...editing, image: ev.target?.result as string });
+                        }
+                      };
+                      img.src = ev.target?.result as string;
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = "";
+                  }} />
+                </label>
+              </div>
+            </div>
             <Field
               label="Ordem"
               type="number"

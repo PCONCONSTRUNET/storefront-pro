@@ -41,8 +41,12 @@ function Page() {
                   params={{ slug: c.id }}
                   className="bg-card rounded-2xl p-5 shadow-card hover:shadow-soft transition-all flex flex-col items-center text-center group"
                 >
-                  <div className="w-20 h-20 rounded-2xl gradient-soft grid place-items-center text-4xl group-hover:scale-110 transition-transform">
-                    {c.image}
+                  <div className="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center text-3xl mb-3">
+                    {c.image?.startsWith("http") || c.image?.startsWith("data:") || c.image?.startsWith("/") ? (
+                      <img src={c.image} alt="" className="w-8 h-8 object-contain" />
+                    ) : (
+                      c.image
+                    )}
                   </div>
                   <div className="mt-3 font-semibold">{c.name}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
