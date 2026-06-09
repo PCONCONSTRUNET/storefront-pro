@@ -557,3 +557,25 @@ export const getSyncStatusFn = createServerFn({ method: "POST" })
     }
   });
 
+export const fetchCustomerByIdFn = createServerFn({ method: "POST" })
+  .inputValidator((i) => z.object({ customerId: z.string().uuid() }).parse(i))
+  .handler(async ({ data }) => {
+    const { data: row, error } = await supabaseAdmin
+      .from("customers")
+      .select("id, name, email, phone, address, addresses, favorites, created_at")
+      .eq("id", data.customerId)
+      .maybeSingle();
+    if (error || !row) return { customer: null };
+    return {
+      customer: {
+        id: (row as any).id,
+        name: (row as any).name,
+        email: (row as any).email,
+        phone: (row as any).phone || "",
+        address: (row as any).address || null,
+        addresses: Array.isArray((row as any).addresses) ? (row as any).addresses : [],
+        favorites: Array.isArray((row as any).favorites) ? (row as any).favorites : [],
+        createdAt: (row as any).created_at,
+      },
+    };
+  });

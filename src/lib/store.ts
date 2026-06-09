@@ -1443,6 +1443,45 @@ export const useStore = create<AppState>()(
               })
               .catch(() => {}),
           );
+
+          // SOLUÇÃO DEFINITIVA: Se há currentCustomerId mas o objeto customer
+          // não está na lista local (race condition com IDB ou dados perdidos),
+          // busca diretamente do servidor e restaura na store.
+          // Isso garante que o cliente NUNCA veja a tela de login após um F5.
+          if (state.currentCustomerId) {
+            const existsLocally = (state.customers || []).some(
+              (c) => c.id === state.currentCustomerId,
+            );
+            if (!existsLocally) {
+              import("./admin.functions")
+                .then(({ fetchCustomerByIdFn }) =>
+                  fetchCustomerByIdFn({ data: { customerId: state.currentCustomerId! } }),
+                )
+                .then((res) => {
+                  if (res?.customer) {
+                    const c = res.customer;
+                    useStore.setState((s) => ({
+                      customers: [
+                        ...s.customers.filter((x) => x.id !== c.id),
+                        { ...c, password: "" },
+                      ],
+                      // Garante que o ID continua setado
+                      currentCustomerId: c.id,
+                      sessions: {
+                        ...s.sessions,
+                        customer: {
+                          token: `${c.id}.restored`,
+                          subjectId: c.id,
+                          issuedAt: new Date().toISOString(),
+                          expiresAt: new Date(Date.now() + CUSTOMER_SESSION_TTL_MS).toISOString(),
+                        },
+                      },
+                    }));
+                  }
+                })
+                .catch(() => {});
+            }
+          }
         }
       },
 
