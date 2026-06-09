@@ -336,7 +336,7 @@ function Page() {
               <li
                 key={r.id}
                 className="p-4 flex justify-between items-start gap-3"
-                style={{ borderLeft: `4px solid ${r.isOut ? "var(--destructive)" : "var(--success)"}`, opacity: r.isOut ? 0.85 : 1 }}
+                style={{ borderLeft: `4px solid ${r.isOut ? "#ef4444" : "#22c55e"}` }}
               >
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
