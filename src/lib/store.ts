@@ -1300,7 +1300,7 @@ export const useStore = create<AppState>()(
           // CRITICAL: If local has a valid illustration, KEEP IT.
           // The database doesn't have real photos yet, so we prioritize the AI-generated ones.
           const localIsIllustration = p.image?.startsWith("/products/");
-          const remoteIsRealImage = remote.image?.startsWith("http");
+          const remoteIsRealImage = remote.image?.startsWith("http") || remote.image?.startsWith("data:");
 
           return {
             ...remote,
