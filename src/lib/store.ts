@@ -1322,8 +1322,25 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 10,
+      version: 11,
       skipHydration: typeof window === "undefined",
+      partialize: (state) => {
+        const isBase64 = (s: string) => s && s.startsWith("data:");
+        return {
+          ...state,
+          // Limpa imagens pesadas em base64/data URLs do localStorage para evitar quota exceeded
+          products: state.products.map((p) => ({
+            ...p,
+            image: isBase64(p.image) ? "" : p.image,
+            gallery: p.gallery?.map(g => isBase64(g) ? "" : g) || [],
+          })),
+          categories: state.categories.map((c) => ({
+            ...c,
+            image: isBase64(c.image || "") ? "" : c.image,
+          })),
+          activityLogs: [], 
+        };
+      },
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
         if (!persisted) return persisted;
@@ -1342,6 +1359,10 @@ export const useStore = create<AppState>()(
         }
         if (version < 10) {
           // Force clear to use new illustration priority logic
+          persisted.products = initialProducts;
+        }
+        if (version < 11) {
+          // Force clear to remove bloated base64 images that caused quota exceeded errors
           persisted.products = initialProducts;
         }
         return persisted;
