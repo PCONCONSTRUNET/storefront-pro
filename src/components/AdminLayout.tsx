@@ -31,7 +31,7 @@ import { EnableNotificationsPrompt } from "@/components/EnableNotificationsPromp
 import { AdminDeviceSyncBanner } from "@/components/AdminDeviceSyncBanner";
 import { ConfirmHost } from "@/components/ConfirmDialog";
 
-const nav = [
+const DEFAULT_NAV = [
   {
     to: "/admin/dashboard",
     label: "Dashboard",
@@ -70,6 +70,49 @@ export function AdminLayout({
   const sync = useStore((s) => s.sync);
   const path = useRouterState({ select: (r) => r.location.pathname });
   const [open, setOpen] = useState(false);
+  const [navItems, setNavItems] = useState(DEFAULT_NAV);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("admin_nav_order");
+    if (saved) {
+      try {
+        const order = JSON.parse(saved) as string[];
+        const sorted = [...DEFAULT_NAV].sort((a, b) => {
+          const indexA = order.indexOf(a.to);
+          const indexB = order.indexOf(b.to);
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        });
+        setNavItems(sorted);
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleDragStart = (e: React.DragEvent, to: string) => {
+    e.dataTransfer.setData("text/plain", to);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetTo: string) => {
+    e.preventDefault();
+    const sourceTo = e.dataTransfer.getData("text/plain");
+    if (sourceTo && sourceTo !== targetTo) {
+      setNavItems((prev) => {
+        const list = [...prev];
+        const sourceIndex = list.findIndex((n) => n.to === sourceTo);
+        const targetIndex = list.findIndex((n) => n.to === targetTo);
+        if (sourceIndex === -1 || targetIndex === -1) return list;
+        const [removed] = list.splice(sourceIndex, 1);
+        list.splice(targetIndex, 0, removed);
+        localStorage.setItem("admin_nav_order", JSON.stringify(list.map((n) => n.to)));
+        return list;
+      });
+    }
+  };
 
   useEffect(() => {
     if (hydrated && !isAdmin) navigate({ to: "/admin/login" });
@@ -98,14 +141,18 @@ export function AdminLayout({
           <div className="text-xs text-muted-foreground">Princesa de Laços</div>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          {nav.map((it) => {
+          {navItems.map((it) => {
             const active = it.exact ? path === it.to : path.startsWith(it.to);
             return (
               <Link
+                draggable
+                onDragStart={(e) => handleDragStart(e, it.to)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, it.to)}
                 key={it.to}
                 to={it.to}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer",
                   active
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted text-foreground",
@@ -152,17 +199,21 @@ export function AdminLayout({
               </button>
             </div>
             <nav className="flex-1 space-y-0.5 overflow-y-auto">
-              {nav.map((it) => {
+              {navItems.map((it) => {
                 const active = it.exact
                   ? path === it.to
                   : path.startsWith(it.to);
                 return (
                   <Link
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, it.to)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, it.to)}
                     key={it.to}
                     to={it.to}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium cursor-pointer",
                       active
                         ? "bg-primary text-primary-foreground"
                         : "hover:bg-muted",
