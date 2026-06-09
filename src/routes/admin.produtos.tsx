@@ -39,6 +39,7 @@ const empty = (): Product => ({
 
 function Page() {
   const { products, categories, upsertProduct, deleteProduct } = useStore();
+  const catMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
   const [editing, setEditing] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
 
@@ -90,6 +91,19 @@ function Page() {
               <div className="flex-1 min-w-0 ml-3 md:ml-0">
                 <div className="font-medium text-sm truncate">{p.name}</div>
                 <div className="text-xs text-muted-foreground">SKU {p.sku}</div>
+                {/* Category badges */}
+                {(() => {
+                  const cats = (p.categories?.length ? p.categories : (p.category ? [p.category] : []));
+                  return cats.length > 0 ? (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {cats.map((cid) => (
+                        <span key={cid} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary leading-none">
+                          {catMap[cid] || cid}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
               </div>
               <div className="hidden md:block text-sm font-semibold text-primary">
                 {brl(p.price)}
