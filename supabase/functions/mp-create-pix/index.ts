@@ -138,12 +138,16 @@ Deno.serve(async (req) => {
 
   const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`;
 
+  const expirationDate = new Date();
+  expirationDate.setHours(expirationDate.getHours() + 24);
+
   const mpPayload = {
     transaction_amount: Number(total.toFixed(2)),
     description: `Pedido Princesa de Laços #${order.id.slice(0, 8)}`,
     payment_method_id: "pix",
     notification_url: webhookUrl,
     external_reference: order.id,
+    date_of_expiration: expirationDate.toISOString(),
     payer: {
       email: customer.email,
       first_name: firstName,

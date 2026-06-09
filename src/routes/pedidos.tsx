@@ -32,10 +32,9 @@ const TABS = [
   { id: "todos", label: "Tudo" },
   { id: "aguardando_pagamento", label: "A Pagar" },
   { id: "em_separacao", label: "Preparando" },
-  { id: "saiu_para_entrega", label: "A caminho" },
+  { id: "saiu_para_entrega", label: "Retirada" },
   { id: "concluido", label: "Finalizado" },
   { id: "cancelado", label: "Cancelado" },
-  { id: "reembolsado", label: "Reembolso" },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -101,8 +100,8 @@ function Page() {
     
     if (status === "cancelado") return { text: "CANCELADO", deliveryText: "Pedido cancelado", color: "text-[#ee4d2d]", icon: false };
     if (status === "reembolsado") return { text: "REEMBOLSO", deliveryText: "Pedido reembolsado", color: "text-[#ee4d2d]", icon: false };
-    if (delivery === "entregue" || status === "concluido") return { text: "FINALIZADO", deliveryText: "Pedido entregue com sucesso", color: "text-[#ee4d2d]", icon: true };
-    if (delivery === "saiu_para_entrega") return { text: "A CAMINHO", deliveryText: "Seu pedido está a caminho", color: "text-[#ee4d2d]", icon: true };
+    if (delivery === "entregue" || status === "concluido") return { text: "FINALIZADO", deliveryText: "Pedido entregue / finalizado com sucesso", color: "text-[#ee4d2d]", icon: true };
+    if (delivery === "saiu_para_entrega") return { text: "AGUARDANDO RETIRADA", deliveryText: "Aguardando retirada no ateliê", color: "text-[#ee4d2d]", icon: true };
     if (delivery === "em_separacao" || status === "em_separacao") return { text: "PREPARANDO", deliveryText: "O vendedor está preparando seu pedido", color: "text-[#26aa99]", icon: true };
     if (status === "pago") return { text: "PAGO", deliveryText: "Pagamento confirmado", color: "text-[#26aa99]", icon: false };
     return { text: "A PAGAR", deliveryText: "Aguardando pagamento", color: "text-[#ee4d2d]", icon: false };
@@ -236,6 +235,15 @@ function Page() {
                           {isConcluido ? "Esperando pelo vendedor dar uma classificação a você" : "Só confirme o recebimento depois de verificar os itens recebidos"}
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                          {normalizeOrderStatus(o.status) === "aguardando_pagamento" && (
+                            <Link
+                              to="/pedido/$id"
+                              params={{ id: o.id }}
+                              className="bg-[#ee4d2d] text-white px-5 py-2 text-sm rounded shadow-sm hover:bg-[#d73211] transition-colors whitespace-nowrap"
+                            >
+                              Pagar Agora
+                            </Link>
+                          )}
                           {isACaminho && (
                             <button className="bg-[#ee4d2d] text-white px-5 py-2 text-sm rounded shadow-sm hover:bg-[#d73211] transition-colors whitespace-nowrap">
                               Pedido Recebido
