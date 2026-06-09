@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin/bi")({
   component: Page,
 });
 
-const COLORS = ["#d177a8", "#f09433", "#25d366", "#dc2743", "#bc1888"];
+const STOCK_COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
 function Page() {
   const { orders, products, customers, sync } = useStore();
@@ -82,25 +82,25 @@ function Page() {
           label="Faturamento Total"
           value={brl(metrics.totalRev)}
           icon={TrendingUp}
-          color="text-success"
+          color="text-emerald-500 bg-emerald-500/10"
         />
         <BIStat
           label="Ticket Médio"
           value={brl(metrics.avgTicket)}
           icon={Activity}
-          color="text-primary"
+          color="text-primary bg-primary/10"
         />
         <BIStat
           label="Estoque Crítico"
           value={metrics.stockCritical}
           icon={AlertTriangle}
-          color="text-gold"
+          color="text-amber-500 bg-amber-500/10"
         />
         <BIStat
           label="Base de Clientes"
           value={metrics.activeCustomers}
           icon={Package}
-          color="text-primary"
+          color="text-fuchsia-500 bg-fuchsia-500/10"
         />
       </div>
 
@@ -118,15 +118,23 @@ function Page() {
                   outerRadius={80}
                   paddingAngle={5}
                   dataKey="value"
+                  stroke="none"
                 >
                   {stockHealth.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={STOCK_COLORS[index % STOCK_COLORS.length]}
                     />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
+                  }}
+                  itemStyle={{ color: "var(--foreground)" }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -134,11 +142,11 @@ function Page() {
             {stockHealth.map((entry, index) => (
               <div
                 key={entry.name}
-                className="flex items-center gap-1.5 text-xs"
+                className="flex items-center gap-1.5 text-xs font-medium"
               >
                 <div
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  style={{ backgroundColor: STOCK_COLORS[index % STOCK_COLORS.length] }}
                 />
                 <span>
                   {entry.name}: {entry.value}
@@ -165,11 +173,13 @@ function Page() {
                 />
                 <YAxis fontSize={11} stroke="var(--muted-foreground)" />
                 <Tooltip
+                  cursor={{ fill: "transparent" }}
                   contentStyle={{
                     background: "var(--card)",
                     border: "1px solid var(--border)",
                     borderRadius: 12,
                   }}
+                  itemStyle={{ color: "var(--foreground)" }}
                 />
                 <Bar
                   dataKey="value"
@@ -197,14 +207,14 @@ function BIStat({
   color: string;
 }) {
   return (
-    <div className="bg-card rounded-2xl p-4 shadow-card border border-border/50">
-      <div className="flex items-center justify-between mb-2">
-        <div className={`p-2 rounded-xl bg-muted ${color}`}>
+    <div className="bg-card rounded-2xl p-5 shadow-card border border-border/40 hover:shadow-lg transition-all group">
+      <div className="flex items-center justify-between">
+        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${color}`}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-2xl font-black tracking-tight mt-3">{value}</div>
+      <div className="text-xs text-muted-foreground font-medium mt-1">{label}</div>
     </div>
   );
 }
