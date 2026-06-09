@@ -211,8 +211,10 @@ export type SessionToken = {
   expiresAt: string;
 };
 
-// Sliding session: any user activity within this window keeps the session alive.
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+// Customer sessions never expire — only explicit logout clears them.
+// Admin sessions slide with a 30-day TTL (sensitive area).
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 365 * 100; // effectively forever (100 years)
+const CUSTOMER_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 365 * 100; // never expires
 const SESSION_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // refresh at most once/day
 
 function makeSession(subjectId: string): SessionToken {
@@ -1382,8 +1384,6 @@ export const useStore = create<AppState>()(
       },
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        // A sessão do cliente/afiliada permanece ativa até logout explícito.
-        // Só validamos a sessão de admin (área sensível).
         const sessions = state.sessions || {
           admin: null,
           customer: null,
@@ -1391,14 +1391,39 @@ export const useStore = create<AppState>()(
         };
         const patch: Partial<AppState> = {};
         const nextSessions = { ...sessions };
+
+        // --- ADMIN: invalida se sessão expirou ---
         if (!isSessionValid(sessions.admin) && state.isAdmin) {
           patch.isAdmin = false;
           patch.adminToken = null;
           nextSessions.admin = null;
         }
+
+        // --- CLIENTE: NUNCA deslogamos automaticamente.
+        // Se há currentCustomerId mas sessions.customer está null/expirado,
+        // recriamos a sessão silenciosamente (token de 100 anos).
+        if (state.currentCustomerId && !sessions.customer) {
+          nextSessions.customer = {
+            token: `${state.currentCustomerId}.restored`,
+            subjectId: state.currentCustomerId,
+            issuedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + CUSTOMER_SESSION_TTL_MS).toISOString(),
+          };
+        }
+
+        // --- AFILIADA: mesma lógica ---
+        if (state.currentAffiliateId && !sessions.affiliate) {
+          nextSessions.affiliate = {
+            token: `${state.currentAffiliateId}.restored`,
+            subjectId: state.currentAffiliateId,
+            issuedAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + CUSTOMER_SESSION_TTL_MS).toISOString(),
+          };
+        }
+
         useStore.setState({ ...patch, sessions: nextSessions });
+
         // Revalida sessão admin via cookie httpOnly no servidor.
-        // Se cookie expirou/inválido, força logout no front.
         if (typeof window !== "undefined") {
           import("./admin.functions").then(({ getAdminSessionFn }) =>
             getAdminSessionFn()
@@ -1509,8 +1534,39 @@ export function hydrateFromCloud(): Promise<void> {
          snap.categories.filter(c => isSampleCatId(c.id)).forEach(c => cloud.deleteCategory(c.id).catch(() => {}));
       }
 
+      // SEGURANÇA: para não-admins, snap.customers e snap.orders vêm vazios.
+      // Nunca sobrescreva a lista local com uma lista vazia — isso deslogaria o cliente.
+      const isAdmin = cur.isAdmin;
+      const mergedCustomers = isAdmin && snap.customers.length > 0
+        ? mergeById(cur.customers, snap.customers)
+        : cur.customers; // preserva 100% os dados locais do cliente
+
+      const mergedOrders = isAdmin && snap.orders.length > 0
+        ? mergeById(cur.orders, snap.orders)
+        : cur.orders;
+
+      const mergedAffiliates = isAdmin && snap.affiliates.length > 0
+        ? mergeById(cur.affiliates, snap.affiliates)
+        : cur.affiliates;
+
+      const mergedAffiliateSales = isAdmin && snap.affiliateSales.length > 0
+        ? mergeById(cur.affiliateSales, snap.affiliateSales)
+        : cur.affiliateSales;
+
+      const mergedTransactions = isAdmin && snap.transactions.length > 0
+        ? mergeById(cur.transactions, snap.transactions)
+        : cur.transactions;
+
+      const mergedWaitlist = isAdmin && snap.waitlist.length > 0
+        ? mergeById(cur.waitlist, snap.waitlist)
+        : cur.waitlist;
+
+      const mergedActivityLogs = isAdmin && snap.activityLogs.length > 0
+        ? mergeById(cur.activityLogs, snap.activityLogs)
+        : cur.activityLogs;
+
       useStore.setState({
-        customers: mergeById(cur.customers, snap.customers),
+        customers: mergedCustomers,
         products: realProducts.length
           ? mergeById(cur.products.filter(p => !isSampleId(p.id)), realProducts)
           : cur.products.filter(p => !isSampleId(p.id)),
@@ -1520,14 +1576,14 @@ export function hydrateFromCloud(): Promise<void> {
         coupons: snap.coupons.length
           ? mergeByCode(cur.coupons, snap.coupons)
           : cur.coupons,
-        affiliates: mergeById(cur.affiliates, snap.affiliates),
-        affiliateSales: mergeById(cur.affiliateSales, snap.affiliateSales),
-        transactions: mergeById(cur.transactions, snap.transactions),
+        affiliates: mergedAffiliates,
+        affiliateSales: mergedAffiliateSales,
+        transactions: mergedTransactions,
         reviews: mergeById(cur.reviews, snap.reviews),
-        orders: mergeById(cur.orders, snap.orders),
+        orders: mergedOrders,
         faq: mergeById(cur.faq, snap.faq),
-        waitlist: mergeById(cur.waitlist, snap.waitlist),
-        activityLogs: mergeById(cur.activityLogs, snap.activityLogs),
+        waitlist: mergedWaitlist,
+        activityLogs: mergedActivityLogs,
         settings: snap.settings
           ? ({ ...cur.settings, ...snap.settings } as StoreSettings)
           : cur.settings,
