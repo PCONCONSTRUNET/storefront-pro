@@ -335,7 +335,8 @@ function Page() {
             {filteredRows.map((r) => (
               <li
                 key={r.id}
-                className={`p-4 flex justify-between items-start gap-3 border-l-4 ${r.isOut ? "border-l-destructive/70" : "border-l-success/70"}`}
+                className="p-4 flex justify-between items-start gap-3"
+                style={{ borderLeft: `4px solid ${r.isOut ? "var(--destructive)" : "var(--success)"}`, opacity: r.isOut ? 0.85 : 1 }}
               >
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
