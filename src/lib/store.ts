@@ -1322,7 +1322,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v1",
-      version: 11,
+      version: 12,
       skipHydration: typeof window === "undefined",
       partialize: (state) => {
         const isBase64 = (s: string) => s && s.startsWith("data:");
@@ -1358,12 +1358,14 @@ export const useStore = create<AppState>()(
           persisted.reviews = [];
         }
         if (version < 10) {
-          // Force clear to use new illustration priority logic
           persisted.products = initialProducts;
         }
         if (version < 11) {
-          // Force clear to remove bloated base64 images that caused quota exceeded errors
           persisted.products = initialProducts;
+        }
+        if (version < 12) {
+          // Clear cached products to wipe out zombie sample products and force a clean cloud fetch
+          persisted.products = [];
         }
         return persisted;
       },
@@ -1450,36 +1452,24 @@ export function hydrateFromCloud(): Promise<void> {
         remote.forEach((x) => {
           const loc = map.get(x.id);
           if (loc) {
-            // Product specific fallback
-            // CRITICAL: Prioritize local illustrations
-            const localIsIllustration = (loc as any).image?.startsWith(
-              "/products/",
-            );
-            const remoteIsRealImage = (x as any).image?.startsWith("http");
+            // Standard fallback
+            const isPlaceholder = (url: string) =>
+              !url ||
+              url === "" ||
+              url === "null" ||
+              (!url.startsWith("http") &&
+                !url.startsWith("/") &&
+                !url.startsWith("data:"));
 
-            if (localIsIllustration && !remoteIsRealImage) {
+            if (isPlaceholder((x as any).image)) {
               (x as any).image = (loc as any).image;
+            }
+            if (
+              !(x as any).gallery ||
+              (x as any).gallery.length === 0 ||
+              isPlaceholder((x as any).gallery[0])
+            ) {
               (x as any).gallery = (loc as any).gallery;
-            } else {
-              // Standard fallback
-              const isPlaceholder = (url: string) =>
-                !url ||
-                url === "" ||
-                url === "null" ||
-                (!url.startsWith("http") &&
-                  !url.startsWith("/") &&
-                  !url.startsWith("data:"));
-
-              if (isPlaceholder((x as any).image)) {
-                (x as any).image = (loc as any).image;
-              }
-              if (
-                !(x as any).gallery ||
-                (x as any).gallery.length === 0 ||
-                isPlaceholder((x as any).gallery[0])
-              ) {
-                (x as any).gallery = (loc as any).gallery;
-              }
             }
           }
           map.set(x.id, x);
