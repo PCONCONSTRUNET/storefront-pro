@@ -11,6 +11,7 @@ import {
 import { brl } from "@/lib/format";
 import {
   ChevronLeft,
+  ChevronRight,
   Minus,
   Plus,
   ShoppingBag,
@@ -113,6 +114,32 @@ function Page() {
                 <span className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full">
                   -{discount}%
                 </span>
+              )}
+              {gallery.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setImgIdx((prev) => (prev > 0 ? prev - 1 : gallery.length - 1));
+                      setImgError(false);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 hover:bg-background text-foreground rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all"
+                    aria-label="Foto anterior"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setImgIdx((prev) => (prev < gallery.length - 1 ? prev + 1 : 0));
+                      setImgError(false);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 hover:bg-background text-foreground rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-all"
+                    aria-label="Próxima foto"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
               )}
             </div>
             {gallery.length > 1 && (
