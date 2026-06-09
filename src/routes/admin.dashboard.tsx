@@ -9,7 +9,6 @@ import {
   Users,
   Package,
   TrendingUp,
-  TrendingUp,
   TrendingDown,
   Sparkles,
   Crown,
