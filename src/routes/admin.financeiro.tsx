@@ -1315,94 +1315,94 @@ Autenticação: ${row.id.toUpperCase()}`;
       className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
       onClick={onClose}
     >
-      <div
-        className="bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] w-full max-w-sm overflow-hidden animate-modal-in shadow-2xl relative flex flex-col text-white"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-6 text-center relative border-b border-white/5">
+      <div className="w-full max-w-[420px] flex flex-col gap-3">
+        <div className="flex justify-between items-center text-white px-2">
+          <h2 className="text-[26px] font-medium tracking-tight">Comprovante</h2>
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-white/70"
+            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white/90 hover:bg-white/30 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
-          
-          <div className="w-12 h-12 bg-white/10 rounded-full mx-auto flex items-center justify-center text-white mb-3 shadow-sm border border-white/10">
-            <span className="font-bold text-lg">{storeSettings.storeName.charAt(0)}</span>
-          </div>
-          
-          <h3 className="font-medium text-white/50 text-xs uppercase tracking-wider mb-1">
-            Comprovante de Transação
-          </h3>
-          <div className={`text-4xl font-black tracking-tight ${row.isOut ? "text-red-400" : "text-green-400"}`}>
-            {row.isOut ? "− " : "+ "}{brl(row.amount)}
-          </div>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-white/5">
-            <span className="text-sm text-white/50">Data e Hora</span>
-            <span className="text-sm font-medium">{formatDate(row.date)}</span>
+        <div
+          className="bg-[#1c1c1e]/85 backdrop-blur-3xl rounded-[32px] p-5 shadow-2xl border border-white/10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex gap-4">
+            <div className="w-[60px] h-[60px] rounded-[18px] bg-[#0E5C3B] flex flex-col items-center justify-center shrink-0 shadow-inner">
+              <span className="text-white font-bold text-2xl leading-none">{storeSettings.storeName.charAt(0)}</span>
+              <span className="text-white/80 text-[8px] mt-1 tracking-wider uppercase font-semibold">Loja</span>
+            </div>
+
+            <div className="flex-1 min-w-0 pt-0.5">
+              <div className="flex justify-between items-start gap-2 mb-1">
+                <h4 className="font-semibold text-[17px] text-white leading-tight truncate">
+                  {row.isOut ? "Saída de " : "Recebido "}{brl(row.amount)}
+                </h4>
+                <span className="text-[13px] text-white/50 shrink-0 mt-0.5">{formatDate(row.date).split(',')[1]}</span>
+              </div>
+              
+              <div className="text-[15px] text-white/90 leading-snug">
+                {row.description}
+                
+                <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
+                  {row.status && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/50 text-[13px]">Status</span>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full
+                        ${
+                          ['pago', 'concluido', 'confirmada'].includes(row.status)
+                            ? 'bg-green-500/20 text-green-400'
+                            : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(row.status)
+                              ? 'bg-yellow-500/20 text-yellow-400'
+                              : 'bg-red-500/20 text-red-400'
+                        }
+                      `}>
+                        {row.status.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/50 text-[13px]">Data</span>
+                    <span className="text-white/90 text-[13px] font-medium">{formatDate(row.date).split(',')[0]}</span>
+                  </div>
+
+                  {row.mpPaymentId && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/50 text-[13px]">Transação MP</span>
+                      <span className="text-white/80 text-[12px] font-mono bg-white/5 px-1.5 py-0.5 rounded">{row.mpPaymentId}</span>
+                    </div>
+                  )}
+
+                  {row.meta && (
+                    <div className="flex flex-col pt-1">
+                      <span className="text-white/50 text-[13px]">Detalhes</span>
+                      <span className="text-white/90 text-[13px] mt-0.5 leading-relaxed">{row.meta}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div className="flex justify-between items-center pb-3 border-b border-white/5">
-            <span className="text-sm text-white/50">Tipo</span>
-            <span className="text-sm font-medium">{row.isOut ? 'Saída (Despesa)' : 'Entrada (Receita)'}</span>
+          <div className="flex gap-2 mt-5 pt-5 border-t border-white/10">
+            <button
+              onClick={handleShare}
+              className="flex-1 h-11 flex items-center justify-center gap-1.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-[14px] font-medium transition-colors"
+            >
+              <Share className="h-4 w-4" /> Compartilhar
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex-1 h-11 flex items-center justify-center gap-1.5 rounded-2xl bg-white hover:bg-white/90 text-black text-[14px] font-medium transition-colors"
+            >
+              <Download className="h-4 w-4" /> PDF
+            </button>
           </div>
-
-          <div className="flex flex-col gap-1 pb-3 border-b border-white/5">
-            <span className="text-sm text-white/50">Descrição</span>
-            <span className="text-sm font-medium">{row.description}</span>
-          </div>
-
-          {row.status && (
-            <div className="flex justify-between items-center pb-3 border-b border-white/5">
-              <span className="text-sm text-white/50">Status</span>
-              <span className={`text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full
-                ${
-                  ['pago', 'concluido', 'confirmada'].includes(row.status)
-                    ? 'bg-green-500/20 text-green-300'
-                    : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(row.status)
-                      ? 'bg-yellow-500/20 text-yellow-300'
-                      : 'bg-red-500/20 text-red-300'
-                }
-              `}>
-                {row.status.replace(/_/g, " ")}
-              </span>
-            </div>
-          )}
-
-          {row.mpPaymentId && (
-            <div className="flex justify-between items-center pb-3 border-b border-white/5">
-              <span className="text-sm text-white/50">ID Mercado Pago</span>
-              <span className="text-xs font-mono bg-white/5 px-2 py-0.5 rounded text-white/80">{row.mpPaymentId}</span>
-            </div>
-          )}
-
-          {row.meta && (
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-white/50">Detalhes</span>
-              <span className="text-sm text-white/80 font-medium break-words leading-relaxed">
-                {row.meta}
-              </span>
-            </div>
-          )}
-        </div>
-        
-        <div className="p-4 bg-white/5 flex gap-3">
-          <button
-            onClick={handleShare}
-            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors border border-white/10"
-          >
-            <Share className="h-4 w-4" /> Compartilhar
-          </button>
-          <button
-            onClick={handlePrint}
-            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl bg-white text-black font-semibold hover:bg-white/90 transition-colors"
-          >
-            <Download className="h-4 w-4" /> PDF
-          </button>
         </div>
       </div>
     </div>
