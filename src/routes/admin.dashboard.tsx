@@ -25,6 +25,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import { adminDeleteFn } from "@/lib/admin.functions";
+
 export const Route = createFileRoute("/admin/dashboard")({
   component: Page,
 });
@@ -35,6 +37,42 @@ function Page() {
   useEffect(() => {
     sync();
   }, [sync]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("system_cleanup_done_v4")) {
+      const wipe = async () => {
+        try {
+          toast.loading("Realizando limpeza geral do banco de dados...", { id: "nuke" });
+          const st = useStore.getState();
+          const p1 = Promise.all(st.orders.map((o) => adminDeleteFn({ data: { table: "orders", match: { id: o.id } } })));
+          const p2 = Promise.all(st.customers.map((c) => adminDeleteFn({ data: { table: "customers", match: { id: c.id } } })));
+          const p3 = Promise.all(st.transactions.map((t) => adminDeleteFn({ data: { table: "transactions", match: { id: t.id } } })));
+          const p4 = Promise.all(st.affiliates.map((a) => adminDeleteFn({ data: { table: "affiliates", match: { id: a.id } } })));
+          const p5 = Promise.all(st.affiliateSales.map((s) => adminDeleteFn({ data: { table: "affiliate_sales", match: { id: s.id } } })));
+          const p6 = Promise.all(st.reviews.map((r) => adminDeleteFn({ data: { table: "reviews", match: { id: r.id } } })));
+          await Promise.all([p1, p2, p3, p4, p5, p6]);
+          
+          useStore.setState({
+            orders: [],
+            customers: [],
+            affiliates: [],
+            affiliateSales: [],
+            transactions: [],
+            reviews: [],
+            waitlist: [],
+            activityLogs: []
+          });
+          
+          localStorage.setItem("system_cleanup_done_v4", "true");
+          toast.success("Limpeza concluída! Produtos, Categorias e Gateway mantidos.", { id: "nuke" });
+        } catch(e) {
+          console.error(e);
+          toast.error("Erro na limpeza do banco", { id: "nuke" });
+        }
+      };
+      wipe();
+    }
+  }, []);
 
   const stats = useMemo(() => {
     const today = new Date();
