@@ -747,13 +747,22 @@ export const useStore = create<AppState>()(
           description: `Cliente logou: ${c.name}`,
           userId: c.id,
         });
+
+        // Backup robusto na LocalStorage para o caso do IDB falhar no F5 rápido
+        localStorage.setItem("princesa-auth", JSON.stringify({
+          currentCustomerId: c.id,
+          session: sess
+        }));
+
         return { ok: true, message: res.message };
       },
-      logoutCustomer: () =>
+      logoutCustomer: () => {
+        localStorage.removeItem("princesa-auth");
         set((s) => ({
           currentCustomerId: null,
           sessions: { ...s.sessions, customer: null },
-        })),
+        }));
+      },
       updateCustomer: async (data) => {
         const id = get().currentCustomerId;
         if (!id) return { ok: false, message: "Não autenticada" };
@@ -1397,6 +1406,33 @@ export const useStore = create<AppState>()(
           patch.isAdmin = false;
           patch.adminToken = null;
           nextSessions.admin = null;
+        }
+
+        // --- BACKUP ROBUSTO DO CLIENTE ---
+        // Se a store hidratou vazia (ex: falha no IDB no F5), tenta recuperar do backup
+        if (!state.currentCustomerId && typeof window !== "undefined") {
+          try {
+            const backupStr = localStorage.getItem("princesa-auth");
+            if (backupStr) {
+              const backup = JSON.parse(backupStr);
+              if (backup.currentCustomerId) {
+                patch.currentCustomerId = backup.currentCustomerId;
+                state.currentCustomerId = backup.currentCustomerId;
+                if (backup.session) {
+                  nextSessions.customer = backup.session;
+                  sessions.customer = backup.session;
+                }
+              }
+            }
+          } catch (e) {}
+        } else if (state.currentCustomerId && nextSessions.customer && typeof window !== "undefined") {
+          // Salva pró-ativamente para proteger usuários que já estavam logados
+          try {
+            localStorage.setItem("princesa-auth", JSON.stringify({
+              currentCustomerId: state.currentCustomerId,
+              session: nextSessions.customer
+            }));
+          } catch (e) {}
         }
 
         // --- CLIENTE: NUNCA deslogamos automaticamente.
