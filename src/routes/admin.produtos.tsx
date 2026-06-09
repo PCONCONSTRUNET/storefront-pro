@@ -317,7 +317,7 @@ function ProductForm({
       )}
 
       {tab === "var" && (
-        <VariationsEditor
+        <FlatVariationsEditor
           variations={p.variations ?? []}
           onChange={(v) => setP({ ...p, variations: v })}
         />
@@ -347,152 +347,103 @@ function ProductForm({
 type VarOption = { label: string; priceDelta?: number };
 type Variation = { name: string; options: VarOption[] };
 
-function normalizeOptions(opts: (string | VarOption)[]): VarOption[] {
-  return opts.map((o) => (typeof o === "string" ? { label: o } : o));
+// Extrai a lista plana de opções de qualquer formato de variações salvo
+function flatOptions(variations: { name: string; options: (string | VarOption)[] }[]): VarOption[] {
+  return variations.flatMap((v) =>
+    v.options.map((o) => (typeof o === "string" ? { label: o } : o))
+  );
 }
 
-function VariationsEditor({
+// Salva como um único grupo (sem nome) para manter compatibilidade com o banco
+function toVariations(opts: VarOption[]): Variation[] {
+  if (opts.length === 0) return [];
+  return [{ name: "Opção", options: opts }];
+}
+
+function FlatVariationsEditor({
   variations,
   onChange,
 }: {
   variations: { name: string; options: (string | VarOption)[] }[];
   onChange: (v: Variation[]) => void;
 }) {
-  const norm: Variation[] = variations.map((v) => ({
-    name: v.name,
-    options: normalizeOptions(v.options),
-  }));
-  const add = () => onChange([...norm, { name: "", options: [] }]);
-  const update = (i: number, patch: Partial<Variation>) => {
-    onChange(norm.map((v, idx) => (idx === i ? { ...v, ...patch } : v)));
-  };
-  const remove = (i: number) => onChange(norm.filter((_, idx) => idx !== i));
-
-  return (
-    <div className="space-y-3">
-      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-foreground/70 leading-relaxed">
-        <strong className="text-foreground">Como funciona:</strong> Crie um grupo de variação (ex: <em>"Tipo de presilha"</em>) e adicione as opções que o cliente poderá escolher (ex: <em>"Com bico de pato"</em>, <em>"Com xuxinha"</em>). Você pode definir um acréscimo no preço por opção.
-      </div>
-      {norm.length === 0 && (
-        <div className="text-center py-6 text-xs text-muted-foreground bg-muted/40 rounded-xl">
-          Nenhuma variação cadastrada.
-        </div>
-      )}
-      {norm.map((v, i) => (
-        <div key={i} className="bg-muted/40 rounded-xl p-3 space-y-2 border border-border">
-          <div className="flex gap-2 items-center">
-            <div className="flex-1">
-              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Nome do grupo</label>
-              <input
-                placeholder="Ex: Tipo de presilha, Cor, Tamanho..."
-                value={v.name}
-                onChange={(e) => update(i, { name: e.target.value })}
-                className="mt-0.5 w-full h-9 px-2 text-sm rounded-lg bg-card outline-none focus:ring-2 ring-primary/40"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => remove(i)}
-              className="mt-4 w-9 h-9 grid place-items-center rounded-lg bg-destructive/10 text-destructive flex-shrink-0"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div>
-            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Opções</label>
-            {v.options.length === 0 && (
-              <p className="text-[11px] text-destructive/70 mt-0.5 mb-1">⚠ Adicione pelo menos uma opção abaixo para este grupo aparecer na loja.</p>
-            )}
-            <OptionsInput
-              options={v.options}
-              onChange={(opts) => update(i, { options: opts })}
-            />
-          </div>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={add}
-        className="w-full h-9 rounded-xl bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-1"
-      >
-        <Plus className="h-4 w-4" /> Adicionar grupo de variação
-      </button>
-    </div>
-  );
-}
-
-function OptionsInput({
-  options,
-  onChange,
-}: {
-  options: VarOption[];
-  onChange: (o: VarOption[]) => void;
-}) {
-  // Adiciona uma nova linha vazia já no estado — sem botão Add
-  const addRow = () => {
-    onChange([...options, { label: "", priceDelta: undefined }]);
-  };
+  const opts = flatOptions(variations);
 
   const updateLabel = (i: number, val: string) => {
-    onChange(options.map((o, idx) => (idx === i ? { ...o, label: val } : o)));
+    const next = opts.map((o, idx) => (idx === i ? { ...o, label: val } : o));
+    onChange(toVariations(next));
   };
 
   const updateDelta = (i: number, val: string) => {
     const d = parseFloat(val);
-    onChange(
-      options.map((o, idx) =>
-        idx === i ? { ...o, priceDelta: isNaN(d) ? undefined : d } : o,
-      ),
+    const next = opts.map((o, idx) =>
+      idx === i ? { ...o, priceDelta: isNaN(d) || val === "" ? undefined : d } : o
     );
+    onChange(toVariations(next));
+  };
+
+  const addRow = () => {
+    onChange(toVariations([...opts, { label: "", priceDelta: undefined }]));
   };
 
   const removeRow = (i: number) => {
-    onChange(options.filter((_, idx) => idx !== i));
+    onChange(toVariations(opts.filter((_, idx) => idx !== i)));
   };
 
   return (
-    <div className="mt-1.5 space-y-1.5">
-      {options.map((o, i) => (
+    <div className="space-y-2">
+      {/* Cabeçalho das colunas */}
+      {opts.length > 0 && (
+        <div className="flex gap-2 px-1">
+          <span className="flex-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Nome da opção</span>
+          <span className="w-24 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide text-right">Acréscimo (R$)</span>
+          <span className="w-5" />
+        </div>
+      )}
+
+      {opts.length === 0 && (
+        <div className="text-center py-6 text-xs text-muted-foreground bg-muted/40 rounded-xl">
+          Nenhuma opção cadastrada.
+        </div>
+      )}
+
+      {opts.map((o, i) => (
         <div
           key={i}
-          className="flex items-center gap-1.5 bg-card px-2 py-1.5 rounded-lg border border-border"
+          className="flex items-center gap-2 bg-muted/40 px-2 py-1.5 rounded-xl border border-border"
         >
           <input
             type="text"
             value={o.label}
             onChange={(e) => updateLabel(i, e.target.value)}
-            placeholder="Nome da opção (ex: Com bico de pato)"
-            className="flex-1 h-7 px-1.5 text-xs rounded bg-muted outline-none focus:ring-1 ring-primary/40"
+            placeholder="Ex: Com bico de pato"
+            className="flex-1 h-9 px-2 text-sm rounded-lg bg-card outline-none focus:ring-2 ring-primary/40"
           />
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <span className="text-[10px] text-muted-foreground">+R$</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={o.priceDelta ?? ""}
-              onChange={(e) => updateDelta(i, e.target.value)}
-              placeholder="0,00"
-              className="w-16 h-7 px-1 text-xs rounded bg-muted outline-none text-right focus:ring-1 ring-primary/40"
-            />
-          </div>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={o.priceDelta ?? ""}
+            onChange={(e) => updateDelta(i, e.target.value)}
+            placeholder="0,00"
+            className="w-24 h-9 px-2 text-sm rounded-lg bg-card outline-none text-right focus:ring-2 ring-primary/40"
+          />
           <button
             type="button"
-            title="Remover opção"
             onClick={() => removeRow(i)}
-            className="text-muted-foreground hover:text-destructive ml-0.5"
+            className="w-8 h-8 grid place-items-center rounded-lg bg-destructive/10 text-destructive flex-shrink-0"
           >
-            <X className="h-3.5 w-3.5" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       ))}
+
       <button
         type="button"
         onClick={addRow}
-        className="w-full h-8 rounded-lg border border-dashed border-primary/40 text-primary/70 hover:text-primary hover:border-primary text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+        className="w-full h-10 rounded-xl bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-1.5"
       >
-        <Plus className="h-3.5 w-3.5" /> Adicionar opção
+        <Plus className="h-4 w-4" /> Adicionar opção
       </button>
     </div>
   );

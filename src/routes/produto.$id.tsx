@@ -38,15 +38,14 @@ function Page() {
   const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   const priceDelta = (() => {
-    if (!product?.variations) return 0;
-    let d = 0;
-    for (const v of product.variations) {
-      const idx = selected[v.name];
-      if (idx == null) continue;
-      const opt = v.options[idx];
-      if (typeof opt === "object" && opt.priceDelta) d += opt.priceDelta;
-    }
-    return d;
+    const flatIdx = selected["_flat"];
+    if (flatIdx == null || !product?.variations) return 0;
+    const allOpts = product.variations.flatMap((v: any) =>
+      (v.options ?? []).map((o: any) =>
+        typeof o === "object" ? (o.priceDelta ?? 0) : 0
+      )
+    );
+    return allOpts[flatIdx] ?? 0;
   })();
   const finalPrice = (product?.price ?? 0) + priceDelta;
 
@@ -208,49 +207,55 @@ function Page() {
               {product.description}
             </p>
 
-            {product.variations?.filter(v => v.options && v.options.length > 0).map((v) => (
-              <div key={v.name} className="mt-4">
-                <div className="text-sm font-semibold mb-2 flex items-center gap-2">
-                  {v.name}
-                  <span className="text-[10px] text-muted-foreground font-normal">(escolha uma opção)</span>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {v.options.map((o, idx) => {
-                    const label = typeof o === "string" ? o : o.label;
-                    const delta =
-                      typeof o === "object" ? o.priceDelta : undefined;
-                    const isSel = selected[v.name] === idx;
-                    return (
-                      <button
-                        key={label + idx}
-                        type="button"
-                        onClick={() =>
-                          setSelected((s) => ({ ...s, [v.name]: idx }))
-                        }
-                        className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
-                          isSel
-                            ? "border-primary bg-primary/10 text-primary font-semibold shadow-sm"
-                            : "border-border hover:border-primary hover:bg-primary/5"
-                        }`}
-                      >
-                        {label}
-                        {delta && delta > 0 ? (
-                          <span className="ml-1 text-xs opacity-80 font-normal">
-                            +{delta.toFixed(2).replace(".", ",")}
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+            {(() => {
+              // Flatten all options from all groups into a single list
+              const allOpts = (product.variations ?? []).flatMap(v =>
+                (v.options ?? []).map((o: any) => ({
+                  label: typeof o === "string" ? o : o.label,
+                  delta: typeof o === "object" ? (o.priceDelta ?? 0) : 0,
+                }))
+              ).filter(o => o.label);
 
-            {priceDelta > 0 && (
-              <div className="mt-2 text-xs text-primary font-medium">
-                Acréscimo da variação: +{brl(priceDelta)}
-              </div>
-            )}
+              if (allOpts.length === 0) return null;
+
+              return (
+                <div className="mt-4">
+                  <div className="text-sm font-semibold mb-2 flex items-center gap-2">
+                    Escolha uma opção
+                    <span className="text-[10px] text-muted-foreground font-normal">(obrigatório)</span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {allOpts.map((o, idx) => {
+                      const isSel = selected["_flat"] === idx;
+                      return (
+                        <button
+                          key={o.label + idx}
+                          type="button"
+                          onClick={() => setSelected({ _flat: idx })}
+                          className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
+                            isSel
+                              ? "border-primary bg-primary/10 text-primary font-semibold shadow-sm"
+                              : "border-border hover:border-primary hover:bg-primary/5"
+                          }`}
+                        >
+                          {o.label}
+                          {o.delta > 0 && (
+                            <span className="ml-1 text-xs opacity-80 font-normal">
+                              +{o.delta.toFixed(2).replace(".", ",")}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selected["_flat"] != null && allOpts[selected["_flat"]]?.delta > 0 && (
+                    <div className="mt-2 text-xs text-primary font-medium">
+                      Acréscimo: +{brl(allOpts[selected["_flat"]].delta)}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="mt-5 flex items-center gap-3">
               <span className="text-sm font-semibold">Quantidade</span>
