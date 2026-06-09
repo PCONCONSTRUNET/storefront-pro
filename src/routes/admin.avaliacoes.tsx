@@ -155,7 +155,7 @@ function Page() {
                           toast.success("Avaliação excluída");
                         }
                       }}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                      className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                       title="Excluir Avaliação"
                     >
                       <Trash2 className="h-4 w-4" />
