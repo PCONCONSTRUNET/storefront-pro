@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { get, set, del } from "idb-keyval";
 import { useEffect, useState } from "react";
 import {
   initialProducts,
@@ -397,9 +398,23 @@ type AppState = {
   sync: () => Promise<void>;
 };
 
+// Storage via IndexedDB para evitar o limite de 5MB do localStorage
+const idbStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    return (await get(name)) || null;
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    await set(name, value);
+  },
+  removeItem: async (name: string): Promise<void> => {
+    await del(name);
+  },
+};
+
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
+
       products: initialProducts,
       categories: initialCategories,
       coupons: initialCoupons,
@@ -1321,52 +1336,19 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: "princesa-store-v1",
-      version: 12,
+      name: "princesa-store-v2",
+      version: 1,
+      storage: createJSONStorage(() => idbStorage),
       skipHydration: typeof window === "undefined",
       partialize: (state) => {
-        const isBase64 = (s: string) => s && s.startsWith("data:");
         return {
           ...state,
-          // Limpa imagens pesadas em base64/data URLs do localStorage para evitar quota exceeded
-          products: state.products.map((p) => ({
-            ...p,
-            image: isBase64(p.image) ? "" : p.image,
-            gallery: p.gallery?.map(g => isBase64(g) ? "" : g) || [],
-          })),
-          categories: state.categories.map((c) => ({
-            ...c,
-            image: isBase64(c.image || "") ? "" : c.image,
-          })),
           activityLogs: [], 
         };
       },
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
         if (!persisted) return persisted;
-        if (version < 2) {
-          persisted.products = initialProducts;
-          persisted.categories = initialCategories;
-        }
-        if (version < 3) {
-          persisted.sessions = { admin: null, customer: null, affiliate: null };
-        }
-        if (version < 4) {
-          persisted.adminPasswordOverride = {};
-        }
-        if (version < 5) {
-          persisted.reviews = [];
-        }
-        if (version < 10) {
-          persisted.products = initialProducts;
-        }
-        if (version < 11) {
-          persisted.products = initialProducts;
-        }
-        if (version < 12) {
-          // Clear cached products to wipe out zombie sample products and force a clean cloud fetch
-          persisted.products = [];
-        }
         return persisted;
       },
       onRehydrateStorage: () => (state) => {
@@ -1569,3 +1551,8 @@ export const selectCartCount = (s: AppState) =>
   s.cart.reduce((a, i) => a + i.quantity, 0);
 export const selectCurrentCustomer = (s: AppState) =>
   s.customers.find((c) => c.id === s.currentCustomerId) || null;
+
+// Helper para evitar ciclo em cloud.ts
+if (typeof window !== "undefined") {
+  (window as any).__princesaAdmin = () => useStore.getState().isAdmin;
+}

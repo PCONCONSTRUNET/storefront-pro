@@ -48,10 +48,7 @@ type AdminSnapshot = {
 function isAdminLogged(): boolean {
   try {
     if (typeof window === "undefined") return false;
-    const raw = window.localStorage.getItem("princesa-store-v1");
-    if (!raw) return false;
-    const parsed = JSON.parse(raw);
-    return Boolean(parsed?.state?.isAdmin);
+    return Boolean((window as any).__princesaAdmin?.());
   } catch {
     return false;
   }
