@@ -368,7 +368,7 @@ function Page() {
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} tickFormatter={(val) => `R$${val}`} />
                 <RechartsTooltip
-                  cursor={{ fill: "#f3f4f6" }}
+                  cursor={false}
                   contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", fontSize: "14px", fontWeight: "bold" }}
                   formatter={(value: number) => brl(value)}
                   labelStyle={{ color: "#6b7280", marginBottom: "4px" }}
