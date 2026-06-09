@@ -1338,23 +1338,30 @@ export const useStore = create<AppState>()(
                   : local.gallery,
           };
         });
-        set((s) => ({
-          customers: snap.customers,
-          products: mergedProducts,
-          categories: snap.categories,
-          coupons: snap.coupons,
-          affiliates: snap.affiliates,
-          affiliateSales: snap.affiliateSales,
-          transactions: snap.transactions,
-          reviews: snap.reviews,
-          orders: snap.orders,
-          faq: snap.faq,
-          waitlist: snap.waitlist,
-          activityLogs: snap.activityLogs,
-          settings: snap.settings
-            ? { ...s.settings, ...snap.settings }
-            : s.settings,
-        }));
+        set((s) => {
+          const updates: Partial<AppState> = {
+            products: mergedProducts,
+            categories: snap.categories,
+            coupons: snap.coupons,
+            reviews: snap.reviews,
+            faq: snap.faq,
+            settings: snap.settings
+              ? { ...s.settings, ...snap.settings }
+              : s.settings,
+          };
+
+          if (s.isAdmin) {
+            updates.customers = snap.customers;
+            updates.affiliates = snap.affiliates;
+            updates.affiliateSales = snap.affiliateSales;
+            updates.transactions = snap.transactions;
+            updates.orders = snap.orders;
+            updates.waitlist = snap.waitlist;
+            updates.activityLogs = snap.activityLogs;
+          }
+
+          return updates;
+        });
       },
     }),
     {
