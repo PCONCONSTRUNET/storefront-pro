@@ -378,6 +378,7 @@ function CategoriesScroller({
 
 function ProductRowCarousel({ products }: { products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
 
   const scrollBy = (dir: number) => {
     if (scrollRef.current) {
@@ -386,6 +387,23 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
+
+  const onScroll = () => {
+    const el = scrollRef.current;
+    const ind = indicatorRef.current;
+    if (!el || !ind) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+    const progress = Math.max(0, Math.min(1, el.scrollLeft / maxScroll));
+    // Thumb is 1/3 width, so it can move 2x its own width to reach the end
+    ind.style.transform = `translateX(${progress * 200}%)`;
+  };
+
+  useEffect(() => {
+    onScroll();
+    window.addEventListener("resize", onScroll);
+    return () => window.removeEventListener("resize", onScroll);
+  }, [products]);
 
   return (
     <div className="relative group">
@@ -399,6 +417,7 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
 
       <div
         ref={scrollRef}
+        onScroll={onScroll}
         className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-3 px-3 scroll-pl-3 md:mx-0 md:px-0 md:scroll-pl-0"
       >
         {products.map((p) => (
@@ -413,12 +432,13 @@ function ProductRowCarousel({ products }: { products: Product[] }) {
       
       {/* Indicador de rolagem mobile */}
       {products.length > 2 && (
-        <div className="flex md:hidden items-center justify-center gap-1.5 mt-1 pb-3 text-muted-foreground/50">
-          <ChevronLeft className="w-3 h-3" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider">
-            Deslize para ver mais
-          </span>
-          <ChevronRight className="w-3 h-3" />
+        <div className="flex md:hidden flex-col items-center justify-center mt-1 pb-3 gap-2">
+          <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden relative">
+            <div 
+              ref={indicatorRef}
+              className="absolute top-0 bottom-0 left-0 w-1/3 bg-primary rounded-full"
+            />
+          </div>
         </div>
       )}
 
