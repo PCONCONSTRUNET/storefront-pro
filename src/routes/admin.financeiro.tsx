@@ -1312,60 +1312,60 @@ Autenticação: ${row.id.toUpperCase()}`;
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
       onClick={onClose}
     >
       <div
-        className="bg-background rounded-3xl w-full max-w-sm overflow-hidden animate-modal-in shadow-2xl relative flex flex-col"
+        className="bg-[#1a1a1a]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] w-full max-w-sm overflow-hidden animate-modal-in shadow-2xl relative flex flex-col text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-primary/10 p-6 text-center relative">
+        <div className="p-6 text-center relative border-b border-white/5">
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 p-2 rounded-full bg-background/50 hover:bg-background transition-colors text-foreground"
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-white/70"
           >
             <X className="h-4 w-4" />
           </button>
           
-          <div className="w-12 h-12 bg-primary rounded-full mx-auto flex items-center justify-center text-primary-foreground mb-3 shadow-md">
+          <div className="w-12 h-12 bg-white/10 rounded-full mx-auto flex items-center justify-center text-white mb-3 shadow-sm border border-white/10">
             <span className="font-bold text-lg">{storeSettings.storeName.charAt(0)}</span>
           </div>
           
-          <h3 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider mb-1">
+          <h3 className="font-medium text-white/50 text-xs uppercase tracking-wider mb-1">
             Comprovante de Transação
           </h3>
-          <div className={`text-4xl font-black tracking-tight ${row.isOut ? "text-destructive" : "text-success"}`}>
+          <div className={`text-4xl font-black tracking-tight ${row.isOut ? "text-red-400" : "text-green-400"}`}>
             {row.isOut ? "− " : "+ "}{brl(row.amount)}
           </div>
         </div>
 
-        <div className="p-6 space-y-5 bg-card">
-          <div className="flex justify-between items-center pb-4 border-b border-border/50">
-            <span className="text-sm text-muted-foreground">Data e Hora</span>
-            <span className="text-sm font-semibold">{formatDate(row.date)}</span>
+        <div className="p-6 space-y-4">
+          <div className="flex justify-between items-center pb-3 border-b border-white/5">
+            <span className="text-sm text-white/50">Data e Hora</span>
+            <span className="text-sm font-medium">{formatDate(row.date)}</span>
           </div>
           
-          <div className="flex justify-between items-center pb-4 border-b border-border/50">
-            <span className="text-sm text-muted-foreground">Tipo</span>
-            <span className="text-sm font-semibold">{row.isOut ? 'Saída (Despesa)' : 'Entrada (Receita)'}</span>
+          <div className="flex justify-between items-center pb-3 border-b border-white/5">
+            <span className="text-sm text-white/50">Tipo</span>
+            <span className="text-sm font-medium">{row.isOut ? 'Saída (Despesa)' : 'Entrada (Receita)'}</span>
           </div>
 
-          <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
-            <span className="text-sm text-muted-foreground">Descrição</span>
-            <span className="text-sm font-semibold">{row.description}</span>
+          <div className="flex flex-col gap-1 pb-3 border-b border-white/5">
+            <span className="text-sm text-white/50">Descrição</span>
+            <span className="text-sm font-medium">{row.description}</span>
           </div>
 
           {row.status && (
-            <div className="flex justify-between items-center pb-4 border-b border-border/50">
-              <span className="text-sm text-muted-foreground">Status</span>
+            <div className="flex justify-between items-center pb-3 border-b border-white/5">
+              <span className="text-sm text-white/50">Status</span>
               <span className={`text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full
                 ${
                   ['pago', 'concluido', 'confirmada'].includes(row.status)
-                    ? 'bg-success/10 text-success'
+                    ? 'bg-green-500/20 text-green-300'
                     : ['aguardando_pagamento', 'pendente', 'em_separacao', 'saiu_para_entrega'].includes(row.status)
-                      ? 'bg-gold/10 text-gold'
-                      : 'bg-destructive/10 text-destructive'
+                      ? 'bg-yellow-500/20 text-yellow-300'
+                      : 'bg-red-500/20 text-red-300'
                 }
               `}>
                 {row.status.replace(/_/g, " ")}
@@ -1374,32 +1374,32 @@ Autenticação: ${row.id.toUpperCase()}`;
           )}
 
           {row.mpPaymentId && (
-            <div className="flex justify-between items-center pb-4 border-b border-border/50">
-              <span className="text-sm text-muted-foreground">ID Mercado Pago</span>
-              <span className="text-sm font-mono bg-muted/50 px-2 py-0.5 rounded text-muted-foreground">{row.mpPaymentId}</span>
+            <div className="flex justify-between items-center pb-3 border-b border-white/5">
+              <span className="text-sm text-white/50">ID Mercado Pago</span>
+              <span className="text-xs font-mono bg-white/5 px-2 py-0.5 rounded text-white/80">{row.mpPaymentId}</span>
             </div>
           )}
 
           {row.meta && (
-            <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
-              <span className="text-sm text-muted-foreground">Detalhes</span>
-              <span className="text-sm text-muted-foreground font-medium break-words leading-relaxed">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm text-white/50">Detalhes</span>
+              <span className="text-sm text-white/80 font-medium break-words leading-relaxed">
                 {row.meta}
               </span>
             </div>
           )}
         </div>
         
-        <div className="p-4 bg-muted/30 border-t border-border flex gap-3">
+        <div className="p-4 bg-white/5 flex gap-3">
           <button
             onClick={handleShare}
-            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors border border-white/10"
           >
             <Share className="h-4 w-4" /> Compartilhar
           </button>
           <button
             onClick={handlePrint}
-            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-card border border-border font-semibold hover:bg-muted transition-colors"
+            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl bg-white text-black font-semibold hover:bg-white/90 transition-colors"
           >
             <Download className="h-4 w-4" /> PDF
           </button>
