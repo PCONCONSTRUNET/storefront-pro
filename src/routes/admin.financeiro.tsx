@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   normalizeOrderStatus,
   useStore,
@@ -1310,9 +1311,11 @@ Autenticação: ${row.id.toUpperCase()}`;
     }
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
+      className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
       onClick={onClose}
     >
       <div className="w-full max-w-[420px] flex flex-col gap-3">
@@ -1405,6 +1408,7 @@ Autenticação: ${row.id.toUpperCase()}`;
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
