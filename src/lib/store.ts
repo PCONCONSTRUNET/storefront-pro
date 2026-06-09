@@ -1293,7 +1293,12 @@ export const useStore = create<AppState>()(
         detectAndAlertNewOrders(cur.orders, snap.orders, cur.isAdmin);
         const isPlaceholder = (url: string) =>
           !url || url === "" || url === "null" || url.length < 5;
-        const mergedProducts = snap.products.map((remote) => {
+        
+        // TEMPORARY CLEANUP: Exclui produtos falsos no sync
+        const isSampleId = (id: string) => ["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10"].includes(id);
+        const realRemoteProducts = snap.products.filter(p => !isSampleId(p.id));
+
+        const mergedProducts = realRemoteProducts.map((remote) => {
           const local = cur.products.find((p) => p.id === remote.id);
           if (!local) return remote;
 
@@ -1467,14 +1472,28 @@ export function hydrateFromCloud(): Promise<void> {
         remote.forEach((x) => map.set(x.code, x));
         return Array.from(map.values());
       };
+      // TEMPORARY CLEANUP: Exclui produtos e categorias de demonstração que ficaram no banco de dados.
+      const isSampleId = (id: string) => ["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10"].includes(id);
+      const isSampleCatId = (id: string) => ["lacos", "tiaras", "bicos", "kits", "elasticos", "presilhas"].includes(id);
+      
+      const realProducts = snap.products.filter(p => !isSampleId(p.id));
+      const realCategories = snap.categories.filter(c => !isSampleCatId(c.id));
+
+      if (realProducts.length !== snap.products.length) {
+         snap.products.filter(p => isSampleId(p.id)).forEach(p => cloud.deleteProduct(p.id).catch(() => {}));
+      }
+      if (realCategories.length !== snap.categories.length) {
+         snap.categories.filter(c => isSampleCatId(c.id)).forEach(c => cloud.deleteCategory(c.id).catch(() => {}));
+      }
+
       useStore.setState({
         customers: mergeById(cur.customers, snap.customers),
-        products: snap.products.length
-          ? mergeById(cur.products, snap.products)
-          : cur.products,
-        categories: snap.categories.length
-          ? mergeById(cur.categories, snap.categories)
-          : cur.categories,
+        products: realProducts.length
+          ? mergeById(cur.products.filter(p => !isSampleId(p.id)), realProducts)
+          : cur.products.filter(p => !isSampleId(p.id)),
+        categories: realCategories.length
+          ? mergeById(cur.categories.filter(c => !isSampleCatId(c.id)), realCategories)
+          : cur.categories.filter(c => !isSampleCatId(c.id)),
         coupons: snap.coupons.length
           ? mergeByCode(cur.coupons, snap.coupons)
           : cur.coupons,
