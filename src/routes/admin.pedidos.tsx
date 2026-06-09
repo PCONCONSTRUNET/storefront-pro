@@ -435,11 +435,27 @@ function Page() {
                         status === "saiu_para_entrega" || status === "em_separacao" ? "#3b82f6" : "#f59e0b",
                     }}
                   />
-                  <div className="flex justify-between items-start gap-3 ml-1">
+                  <div className="flex justify-between items-start gap-3 ml-2">
+                    {/* Imagem do primeiro produto */}
+                    {o.items?.[0] && (() => {
+                      const firstProduct = products.find(p => p.id === o.items[0].productId);
+                      if (firstProduct?.images?.[0]) {
+                        return (
+                          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-border">
+                            <img src={firstProduct.images[0]} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border">
+                          <Package className="h-4 w-4 text-muted-foreground/50" />
+                        </div>
+                      );
+                    })()}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm truncate">
-                          #{String(o.id).slice(0, 5).toUpperCase()} · {o.customerName}
+                          {o.customerName}
                         </span>
                         <span
                           className={`text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border ${STATUS_STYLE[status]}`}
@@ -631,6 +647,15 @@ function Page() {
               <div className="text-[11px] font-bold uppercase text-muted-foreground tracking-wide">
                 Pagamento
               </div>
+              <Row icon={Hash} label="ID do Pedido">
+                <button
+                  onClick={() => copy(order.id, "ID copiado")}
+                  className="font-mono text-[10px] hover:text-primary text-right max-w-[150px] truncate"
+                  title={order.id}
+                >
+                  {order.id}
+                </button>
+              </Row>
               <Row icon={CreditCard} label="Método">
                 {order.paymentMethod.toUpperCase()}
               </Row>
