@@ -493,7 +493,7 @@ function Page() {
         const deliverySteps: { value: DeliveryStatus; label: string; icon: any }[] = [
           { value: "pendente", label: "Pendente", icon: Clock },
           { value: "em_separacao", label: "Em separação", icon: Package },
-          { value: "saiu_para_entrega", label: "Saiu p/ entrega", icon: Truck },
+          { value: "saiu_para_entrega", label: "Aguardando retirada", icon: Truck },
           { value: "entregue", label: "Entregue", icon: CheckCircle2 },
         ];
         return (
