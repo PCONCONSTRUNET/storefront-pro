@@ -12,14 +12,15 @@ export function Modal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center sm:p-3 animate-overlay-in"
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-overlay-in"
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[85vh] sm:max-h-[85vh] overflow-y-auto shadow-soft animate-modal-in"
+        className="bg-card rounded-2xl w-full max-w-md shadow-soft animate-modal-in flex flex-col"
+        style={{ maxHeight: "calc(100dvh - 2rem)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-card flex items-center justify-between px-4 py-3 border-b border-border z-10">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
           <h2 className="font-bold text-sm">{title}</h2>
           <button
             onClick={onClose}
@@ -28,7 +29,7 @@ export function Modal({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="p-3">{children}</div>
+        <div className="p-3 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
