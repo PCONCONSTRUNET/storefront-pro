@@ -331,13 +331,16 @@ function Page() {
             Sem movimentações.
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="p-2 space-y-2">
             {filteredRows.map((r) => (
               <li
                 key={r.id}
-                className="p-4 flex justify-between items-start gap-3"
-                style={{ borderLeft: `4px solid ${r.isOut ? "#ef4444" : "#22c55e"}` }}
+                className="p-4 flex justify-between items-start gap-3 relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm"
               >
+                <div
+                  className="absolute top-0 left-0 bottom-0 w-1.5"
+                  style={{ backgroundColor: r.isOut ? "#ef4444" : "#22c55e" }}
+                />
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
                     {r.kind === "comissao" && (
