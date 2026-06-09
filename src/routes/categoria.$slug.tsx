@@ -12,10 +12,12 @@ export const Route = createFileRoute("/categoria/$slug")({
 function Page() {
   const { slug } = Route.useParams();
   const hydrated = useStoreHydrated();
-  const { products, categories } = useStore();
+  const { categories } = useStore();
   const cat = categories.find((c) => c.id === slug);
-  const list = products.filter(
-    (p) => p.category === slug && p.active && !p.hidden,
+  const list = useStore((s) =>
+    s.products.filter(
+      (p) => (p.categories?.includes(slug) || p.category === slug) && p.active && !p.hidden,
+    ),
   );
 
   return (

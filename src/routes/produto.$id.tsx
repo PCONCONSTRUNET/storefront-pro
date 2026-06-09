@@ -72,7 +72,7 @@ function Page() {
   const related = products
     .filter(
       (p) =>
-        p.category === product.category &&
+        (p.categories?.includes(product.category) || p.category === product.category) &&
         p.id !== product.id &&
         p.active &&
         !p.hidden,

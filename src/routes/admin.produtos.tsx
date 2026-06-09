@@ -220,22 +220,41 @@ function ProductForm({
             onChange={(v) => setP({ ...p, sku: v })}
             required
           />
-          <label className="block">
-            <span className="text-xs font-medium text-muted-foreground">
-              Categoria
+          <div className="block col-span-2">
+            <span className="text-xs font-medium text-muted-foreground mb-1 block">
+              Categorias
             </span>
-            <select
-              value={p.category}
-              onChange={(e) => setP({ ...p, category: e.target.value })}
-              className="mt-1 w-full h-10 px-2 text-sm rounded-xl bg-muted outline-none"
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => {
+                const selected = p.categories?.includes(c.id) || p.category === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      let nextCats = p.categories || (p.category ? [p.category] : []);
+                      if (selected) {
+                        nextCats = nextCats.filter(id => id !== c.id);
+                      } else {
+                        nextCats = [...nextCats, c.id];
+                      }
+                      setP({ ...p, categories: nextCats, category: nextCats[0] || "" });
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs transition-colors border ${
+                      selected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {c.name}
+                  </button>
+                );
+              })}
+            </div>
+            {(!p.categories?.length && !p.category) && (
+               <p className="text-[10px] text-destructive mt-1">Selecione pelo menos uma categoria.</p>
+            )}
+          </div>
           <Field
             label="Preço"
             type="number"

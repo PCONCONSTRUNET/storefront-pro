@@ -150,6 +150,7 @@ const toProduct = (r: any): Product => ({
   image: Array.isArray(r.images) && r.images[0] ? r.images[0] : "",
   gallery: Array.isArray(r.images) ? r.images.slice(1) : [],
   category: r.category_id || "",
+  categories: r.extra?.categories || (r.category_id ? [r.category_id] : []),
   stock: r.stock ?? 0,
   sku: r.extra?.sku || "",
   active: r.active !== false,
@@ -330,7 +331,7 @@ export const cloud = {
         active: p.active,
         featured: false,
         variations: p.variations || [],
-        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock, sortOrder: p.sortOrder },
+        extra: { sku: p.sku, hidden: p.hidden, minStock: p.minStock, sortOrder: p.sortOrder, categories: p.categories || [p.category] },
       },
       "id",
     );

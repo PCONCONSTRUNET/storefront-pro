@@ -62,7 +62,7 @@ function Page() {
   const saveProducts = async () => {
     try {
       const visible = catFilter
-        ? prodList.filter((p) => p.category === catFilter)
+        ? prodList.filter((p) => p.categories?.includes(catFilter) || p.category === catFilter)
         : prodList;
       await Promise.all(
         visible.map((p, i) => upsertProduct({ ...p, sortOrder: i + 1 })),
@@ -74,7 +74,7 @@ function Page() {
   };
 
   const visibleProds = catFilter
-    ? prodList.filter((p) => p.category === catFilter)
+    ? prodList.filter((p) => p.categories?.includes(catFilter) || p.category === catFilter)
     : prodList;
 
   return (
@@ -230,7 +230,7 @@ function Page() {
                         {p.name}
                       </div>
                       <div className="text-[11px] text-muted-foreground truncate">
-                        {p.category} · {p.active ? "ativo" : "inativo"}
+                        {p.categories?.length ? p.categories.join(", ") : p.category} · {p.active ? "ativo" : "inativo"}
                         {p.hidden ? " · oculto" : ""}
                       </div>
                     </div>

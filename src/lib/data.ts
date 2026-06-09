@@ -7,6 +7,7 @@ export type Product = {
   image: string;
   gallery?: string[];
   category: string;
+  categories?: string[];
   stock: number;
   minStock?: number;
   sku: string;
