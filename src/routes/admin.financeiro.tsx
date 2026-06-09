@@ -22,7 +22,19 @@ import {
   Pencil,
   Download,
   FileText,
+  Share,
+  Calendar,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { toast } from "sonner";
 import { downloadCSV, downloadPDF } from "@/lib/export";
 
@@ -78,6 +90,9 @@ function Page() {
 
   const [viewingRow, setViewingRow] = useState<Row | null>(null);
 
+  type DateFilter = "hoje" | "7d" | "30d" | "mes" | "custom";
+  const [dateFilter, setDateFilter] = useState<DateFilter>("30d");
+
   const todayISO = new Date().toISOString().slice(0, 10);
   const monthAgoISO = (() => {
     const d = new Date();
@@ -86,6 +101,22 @@ function Page() {
   })();
   const [reportFrom, setReportFrom] = useState(monthAgoISO);
   const [reportTo, setReportTo] = useState(todayISO);
+
+  useEffect(() => {
+    if (dateFilter !== "custom") {
+      const start = new Date();
+      if (dateFilter === "hoje") {
+      } else if (dateFilter === "7d") {
+        start.setDate(start.getDate() - 6);
+      } else if (dateFilter === "30d") {
+        start.setDate(start.getDate() - 29);
+      } else if (dateFilter === "mes") {
+        start.setDate(1);
+      }
+      setReportFrom(start.toISOString().slice(0, 10));
+      setReportTo(todayISO);
+    }
+  }, [dateFilter, todayISO]);
 
   const rows: Row[] = useMemo(() => {
     const list: Row[] = [];
@@ -186,20 +217,58 @@ function Page() {
     return list.sort((a, b) => +new Date(b.date) - +new Date(a.date));
   }, [orders, products, affiliateSales, affiliates, transactions]);
 
+  const dateFilteredRows = useMemo(() => {
+    return rows.filter((r) => {
+      const d = r.date.slice(0, 10);
+      return d >= reportFrom && d <= reportTo;
+    });
+  }, [rows, reportFrom, reportTo]);
+
   const totals = useMemo(() => {
-    const entradas = rows
+    const entradas = dateFilteredRows
       .filter((r) => !r.isOut && r.isCompleted)
       .reduce((a, r) => a + r.amount, 0);
-    const saidas = rows
+    const saidas = dateFilteredRows
       .filter((r) => r.isOut && r.isCompleted)
       .reduce((a, r) => a + r.amount, 0);
     const pendente = orders
-      .filter((o) => normalizeOrderStatus(o.status) === "aguardando_pagamento")
+      .filter((o) => {
+        const d = o.createdAt.slice(0, 10);
+        return d >= reportFrom && d <= reportTo && normalizeOrderStatus(o.status) === "aguardando_pagamento";
+      })
       .reduce((a, o) => a + o.total, 0);
     return { entradas, saidas, pendente, caixa: entradas - saidas };
-  }, [rows, orders]);
+  }, [dateFilteredRows, orders, reportFrom, reportTo]);
 
-  const filteredRows = rows.filter(
+  const chartData = useMemo(() => {
+    const groups: Record<string, { entradas: number; saidas: number }> = {};
+    const start = new Date(reportFrom + "T12:00:00Z");
+    const end = new Date(reportTo + "T12:00:00Z");
+    
+    if (end.getTime() - start.getTime() <= 60 * 24 * 60 * 60 * 1000) {
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const k = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+        groups[k] = { entradas: 0, saidas: 0 };
+      }
+    }
+    
+    dateFilteredRows.forEach((r) => {
+      if (!r.isCompleted) return;
+      const d = new Date(r.date);
+      const k = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+      if (!groups[k]) groups[k] = { entradas: 0, saidas: 0 };
+      if (r.isOut) groups[k].saidas += r.amount;
+      else groups[k].entradas += r.amount;
+    });
+
+    return Object.entries(groups).map(([date, data]) => ({
+      date,
+      Entradas: data.entradas,
+      Saídas: data.saidas,
+    }));
+  }, [dateFilteredRows, reportFrom, reportTo]);
+
+  const filteredRows = dateFilteredRows.filter(
     (r) => filter === "todos" || (filter === "entrada" ? !r.isOut : r.isOut),
   );
 
@@ -240,6 +309,76 @@ function Page() {
             <div className="text-xs text-muted-foreground">{c.label}</div>
           </div>
         ))}
+      </div>
+
+      <div className="bg-card rounded-2xl shadow-card p-4 mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 className="font-bold text-lg">Visão Geral</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 bg-muted/50 border border-border rounded-full p-1">
+              <Calendar className="h-3.5 w-3.5 ml-2 text-muted-foreground" />
+              {(
+                [
+                  { id: "hoje", label: "Hoje" },
+                  { id: "7d", label: "7 dias" },
+                  { id: "30d", label: "30 dias" },
+                  { id: "mes", label: "Mês atual" },
+                  { id: "custom", label: "Outro" },
+                ] as const
+              ).map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setDateFilter(f.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full font-semibold transition ${dateFilter === f.id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            {dateFilter === "custom" && (
+              <div className="flex items-center gap-2 text-sm bg-muted/50 border border-border rounded-full px-3 py-1">
+                <input
+                  type="date"
+                  value={reportFrom}
+                  onChange={(e) => setReportFrom(e.target.value)}
+                  className="bg-transparent outline-none text-xs font-semibold"
+                />
+                <span className="text-muted-foreground">até</span>
+                <input
+                  type="date"
+                  value={reportTo}
+                  onChange={(e) => setReportTo(e.target.value)}
+                  className="bg-transparent outline-none text-xs font-semibold"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {chartData.length > 0 ? (
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} tickFormatter={(val) => `R$${val}`} />
+                <RechartsTooltip
+                  cursor={{ fill: "#f3f4f6" }}
+                  contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", fontSize: "14px", fontWeight: "bold" }}
+                  formatter={(value: number) => brl(value)}
+                  labelStyle={{ color: "#6b7280", marginBottom: "4px" }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
+                <Bar dataKey="Entradas" fill="#22c55e" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Saídas" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">
+            Nenhuma movimentação concluída neste período.
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -1088,78 +1227,151 @@ function TransactionDetailsModal({
   row: Row;
   onClose: () => void;
 }) {
+  const storeSettings = useStore((s) => s.settings);
+
+  const handlePrint = () => {
+    const html = `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Comprovante — ${storeSettings.storeName}</title>
+<style>
+  body { font-family: sans-serif; background: #f4f4f5; margin: 0; padding: 20px; color: #111; }
+  .receipt { max-width: 400px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 16px; margin-bottom: 16px; }
+  .header h1 { margin: 0; font-size: 18px; color: #ec4899; }
+  .header p { margin: 4px 0 0; font-size: 12px; color: #666; }
+  .amount { text-align: center; font-size: 32px; font-weight: 900; margin: 24px 0; color: ${row.isOut ? '#ef4444' : '#22c55e'}; }
+  .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+  .row span:first-child { color: #666; font-weight: 500; }
+  .row span:last-child { font-weight: 700; text-align: right; max-width: 60%; word-break: break-word; }
+  .footer { text-align: center; font-size: 12px; color: #888; margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; }
+  @media print { body { background: #fff; } .receipt { box-shadow: none; max-width: 100%; padding: 0; } }
+</style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <h1>${storeSettings.storeName}</h1>
+      <p>Comprovante de Transação</p>
+    </div>
+    <div class="amount">${row.isOut ? '− ' : '+ '}${brl(row.amount)}</div>
+    <div class="row"><span>Data e Hora</span><span>${formatDate(row.date)}</span></div>
+    <div class="row"><span>Tipo</span><span>${row.isOut ? 'Saída' : 'Entrada'}</span></div>
+    <div class="row"><span>Descrição</span><span>${row.description}</span></div>
+    ${row.status ? `<div class="row"><span>Status</span><span style="text-transform:uppercase">${row.status.replace(/_/g, " ")}</span></div>` : ""}
+    ${row.meta ? `<div class="row" style="flex-direction:column; gap:4px"><span>Detalhes</span><span style="text-align:left; max-width:100%">${row.meta}</span></div>` : ""}
+    <div class="footer">Autenticação: ${row.id.toUpperCase()}<br/>Gerado em ${new Date().toLocaleString("pt-BR")}</div>
+  </div>
+  <script>setTimeout(() => window.print(), 300);</script>
+</body>
+</html>`;
+    const w = window.open("", "_blank", "width=500,height=700");
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    }
+  };
+
+  const handleShare = async () => {
+    const text = `Comprovante - ${storeSettings.storeName}
+Data: ${formatDate(row.date)}
+Valor: ${brl(row.amount)}
+Descrição: ${row.description}
+Status: ${row.status || 'Concluído'}
+Autenticação: ${row.id.toUpperCase()}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Comprovante",
+          text,
+        });
+      } catch (err) {}
+    } else {
+      navigator.clipboard.writeText(text);
+      toast.success("Copiado para a área de transferência!");
+    }
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4 animate-overlay-in"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-3xl p-5 w-full max-w-sm overflow-hidden animate-modal-in shadow-xl relative"
+        className="bg-background rounded-3xl w-full max-w-sm overflow-hidden animate-modal-in shadow-2xl relative flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
-        <div className="pr-8 mb-6">
-          <h3 className="font-bold text-xl text-foreground">Detalhes da Transação</h3>
-          <div className="text-sm text-muted-foreground mt-0.5">
-            {formatDate(row.date)}
+        <div className="bg-primary/10 p-6 text-center relative">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-4 top-4 p-2 rounded-full bg-background/50 hover:bg-background transition-colors text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          
+          <div className="w-12 h-12 bg-primary rounded-full mx-auto flex items-center justify-center text-primary-foreground mb-3 shadow-md">
+            <span className="font-bold text-lg">{storeSettings.storeName.charAt(0)}</span>
+          </div>
+          
+          <h3 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider mb-1">
+            Comprovante de Transação
+          </h3>
+          <div className={`text-4xl font-black tracking-tight ${row.isOut ? "text-destructive" : "text-success"}`}>
+            {row.isOut ? "− " : "+ "}{brl(row.amount)}
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-muted/30 rounded-2xl p-4 flex flex-col items-center justify-center border border-border/50 text-center">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">
-              {row.isOut ? "Saída (Despesa)" : "Entrada (Receita)"}
-            </div>
-            <div
-              className={`text-3xl font-black tracking-tight ${
-                row.isOut ? "text-destructive" : "text-emerald-600"
-              }`}
-            >
-              {row.isOut ? "− " : "+ "}
-              {brl(row.amount)}
-            </div>
-            {row.status && (
-              <div className="mt-2 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-background border border-border shadow-sm">
+        <div className="p-6 space-y-5 bg-card">
+          <div className="flex justify-between items-center pb-4 border-b border-border/50">
+            <span className="text-sm text-muted-foreground">Data e Hora</span>
+            <span className="text-sm font-semibold">{formatDate(row.date)}</span>
+          </div>
+          
+          <div className="flex justify-between items-center pb-4 border-b border-border/50">
+            <span className="text-sm text-muted-foreground">Tipo</span>
+            <span className="text-sm font-semibold">{row.isOut ? 'Saída (Despesa)' : 'Entrada (Receita)'}</span>
+          </div>
+
+          <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
+            <span className="text-sm text-muted-foreground">Descrição</span>
+            <span className="text-sm font-semibold">{row.description}</span>
+          </div>
+
+          {row.status && (
+            <div className="flex justify-between items-center pb-4 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Status</span>
+              <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground">
                 {row.status.replace(/_/g, " ")}
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-3 px-1">
-            <div>
-              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
-                Descrição
-              </div>
-              <div className="text-sm font-semibold">{row.description}</div>
+              </span>
             </div>
+          )}
 
-            {row.customerEmail && (
-              <div>
-                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
-                  E-mail do Cliente
-                </div>
-                <div className="text-sm font-medium">{row.customerEmail}</div>
-              </div>
-            )}
-
-            {row.meta && (
-              <div className="pt-2 border-t border-border/50">
-                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
-                  Itens / Informações
-                </div>
-                <div className="text-sm font-medium text-muted-foreground leading-relaxed">
-                  {row.meta}
-                </div>
-              </div>
-            )}
-          </div>
+          {row.meta && (
+            <div className="flex flex-col gap-1 pb-4 border-b border-border/50">
+              <span className="text-sm text-muted-foreground">Detalhes</span>
+              <span className="text-sm text-muted-foreground font-medium break-words leading-relaxed">
+                {row.meta}
+              </span>
+            </div>
+          )}
+        </div>
+        
+        <div className="p-4 bg-muted/30 border-t border-border flex gap-3">
+          <button
+            onClick={handleShare}
+            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+          >
+            <Share className="h-4 w-4" /> Compartilhar
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex-1 h-12 flex items-center justify-center gap-2 rounded-xl bg-card border border-border font-semibold hover:bg-muted transition-colors"
+          >
+            <Download className="h-4 w-4" /> PDF
+          </button>
         </div>
       </div>
     </div>
