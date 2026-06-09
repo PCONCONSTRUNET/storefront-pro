@@ -208,9 +208,12 @@ function Page() {
               {product.description}
             </p>
 
-            {product.variations?.map((v) => (
+            {product.variations?.filter(v => v.options && v.options.length > 0).map((v) => (
               <div key={v.name} className="mt-4">
-                <div className="text-sm font-semibold mb-2">{v.name}</div>
+                <div className="text-sm font-semibold mb-2 flex items-center gap-2">
+                  {v.name}
+                  <span className="text-[10px] text-muted-foreground font-normal">(escolha uma opção)</span>
+                </div>
                 <div className="flex gap-2 flex-wrap">
                   {v.options.map((o, idx) => {
                     const label = typeof o === "string" ? o : o.label;
@@ -224,12 +227,16 @@ function Page() {
                         onClick={() =>
                           setSelected((s) => ({ ...s, [v.name]: idx }))
                         }
-                        className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${isSel ? "border-primary bg-primary/10 text-primary font-semibold" : "border-border hover:border-primary hover:bg-primary/5"}`}
+                        className={`px-3 py-1.5 rounded-full border text-sm transition-all ${
+                          isSel
+                            ? "border-primary bg-primary/10 text-primary font-semibold shadow-sm"
+                            : "border-border hover:border-primary hover:bg-primary/5"
+                        }`}
                       >
                         {label}
-                        {delta ? (
-                          <span className="ml-1 text-xs opacity-80">
-                            +{brl(delta)}
+                        {delta && delta > 0 ? (
+                          <span className="ml-1 text-xs opacity-80 font-normal">
+                            +{delta.toFixed(2).replace(".", ",")}
                           </span>
                         ) : null}
                       </button>
@@ -238,6 +245,12 @@ function Page() {
                 </div>
               </div>
             ))}
+
+            {priceDelta > 0 && (
+              <div className="mt-2 text-xs text-primary font-medium">
+                Acréscimo da variação: +{brl(priceDelta)}
+              </div>
+            )}
 
             <div className="mt-5 flex items-center gap-3">
               <span className="text-sm font-semibold">Quantidade</span>

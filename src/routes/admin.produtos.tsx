@@ -369,36 +369,46 @@ function VariationsEditor({
   const remove = (i: number) => onChange(norm.filter((_, idx) => idx !== i));
 
   return (
-    <div className="space-y-2">
-      <p className="text-[11px] text-muted-foreground">
-        Ex.: Tamanho → P (+0), G (+5,00) · Cor → Rosa, Azul
-      </p>
+    <div className="space-y-3">
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-foreground/70 leading-relaxed">
+        <strong className="text-foreground">Como funciona:</strong> Crie um grupo de variação (ex: <em>"Tipo de presilha"</em>) e adicione as opções que o cliente poderá escolher (ex: <em>"Com bico de pato"</em>, <em>"Com xuxinha"</em>). Você pode definir um acréscimo no preço por opção.
+      </div>
       {norm.length === 0 && (
         <div className="text-center py-6 text-xs text-muted-foreground bg-muted/40 rounded-xl">
-          Nenhuma variação.
+          Nenhuma variação cadastrada.
         </div>
       )}
       {norm.map((v, i) => (
-        <div key={i} className="bg-muted/40 rounded-xl p-2 space-y-2">
-          <div className="flex gap-2">
-            <input
-              placeholder="Nome (ex: Tamanho)"
-              value={v.name}
-              onChange={(e) => update(i, { name: e.target.value })}
-              className="flex-1 h-9 px-2 text-sm rounded-lg bg-card outline-none focus:ring-2 ring-primary/40"
-            />
+        <div key={i} className="bg-muted/40 rounded-xl p-3 space-y-2 border border-border">
+          <div className="flex gap-2 items-center">
+            <div className="flex-1">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Nome do grupo</label>
+              <input
+                placeholder="Ex: Tipo de presilha, Cor, Tamanho..."
+                value={v.name}
+                onChange={(e) => update(i, { name: e.target.value })}
+                className="mt-0.5 w-full h-9 px-2 text-sm rounded-lg bg-card outline-none focus:ring-2 ring-primary/40"
+              />
+            </div>
             <button
               type="button"
               onClick={() => remove(i)}
-              className="w-9 h-9 grid place-items-center rounded-lg bg-destructive/10 text-destructive"
+              className="mt-4 w-9 h-9 grid place-items-center rounded-lg bg-destructive/10 text-destructive flex-shrink-0"
             >
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
-          <OptionsInput
-            options={v.options}
-            onChange={(opts) => update(i, { options: opts })}
-          />
+
+          <div>
+            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Opções</label>
+            {v.options.length === 0 && (
+              <p className="text-[11px] text-destructive/70 mt-0.5 mb-1">⚠ Adicione pelo menos uma opção abaixo para este grupo aparecer na loja.</p>
+            )}
+            <OptionsInput
+              options={v.options}
+              onChange={(opts) => update(i, { options: opts })}
+            />
+          </div>
         </div>
       ))}
       <button
@@ -406,7 +416,7 @@ function VariationsEditor({
         onClick={add}
         className="w-full h-9 rounded-xl bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center gap-1"
       >
-        <Plus className="h-4 w-4" /> Adicionar variação
+        <Plus className="h-4 w-4" /> Adicionar grupo de variação
       </button>
     </div>
   );
@@ -423,11 +433,8 @@ function OptionsInput({
   const [delta, setDelta] = useState("");
   const add = () => {
     const l = label.trim();
-    if (!l || options.some((o) => o.label === l)) {
-      setLabel("");
-      setDelta("");
-      return;
-    }
+    if (!l) return;
+    // Allow duplicate labels (user can have same name in different groups)
     const d = parseFloat(delta);
     onChange([...options, { label: l, priceDelta: isNaN(d) ? undefined : d }]);
     setLabel("");
@@ -442,34 +449,41 @@ function OptionsInput({
     );
   };
   return (
-    <div>
-      <div className="space-y-1 mb-2">
-        {options.map((o, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-1 bg-card px-2 py-1 rounded-lg"
-          >
-            <span className="text-xs flex-1 truncate">{o.label}</span>
+    <div className="mt-1.5 space-y-1">
+      {options.map((o, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-1.5 bg-card px-2 py-1.5 rounded-lg border border-border"
+        >
+          <span className="text-xs flex-1 font-medium truncate">{o.label}</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
             <span className="text-[10px] text-muted-foreground">+R$</span>
             <input
               type="number"
               step="0.01"
+              min="0"
               value={o.priceDelta ?? ""}
               onChange={(e) => updateDelta(i, e.target.value)}
               placeholder="0,00"
-              className="w-16 h-7 px-1 text-xs rounded bg-muted outline-none text-right"
+              className="w-16 h-7 px-1 text-xs rounded bg-muted outline-none text-right focus:ring-1 ring-primary/40"
             />
-            <button
-              type="button"
-              onClick={() => onChange(options.filter((_, idx) => idx !== i))}
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <X className="h-3 w-3" />
-            </button>
+            {(o.priceDelta ?? 0) > 0 && (
+              <span className="text-[10px] text-primary font-semibold">
+                +{o.priceDelta!.toFixed(2).replace(".", ",")}
+              </span>
+            )}
           </div>
-        ))}
-      </div>
-      <div className="flex gap-1">
+          <button
+            type="button"
+            title="Remover opção"
+            onClick={() => onChange(options.filter((_, idx) => idx !== i))}
+            className="text-muted-foreground hover:text-destructive ml-1"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ))}
+      <div className="flex gap-1 mt-1">
         <input
           value={label}
           onChange={(e) => setLabel(e.target.value)}
@@ -479,12 +493,13 @@ function OptionsInput({
               add();
             }
           }}
-          placeholder="Opção (ex: G)"
-          className="flex-1 h-8 px-2 text-xs rounded-lg bg-card outline-none"
+          placeholder="Nome da opção (ex: Com bico de pato)"
+          className="flex-1 h-8 px-2 text-xs rounded-lg bg-card outline-none border border-dashed border-border focus:border-primary"
         />
         <input
           type="number"
           step="0.01"
+          min="0"
           value={delta}
           onChange={(e) => setDelta(e.target.value)}
           onKeyDown={(e) => {
@@ -494,12 +509,13 @@ function OptionsInput({
             }
           }}
           placeholder="+R$ 0,00"
-          className="w-24 h-8 px-2 text-xs rounded-lg bg-card outline-none"
+          className="w-24 h-8 px-2 text-xs rounded-lg bg-card outline-none border border-dashed border-border focus:border-primary"
         />
         <button
           type="button"
           onClick={add}
-          className="px-3 h-8 rounded-lg bg-primary/10 text-primary text-xs font-semibold"
+          disabled={!label.trim()}
+          className="px-3 h-8 rounded-lg bg-primary/10 text-primary text-xs font-semibold disabled:opacity-40"
         >
           Add
         </button>
