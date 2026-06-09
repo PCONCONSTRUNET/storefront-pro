@@ -133,7 +133,22 @@ function Page() {
             {catList.map((c, i) => (
               <li
                 key={c.id}
-                className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40"
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData("text/plain", c.id);
+                  e.dataTransfer.setData("type", "category");
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (e.dataTransfer.getData("type") !== "category") return;
+                  const sourceId = e.dataTransfer.getData("text/plain");
+                  if (sourceId === c.id) return;
+                  const sourceIndex = catList.findIndex(x => x.id === sourceId);
+                  if (sourceIndex === -1) return;
+                  setCatList(move(catList, sourceIndex, i));
+                }}
+                className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 cursor-grab active:cursor-grabbing transition-colors"
               >
                 <span className="text-[10px] w-6 text-center font-bold text-muted-foreground">
                   {i + 1}
@@ -217,7 +232,22 @@ function Page() {
                 return (
                   <li
                     key={p.id}
-                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("text/plain", p.id);
+                      e.dataTransfer.setData("type", "product");
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (e.dataTransfer.getData("type") !== "product") return;
+                      const sourceId = e.dataTransfer.getData("text/plain");
+                      if (sourceId === p.id) return;
+                      const sourceIndex = prodList.findIndex(x => x.id === sourceId);
+                      if (sourceIndex === -1) return;
+                      setProdList(move(prodList, sourceIndex, fullIdx));
+                    }}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40 cursor-grab active:cursor-grabbing transition-colors"
                   >
                     <span className="text-[10px] w-6 text-center font-bold text-muted-foreground">
                       {i + 1}
