@@ -429,33 +429,42 @@ function OptionsInput({
   options: VarOption[];
   onChange: (o: VarOption[]) => void;
 }) {
-  const [label, setLabel] = useState("");
-  const [delta, setDelta] = useState("");
-  const add = () => {
-    const l = label.trim();
-    if (!l) return;
-    // Allow duplicate labels (user can have same name in different groups)
-    const d = parseFloat(delta);
-    onChange([...options, { label: l, priceDelta: isNaN(d) ? undefined : d }]);
-    setLabel("");
-    setDelta("");
+  // Adiciona uma nova linha vazia já no estado — sem botão Add
+  const addRow = () => {
+    onChange([...options, { label: "", priceDelta: undefined }]);
   };
-  const updateDelta = (i: number, v: string) => {
-    const d = parseFloat(v);
+
+  const updateLabel = (i: number, val: string) => {
+    onChange(options.map((o, idx) => (idx === i ? { ...o, label: val } : o)));
+  };
+
+  const updateDelta = (i: number, val: string) => {
+    const d = parseFloat(val);
     onChange(
       options.map((o, idx) =>
         idx === i ? { ...o, priceDelta: isNaN(d) ? undefined : d } : o,
       ),
     );
   };
+
+  const removeRow = (i: number) => {
+    onChange(options.filter((_, idx) => idx !== i));
+  };
+
   return (
-    <div className="mt-1.5 space-y-1">
+    <div className="mt-1.5 space-y-1.5">
       {options.map((o, i) => (
         <div
           key={i}
           className="flex items-center gap-1.5 bg-card px-2 py-1.5 rounded-lg border border-border"
         >
-          <span className="text-xs flex-1 font-medium truncate">{o.label}</span>
+          <input
+            type="text"
+            value={o.label}
+            onChange={(e) => updateLabel(i, e.target.value)}
+            placeholder="Nome da opção (ex: Com bico de pato)"
+            className="flex-1 h-7 px-1.5 text-xs rounded bg-muted outline-none focus:ring-1 ring-primary/40"
+          />
           <div className="flex items-center gap-1 flex-shrink-0">
             <span className="text-[10px] text-muted-foreground">+R$</span>
             <input
@@ -467,59 +476,24 @@ function OptionsInput({
               placeholder="0,00"
               className="w-16 h-7 px-1 text-xs rounded bg-muted outline-none text-right focus:ring-1 ring-primary/40"
             />
-            {(o.priceDelta ?? 0) > 0 && (
-              <span className="text-[10px] text-primary font-semibold">
-                +{o.priceDelta!.toFixed(2).replace(".", ",")}
-              </span>
-            )}
           </div>
           <button
             type="button"
             title="Remover opção"
-            onClick={() => onChange(options.filter((_, idx) => idx !== i))}
-            className="text-muted-foreground hover:text-destructive ml-1"
+            onClick={() => removeRow(i)}
+            className="text-muted-foreground hover:text-destructive ml-0.5"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
       ))}
-      <div className="flex gap-1 mt-1">
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-          placeholder="Nome da opção (ex: Com bico de pato)"
-          className="flex-1 h-8 px-2 text-xs rounded-lg bg-card outline-none border border-dashed border-border focus:border-primary"
-        />
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          value={delta}
-          onChange={(e) => setDelta(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-          placeholder="+R$ 0,00"
-          className="w-24 h-8 px-2 text-xs rounded-lg bg-card outline-none border border-dashed border-border focus:border-primary"
-        />
-        <button
-          type="button"
-          onClick={add}
-          disabled={!label.trim()}
-          className="px-3 h-8 rounded-lg bg-primary/10 text-primary text-xs font-semibold disabled:opacity-40"
-        >
-          Add
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={addRow}
+        className="w-full h-8 rounded-lg border border-dashed border-primary/40 text-primary/70 hover:text-primary hover:border-primary text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+      >
+        <Plus className="h-3.5 w-3.5" /> Adicionar opção
+      </button>
     </div>
   );
 }
