@@ -1048,3 +1048,95 @@ function AffiliateReport({
     </div>
   );
 }
+
+function TransactionDetailsModal({
+  row,
+  onClose,
+}: {
+  row: Row;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4 animate-overlay-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card rounded-2xl p-5 w-full max-w-sm overflow-hidden animate-modal-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-lg">Detalhes da Movimentação</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+              Data e Hora
+            </div>
+            <div className="text-sm font-medium">{formatDate(row.date)}</div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+              Descrição
+            </div>
+            <div className="text-sm font-medium">{row.description}</div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+              Tipo
+            </div>
+            <div className="text-sm font-medium">
+              {row.isOut ? "Saída (Despesa)" : "Entrada (Receita)"}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+              Valor
+            </div>
+            <div
+              className={`text-xl font-bold ${
+                row.isOut ? "text-destructive" : "text-success"
+              }`}
+            >
+              {row.isOut ? "− " : "+ "}
+              {brl(row.amount)}
+            </div>
+          </div>
+
+          {row.meta && (
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                Informações Adicionais
+              </div>
+              <div className="text-sm font-medium text-muted-foreground">
+                {row.meta}
+              </div>
+            </div>
+          )}
+
+          {row.status && (
+            <div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                Status
+              </div>
+              <div className="text-sm font-medium capitalize">
+                {row.status.replace(/_/g, " ")}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
