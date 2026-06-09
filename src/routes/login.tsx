@@ -21,7 +21,7 @@ function Page() {
     const r = await loginCustomer(email, password);
     if (r.ok) {
       toast.success(r.message);
-      navigate({ to: "/perfil" });
+      navigate({ to: "/" });
     } else toast.error(r.message);
   };
 

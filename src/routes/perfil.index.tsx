@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { StoreLayout } from "@/components/StoreLayout";
@@ -183,12 +183,15 @@ function AuthModal({
     password: "",
   });
 
+  const navigate = useNavigate();
+
   const submitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = await loginCustomer(email, password);
     if (r.ok) {
       toast.success(r.message);
       onClose();
+      navigate({ to: "/" });
     } else {
       toast.error(r.message);
     }

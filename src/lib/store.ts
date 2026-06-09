@@ -724,6 +724,8 @@ export const useStore = create<AppState>()(
           favorites: (res.customer.favorites as string[]) || [],
           createdAt: res.customer.createdAt,
         };
+        const newSession = makeSession(c.id);
+
         set((s) => {
           const email = (c.email || "").trim().toLowerCase();
           const reattachedOrders = s.orders.map((o) =>
@@ -736,7 +738,7 @@ export const useStore = create<AppState>()(
           return {
             customers: [...s.customers.filter((x) => x.id !== c.id), c],
             currentCustomerId: c.id,
-            sessions: { ...s.sessions, customer: makeSession(c.id) },
+            sessions: { ...s.sessions, customer: newSession },
             orders: reattachedOrders,
           };
         });
@@ -751,7 +753,7 @@ export const useStore = create<AppState>()(
         // Backup robusto na LocalStorage para o caso do IDB falhar no F5 rápido
         localStorage.setItem("princesa-auth", JSON.stringify({
           currentCustomerId: c.id,
-          session: sess
+          session: newSession
         }));
 
         return { ok: true, message: res.message };
