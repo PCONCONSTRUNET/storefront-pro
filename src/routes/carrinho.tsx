@@ -58,6 +58,7 @@ function Page() {
     applyCoupon,
     removeCoupon,
     appliedCoupon,
+    coupons,
   } = useStore();
   const totals = useStore(useShallow(selectCartTotals));
   const [code, setCode] = useState("");
@@ -234,9 +235,11 @@ function Page() {
               Finalizar compra
             </button>
 
-            <div className="mt-3 text-[11px] text-muted-foreground text-center">
-              Cupons disponíveis: PRIMEIRA10, PRINCESA20
-            </div>
+            {coupons.length > 0 && (
+              <div className="mt-3 text-[11px] text-muted-foreground text-center">
+                Cupons disponíveis: {coupons.map((c) => c.code).join(", ")}
+              </div>
+            )}
           </aside>
         </div>
       </div>
