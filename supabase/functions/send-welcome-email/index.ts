@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
       `Bem-vinda${name ? `, ${name}` : ""}! 🎀`,
       `<p>Que alegria ter você com a gente!</p>
        <p>Sua conta foi criada com sucesso. Agora você pode acompanhar seus pedidos, salvar favoritos e aproveitar nossas novidades.</p>
-       <p style="margin-top:24px"><a href="https://princesadelacos.com.br" style="background:linear-gradient(135deg,#ec4899,#f43f5e);color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:bold">Ver loja</a></p>`,
+       <p style="margin-top:24px"><a href="https://princesadelaços.com.br" style="background:linear-gradient(135deg,#ec4899,#f43f5e);color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;font-weight:bold">Ver loja</a></p>`,
     );
     await sendEmail({
       to: email,
