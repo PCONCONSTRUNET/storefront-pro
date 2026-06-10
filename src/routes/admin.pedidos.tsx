@@ -14,6 +14,7 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
 import { Modal } from "@/components/AdminModal";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { CorreiosLogo } from "@/components/CorreiosLogo";
 import {
   Search,
   X,
@@ -500,8 +501,8 @@ function Page() {
                           </span>
                         )}
                         {o.deliveryMethod === "entrega" && (
-                          <span className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">
-                            <Package className="h-3 w-3" /> VIA CORREIOS
+                          <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
+                            <CorreiosLogo className="h-3 w-auto object-contain" />
                           </span>
                         )}
                       </div>
