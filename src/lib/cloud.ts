@@ -686,7 +686,7 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
 
 export async function injectMockOrder() {
   await adminUpsert("orders", {
-    id: "TESTE-" + Date.now().toString().slice(-4),
+    id: crypto.randomUUID(),
     customer_name: "Maria da Silva Simulação",
     customer_email: "maria@exemplo.com",
     customer_phone: "(11) 98765-4321",

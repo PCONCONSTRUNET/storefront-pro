@@ -328,7 +328,7 @@ function Page() {
                 }));
                 await sync();
                 useStore.setState(s => ({ 
-                  orders: s.orders.map(o => o.id.startsWith("TESTE-") ? { ...o, customerCpf: "111.222.333-44" } : o)
+                  orders: s.orders.map(o => o.customerName === "Maria da Silva Simulação" ? { ...o, customerCpf: "111.222.333-44" } : o)
                 }));
                 toast.success("Pedido Teste Correios gerado!");
               } catch (e: any) {
