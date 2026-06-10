@@ -327,6 +327,9 @@ function Page() {
                   settings: { ...s.settings, cpfCnpj: s.settings?.cpfCnpj || "12.345.678/0001-90" } as any
                 }));
                 await sync();
+                useStore.setState(s => ({ 
+                  orders: s.orders.map(o => o.id.startsWith("TESTE-") ? { ...o, customerCpf: "111.222.333-44" } : o)
+                }));
                 toast.success("Pedido Teste Correios gerado!");
               } catch (e: any) {
                 console.error("Erro ao gerar pedido teste", e);

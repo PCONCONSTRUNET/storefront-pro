@@ -690,7 +690,6 @@ export async function injectMockOrder() {
     customer_name: "Maria da Silva Simulação",
     customer_email: "maria@exemplo.com",
     customer_phone: "(11) 98765-4321",
-    customer_cpf: "111.222.333-44",
     items: [
       { productId: "p1", name: "Laço Encanto Rosa", price: 15.9, quantity: 2, image: "" }
     ],
