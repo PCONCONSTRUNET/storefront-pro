@@ -16,6 +16,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CorreiosLogo } from "@/components/CorreiosLogo";
 
 function CartHeader() {
   const router = useRouter();
@@ -267,6 +268,9 @@ function Page() {
                 className="w-full flex flex-col items-center justify-center p-4 rounded-2xl border-[3px] border-border hover:border-primary hover:bg-primary/5 transition-all text-center shadow-sm bg-muted/20"
               >
                 <span className="font-bold text-lg text-foreground">Outra cidade</span>
+                <span className="text-sm font-medium text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                  Envio via <CorreiosLogo className="h-4 w-auto -ml-0.5" />
+                </span>
               </button>
             </div>
             

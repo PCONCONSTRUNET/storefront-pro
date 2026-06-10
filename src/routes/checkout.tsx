@@ -24,6 +24,7 @@ import type { CreatePixInput } from "@/lib/mercadopago";
 import mpIcon from "@/assets/mercadopago-icon.png";
 import pixIcon from "@/assets/pix-icon.png";
 import cardIcon from "@/assets/card-icon.png";
+import { CorreiosLogo } from "@/components/CorreiosLogo";
 
 export const Route = createFileRoute("/checkout")({
   component: Page,
@@ -280,8 +281,10 @@ function Page() {
                   <div className="flex items-center justify-between p-3 rounded-xl border-2 transition-all text-left border-primary bg-primary/5">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded-full border-2 border-primary bg-primary" />
-                      <div className="font-medium text-sm">
-                        {form.deliveryMethod === "retirada" ? "Retirada no ateliê (Lauro Müller)" : "Envio via Correios"}
+                      <div className="font-medium text-sm flex items-center gap-1.5">
+                        {form.deliveryMethod === "retirada" ? "Retirada no ateliê (Lauro Müller)" : (
+                          <>Envio via <CorreiosLogo className="h-4 w-auto" /></>
+                        )}
                       </div>
                     </div>
                     <Link to="/carrinho" className="text-xs text-primary underline font-medium">Alterar</Link>
@@ -302,7 +305,7 @@ function Page() {
                 </div>
               ) : (
                 <div className="space-y-3 mt-4 border border-border rounded-xl p-3 bg-muted/30">
-                  <div className="font-semibold text-sm mb-1">Endereço de Entrega (Correios)</div>
+                  <div className="font-semibold text-sm mb-1 flex items-center gap-1.5">Endereço de Entrega <CorreiosLogo className="h-4 w-auto" /></div>
                   <Field
                     label="CPF (Obrigatório para os Correios)"
                     value={form.cpf}
@@ -460,7 +463,7 @@ function Page() {
                     label="Contato"
                     value={`${form.email} · ${form.phone}`}
                   />
-                  <Row label="Entrega" value={form.deliveryMethod === "retirada" ? "Retirada no ateliê" : "Correios"} />
+                  <Row label="Entrega" value={form.deliveryMethod === "retirada" ? "Retirada no ateliê" : <span className="flex items-center gap-1">Correios <CorreiosLogo className="h-3.5 w-auto" /></span>} />
                   <Row label={form.deliveryMethod === "retirada" ? "Local" : "Endereço"} value={form.deliveryMethod === "retirada" ? settings.address : `${form.street}, ${form.number} - ${form.city}/${form.state}`} />
                   {form.notes.trim() && (
                     <Row label="Observações" value={form.notes} />
@@ -676,11 +679,11 @@ function Field({
     </label>
   );
 }
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between text-sm gap-3">
       <span className="text-muted-foreground shrink-0">{label}</span>
-      <span className="font-medium text-right">{value}</span>
+      <span className="font-medium text-right flex items-center gap-1">{value}</span>
     </div>
   );
 }

@@ -52,6 +52,7 @@ import { Route as AdminBiRouteImport } from './routes/admin.bi'
 import { Route as AdminAvaliacoesRouteImport } from './routes/admin.avaliacoes'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
 import { Route as CheckoutPixIdRouteImport } from './routes/checkout.pix.$id'
+import { Route as ApiSitemapXmlRouteImport } from './routes/api/sitemap.xml'
 import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
 import { Route as ApiLovableBotNotifyRouteImport } from './routes/api/lovable-bot/notify'
 import { Route as ApiLovableBotLogoutRouteImport } from './routes/api/lovable-bot/logout'
@@ -274,6 +275,11 @@ const CheckoutPixIdRoute = CheckoutPixIdRouteImport.update({
   path: '/pix/$id',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const ApiSitemapXmlRoute = ApiSitemapXmlRouteImport.update({
+  id: '/api/sitemap/xml',
+  path: '/api/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLovableBotStatusRoute = ApiLovableBotStatusRouteImport.update({
   id: '/api/lovable-bot/status',
   path: '/api/lovable-bot/status',
@@ -354,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
   '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
   '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
+  '/api/sitemap/xml': typeof ApiSitemapXmlRoute
   '/checkout/pix/$id': typeof CheckoutPixIdRoute
 }
 export interface FileRoutesByTo {
@@ -405,6 +412,7 @@ export interface FileRoutesByTo {
   '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
   '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
   '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
+  '/api/sitemap/xml': typeof ApiSitemapXmlRoute
   '/checkout/pix/$id': typeof CheckoutPixIdRoute
 }
 export interface FileRoutesById {
@@ -457,6 +465,7 @@ export interface FileRoutesById {
   '/api/lovable-bot/logout': typeof ApiLovableBotLogoutRoute
   '/api/lovable-bot/notify': typeof ApiLovableBotNotifyRoute
   '/api/lovable-bot/status': typeof ApiLovableBotStatusRoute
+  '/api/sitemap/xml': typeof ApiSitemapXmlRoute
   '/checkout/pix/$id': typeof CheckoutPixIdRoute
 }
 export interface FileRouteTypes {
@@ -510,6 +519,7 @@ export interface FileRouteTypes {
     | '/api/lovable-bot/logout'
     | '/api/lovable-bot/notify'
     | '/api/lovable-bot/status'
+    | '/api/sitemap/xml'
     | '/checkout/pix/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/api/lovable-bot/logout'
     | '/api/lovable-bot/notify'
     | '/api/lovable-bot/status'
+    | '/api/sitemap/xml'
     | '/checkout/pix/$id'
   id:
     | '__root__'
@@ -612,6 +623,7 @@ export interface FileRouteTypes {
     | '/api/lovable-bot/logout'
     | '/api/lovable-bot/notify'
     | '/api/lovable-bot/status'
+    | '/api/sitemap/xml'
     | '/checkout/pix/$id'
   fileRoutesById: FileRoutesById
 }
@@ -664,6 +676,7 @@ export interface RootRouteChildren {
   ApiLovableBotLogoutRoute: typeof ApiLovableBotLogoutRoute
   ApiLovableBotNotifyRoute: typeof ApiLovableBotNotifyRoute
   ApiLovableBotStatusRoute: typeof ApiLovableBotStatusRoute
+  ApiSitemapXmlRoute: typeof ApiSitemapXmlRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -969,6 +982,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutPixIdRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/api/sitemap/xml': {
+      id: '/api/sitemap/xml'
+      path: '/api/sitemap/xml'
+      fullPath: '/api/sitemap/xml'
+      preLoaderRoute: typeof ApiSitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/lovable-bot/status': {
       id: '/api/lovable-bot/status'
       path: '/api/lovable-bot/status'
@@ -1075,6 +1095,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLovableBotLogoutRoute: ApiLovableBotLogoutRoute,
   ApiLovableBotNotifyRoute: ApiLovableBotNotifyRoute,
   ApiLovableBotStatusRoute: ApiLovableBotStatusRoute,
+  ApiSitemapXmlRoute: ApiSitemapXmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
