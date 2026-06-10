@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useStore, selectCartTotals, selectCartCount } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
@@ -59,6 +60,8 @@ function Page() {
   } = useStore();
   const totals = useStore(useShallow(selectCartTotals));
   const [code, setCode] = useState("");
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const navigate = useNavigate();
 
   if (cart.length === 0) {
     return (
@@ -223,12 +226,12 @@ function Page() {
               </div>
             </dl>
 
-            <Link
-              to="/checkout"
+            <button
+              onClick={() => setShowLocationModal(true)}
               className="mt-4 w-full h-12 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center justify-center active:scale-95 transition-all"
             >
               Finalizar compra
-            </Link>
+            </button>
 
             <div className="mt-3 text-[11px] text-muted-foreground text-center">
               Cupons disponíveis: PRIMEIRA10, PRINCESA20
@@ -236,6 +239,47 @@ function Page() {
           </aside>
         </div>
       </div>
+
+      {showLocationModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          onClick={() => setShowLocationModal(false)}
+        >
+          <div 
+            className="bg-card rounded-3xl p-6 shadow-2xl max-w-sm w-full animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold text-center mb-2">Qual a sua cidade?</h2>
+            <p className="text-sm text-center text-muted-foreground mb-6">
+              A retirada no ateliê é exclusiva para moradores de Lauro Müller. As demais cidades são enviadas via Correios.
+            </p>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate({ to: "/checkout", search: { delivery: "retirada" } })}
+                className="w-full flex flex-col items-center justify-center p-3 rounded-xl border-2 border-border hover:border-primary/50 transition-all text-center bg-muted/20"
+              >
+                <span className="font-semibold text-primary">Sou de Lauro Müller</span>
+                <span className="text-xs text-muted-foreground mt-0.5">Retirada no ateliê</span>
+              </button>
+              <button
+                onClick={() => navigate({ to: "/checkout", search: { delivery: "entrega" } })}
+                className="w-full flex flex-col items-center justify-center p-3 rounded-xl border-2 border-border hover:border-primary/50 transition-all text-center bg-muted/20"
+              >
+                <span className="font-semibold text-foreground">Outra cidade</span>
+                <span className="text-xs text-muted-foreground mt-0.5">Envio via Correios</span>
+              </button>
+            </div>
+            
+            <button
+              onClick={() => setShowLocationModal(false)}
+              className="w-full mt-4 h-10 rounded-full border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Voltar
+            </button>
+          </div>
+        </div>
+      )}
     </StoreLayout>
   );
 }

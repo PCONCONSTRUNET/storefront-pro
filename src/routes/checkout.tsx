@@ -48,7 +48,7 @@ function Page() {
     email: customer?.email || "",
     phone: customer?.phone || "",
     payment: "pix" as "pix" | "card" | "cash",
-    deliveryMethod: "retirada" as "retirada" | "entrega",
+    deliveryMethod: (new URLSearchParams(window.location.search).get("delivery") === "entrega" ? "entrega" : "retirada") as "retirada" | "entrega",
     cep: "",
     street: "",
     number: "",
@@ -259,38 +259,17 @@ function Page() {
               </p>
 
               <div className="space-y-2 mt-4">
-                <span className="text-xs font-medium text-muted-foreground">Forma de entrega</span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setForm({ ...form, deliveryMethod: "retirada" })}
-                    className={cn(
-                      "flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left",
-                      form.deliveryMethod === "retirada"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-4 h-4 rounded-full border-2",
-                      form.deliveryMethod === "retirada" ? "border-primary bg-primary" : "border-border"
-                    )} />
-                    <div className="font-medium text-sm">Retirada</div>
-                  </button>
-                  <button
-                    onClick={() => setForm({ ...form, deliveryMethod: "entrega" })}
-                    className={cn(
-                      "flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left",
-                      form.deliveryMethod === "entrega"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-4 h-4 rounded-full border-2",
-                      form.deliveryMethod === "entrega" ? "border-primary bg-primary" : "border-border"
-                    )} />
-                    <div className="font-medium text-sm">Correios</div>
-                  </button>
+                <span className="text-xs font-medium text-muted-foreground">Forma de entrega selecionada</span>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="flex items-center justify-between p-3 rounded-xl border-2 transition-all text-left border-primary bg-primary/5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full border-2 border-primary bg-primary" />
+                      <div className="font-medium text-sm">
+                        {form.deliveryMethod === "retirada" ? "Retirada no ateliê (Lauro Müller)" : "Envio via Correios"}
+                      </div>
+                    </div>
+                    <Link to="/carrinho" className="text-xs text-primary underline font-medium">Alterar</Link>
+                  </div>
                 </div>
               </div>
 
