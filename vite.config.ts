@@ -30,9 +30,6 @@ const envDefines = {
       process.env.SUPABASE_PUBLISHABLE_KEY ||
       "",
   ),
-  "process.env.SUPABASE_SERVICE_ROLE_KEY": JSON.stringify(
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  ),
 };
 
 export default defineConfig({

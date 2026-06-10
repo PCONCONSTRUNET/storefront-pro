@@ -494,7 +494,7 @@ export const getSyncStatusFn = createServerFn({ method: "POST" })
         (supabaseAdmin as any)
           .from("orders")
           .select("paid_at", { count: "exact" })
-          .eq("payment_status", "paid")
+          .eq("payment_status", "approved")
           .order("paid_at", { ascending: false })
           .limit(1)
           .then((r: any) => ({

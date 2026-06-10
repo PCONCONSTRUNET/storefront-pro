@@ -13,6 +13,7 @@ import { useStore, hydrateFromCloud } from "@/lib/store";
 
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+import { Analytics } from "@/components/Analytics";
 import appCss from "../styles.css?url";
 
 const PWA_ALLOWED_ROUTES = ["/afiliada/login", "/afiliada", "/admin"];
@@ -116,20 +117,20 @@ export const Route = createRootRoute({
       {
         property: "og:image",
         content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp",
+          "https://princesadelacos.com.br/icon-512.png",
       },
       {
         name: "twitter:image",
         content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1778083243316-versao_grande.webp",
+          "https://princesadelacos.com.br/icon-512.png",
       },
       { property: "og:title", content: "Princesa de Laços — Loja On-line" },
       { name: "twitter:title", content: "Princesa de Laços — Loja On-line" },
       { name: "description", content: "Princesa de Laços — Loja On-line" },
       { property: "og:description", content: "Princesa de Laços — Loja On-line" },
       { name: "twitter:description", content: "Princesa de Laços — Loja On-line" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779231001061-princesa_de_lacos_1mb.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779231001061-princesa_de_lacos_1mb.webp" },
+      { property: "og:image", content: "https://princesadelacos.com.br/icon-512.png" },
+      { name: "twitter:image", content: "https://princesadelacos.com.br/icon-512.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -362,6 +363,7 @@ function RootComponent() {
   return (
     <>
       <Outlet />
+      <Analytics />
       <PwaInstallPrompt />
     </>
   );

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Desabilitar indexação de rotas privadas
+Disallow: /admin/
+Disallow: /admin
+Disallow: /afiliada/
+Disallow: /afiliada
+Disallow: /perfil/
+Disallow: /perfil
+
+Sitemap: https://princesadelacos.com.br/api/sitemap.xml
