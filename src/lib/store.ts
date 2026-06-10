@@ -88,6 +88,7 @@ export type Order = {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  customerCpf?: string;
   items: {
     productId: string;
     name: string;
@@ -179,6 +180,7 @@ export type Customer = {
     neighborhood: string;
     city: string;
     state: string;
+    cpf?: string;
   };
   favorites?: string[];
   createdAt: string;
@@ -197,6 +199,7 @@ export type StoreSettings = {
   bannerTitle: string;
   bannerSubtitle: string;
   email: string;
+  cpfCnpj?: string;
 };
 
 const defaultSettings: StoreSettings = {
@@ -350,6 +353,7 @@ type AppState = {
     customerName: string;
     customerEmail: string;
     customerPhone: string;
+    customerCpf?: string;
     address: string;
     paymentMethod: "pix" | "card" | "cash";
     deliveryMethod: "entrega" | "retirada";
@@ -364,6 +368,7 @@ type AppState = {
     customerName: string;
     customerEmail: string;
     customerPhone: string;
+    customerCpf?: string;
     items: Order["items"];
     subtotal: number;
     discount: number;
@@ -1060,6 +1065,7 @@ export const useStore = create<AppState>()(
           customerName: data.customerName,
           customerEmail: data.customerEmail,
           customerPhone: data.customerPhone,
+          customerCpf: data.customerCpf,
           items,
           subtotal,
           discount,
@@ -1190,6 +1196,7 @@ export const useStore = create<AppState>()(
           customerName: data.customerName,
           customerEmail: data.customerEmail,
           customerPhone: data.customerPhone,
+          customerCpf: data.customerCpf,
           items: data.items,
           subtotal: data.subtotal,
           discount: data.discount,

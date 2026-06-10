@@ -473,6 +473,11 @@ function Page() {
                             Pix expirado
                           </span>
                         )}
+                        {o.deliveryMethod === "entrega" && (
+                          <span className="text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">
+                            <Package className="h-3 w-3" /> VIA CORREIOS
+                          </span>
+                        )}
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
                         <span>{formatDate(o.createdAt)}</span>
@@ -799,11 +804,23 @@ function Page() {
                 <WhatsAppIcon className="h-4 w-4" /> WhatsApp
               </button>
               <button
-                onClick={() => printOrderReceipt(order, settings)}
-                className="h-10 rounded-full bg-muted font-semibold text-xs flex items-center justify-center gap-1.5"
+                onClick={() => {
+                  printOrderReceipt(order, settings);
+                }}
+                className="h-10 rounded-full bg-primary text-primary-foreground font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-primary/90"
               >
                 <Printer className="h-4 w-4" /> Imprimir
               </button>
+              {order.deliveryMethod === "entrega" && (
+                <button
+                  onClick={() => {
+                    import("@/lib/printShippingLabel").then(m => m.printShippingLabel(order, settings));
+                  }}
+                  className="col-span-2 h-10 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-yellow-200"
+                >
+                  <Package className="h-4 w-4" /> Imprimir Declaração Correios
+                </button>
+              )}
               <button
                 onClick={async () => {
                   const { confirmDialog } = await import("@/components/ConfirmDialog");

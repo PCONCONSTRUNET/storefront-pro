@@ -56,6 +56,7 @@ function Page() {
     neighborhood: customer?.addressData?.neighborhood || "",
     city: customer?.addressData?.city || "",
     state: customer?.addressData?.state || "",
+    cpf: customer?.addressData?.cpf || "",
     notes: "",
   });
   const [saveAddress, setSaveAddress] = useState(false);
@@ -99,10 +100,8 @@ function Page() {
       if (digits.length < 10 || digits.length > 13)
         return toast.error("WhatsApp inválido — informe DDD + número");
       
-      if (form.deliveryMethod === "entrega") {
-        if (!form.cep || !form.street || !form.number || !form.neighborhood || !form.city || !form.state) {
-          return toast.error("Preencha todos os campos obrigatórios do endereço");
-        }
+      if (form.deliveryMethod === "entrega" && (!form.cep || !form.street || !form.number || !form.neighborhood || !form.city || !form.state || !form.cpf)) {
+        return toast.error("Preencha todos os campos do endereço e o CPF para entrega.");
       }
     }
     setStep((s) => s + 1);
@@ -151,6 +150,7 @@ function Page() {
           neighborhood: form.neighborhood,
           city: form.city,
           state: form.state,
+          cpf: form.cpf,
         }
       });
     }
@@ -172,6 +172,7 @@ function Page() {
       customerName: form.name,
       customerEmail: form.email,
       customerPhone: form.phone,
+      customerCpf: form.deliveryMethod === "entrega" ? form.cpf : undefined,
       address: addressStr,
       paymentMethod: form.payment,
       deliveryMethod: form.deliveryMethod,
@@ -302,6 +303,12 @@ function Page() {
               ) : (
                 <div className="space-y-3 mt-4 border border-border rounded-xl p-3 bg-muted/30">
                   <div className="font-semibold text-sm mb-1">Endereço de Entrega (Correios)</div>
+                  <Field
+                    label="CPF (Obrigatório para os Correios)"
+                    value={form.cpf}
+                    placeholder="000.000.000-00"
+                    onChange={(v) => setForm({ ...form, cpf: v })}
+                  />
                   <Field
                     label="CEP"
                     value={form.cep}
