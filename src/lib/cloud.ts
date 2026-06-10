@@ -700,7 +700,7 @@ export async function injectMockOrder() {
     payment_method: "pix",
     delivery_method: "entrega",
     payment_status: "approved",
-    delivery_status: "pending",
+    delivery_status: "pendente",
     created_at: new Date().toISOString(),
     address: "Rua das Flores, 123 - Centro, São Paulo - SP, 01000-000",
   }, "id");
