@@ -838,7 +838,7 @@ function Page() {
               >
                 <Printer className="h-4 w-4" /> Imprimir
               </button>
-              {order.deliveryMethod === "entrega" && (
+              {order.deliveryMethod === "entrega" && ["pago", "em_separacao", "saiu_para_entrega", "concluido"].includes(order.status) && (
                 <button
                   onClick={() => {
                     import("@/lib/printShippingLabel").then(m => m.printShippingLabel(order, settings));

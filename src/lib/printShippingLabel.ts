@@ -11,6 +11,13 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
   const trackingCodeMatch = order.notes?.match(/\[RASTREIO:\s*(.*?)\]/);
   const trackingCode = trackingCodeMatch ? trackingCodeMatch[1] : "________________________";
 
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const month = monthNames[now.getMonth()];
+  const year = now.getFullYear();
+  const formattedDate = `${day} de ${month} de ${year}`;
+
   const totalValue = order.items.reduce((a, b) => a + (b.price * b.quantity), 0);
   const totalQtd = order.items.reduce((a, b) => a + b.quantity, 0);
 
@@ -221,7 +228,7 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
         Declaro ainda que não estou postando conteúdo inflamável, explosivo, causador de combustão espontânea, tóxico, corrosivo, gás ou qualquer outro conteúdo que constitua perigo, conforme o art. 13 da Lei Postal no 6.538/78.
         
         <div class="signature-area">
-          <div>____ de ________________________ de ______</div>
+          <div>${formattedDate}</div>
           <div style="text-align: center;">
             ___________________________________________________________<br/>
             Assinatura do Declarante/Remetente
