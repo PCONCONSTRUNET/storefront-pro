@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/configuracoes")({
   component: Page,
@@ -15,6 +16,23 @@ function Page() {
   const save = () => {
     updateSettings(s);
     toast.success("Configurações salvas!");
+  };
+
+  const handleLimpezaGeral = async () => {
+    if (!window.confirm("ATENÇÃO: Isso irá apagar todos os clientes, pedidos, transações e histórico (exceto gateway e produtos). ESSA AÇÃO É IRREVERSÍVEL. Tem certeza?")) {
+      return;
+    }
+    
+    const tId = toast.loading("Limpando o sistema...");
+    try {
+      const { error } = await supabase.functions.invoke("admin-limpeza-geral");
+      if (error) throw error;
+      toast.success("Sistema limpo com sucesso!", { id: tId });
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Erro ao limpar o sistema: " + e.message, { id: tId });
+    }
   };
 
   return (
@@ -70,6 +88,18 @@ function Page() {
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-rotate-cw"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
             Forçar atualização
+          </button>
+        </Card>
+        <Card title="Zona de Perigo">
+          <div className="text-sm text-red-500 mb-3">
+            <strong>Cuidado:</strong> Limpeza geral do painel. Apaga todos os pedidos, clientes e dashboard financeiro. O gateway, produtos e categorias ficam intactos.
+          </div>
+          <button
+            onClick={handleLimpezaGeral}
+            className="w-full h-11 rounded-full border border-red-200 bg-red-50 text-red-600 flex items-center justify-center gap-2 hover:bg-red-100 font-semibold text-sm transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            Fazer Limpeza Geral
           </button>
         </Card>
       </div>
