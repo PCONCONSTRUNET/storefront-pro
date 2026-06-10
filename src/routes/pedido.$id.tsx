@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   ChevronLeft,
   RotateCcw,
+  Truck,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -124,6 +126,40 @@ function Page() {
             )})}
           </ol>
         </div>
+
+        {order.notes?.match(/\[RASTREIO: (.*?)\]/) && (() => {
+          const code = order.notes.match(/\[RASTREIO: (.*?)\]/)?.[1];
+          return (
+            <div className="mt-4 bg-card rounded-2xl p-4 shadow-card text-sm flex flex-col gap-2 border-2 border-primary/20">
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <Truck className="h-5 w-5 text-primary" /> Código de Rastreio
+              </div>
+              <p className="text-muted-foreground text-xs">Acompanhe a sua entrega com o código abaixo:</p>
+              <div className="flex gap-2 mt-1">
+                <div className="flex-1 bg-muted/50 border border-border rounded-xl px-3 flex items-center font-mono font-bold text-primary select-all">
+                  {code}
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(code || "");
+                    toast.success("Código copiado!");
+                  }}
+                  className="h-11 px-4 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                >
+                  <Copy className="h-4 w-4" /> Copiar
+                </button>
+              </div>
+              <a
+                href="https://rastreamento.correios.com.br/app/index.php"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-11 w-full rounded-xl border-2 border-border font-semibold flex items-center justify-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all mt-1"
+              >
+                Rastrear nos Correios
+              </a>
+            </div>
+          );
+        })()}
 
         <div className="mt-4 bg-card rounded-2xl p-4 shadow-card">
           <h2 className="font-semibold mb-3">Itens</h2>
