@@ -328,6 +328,9 @@ function Page() {
                 }));
                 await sync();
                 toast.success("Pedido Teste Correios gerado!");
+              } catch (e: any) {
+                console.error("Erro ao gerar pedido teste", e);
+                toast.error(e.message || "Erro ao gerar pedido");
               } finally {
                 setBusy(false);
               }
