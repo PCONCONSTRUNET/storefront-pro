@@ -41,7 +41,7 @@ export const initialProducts: Product[] = [];
 
 export type Coupon = {
   code: string;
-  type: "percent" | "fixed";
+  type: "percent" | "fixed" | "free_shipping";
   value: number;
   validUntil: string;
   maxUses: number;

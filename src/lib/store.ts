@@ -200,6 +200,7 @@ export type StoreSettings = {
   bannerSubtitle: string;
   email: string;
   cpfCnpj?: string;
+  shippingRules?: { id: string; state: string; city: string; fee: number }[];
 };
 
 const defaultSettings: StoreSettings = {
@@ -1756,7 +1757,9 @@ export const selectCartTotals = (s: AppState) => {
   const discount = coupon
     ? coupon.type === "percent"
       ? (subtotal * coupon.value) / 100
-      : coupon.value
+      : coupon.type === "fixed"
+        ? coupon.value
+        : 0
     : 0;
   const shipping = 0;
   const total = Math.max(0, subtotal - discount);

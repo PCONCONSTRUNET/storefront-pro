@@ -49,7 +49,7 @@ function Page() {
             <div className="flex-1">
               <div className="font-bold">{c.code}</div>
               <div className="text-xs text-muted-foreground">
-                {c.type === "percent" ? `${c.value}% off` : `R$ ${c.value} off`}{" "}
+                {c.type === "free_shipping" ? "Frete grátis" : c.type === "percent" ? `${c.value}% off` : `R$ ${c.value} off`}{" "}
                 · Mín {c.minOrder}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -113,23 +113,26 @@ function Page() {
                   onChange={(e) =>
                     setEditing({
                       ...editing,
-                      type: e.target.value as "percent" | "fixed",
+                      type: e.target.value as "percent" | "fixed" | "free_shipping",
                     })
                   }
                   className="mt-1 w-full h-11 px-3 rounded-xl bg-muted"
                 >
                   <option value="percent">Percentual</option>
                   <option value="fixed">Valor fixo</option>
+                  <option value="free_shipping">Frete grátis</option>
                 </select>
               </label>
-              <Field
-                label="Valor"
-                type="number"
-                value={String(editing.value)}
-                onChange={(v) =>
-                  setEditing({ ...editing, value: parseFloat(v) || 0 })
-                }
-              />
+              {editing.type !== "free_shipping" && (
+                <Field
+                  label="Valor"
+                  type="number"
+                  value={String(editing.value)}
+                  onChange={(v) =>
+                    setEditing({ ...editing, value: parseFloat(v) || 0 })
+                  }
+                />
+              )}
               <Field
                 label="Pedido mínimo"
                 type="number"

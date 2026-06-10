@@ -22,6 +22,7 @@ import {
   ArrowUpDown,
   Activity,
   Star,
+  Truck,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
@@ -48,6 +49,7 @@ const DEFAULT_NAV = [
   { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },
   { to: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
+  { to: "/admin/frete", label: "Frete", icon: Truck },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { to: "/admin/chatbot", label: "Chatbot", icon: WhatsAppIcon },
   { to: "/admin/logs", label: "Logs de Auditoria", icon: FileText },

@@ -34,7 +34,7 @@ const steps = ["Seus dados", "Pagamento", "Revisão"];
 
 function Page() {
   const navigate = useNavigate();
-  const { cart, settings, placeOrder, products } = useStore();
+  const { cart, settings, placeOrder, products, appliedCoupon, coupons } = useStore();
   const customer = useStore(selectCurrentCustomer);
   const totals = useStore(useShallow(selectCartTotals));
   const [step, setStep] = useState(0);
@@ -108,11 +108,29 @@ function Page() {
     setStep((s) => s + 1);
   };
 
+  const coupon = coupons.find(c => c.code === appliedCoupon);
+  let computedShipping = 0;
+  if (form.deliveryMethod === "entrega") {
+    if (coupon?.type === "free_shipping") {
+      computedShipping = 0;
+    } else {
+      const rules = settings.shippingRules || [];
+      const st = form.state.toUpperCase().trim();
+      const ci = form.city.toLowerCase().trim();
+      
+      const cityMatch = rules.find(r => r.state.toUpperCase().trim() === st && r.city.toLowerCase().trim() === ci && r.city.trim() !== "");
+      const stateMatch = rules.find(r => r.state.toUpperCase().trim() === st && !r.city.trim());
+      
+      if (cityMatch) computedShipping = cityMatch.fee;
+      else if (stateMatch) computedShipping = stateMatch.fee;
+      else computedShipping = settings.shippingFee;
+    }
+  }
+
   const finish = async () => {
     if (submitting) return;
 
-    const shipping = form.deliveryMethod === "entrega" ? settings.shippingFee : 0;
-    const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+    const total = Math.max(0, totals.subtotal - totals.discount) + computedShipping;
     
     const addressStr = form.deliveryMethod === "entrega" 
       ? `${form.street}, ${form.number}${form.complement ? ` - ${form.complement}` : ''}, ${form.neighborhood}, ${form.city} - ${form.state}, CEP: ${form.cep}`
@@ -133,7 +151,7 @@ function Page() {
       totals: {
         subtotal: totals.subtotal,
         discount: totals.discount,
-        shipping,
+        shipping: computedShipping,
         total,
       },
       delivery: form.deliveryMethod,
@@ -481,11 +499,11 @@ function Page() {
                     <Row label="Desconto" value={`− ${brl(totals.discount)}`} />
                   )}
                   {form.deliveryMethod === "entrega" && (
-                    <Row label="Frete" value={brl(settings.shippingFee)} />
+                    <Row label="Frete" value={computedShipping === 0 ? "Grátis" : brl(computedShipping)} />
                   )}
                   <div className="flex justify-between font-bold text-lg pt-1">
                     <span>Total</span>
-                    <span className="text-primary">{brl(total + (form.deliveryMethod === "entrega" ? settings.shippingFee : 0))}</span>
+                    <span className="text-primary">{brl(total + computedShipping)}</span>
                   </div>
                 </div>
               );
