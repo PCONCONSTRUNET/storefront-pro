@@ -104,52 +104,6 @@ function Page() {
   const [query, setQuery] = useState(initialQ);
   const [busy, setBusy] = useState(false);
 
-  const handleInjectMockOrder = async () => {
-    try {
-      const customer = useStore.getState().customers[0] || {
-        id: crypto.randomUUID(),
-        name: "Cliente Teste",
-        email: "teste@exemplo.com",
-        phone: "(11) 99999-9999",
-      };
-
-      const { adminUpsertFn } = await import("@/lib/admin.functions");
-      const r = await adminUpsertFn({
-        data: {
-          table: "orders",
-          row: {
-            id: crypto.randomUUID(),
-            customer_name: customer.name,
-            customer_email: customer.email,
-            customer_phone: customer.phone,
-            items: [
-              { productId: "p1", name: "Laço Princesa", price: 29.9, quantity: 1, image: "" }
-            ],
-            subtotal: 29.9,
-            discount: 0,
-            shipping: 10.0,
-            total: 39.9,
-            payment_method: "pix",
-            delivery_method: "entrega",
-            payment_status: "pago",
-            delivery_status: "pendente",
-            created_at: new Date().toISOString(),
-            address: "Rua Teste, 123 - Centro, São Paulo - SP, 01000-000",
-          },
-          onConflict: "id",
-        }
-      });
-      if (r.ok) {
-        toast.success("Pedido de teste criado! Atualize a página.");
-        useStore.getState().sync();
-      } else {
-        toast.error("Erro: " + r.message);
-      }
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  };
-
   useEffect(() => {
     setQuery(initialQ);
     if (initialQ) setFilter("todos");
@@ -365,32 +319,6 @@ function Page() {
             <RefreshCw className="h-3.5 w-3.5" /> Atualizar
           </button>
           <button
-            onClick={async () => {
-              setBusy(true);
-              try {
-                const { injectMockOrder } = await import("@/lib/cloud");
-                await injectMockOrder();
-                useStore.setState(s => ({ 
-                  settings: { ...s.settings, cpfCnpj: s.settings?.cpfCnpj || "12.345.678/0001-90" } as any
-                }));
-                await sync();
-                useStore.setState(s => ({ 
-                  orders: s.orders.map(o => o.customerName === "Maria da Silva Simulação" ? { ...o, customerCpf: "111.222.333-44" } : o)
-                }));
-                toast.success("Pedido Teste Correios gerado!");
-              } catch (e: any) {
-                console.error("Erro ao gerar pedido teste", e);
-                toast.error(e.message || "Erro ao gerar pedido");
-              } finally {
-                setBusy(false);
-              }
-            }}
-            disabled={busy}
-            className="px-2.5 py-1 rounded-full bg-primary/20 text-primary hover:bg-primary/30 font-semibold"
-          >
-            Gerar Pedido Teste Correios
-          </button>
-          <button
             onClick={exportCsv}
             className="px-2.5 py-1 rounded-full bg-muted hover:bg-muted/70 font-semibold"
           >
@@ -398,13 +326,6 @@ function Page() {
           </button>
         </div>
       </div>
-
-      <button
-        onClick={handleInjectMockOrder}
-        className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg text-sm font-medium hover:bg-pink-600 transition-colors flex items-center gap-2"
-      >
-        <Package className="h-4 w-4" /> Gerar Pedido de Teste (Pago)
-      </button>
 
       {/* Search + filters */}
       <div className="relative mb-2">
