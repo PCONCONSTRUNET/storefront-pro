@@ -318,29 +318,21 @@ function Page() {
             <RefreshCw className="h-3.5 w-3.5" /> Atualizar
           </button>
           <button
-            onClick={() => {
-              const newOrder = {
-                id: "TESTE-" + Date.now().toString().slice(-4),
-                customerId: "guest",
-                customerName: "Maria da Silva Simulação",
-                customerEmail: "maria@exemplo.com",
-                customerPhone: "(11) 98765-4321",
-                customerCpf: "111.222.333-44",
-                items: [
-                  { productId: "p1", name: "Laço Encanto Rosa", price: 15.9, quantity: 2, image: "" }
-                ],
-                subtotal: 31.8, discount: 0, shipping: 12.9, total: 44.7,
-                paymentMethod: "pix", deliveryMethod: "entrega",
-                status: "pago", deliveryStatus: "pendente",
-                createdAt: new Date().toISOString(),
-                address: "Rua das Flores, 123 - Centro, São Paulo - SP, 01000-000"
-              } as any;
-              useStore.setState(s => ({ 
-                orders: [newOrder, ...s.orders],
-                settings: { ...s.settings, cpfCnpj: s.settings.cpfCnpj || "12.345.678/0001-90" } as any
-              }));
-              toast.success("Pedido Teste Correios gerado!");
+            onClick={async () => {
+              setBusy(true);
+              try {
+                const { injectMockOrder } = await import("@/lib/cloud");
+                await injectMockOrder();
+                useStore.setState(s => ({ 
+                  settings: { ...s.settings, cpfCnpj: s.settings?.cpfCnpj || "12.345.678/0001-90" } as any
+                }));
+                await sync();
+                toast.success("Pedido Teste Correios gerado!");
+              } finally {
+                setBusy(false);
+              }
             }}
+            disabled={busy}
             className="px-2.5 py-1 rounded-full bg-primary/20 text-primary hover:bg-primary/30 font-semibold"
           >
             Gerar Pedido Teste Correios

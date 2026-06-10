@@ -683,3 +683,26 @@ export async function fetchCloudSnapshot(): Promise<CloudSnapshot> {
     activityLogs: (admin?.activityLogs || []).map(toActivityLog),
   };
 }
+
+export async function injectMockOrder() {
+  await adminUpsert("orders", {
+    id: "TESTE-" + Date.now().toString().slice(-4),
+    customer_name: "Maria da Silva Simulação",
+    customer_email: "maria@exemplo.com",
+    customer_phone: "(11) 98765-4321",
+    customer_cpf: "111.222.333-44",
+    items: [
+      { productId: "p1", name: "Laço Encanto Rosa", price: 15.9, quantity: 2, image: "" }
+    ],
+    subtotal: 31.8,
+    discount: 0,
+    shipping: 12.9,
+    total: 44.7,
+    payment_method: "pix",
+    delivery_method: "entrega",
+    payment_status: "paid",
+    delivery_status: "pending",
+    created_at: new Date().toISOString(),
+    address: "Rua das Flores, 123 - Centro, São Paulo - SP, 01000-000",
+  }, "id");
+}
