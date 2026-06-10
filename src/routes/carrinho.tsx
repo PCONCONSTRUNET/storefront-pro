@@ -254,20 +254,19 @@ function Page() {
               A retirada no ateliê é exclusiva para moradores de Lauro Müller. As demais cidades são enviadas via Correios.
             </p>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <button
                 onClick={() => navigate({ to: "/checkout", search: { delivery: "retirada" } })}
-                className="w-full flex flex-col items-center justify-center p-3 rounded-xl border-2 border-border hover:border-primary/50 transition-all text-center bg-muted/20"
+                className="w-full flex flex-col items-center justify-center p-4 rounded-2xl border-[3px] border-primary/20 hover:border-primary hover:bg-primary/5 transition-all text-center shadow-sm"
               >
-                <span className="font-semibold text-primary">Sou de Lauro Müller</span>
-                <span className="text-xs text-muted-foreground mt-0.5">Retirada no ateliê</span>
+                <span className="font-bold text-lg text-primary">Sou de Lauro Müller</span>
+                <span className="text-sm font-medium text-muted-foreground mt-0.5">Retirada no ateliê</span>
               </button>
               <button
                 onClick={() => navigate({ to: "/checkout", search: { delivery: "entrega" } })}
-                className="w-full flex flex-col items-center justify-center p-3 rounded-xl border-2 border-border hover:border-primary/50 transition-all text-center bg-muted/20"
+                className="w-full flex flex-col items-center justify-center p-4 rounded-2xl border-[3px] border-border hover:border-primary hover:bg-primary/5 transition-all text-center shadow-sm bg-muted/20"
               >
-                <span className="font-semibold text-foreground">Outra cidade</span>
-                <span className="text-xs text-muted-foreground mt-0.5">Envio via Correios</span>
+                <span className="font-bold text-lg text-foreground">Outra cidade</span>
               </button>
             </div>
             
