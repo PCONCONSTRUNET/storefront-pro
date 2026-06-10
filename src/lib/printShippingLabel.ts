@@ -1,8 +1,4 @@
-import logoUrl from "@/assets/logo-princesa.png";
 import type { Order, StoreSettings } from "@/lib/store";
-
-const brl = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const esc = (s: unknown) =>
   String(s ?? "")
@@ -11,18 +7,6 @@ const esc = (s: unknown) =>
     .replace(/>/g, "&gt;");
 
 export function printShippingLabel(order: Order, settings: StoreSettings) {
-  const logoSrc = new URL(logoUrl, window.location.origin).href;
-  
-  const itemsHtml = order.items
-    .map(
-      (it) => `
-      <tr>
-        <td class="desc">${esc(it.name)}</td>
-        <td class="center">${it.quantity}</td>
-        <td class="right">${brl(it.price * it.quantity)}</td>
-      </tr>`,
-    )
-    .join("");
 
   const trackingCodeMatch = order.notes?.match(/\[RASTREIO:\s*(.*?)\]/);
   const trackingCode = trackingCodeMatch ? trackingCodeMatch[1] : "________________________";
@@ -207,16 +191,16 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
           </tr>
         </thead>
         <tbody>
-          ${order.items.map((it, idx) => \`
+          ${order.items.map((it, idx) => `
           <tr>
-            <td class="center">\${idx + 1}</td>
-            <td>\${esc(it.productId)}</td>
-            <td>\${esc(it.name)}</td>
+            <td class="center">${idx + 1}</td>
+            <td>${esc(it.productId)}</td>
+            <td>${esc(it.name)}</td>
             <td></td>
-            <td class="center">\${it.quantity}</td>
-            <td class="right">\${(it.price).toFixed(2)}</td>
+            <td class="center">${it.quantity}</td>
+            <td class="right">${(it.price).toFixed(2)}</td>
           </tr>
-          \`).join("")}
+          `).join("")}
           <tr>
             <td colspan="4" class="right">Totais</td>
             <td class="center">${totalQtd}</td>
