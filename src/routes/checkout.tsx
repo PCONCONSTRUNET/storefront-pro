@@ -48,6 +48,14 @@ function Page() {
     email: customer?.email || "",
     phone: customer?.phone || "",
     payment: "pix" as "pix" | "card" | "cash",
+    deliveryMethod: "retirada" as "retirada" | "entrega",
+    cep: "",
+    street: "",
+    number: "",
+    complement: "",
+    neighborhood: "",
+    city: "",
+    state: "",
     notes: "",
   });
   const [installmentInfo, setInstallmentInfo] = useState<{
@@ -89,6 +97,12 @@ function Page() {
       const digits = form.phone.replace(/\D/g, "");
       if (digits.length < 10 || digits.length > 13)
         return toast.error("WhatsApp inválido — informe DDD + número");
+      
+      if (form.deliveryMethod === "entrega") {
+        if (!form.cep || !form.street || !form.number || !form.neighborhood || !form.city || !form.state) {
+          return toast.error("Preencha todos os campos obrigatórios do endereço");
+        }
+      }
     }
     setStep((s) => s + 1);
   };
@@ -96,8 +110,13 @@ function Page() {
   const finish = async () => {
     if (submitting) return;
 
-    const shipping = 0;
-    const total = Math.max(0, totals.subtotal - totals.discount);
+    const shipping = form.deliveryMethod === "entrega" ? settings.shippingFee : 0;
+    const total = Math.max(0, totals.subtotal - totals.discount) + shipping;
+    
+    const addressStr = form.deliveryMethod === "entrega" 
+      ? `${form.street}, ${form.number}${form.complement ? ` - ${form.complement}` : ''}, ${form.neighborhood}, ${form.city} - ${form.state}, CEP: ${form.cep}`
+      : settings.address;
+
     const sharedPayload = {
       customer: { name: form.name, email: form.email, phone: form.phone },
       items: cart.map((it) => {
@@ -116,8 +135,8 @@ function Page() {
         shipping,
         total,
       },
-      delivery: "retirada" as const,
-      address: settings.address,
+      delivery: form.deliveryMethod,
+      address: addressStr,
       notes: form.notes,
     };
 
@@ -138,9 +157,9 @@ function Page() {
       customerName: form.name,
       customerEmail: form.email,
       customerPhone: form.phone,
-      address: settings.address,
+      address: addressStr,
       paymentMethod: form.payment,
-      deliveryMethod: "retirada",
+      deliveryMethod: form.deliveryMethod,
       notes: form.notes,
     });
     playBeep();
@@ -239,16 +258,102 @@ function Page() {
                 aprovada e aviso quando o pedido estiver pronto pelo WhatsApp.
               </p>
 
-              <div className="rounded-xl bg-accent/40 border border-accent p-3 text-sm mt-2">
-                <div className="font-semibold text-accent-foreground mb-0.5">
-                  📍 Retirada no ateliê
-                </div>
-                <div className="text-muted-foreground">{settings.address}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Avisaremos pelo WhatsApp quando o pedido estiver pronto para
-                  retirada.
+              <div className="space-y-2 mt-4">
+                <span className="text-xs font-medium text-muted-foreground">Forma de entrega</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setForm({ ...form, deliveryMethod: "retirada" })}
+                    className={cn(
+                      "flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left",
+                      form.deliveryMethod === "retirada"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-4 h-4 rounded-full border-2",
+                      form.deliveryMethod === "retirada" ? "border-primary bg-primary" : "border-border"
+                    )} />
+                    <div className="font-medium text-sm">Retirada</div>
+                  </button>
+                  <button
+                    onClick={() => setForm({ ...form, deliveryMethod: "entrega" })}
+                    className={cn(
+                      "flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left",
+                      form.deliveryMethod === "entrega"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-4 h-4 rounded-full border-2",
+                      form.deliveryMethod === "entrega" ? "border-primary bg-primary" : "border-border"
+                    )} />
+                    <div className="font-medium text-sm">Correios</div>
+                  </button>
                 </div>
               </div>
+
+              {form.deliveryMethod === "retirada" ? (
+                <div className="rounded-xl bg-accent/40 border border-accent p-3 text-sm mt-2">
+                  <div className="font-semibold text-accent-foreground mb-0.5">
+                    📍 Retirada no ateliê
+                  </div>
+                  <div className="text-muted-foreground">{settings.address}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Avisaremos pelo WhatsApp quando o pedido estiver pronto para
+                    retirada.
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 mt-4 border border-border rounded-xl p-3 bg-muted/30">
+                  <div className="font-semibold text-sm mb-1">Endereço de Entrega (Correios)</div>
+                  <Field
+                    label="CEP"
+                    value={form.cep}
+                    placeholder="00000-000"
+                    onChange={(v) => setForm({ ...form, cep: v })}
+                  />
+                  <Field
+                    label="Rua / Avenida"
+                    value={form.street}
+                    onChange={(v) => setForm({ ...form, street: v })}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field
+                      label="Número"
+                      value={form.number}
+                      onChange={(v) => setForm({ ...form, number: v })}
+                    />
+                    <Field
+                      label="Complemento"
+                      value={form.complement}
+                      onChange={(v) => setForm({ ...form, complement: v })}
+                    />
+                  </div>
+                  <Field
+                    label="Bairro"
+                    value={form.neighborhood}
+                    onChange={(v) => setForm({ ...form, neighborhood: v })}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field
+                      label="Cidade"
+                      value={form.city}
+                      onChange={(v) => setForm({ ...form, city: v })}
+                    />
+                    <Field
+                      label="Estado (UF)"
+                      value={form.state}
+                      placeholder="SC"
+                      onChange={(v) => setForm({ ...form, state: v })}
+                    />
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-2">
+                    Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
+                  </div>
+                </div>
+              )}
 
               <label className="block">
                 <span className="text-xs font-medium text-muted-foreground">
@@ -340,8 +445,8 @@ function Page() {
                     label="Contato"
                     value={`${form.email} · ${form.phone}`}
                   />
-                  <Row label="Retirada" value="No ateliê" />
-                  <Row label="Local" value={settings.address} />
+                  <Row label="Entrega" value={form.deliveryMethod === "retirada" ? "Retirada no ateliê" : "Correios"} />
+                  <Row label={form.deliveryMethod === "retirada" ? "Local" : "Endereço"} value={form.deliveryMethod === "retirada" ? settings.address : `${form.street}, ${form.number} - ${form.city}/${form.state}`} />
                   {form.notes.trim() && (
                     <Row label="Observações" value={form.notes} />
                   )}
@@ -357,9 +462,12 @@ function Page() {
                   {totals.discount > 0 && (
                     <Row label="Desconto" value={`− ${brl(totals.discount)}`} />
                   )}
+                  {form.deliveryMethod === "entrega" && (
+                    <Row label="Frete" value={brl(settings.shippingFee)} />
+                  )}
                   <div className="flex justify-between font-bold text-lg pt-1">
                     <span>Total</span>
-                    <span className="text-primary">{brl(total)}</span>
+                    <span className="text-primary">{brl(total + (form.deliveryMethod === "entrega" ? settings.shippingFee : 0))}</span>
                   </div>
                 </div>
               );

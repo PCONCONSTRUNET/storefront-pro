@@ -21,13 +21,9 @@ export const Route = createFileRoute("/pedido/$id")({
   component: Page,
 });
 
-const flow: OrderStatus[] = [
-  "aguardando_pagamento",
-  "pago",
-  "em_separacao",
-  "saiu_para_entrega",
-  "concluido",
-];
+const paymentFlow = ["aguardando_pagamento", "pago"] as const;
+const deliveryFlowRetirada = ["pendente", "em_separacao", "saiu_para_entrega", "entregue"] as const;
+const deliveryFlowEntrega = ["pendente", "em_separacao", "postado_correios", "saiu_para_entrega", "entregue"] as const;
 
 function Page() {
   const { id } = Route.useParams();
@@ -48,7 +44,22 @@ function Page() {
   }
 
   const status = normalizeOrderStatus(order.status);
-  const currentIdx = flow.indexOf(status);
+  const isPaid = status === "pago" || status === "em_separacao" || status === "concluido" || status === "saiu_para_entrega";
+  const deliveryStatus = order.deliveryStatus || "pendente";
+  
+  const flow = order.deliveryMethod === "retirada" ? deliveryFlowRetirada : deliveryFlowEntrega;
+  const currentIdx = flow.indexOf(deliveryStatus as any);
+  
+  const getStepLabel = (step: string) => {
+    switch (step) {
+      case "pendente": return "Aguardando pagamento";
+      case "em_separacao": return "Em separação";
+      case "postado_correios": return "Postado nos Correios";
+      case "saiu_para_entrega": return order.deliveryMethod === "retirada" ? "Aguardando retirada" : "Saiu para entrega";
+      case "entregue": return "Entregue";
+      default: return step;
+    }
+  };
 
   return (
     <StoreLayout>
@@ -75,28 +86,42 @@ function Page() {
         <div className="mt-4 bg-card rounded-2xl p-4 shadow-card">
           <h2 className="font-semibold mb-3">Acompanhamento</h2>
           <ol className="space-y-3">
-            {flow.map((s, i) => (
+            {flow.map((s, i) => {
+              // Se não foi pago, a entrega fica parada em "pendente".
+              // Porém se status do pedido é cancelado/reembolsado não mostra os de entrega como concluidos.
+              const isCompleted = i < currentIdx || (i === currentIdx && isPaid && s !== "pendente") || (s === "pendente" && isPaid);
+              const isCurrent = (s === "pendente" && !isPaid) ? true : (i === currentIdx && isPaid);
+              return (
               <li key={s} className="flex items-center gap-3">
                 <div
-                  className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${i <= currentIdx ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${isCompleted || isCurrent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                 >
-                  {i <= currentIdx ? (
+                  {isCompleted && !isCurrent ? (
                     <CheckCircle2 className="h-4 w-4" />
                   ) : (
                     i + 1
                   )}
                 </div>
-                <span
-                  className={
-                    i === currentIdx
-                      ? "font-semibold"
-                      : "text-muted-foreground text-sm"
-                  }
-                >
-                  {ORDER_STATUS_LABEL[s]}
-                </span>
+                <div className="flex-1">
+                  <div
+                    className={
+                      isCurrent
+                        ? "font-semibold"
+                        : isCompleted
+                        ? "text-foreground text-sm font-medium"
+                        : "text-muted-foreground text-sm"
+                    }
+                  >
+                    {getStepLabel(s)}
+                  </div>
+                  {s === "postado_correios" && isCompleted && order.notes?.match(/\[RASTREIO: (.*?)\]/) && (
+                    <div className="text-xs font-mono mt-0.5 text-primary">
+                      Rastreio: {order.notes.match(/\[RASTREIO: (.*?)\]/)?.[1]}
+                    </div>
+                  )}
+                </div>
               </li>
-            ))}
+            )})}
           </ol>
         </div>
 
@@ -152,12 +177,12 @@ function Page() {
               : "Entrega"}
           </h2>
           <p className="text-muted-foreground">{order.address}</p>
-          {order.notes && (
+          {(order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim() && (
             <div className="mt-3 p-3 rounded-xl bg-gold/10 border border-gold/30">
               <div className="text-[11px] font-bold text-gold uppercase tracking-wide mb-1">
                 📝 Observações
               </div>
-              <div className="whitespace-pre-wrap">{order.notes}</div>
+              <div className="whitespace-pre-wrap">{(order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim()}</div>
             </div>
           )}
         </div>

@@ -56,12 +56,14 @@ export function getOrderStatusLabel(status: unknown) {
 export type DeliveryStatus =
   | "pendente"
   | "em_separacao"
+  | "postado_correios"
   | "saiu_para_entrega"
   | "entregue";
 
 export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
   pendente: "Pendente",
   em_separacao: "Em separação",
+  postado_correios: "Postado nos Correios",
   saiu_para_entrega: "Aguardando retirada",
   entregue: "Entregue",
 };
@@ -69,6 +71,7 @@ export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
 const DELIVERY_VALUES = new Set<DeliveryStatus>([
   "pendente",
   "em_separacao",
+  "postado_correios",
   "saiu_para_entrega",
   "entregue",
 ]);
@@ -76,9 +79,11 @@ const DELIVERY_VALUES = new Set<DeliveryStatus>([
 const DELIVERY_ALIASES: Record<string, DeliveryStatus> = {
   concluido: "entregue",
   delivered: "entregue",
-  shipped: "saiu_para_entrega",
+  shipped: "postado_correios",
   separacao: "em_separacao",
   preparing: "em_separacao",
+  postado: "postado_correios",
+  correios: "postado_correios",
 };
 
 export function normalizeDeliveryStatus(status: unknown): DeliveryStatus {

@@ -374,6 +374,7 @@ function Page() {
             [
               "pendente",
               "em_separacao",
+              "postado_correios",
               "saiu_para_entrega",
               "entregue",
             ] as DeliveryStatus[]
@@ -509,7 +510,8 @@ function Page() {
         const deliverySteps: { value: DeliveryStatus; label: string; icon: any }[] = [
           { value: "pendente", label: "Pendente", icon: Clock },
           { value: "em_separacao", label: "Em separação", icon: Package },
-          { value: "saiu_para_entrega", label: "Aguardando retirada", icon: Truck },
+          { value: "postado_correios", label: "Postado", icon: Truck },
+          { value: "saiu_para_entrega", label: order.deliveryMethod === "retirada" ? "Aguardando retirada" : "Em trânsito", icon: Truck },
           { value: "entregue", label: "Entregue", icon: CheckCircle2 },
         ];
         return (
@@ -606,6 +608,46 @@ function Page() {
               </div>
             </div>
 
+            {order.deliveryMethod === "entrega" && (
+              <div className="rounded-xl border border-border p-3 bg-muted/30">
+                <div className="text-[10px] font-bold uppercase text-muted-foreground tracking-wide mb-1.5 px-1 flex items-center gap-1">
+                  <Package className="h-3 w-3" /> Rastreio Correios
+                </div>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="text"
+                    placeholder="Ex: AB123456789BR"
+                    defaultValue={order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1] || ""}
+                    id="tracking-input"
+                    className="flex-1 h-9 rounded-lg border border-border px-3 text-sm bg-background focus:outline-none focus:border-primary/50"
+                  />
+                  <button
+                    disabled={busy}
+                    onClick={() => {
+                      const input = document.getElementById("tracking-input") as HTMLInputElement;
+                      if (!input) return;
+                      const code = input.value.trim();
+                      const cleanNotes = (order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim();
+                      const newNotes = code ? `[RASTREIO: ${code}]\n${cleanNotes}`.trim() : cleanNotes;
+                      setBusy(true);
+                      try {
+                        useStore.getState().updateOrderNotes(order.id, newNotes);
+                        if (code && order.deliveryStatus === "em_separacao") {
+                           updateDeliveryStatus(order.id, "postado_correios");
+                        }
+                        toast.success("Rastreio salvo!");
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    className="h-9 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold disabled:opacity-50"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Cliente */}
             <div className="rounded-xl border border-border p-3 space-y-1.5">
               <div className="text-[11px] font-bold uppercase text-muted-foreground tracking-wide">
@@ -640,6 +682,16 @@ function Page() {
               >
                 <span className="text-right">{order.address || "—"}</span>
               </Row>
+              {order.notes?.match(/\[RASTREIO: (.*?)\]/) && (
+                <Row icon={Package} label="Cód. Rastreio">
+                  <button
+                    onClick={() => copy(order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1] || "", "Código copiado!")}
+                    className="hover:text-primary font-mono text-xs"
+                  >
+                    {order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1]}
+                  </button>
+                </Row>
+              )}
             </div>
 
             {/* Pagamento */}
@@ -677,12 +729,12 @@ function Page() {
               )}
             </div>
 
-            {order.notes && (
+            {(order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim() && (
               <div className="p-3 rounded-xl bg-gold/10 border border-gold/30">
                 <div className="text-[11px] font-bold text-gold uppercase tracking-wide mb-1">
                   Observações do cliente
                 </div>
-                <div className="text-sm whitespace-pre-wrap">{order.notes}</div>
+                <div className="text-sm whitespace-pre-wrap">{(order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim()}</div>
               </div>
             )}
 

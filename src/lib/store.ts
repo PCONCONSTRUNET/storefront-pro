@@ -348,6 +348,7 @@ type AppState = {
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   updateDeliveryStatus: (id: string, status: DeliveryStatus) => void;
+  updateOrderNotes: (id: string, notes: string) => void;
   deleteOrder: (id: string) => void;
   saveRemoteOrder: (data: {
     id: string;
@@ -1272,6 +1273,14 @@ export const useStore = create<AppState>()(
           ),
         }));
         cloud.updateDeliveryStatus(id, status);
+      },
+      updateOrderNotes: (id, notes) => {
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id === id ? { ...o, notes } : o,
+          ),
+        }));
+        cloud.updateOrderNotes(id, notes);
       },
       deleteOrder: (id) => {
         set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }));

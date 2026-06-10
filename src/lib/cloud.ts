@@ -538,6 +538,9 @@ export const cloud = {
   async updateDeliveryStatus(id: string, status: string) {
     await adminPatch("orders", { id }, { delivery_status: status });
   },
+  async updateOrderNotes(id: string, notes: string) {
+    await adminPatch("orders", { id }, { notes });
+  },
   async deleteOrder(id: string) {
     await adminDelete("orders", { id });
   },
