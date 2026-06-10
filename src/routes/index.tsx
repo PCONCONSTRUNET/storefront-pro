@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useStore, useStoreHydrated, type Product } from "@/lib/store";
+import { useStore, useStoreHydrated } from "@/lib/store";
+import { type Product } from "@/lib/data";
 import { StoreLayout } from "@/components/StoreLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGridSkeleton } from "@/components/Skeleton";
