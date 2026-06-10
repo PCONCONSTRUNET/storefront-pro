@@ -171,6 +171,15 @@ export type Customer = {
   password: string;
   address?: string;
   addresses?: string[];
+  addressData?: {
+    cep: string;
+    street: string;
+    number: string;
+    complement: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  };
   favorites?: string[];
   createdAt: string;
 };
@@ -295,7 +304,7 @@ type AppState = {
   ) => Promise<{ ok: boolean; message: string }>;
   logoutCustomer: () => void;
   updateCustomer: (
-    data: Partial<Pick<Customer, "name" | "phone" | "address" | "password">>,
+    data: Partial<Pick<Customer, "name" | "phone" | "address" | "password" | "addressData">>,
   ) => Promise<{
     ok: boolean;
     message: string;

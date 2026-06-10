@@ -49,15 +49,16 @@ function Page() {
     phone: customer?.phone || "",
     payment: "pix" as "pix" | "card" | "cash",
     deliveryMethod: (new URLSearchParams(window.location.search).get("delivery") === "entrega" ? "entrega" : "retirada") as "retirada" | "entrega",
-    cep: "",
-    street: "",
-    number: "",
-    complement: "",
-    neighborhood: "",
-    city: "",
-    state: "",
+    cep: customer?.addressData?.cep || "",
+    street: customer?.addressData?.street || "",
+    number: customer?.addressData?.number || "",
+    complement: customer?.addressData?.complement || "",
+    neighborhood: customer?.addressData?.neighborhood || "",
+    city: customer?.addressData?.city || "",
+    state: customer?.addressData?.state || "",
     notes: "",
   });
+  const [saveAddress, setSaveAddress] = useState(false);
   const [installmentInfo, setInstallmentInfo] = useState<{
     max: number;
     maxSemJuros: number;
@@ -139,6 +140,20 @@ function Page() {
       address: addressStr,
       notes: form.notes,
     };
+
+    if (saveAddress && customer && form.deliveryMethod === "entrega") {
+      useStore.getState().updateCustomer({
+        addressData: {
+          cep: form.cep,
+          street: form.street,
+          number: form.number,
+          complement: form.complement,
+          neighborhood: form.neighborhood,
+          city: form.city,
+          state: form.state,
+        }
+      });
+    }
 
     // Pix → abre modal com QR + copia e cola + polling
     if (form.payment === "pix") {
@@ -331,6 +346,20 @@ function Page() {
                   <div className="text-xs text-muted-foreground mt-2">
                     Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
                   </div>
+                  {customer && (
+                    <div className="flex items-center gap-2 mt-4">
+                      <input 
+                        type="checkbox" 
+                        id="saveAddress" 
+                        checked={saveAddress} 
+                        onChange={(e) => setSaveAddress(e.target.checked)} 
+                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary/50"
+                      />
+                      <label htmlFor="saveAddress" className="text-sm font-medium text-foreground select-none cursor-pointer">
+                        Salvar este endereço para as próximas compras
+                      </label>
+                    </div>
+                  )}
                 </div>
               )}
 
