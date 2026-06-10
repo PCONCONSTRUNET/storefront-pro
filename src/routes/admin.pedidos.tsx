@@ -440,10 +440,10 @@ function Page() {
                     {/* Imagem do primeiro produto */}
                     {o.items?.[0] && (() => {
                       const firstProduct = products.find(p => p.id === o.items[0].productId);
-                      if (firstProduct?.images?.[0]) {
+                      if (firstProduct?.image) {
                         return (
                           <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-border">
-                            <img src={firstProduct.images[0]} alt="" className="w-full h-full object-cover" />
+                            <img src={firstProduct.image} alt="" className="w-full h-full object-cover" />
                           </div>
                         );
                       }

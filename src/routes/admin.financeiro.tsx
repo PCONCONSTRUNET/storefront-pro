@@ -81,6 +81,7 @@ function Page() {
   const updateTransaction = useStore((s) => s.updateTransaction);
   const deleteAffiliateSale = useStore((s) => s.deleteAffiliateSale);
   const sync = useStore((s) => s.sync);
+  const settings = useStore((s) => s.settings);
 
   useEffect(() => {
     sync();
@@ -503,7 +504,7 @@ function Page() {
                     <Users className="h-5 w-5 text-white" />
                   ) : (
                     <>
-                      <span className="text-white font-bold text-xl leading-none">{storeSettings.storeName.charAt(0)}</span>
+                      <span className="text-white font-bold text-xl leading-none">{settings.storeName.charAt(0)}</span>
                       <span className="text-white text-[7px] mt-1 tracking-wider uppercase font-bold">Loja</span>
                     </>
                   )}

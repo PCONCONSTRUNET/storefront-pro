@@ -86,7 +86,7 @@ function Page() {
       return status === "concluido" || delivery === "entregue";
     }
     if (activeTab === "saiu_para_entrega") {
-      return delivery === "saiu_para_entrega" && status !== "concluido" && delivery !== "entregue";
+      return delivery === "saiu_para_entrega" && status !== "concluido";
     }
     if (activeTab === "em_separacao") {
       return (delivery === "em_separacao" || status === "em_separacao") && status !== "concluido" && delivery !== "entregue" && delivery !== "saiu_para_entrega";

@@ -111,8 +111,8 @@ function Page() {
                 
                 {/* Produto Info Simplificada */}
                 <div className="w-full sm:w-48 shrink-0 flex items-center gap-3 pr-4 sm:border-r border-border">
-                  {product?.images?.[0] ? (
-                    <img src={product.images[0]} alt={product.name} className="w-12 h-12 rounded-lg object-cover bg-muted" />
+                  {product?.image ? (
+                    <img src={product.image} alt={product.name} className="w-12 h-12 rounded-lg object-cover bg-muted" />
                   ) : (
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                       <ImageIcon className="h-5 w-5 text-muted-foreground/50" />
