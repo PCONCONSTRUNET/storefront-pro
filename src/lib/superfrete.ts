@@ -22,7 +22,7 @@ export const calculateShippingFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     try {
-      const response = await fetch("https://app.superfrete.com/api/v2/calculator", {
+      const response = await fetch("https://api.superfrete.com/api/v0/calculator", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${SUPERFRETE_TOKEN}`,
