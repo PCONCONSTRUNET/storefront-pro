@@ -227,6 +227,7 @@ const toOrder = (r: any): Order => ({
   customerName: r.customer_name,
   customerEmail: r.customer_email,
   customerPhone: r.customer_phone,
+  customerCpf: r.customer_document || r.customer_cpf,
   items: Array.isArray(r.items) ? r.items : [],
   subtotal: Number(r.subtotal) || 0,
   discount: Number(r.discount) || 0,

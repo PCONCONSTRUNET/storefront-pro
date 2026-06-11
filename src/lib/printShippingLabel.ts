@@ -30,14 +30,13 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
   const orderState = cityStateMatch ? cityStateMatch[2] : "";
   const orderStreet = addrStr.replace(/,\s*[^,]+\s*-\s*[A-Z]{2}(?:,\s*CEP:.*)?$/i, "").trim();
 
-  // Attempt to parse settings address
+  // Fixed sender data requested by the user
   const sAddrStr = settings.address || "";
-  const sCepMatch = sAddrStr.match(/CEP:\s*([\d-]+)/i);
-  const sCep = sCepMatch ? sCepMatch[1] : "";
-  const sCityStateMatch = sAddrStr.match(/,\s*([^,]+)\s*-\s*([A-Z]{2})(?:,\s*CEP:|$)/i);
-  const sCity = sCityStateMatch ? sCityStateMatch[1] : "";
-  const sState = sCityStateMatch ? sCityStateMatch[2] : "";
-  const sStreet = sAddrStr.replace(/,\s*[^,]+\s*-\s*[A-Z]{2}(?:,\s*CEP:.*)?$/i, "").trim();
+  const sCep = "88880-000";
+  const sCity = "Lauro Müller";
+  const sState = "SC";
+  const sStreet = sAddrStr || "Ateliê";
+  const senderCpfCnpj = "088.199.839-74";
 
   const html = `<!doctype html>
 <html lang="pt-BR">
@@ -169,7 +168,7 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
             <table class="inner-table">
               <tr>
                 <td style="width: 60%">CEP: ${esc(sCep)}</td>
-                <td style="width: 40%">CPF/CNPJ: ${esc(settings.cpfCnpj)}</td>
+                <td style="width: 40%">CPF/CNPJ: ${esc(senderCpfCnpj)}</td>
               </tr>
             </table>
           </td>

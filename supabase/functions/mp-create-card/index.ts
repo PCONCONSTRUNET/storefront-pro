@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
       customer_name: customer.name,
       customer_email: customer.email,
       customer_phone: String(customer.phone).replace(/\D/g, ""),
-      customer_document: card.payer?.identification?.number ?? null,
+      customer_document: customer.document ?? card.payer?.identification?.number ?? null,
       delivery_method: body.delivery ?? "entrega",
       address: body.address ?? null,
       notes: body.notes ?? null,

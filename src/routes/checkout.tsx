@@ -157,7 +157,7 @@ function Page() {
       : settings.address;
 
     const sharedPayload = {
-      customer: { name: form.name, email: form.email, phone: form.phone },
+      customer: { name: form.name, email: form.email, phone: form.phone, document: form.deliveryMethod === "entrega" ? form.cpf : undefined },
       items: cart.map((it) => {
         const p = products.find((x) => x.id === it.productId);
         return {
