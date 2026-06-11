@@ -100,15 +100,7 @@ export function StoreHeader() {
         <div className="hidden md:flex items-center">
           <NotificationBell />
         </div>
-        <a
-          href={`https://wa.me/${(settings.whatsapp || "").replace(/\D/g, "")}`}
-          target="_blank"
-          rel="noreferrer"
-          className="hidden md:grid w-10 h-10 place-items-center rounded-full hover:bg-white/15 transition-colors"
-          aria-label="Chat"
-        >
-          <MessageCircle className="h-5 w-5" />
-        </a>
+
 
         {/* Notification bell - mobile (before cart) */}
         <div className="flex md:hidden items-center">
