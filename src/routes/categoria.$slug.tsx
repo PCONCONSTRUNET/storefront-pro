@@ -14,10 +14,9 @@ function Page() {
   const hydrated = useStoreHydrated();
   const { categories } = useStore();
   const cat = (categories || []).find((c) => c?.id === slug);
-  const list = useStore((s) =>
-    (s?.products || []).filter(
-      (p) => p && ((p.categories && p.categories.includes(slug)) || p.category === slug) && p.active && !p.hidden,
-    ),
+  const products = useStore((s) => s?.products || []);
+  const list = products.filter(
+    (p) => p && ((p.categories && p.categories.includes(slug)) || p.category === slug) && p.active && !p.hidden,
   );
 
   return (
