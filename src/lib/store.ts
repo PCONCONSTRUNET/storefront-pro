@@ -368,6 +368,7 @@ type AppState = {
     notes?: string;
   }) => Order;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
+  updateOrderLocally: (id: string, patch: Partial<Order>) => void;
   updateDeliveryStatus: (id: string, status: DeliveryStatus) => void;
   updateOrderNotes: (id: string, notes: string) => void;
   updateOrderTrackingCode: (id: string, trackingCode: string) => void;
@@ -1287,6 +1288,11 @@ export const useStore = create<AppState>()(
             )
             .catch(() => {});
         }
+      },
+      updateOrderLocally: (id, patch) => {
+        set((s) => ({
+          orders: s.orders.map((o) => (o.id === id ? { ...o, ...patch } : o)),
+        }));
       },
       updateDeliveryStatus: (id, status) => {
         set((s) => ({

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useStore,
   ORDER_STATUS_LABEL,
@@ -17,7 +17,7 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
-
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pedido/$id")({
   component: Page,
@@ -44,6 +44,28 @@ function Page() {
       </StoreLayout>
     );
   }
+
+  useEffect(() => {
+    supabase
+      .rpc("get_order_tracking", { _id: order.id })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const payload = data as {
+            status?: string;
+            deliveryStatus?: string;
+            trackingCode?: string;
+            notes?: string;
+          };
+          useStore.getState().updateOrderLocally(order.id, {
+            status: payload.status as any,
+            deliveryStatus: payload.deliveryStatus as any,
+            trackingCode: payload.trackingCode,
+            notes: payload.notes,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [order.id]);
 
   const status = normalizeOrderStatus(order.status);
   const isPaid = status === "pago" || status === "em_separacao" || status === "concluido" || status === "saiu_para_entrega";
