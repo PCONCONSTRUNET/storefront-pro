@@ -14,6 +14,7 @@ function Page() {
   
   const [defaultFee, setDefaultFee] = useState(settings.shippingFee.toString());
   const [active, setActive] = useState(settings.superfreteActive !== false);
+  const [feeActive, setFeeActive] = useState(settings.shippingFeeActive !== false);
   const [cep, setCep] = useState(settings.superfreteCepOrigem || "");
 
   const saveSettings = () => {
@@ -24,6 +25,7 @@ function Page() {
       ...settings, 
       shippingFee: val,
       superfreteActive: active,
+      shippingFeeActive: feeActive,
       superfreteCepOrigem: cep
     });
     
@@ -91,6 +93,19 @@ function Page() {
           </div>
           
           <div className="space-y-4">
+            <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
+              <input 
+                type="checkbox"
+                checked={feeActive}
+                onChange={e => setFeeActive(e.target.checked)}
+                className="w-5 h-5 rounded border-2 border-primary/50 text-primary focus:ring-primary accent-primary cursor-pointer"
+              />
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-foreground">Ativar Frete Fixo</div>
+                <div className="text-[11px] text-muted-foreground leading-tight">Cobra um valor fixo se a integração não encontrar opções</div>
+              </div>
+            </label>
+
             <label className="block">
               <span className="text-xs font-medium text-foreground">Valor do Frete Fixo (R$)</span>
               <input 

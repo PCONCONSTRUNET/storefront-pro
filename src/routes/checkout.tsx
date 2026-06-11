@@ -141,16 +141,7 @@ function Page() {
     } else if (selectedShipping) {
       computedShipping = selectedShipping.discountPrice;
     } else {
-      const rules = settings.shippingRules || [];
-      const st = form.state.toUpperCase().trim();
-      const ci = form.city.toLowerCase().trim();
-      
-      const cityMatch = rules.find(r => r.state.toUpperCase().trim() === st && r.city.toLowerCase().trim() === ci && r.city.trim() !== "");
-      const stateMatch = rules.find(r => r.state.toUpperCase().trim() === st && !r.city.trim());
-      
-      if (cityMatch) computedShipping = cityMatch.fee;
-      else if (stateMatch) computedShipping = stateMatch.fee;
-      else computedShipping = settings.shippingFee;
+      computedShipping = settings.shippingFeeActive !== false ? settings.shippingFee : 0;
     }
   }
 
@@ -420,9 +411,13 @@ function Page() {
                             </label>
                           ))}
                         </div>
-                      ) : (
+                      ) : settings.shippingFeeActive !== false ? (
                         <div className="text-xs text-muted-foreground mt-2">
                           Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-primary font-bold mt-2">
+                          Frete Grátis
                         </div>
                       )}
                     </div>

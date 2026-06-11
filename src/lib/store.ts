@@ -203,6 +203,7 @@ export type StoreSettings = {
   shippingRules?: { id: string; state: string; city: string; fee: number }[];
   superfreteActive?: boolean;
   superfreteCepOrigem?: string;
+  shippingFeeActive?: boolean;
 };
 
 const defaultSettings: StoreSettings = {
@@ -220,6 +221,7 @@ const defaultSettings: StoreSettings = {
   bannerSubtitle: "Laços feitos com amor para princesas de todas as idades",
   superfreteActive: true,
   superfreteCepOrigem: "88735000",
+  shippingFeeActive: true,
 };
 
 export type SessionKind = "admin" | "customer" | "affiliate";
