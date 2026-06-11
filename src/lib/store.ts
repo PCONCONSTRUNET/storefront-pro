@@ -113,6 +113,7 @@ export type Order = {
   paidAt?: string;
   mpPaymentId?: string;
   pixExpiresAt?: string;
+  trackingCode?: string;
 };
 
 export type Affiliate = {
@@ -369,6 +370,7 @@ type AppState = {
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   updateDeliveryStatus: (id: string, status: DeliveryStatus) => void;
   updateOrderNotes: (id: string, notes: string) => void;
+  updateOrderTrackingCode: (id: string, trackingCode: string) => void;
   deleteOrder: (id: string) => void;
   saveRemoteOrder: (data: {
     id: string;
@@ -1064,10 +1066,7 @@ export const useStore = create<AppState>()(
         const shipping = 0;
         const total = Math.max(0, subtotal - discount) + shipping;
         const order: Order = {
-          id:
-            typeof crypto !== "undefined" && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `PED${Date.now().toString().slice(-6)}`,
+          id: Math.random().toString(36).substring(2, 7).toUpperCase(),
           customerId: state.currentCustomerId || "guest",
           customerName: data.customerName,
           customerEmail: data.customerEmail,
@@ -1299,11 +1298,15 @@ export const useStore = create<AppState>()(
       },
       updateOrderNotes: (id, notes) => {
         set((s) => ({
-          orders: s.orders.map((o) =>
-            o.id === id ? { ...o, notes } : o,
-          ),
+          orders: s.orders.map((o) => (o.id === id ? { ...o, notes } : o)),
         }));
         cloud.updateOrderNotes(id, notes);
+      },
+      updateOrderTrackingCode: (id, trackingCode) => {
+        set((s) => ({
+          orders: s.orders.map((o) => (o.id === id ? { ...o, trackingCode } : o)),
+        }));
+        cloud.updateOrderTrackingCode(id, trackingCode);
       },
       deleteOrder: (id) => {
         set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }));

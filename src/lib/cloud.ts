@@ -244,6 +244,7 @@ const toOrder = (r: any): Order => ({
   paidAt: r.paid_at || undefined,
   mpPaymentId: r.mp_payment_id || undefined,
   pixExpiresAt: r.pix_expires_at || undefined,
+  trackingCode: r.tracking_code || undefined,
 });
 
 const toWaitlist = (r: any): WaitlistEntry => ({
@@ -541,6 +542,10 @@ export const cloud = {
   },
   async updateOrderNotes(id: string, notes: string) {
     await adminPatch("orders", { id }, { notes });
+  },
+
+  async updateOrderTrackingCode(id: string, tracking_code: string) {
+    await adminPatch("orders", { id }, { tracking_code });
   },
   async deleteOrder(id: string) {
     await adminDelete("orders", { id });

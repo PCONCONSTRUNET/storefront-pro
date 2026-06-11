@@ -623,7 +623,7 @@ function Page() {
                   <input
                     type="text"
                     placeholder="Ex: AB123456789BR"
-                    defaultValue={order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1] || ""}
+                    defaultValue={order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1] || ""}
                     id="tracking-input"
                     className="flex-1 h-9 rounded-lg border border-border px-3 text-sm bg-background focus:outline-none focus:border-primary/50"
                   />
@@ -633,11 +633,9 @@ function Page() {
                       const input = document.getElementById("tracking-input") as HTMLInputElement;
                       if (!input) return;
                       const code = input.value.trim();
-                      const cleanNotes = (order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim();
-                      const newNotes = code ? `[RASTREIO: ${code}]\n${cleanNotes}`.trim() : cleanNotes;
                       setBusy(true);
                       try {
-                        useStore.getState().updateOrderNotes(order.id, newNotes);
+                        useStore.getState().updateOrderTrackingCode(order.id, code);
                         if (code && order.deliveryStatus === "em_separacao") {
                            updateDeliveryStatus(order.id, "postado_correios");
                         }
@@ -688,13 +686,13 @@ function Page() {
               >
                 <span className="text-right">{order.address || "—"}</span>
               </Row>
-              {order.notes?.match(/\[RASTREIO: (.*?)\]/) && (
+              {(order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)) && (
                 <Row icon={Package} label="Cód. Rastreio">
                   <button
-                    onClick={() => copy(order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1] || "", "Código copiado!")}
+                    onClick={() => copy(order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1] || "", "Código copiado!")}
                     className="hover:text-primary font-mono text-xs"
                   >
-                    {order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1]}
+                    {order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1]}
                   </button>
                 </Row>
               )}

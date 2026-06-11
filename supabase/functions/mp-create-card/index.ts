@@ -142,10 +142,13 @@ Deno.serve(async (req) => {
 
   if (total <= 0) return json({ error: "Total inválido" }, 400);
 
+  const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
+
   // 1) Cria pedido
   const { data: order, error: insErr } = await supabase
     .from("orders")
     .insert({
+      id: shortId,
       customer_name: customer.name,
       customer_email: customer.email,
       customer_phone: String(customer.phone).replace(/\D/g, ""),

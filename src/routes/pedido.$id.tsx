@@ -54,7 +54,7 @@ function Page() {
   
   const getStepLabel = (step: string) => {
     switch (step) {
-      case "pendente": return "Aguardando pagamento";
+      case "pendente": return isPaid ? "Pagamento aprovado" : "Aguardando pagamento";
       case "em_separacao": return "Em separação";
       case "postado_correios": return "Postado nos Correios";
       case "saiu_para_entrega": return order.deliveryMethod === "retirada" ? "Aguardando retirada" : "Saiu para entrega";
@@ -96,7 +96,7 @@ function Page() {
               return (
               <li key={s} className="flex items-center gap-3">
                 <div
-                  className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${isCompleted || isCurrent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${isCompleted && !isCurrent ? "bg-success text-success-foreground" : isCurrent && isPaid ? "bg-success text-success-foreground" : isCurrent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                 >
                   {isCompleted && !isCurrent ? (
                     <CheckCircle2 className="h-4 w-4" />
@@ -116,9 +116,9 @@ function Page() {
                   >
                     {getStepLabel(s)}
                   </div>
-                  {s === "postado_correios" && isCompleted && order.notes?.match(/\[RASTREIO: (.*?)\]/) && (
+                  {s === "postado_correios" && isCompleted && (order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)) && (
                     <div className="text-xs font-mono mt-0.5 text-primary">
-                      Rastreio: {order.notes.match(/\[RASTREIO: (.*?)\]/)?.[1]}
+                      Rastreio: {order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1]}
                     </div>
                   )}
                 </div>
@@ -127,8 +127,8 @@ function Page() {
           </ol>
         </div>
 
-        {order.notes?.match(/\[RASTREIO: (.*?)\]/) && (() => {
-          const code = order.notes.match(/\[RASTREIO: (.*?)\]/)?.[1];
+        {(order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)) && (() => {
+          const code = order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1];
           return (
             <div className="mt-4 bg-card rounded-2xl p-4 shadow-card text-sm flex flex-col gap-2 border-2 border-primary/20">
               <div className="flex items-center gap-2 font-bold text-foreground">

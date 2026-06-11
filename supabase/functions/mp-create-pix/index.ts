@@ -103,10 +103,13 @@ Deno.serve(async (req) => {
     );
   }
 
+  const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
+
   // 1) Cria pedido no banco
   const { data: order, error: insErr } = await supabase
     .from("orders")
     .insert({
+      id: shortId,
       customer_name: customer.name,
       customer_email: customer.email,
       customer_phone: String(customer.phone).replace(/\D/g, ""),
