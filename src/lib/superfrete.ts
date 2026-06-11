@@ -92,61 +92,74 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const token = getSuperfreteToken();
+
+    // Buscar dados do pedido
+    const { data: orderData, error: orderError } = await supabaseAdmin
+      .from("orders")
+      .select("*")
+      .eq("id", data.orderId)
+      .single();
+    if (orderError || !orderData) throw new Error("Pedido não encontrado");
+
+    // Buscar configurações da loja — a tabela armazena { id, data } onde data é o JSON das settings
+    const { data: storeSettingsRow } = await supabaseAdmin
+      .from("store_settings")
+      .select("data")
+      .eq("id", 1)
+      .maybeSingle();
+
+    // Extrai as settings do campo `data`, com fallback para objeto vazio
+    const settings = (storeSettingsRow?.data as Partial<StoreSettings>) || {};
+
+    const parsedItems = Array.isArray(orderData.items)
+      ? (orderData.items as any[])
+      : JSON.parse((orderData.items as string) || "[]");
+
+    const products = parsedItems.map((i: any) => ({
+      name: i.name,
+      quantity: String(i.quantity),
+      unitary_value: String(i.price)
+    }));
+
+    // Extrai CEP do endereço — formato: "... CEP: 88735-000" ou "CEP: 88735000"
+    const cepMatch = orderData.address?.match(/CEP[:\s]+([0-9]{5}-?[0-9]{3})/i);
+    const cepDestino = cepMatch ? cepMatch[1].replace(/\D/g, "") : "00000000";
+
+    // Extrai UF do endereço — formato: "... SC, CEP..." ou "...Estado: SC"
+    // Tenta capturar a sigla de estado de 2 letras que aparece antes do CEP
+    const stateMatch = orderData.address?.match(/[,\s-]\s*([A-Z]{2})\s*[,\s-]?\s*CEP/i)
+      || orderData.address?.match(/,\s*([A-Z]{2})\s*$/i);
+    const stateAbbr = stateMatch ? stateMatch[1].toUpperCase() : (settings.superfreteAddressState || "SC");
+
+    // Extrai cidade do endereço — tenta capturar antes da UF
+    const cityMatch = orderData.address?.match(/,\s*([^,]+?)\s*[-–,]\s*[A-Z]{2}\s*[,\s-]?\s*CEP/i);
+    const city = cityMatch ? cityMatch[1].trim() : "NA";
+
+    const toPayload = {
+      name: orderData.customer_name,
+      address: orderData.address || "Endereço não informado",
+      district: "NA",
+      city: city,
+      state_abbr: stateAbbr,
+      postal_code: cepDestino,
+      email: orderData.customer_email || "",
+      document: (orderData as any).customer_document || "00000000000"
+    };
+
+    const fromPayload = {
+      name: settings.storeName || "Loja",
+      address: settings.superfreteAddressStreet || "Rua Principal",
+      number: settings.superfreteAddressNumber || "1",
+      district: settings.superfreteAddressNeighborhood || "Centro",
+      city: settings.superfreteAddressCity || "Cidade",
+      state_abbr: settings.superfreteAddressState || "SC",
+      postal_code: settings.superfreteCepOrigem?.replace(/\D/g, '') || ""
+    };
+
+    let responseText = "";
     try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const token = getSuperfreteToken();
-
-      // Buscar dados do pedido
-      const { data: orderData, error: orderError } = await supabaseAdmin
-        .from("orders")
-        .select("*")
-        .eq("id", data.orderId)
-        .single();
-      if (orderError || !orderData) throw new Error("Pedido não encontrado");
-
-      // Buscar configurações da loja
-      const { data: storeSettingsData } = await supabaseAdmin
-        .from("store_settings")
-        .select("*")
-        .single();
-      if (!storeSettingsData) throw new Error("Configurações não encontradas");
-
-      const settings = storeSettingsData as unknown as StoreSettings;
-
-      const parsedItems = Array.isArray(orderData.items) 
-        ? (orderData.items as any[]) 
-        : JSON.parse((orderData.items as string) || "[]");
-
-      const products = parsedItems.map((i: any) => ({
-        name: i.name,
-        quantity: String(i.quantity),
-        unitary_value: String(i.price)
-      }));
-
-      const cepMatch = orderData.address?.match(/CEP:\s*([\d-]+)/i);
-      const cepDestino = cepMatch ? cepMatch[1].replace(/\D/g, "") : "00000000";
-
-      const toPayload = {
-        name: orderData.customer_name,
-        address: orderData.address,
-        district: "NA", // Substituir por bairro real se aplicável
-        city: "NA", // Substituir por cidade real se aplicável
-        state_abbr: "SP", // OBRIGATÓRIO (CAIXA ALTA) - no ambiente real, deve vir do CEP ou do cadastro
-        postal_code: cepDestino,
-        email: orderData.customer_email || "",
-        document: orderData.customer_document || "00000000000"
-      };
-
-      const fromPayload = {
-        name: settings.storeName || "Loja",
-        address: settings.superfreteAddressStreet || "Rua Principal",
-        number: settings.superfreteAddressNumber || "1",
-        district: settings.superfreteAddressNeighborhood || "Centro",
-        city: settings.superfreteAddressCity || "Cidade",
-        state_abbr: settings.superfreteAddressState || "SP",
-        postal_code: settings.superfreteCepOrigem?.replace(/\D/g, '') || ""
-      };
-
       const response = await fetch("https://api.superfrete.com/api/v0/cart", {
         method: "POST",
         headers: {
@@ -176,13 +189,25 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
         })
       });
 
+      responseText = await response.text();
+
       if (!response.ok) {
-        console.error("SuperFrete Cart Error:", await response.text());
-        throw new Error("Falha ao enviar para o Super Frete");
+        console.error("SuperFrete Cart Error:", responseText);
+        // Tenta extrair mensagem legível da resposta da API
+        let apiMsg = "";
+        try {
+          const parsed = JSON.parse(responseText);
+          apiMsg = parsed?.message || parsed?.error || JSON.stringify(parsed);
+        } catch { apiMsg = responseText.slice(0, 200); }
+        throw new Error(`SuperFrete: ${apiMsg || response.statusText}`);
       }
 
-      const resJson = await response.json();
+      const resJson = JSON.parse(responseText);
       const superfreteId = resJson.id;
+
+      if (!superfreteId) {
+        throw new Error(`SuperFrete não retornou ID do carrinho. Resposta: ${responseText.slice(0, 200)}`);
+      }
 
       // Salvar no BD
       await supabaseAdmin
@@ -192,11 +217,13 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
         .eq("id", data.orderId);
 
       return { ok: true, superfreteOrderId: superfreteId };
-    } catch (error) {
-      console.error("SuperFrete Cart Exception:", error);
-      throw new Error("Erro interno ao integrar com Super Frete");
+    } catch (error: any) {
+      console.error("SuperFrete Cart Exception:", error?.message || error, "| Response:", responseText);
+      // Re-lança o erro original (não engole mais com mensagem genérica)
+      throw error instanceof Error ? error : new Error(String(error));
     }
   });
+
 
 export async function createSuperFreteCart(orderData: { id: string }) {
   const settings = useStore.getState().settings;
