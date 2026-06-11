@@ -127,21 +127,12 @@ export function AdminLayout({
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-
   // Real-time listener for orders and transactions to trigger admin blip instantly
   // Also keeps a 60s fallback polling just in case.
   useEffect(() => {
     if (!isAdmin) return;
 
-    const st = useStore.getState();
-    if (st.orders.length > 0 || st.products.length > 0) {
-      setIsInitialLoading(false);
-    }
-
-    sync().finally(() => {
-      setIsInitialLoading(false);
-    });
+    sync().catch(() => {});
 
     const sub = supabase
       .channel('admin_realtime')
@@ -308,16 +299,7 @@ export function AdminLayout({
         </header>
         <main key={path} className="flex-1 p-4 md:p-6 animate-page-in">
           {path === "/admin/notificacoes" && <AdminDeviceSyncBanner />}
-          {isInitialLoading ? (
-            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary/50" />
-              <p className="text-muted-foreground text-sm animate-pulse">
-                Carregando dados do painel...
-              </p>
-            </div>
-          ) : (
-            children
-          )}
+          {children}
         </main>
       </div>
       {path === "/admin/dashboard" && <EnableNotificationsPrompt />}
