@@ -21,7 +21,11 @@ function Page() {
         ) : (
           <ul className="p-2 space-y-2">
             {customers.map((c) => {
-              const cOrders = orders.filter((o) => o.customerId === c.id);
+              const cEmail = c.email?.trim().toLowerCase();
+              const cOrders = orders.filter((o) => 
+                o.customerId === c.id || 
+                (cEmail && (o.customerEmail || "").trim().toLowerCase() === cEmail)
+              );
               const spent = cOrders.reduce((a, o) => a + o.total, 0);
               const last = cOrders[0]?.createdAt;
               return (
@@ -61,7 +65,11 @@ function Page() {
       {viewingCustomer && (
         <CustomerDetailsModal
           customer={viewingCustomer}
-          orders={orders.filter((o) => o.customerId === viewingCustomer.id)}
+          orders={orders.filter((o) => {
+            const cEmail = viewingCustomer.email?.trim().toLowerCase();
+            return o.customerId === viewingCustomer.id || 
+              (cEmail && (o.customerEmail || "").trim().toLowerCase() === cEmail);
+          })}
           onClose={() => setViewingCustomer(null)}
         />
       )}

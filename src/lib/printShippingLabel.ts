@@ -18,7 +18,7 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
   const year = now.getFullYear();
   const formattedDate = `${day} de ${month} de ${year}`;
 
-  const totalValue = order.items.reduce((a, b) => a + (b.price * b.quantity), 0);
+  const totalValue = order.items.reduce((a, b) => a + (b.price * b.quantity), 0) + (order.shipping || 0);
   const totalQtd = order.items.reduce((a, b) => a + b.quantity, 0);
 
   // Attempt to parse city, state, cep from order address
@@ -207,6 +207,16 @@ export function printShippingLabel(order: Order, settings: StoreSettings) {
             <td class="right">${(it.price).toFixed(2)}</td>
           </tr>
           `).join("")}
+          ${(order.shipping || 0) > 0 ? `
+          <tr>
+            <td class="center">-</td>
+            <td>FRETE</td>
+            <td>Frete (Envio)</td>
+            <td></td>
+            <td class="center">1</td>
+            <td class="right">${(order.shipping || 0).toFixed(2)}</td>
+          </tr>
+          ` : ""}
           <tr>
             <td colspan="4" class="right">Totais</td>
             <td class="center">${totalQtd}</td>
