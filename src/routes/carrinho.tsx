@@ -20,7 +20,7 @@ import {
 import { toast } from "sonner";
 import { CorreiosLogo } from "@/components/CorreiosLogo";
 
-function CartHeader() {
+function CartHeader({ isEditing, setIsEditing }: { isEditing?: boolean; setIsEditing?: (v: boolean) => void }) {
   const router = useRouter();
   const count = useStore(selectCartCount);
 
@@ -43,8 +43,16 @@ function CartHeader() {
         </div>
 
         <div className="w-1/4 flex justify-end items-center gap-3 text-sm">
-          <span>Editar</span>
-          <MessageCircle className="h-5 w-5 text-primary" />
+          {isEditing ? (
+            <button onClick={() => setIsEditing?.(false)} className="font-medium text-primary">
+              Concluído
+            </button>
+          ) : (
+            <>
+              <button onClick={() => setIsEditing?.(true)}>Editar</button>
+              <MessageCircle className="h-5 w-5 text-primary" />
+            </>
+          )}
         </div>
       </div>
 
@@ -96,6 +104,7 @@ function Page() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [code, setCode] = useState("");
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   // Initialize selection
@@ -171,7 +180,7 @@ function Page() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <CartHeader />
+      <CartHeader isEditing={isEditing} setIsEditing={setIsEditing} />
       <main className="flex-1 animate-page-in bg-muted/30 pb-32 md:pb-40">
         <div className="max-w-6xl mx-auto md:px-4 md:py-6">
           {/* Desktop Table Header */}
@@ -294,65 +303,15 @@ function Page() {
                     </div>
 
                     {/* Mobile Row */}
-                    <div className="flex gap-3 md:hidden">
-                      <div className="pt-8">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleSelection(p.id)}
-                          className="w-5 h-5 accent-primary rounded-sm cursor-pointer"
-                        />
-                      </div>
-                      <Link to="/produto/$id" params={{ id: p.id }}>
-                        <img
-                          src={p.image}
-                          alt={p.name}
-                          className="w-24 h-24 rounded-sm border border-border object-cover"
-                        />
-                      </Link>
-                      <div className="flex-1 flex flex-col">
-                        <Link
-                          to="/produto/$id"
-                          params={{ id: p.id }}
-                          className="font-medium text-sm line-clamp-2"
-                        >
-                          {p.name}
-                        </Link>
-                        {ci.variation && (
-                          <div className="text-xs text-muted-foreground bg-muted/50 self-start px-2 py-0.5 rounded mt-1">
-                            {ci.variation} <ChevronDown className="inline w-3 h-3"/>
-                          </div>
-                        )}
-                        <div className="flex items-end justify-between mt-auto pt-2">
-                          <span className="text-primary font-medium">
-                            {brl(p.price)}
-                          </span>
-                          <div className="flex items-center border border-border rounded-sm">
-                            <button
-                              onClick={() => updateCartQty(p.id, ci.quantity - 1)}
-                              className="w-7 h-7 flex items-center justify-center"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-8 text-center text-sm border-x border-border h-7 flex items-center justify-center">
-                              {ci.quantity}
-                            </span>
-                            <button
-                              onClick={() => {
-                                if (p.stock !== undefined && ci.quantity >= p.stock) {
-                                  toast.error(`Apenas ${p.stock} unidade(s) disponível(is) em estoque.`);
-                                  return;
-                                }
-                                updateCartQty(p.id, ci.quantity + 1);
-                              }}
-                              className="w-7 h-7 flex items-center justify-center"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <MobileCartItem
+                      p={p}
+                      ci={ci}
+                      isSelected={isSelected}
+                      toggleSelection={toggleSelection}
+                      updateCartQty={updateCartQty}
+                      removeFromCart={removeFromCart}
+                      isEditing={isEditing}
+                    />
                   </div>
                 );
               })}
@@ -432,33 +391,49 @@ function Page() {
           </div>
 
           <div className="flex items-center justify-between w-full md:w-auto md:justify-end gap-4">
-            <div className="text-right flex-1 md:flex-none">
-              <div className="text-sm flex items-center justify-end gap-2">
-                <span>Total ({selectedCart.length} item{selectedCart.length !== 1 ? 's' : ''}):</span>
-                <span className="text-primary font-medium text-lg md:text-xl">
-                  {brl(total)}
-                </span>
-              </div>
-              {discount > 0 && (
-                <div className="text-xs text-success">
-                  Desconto aplicado: {brl(discount)}
+            {isEditing ? (
+              <button
+                onClick={() => {
+                   selectedIds.forEach(id => removeFromCart(id));
+                   setSelectedIds([]);
+                   setIsEditing(false);
+                }}
+                disabled={selectedCart.length === 0}
+                className="w-full md:w-auto bg-destructive text-destructive-foreground px-8 py-3 rounded-sm font-medium disabled:opacity-50 transition-colors"
+              >
+                Excluir ({selectedCart.length})
+              </button>
+            ) : (
+              <>
+                <div className="text-right flex-1 md:flex-none">
+                  <div className="text-sm flex items-center justify-end gap-2">
+                    <span>Total ({selectedCart.length} item{selectedCart.length !== 1 ? 's' : ''}):</span>
+                    <span className="text-primary font-medium text-lg md:text-xl">
+                      {brl(total)}
+                    </span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="text-xs text-success">
+                      Desconto aplicado: {brl(discount)}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            
-            <button
-              onClick={() => {
-                if (selectedCart.length === 0) {
-                   toast.error("Selecione pelo menos um item para continuar.");
-                   return;
-                }
-                setShowLocationModal(true)
-              }}
-              disabled={selectedCart.length === 0}
-              className="bg-primary text-primary-foreground px-8 py-3 rounded-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity min-w-[140px]"
-            >
-              Continuar ({selectedCart.length})
-            </button>
+                
+                <button
+                  onClick={() => {
+                    if (selectedCart.length === 0) {
+                       toast.error("Selecione pelo menos um item para continuar.");
+                       return;
+                    }
+                    setShowLocationModal(true)
+                  }}
+                  disabled={selectedCart.length === 0}
+                  className="bg-primary text-primary-foreground px-8 py-3 rounded-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity min-w-[140px]"
+                >
+                  Continuar ({selectedCart.length})
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -519,6 +494,131 @@ function Page() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function MobileCartItem({
+  p,
+  ci,
+  isSelected,
+  toggleSelection,
+  updateCartQty,
+  removeFromCart,
+  isEditing,
+}: any) {
+  const [offset, setOffset] = useState(0);
+  const [startX, setStartX] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (isEditing) setOffset(0);
+  }, [isEditing]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isEditing) return;
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (startX === null || isEditing) return;
+    const currentX = e.touches[0].clientX;
+    const diff = currentX - startX;
+    if (diff < 0) {
+      setOffset(Math.max(diff, -80));
+    } else {
+      setOffset(0);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (startX === null) return;
+    if (offset < -40) {
+      setOffset(-80);
+    } else {
+      setOffset(0);
+    }
+    setStartX(null);
+  };
+
+  return (
+    <div className="relative md:hidden overflow-hidden bg-destructive rounded-sm">
+      <div className="absolute inset-y-0 right-0 w-20 flex items-center justify-center">
+        <button
+          onClick={() => {
+            removeFromCart(p.id);
+            setOffset(0);
+          }}
+          className="w-full h-full flex items-center justify-center text-white"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
+      
+      <div
+        className="flex gap-3 bg-card relative transition-transform duration-200 ease-out h-full w-full"
+        style={{ transform: `translateX(${offset}px)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="pt-8">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => toggleSelection(p.id)}
+            className="w-5 h-5 accent-primary rounded-sm cursor-pointer"
+          />
+        </div>
+        <Link to="/produto/$id" params={{ id: p.id }}>
+          <img
+            src={p.image}
+            alt={p.name}
+            className="w-24 h-24 rounded-sm border border-border object-cover"
+          />
+        </Link>
+        <div className="flex-1 flex flex-col min-w-0">
+          <Link
+            to="/produto/$id"
+            params={{ id: p.id }}
+            className="font-medium text-sm line-clamp-2"
+          >
+            {p.name}
+          </Link>
+          {ci.variation && (
+            <div className="text-xs text-muted-foreground bg-muted/50 self-start px-2 py-0.5 rounded mt-1 max-w-full truncate">
+              {ci.variation} <ChevronDown className="inline w-3 h-3"/>
+            </div>
+          )}
+          <div className="flex items-end justify-between mt-auto pt-2 gap-2">
+            <span className="text-primary font-medium truncate">
+              {brl(p.price)}
+            </span>
+            <div className="flex items-center border border-border rounded-sm bg-background shrink-0">
+              <button
+                onClick={() => updateCartQty(p.id, ci.quantity - 1)}
+                className="w-7 h-7 flex items-center justify-center"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className="w-8 text-center text-sm border-x border-border h-7 flex items-center justify-center">
+                {ci.quantity}
+              </span>
+              <button
+                onClick={() => {
+                  if (p.stock !== undefined && ci.quantity >= p.stock) {
+                    toast.error(`Apenas ${p.stock} unidade(s) disponível(is) em estoque.`);
+                    return;
+                  }
+                  updateCartQty(p.id, ci.quantity + 1);
+                }}
+                className="w-7 h-7 flex items-center justify-center"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
