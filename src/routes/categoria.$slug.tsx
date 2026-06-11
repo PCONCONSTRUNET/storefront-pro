@@ -13,9 +13,9 @@ function Page() {
   const { slug } = Route.useParams();
   const hydrated = useStoreHydrated();
   const { categories } = useStore();
-  const cat = categories.find((c) => c.id === slug);
+  const cat = (categories || []).find((c) => c.id === slug);
   const list = useStore((s) =>
-    s.products.filter(
+    (s.products || []).filter(
       (p) => (p.categories?.includes(slug) || p.category === slug) && p.active && !p.hidden,
     ),
   );

@@ -30,8 +30,8 @@ function Page() {
           <CategoryGridSkeleton count={8} />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {categories.map((c) => {
-              const count = products.filter(
+            {(categories || []).map((c) => {
+              const count = (products || []).filter(
                 (p) => (p.categories?.includes(c.id) || p.category === c.id) && p.active && !p.hidden,
               ).length;
               return (

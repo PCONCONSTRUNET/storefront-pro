@@ -16,11 +16,11 @@ export function ProductCard({ product }: { product: Product }) {
   const reviews = useStore((s) => s.reviews);
   const orders = useStore((s) => s.orders);
 
-  const productReviews = reviews.filter((r) => r.productId === product.id);
+  const productReviews = (reviews || []).filter((r) => r.productId === product.id);
   
-  const sold = orders.reduce((acc, o) => {
+  const sold = (orders || []).reduce((acc, o) => {
     if (['pago', 'concluido', 'em_separacao', 'saiu_para_entrega'].includes(o.status)) {
-      const it = o.items.find(i => i.productId === product.id);
+      const it = (o.items || []).find(i => i.productId === product.id);
       if (it) return acc + it.quantity;
     }
     return acc;
