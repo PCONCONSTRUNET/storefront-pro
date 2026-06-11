@@ -211,7 +211,7 @@ function Page() {
                 const extraCount = o.items.length - 2;
 
                 return (
-                  <div key={o.id} className="bg-background rounded-2xl shadow-card overflow-hidden">
+                  <div key={o.id} className="bg-background rounded-2xl border-2 border-border shadow-md overflow-hidden">
                     {/* Store header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                       <div className="flex items-center gap-2">
@@ -225,37 +225,42 @@ function Page() {
 
                     {/* Items - clickable */}
                     <Link to="/pedido/$id" params={{ id: o.id }} className="block">
-                      <div className="px-4 py-3 space-y-3">
+                      <div className="px-4 py-3 space-y-0">
                         {visibleItems.map((it, idx) => {
                           const p = products.find(prod => prod.id === it.productId);
                           return (
-                            <div key={idx} className="flex gap-3 items-start">
-                              <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden border border-border bg-muted">
-                                {it.image ? (
-                                  <img src={it.image} className="w-full h-full object-cover" alt="" />
-                                ) : (
-                                  <div className="w-full h-full grid place-items-center">
-                                    <Package className="w-5 h-5 text-muted-foreground" />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-foreground line-clamp-2 leading-snug">
-                                  {it.name}
+                            <div key={idx}>
+                              {idx > 0 && (
+                                <div className="border-t border-dashed border-border/70 my-0" />
+                              )}
+                              <div className="flex gap-3 items-start py-3">
+                                <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 border-border bg-muted">
+                                  {it.image ? (
+                                    <img src={it.image} className="w-full h-full object-cover" alt="" />
+                                  ) : (
+                                    <div className="w-full h-full grid place-items-center">
+                                      <Package className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                  )}
                                 </div>
-                                {it.variation && (
-                                  <div className="text-xs text-muted-foreground mt-0.5">{it.variation}</div>
-                                )}
-                                <div className="text-xs text-muted-foreground mt-0.5">x{it.quantity}</div>
-                              </div>
-                              <div className="text-sm font-semibold text-primary shrink-0">
-                                {brl(it.price)}
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-foreground line-clamp-2 leading-snug">
+                                    {it.name}
+                                  </div>
+                                  {it.variation && (
+                                    <div className="text-xs text-muted-foreground mt-0.5">{it.variation}</div>
+                                  )}
+                                  <div className="text-xs text-muted-foreground mt-0.5">x{it.quantity}</div>
+                                </div>
+                                <div className="text-sm font-semibold text-primary shrink-0">
+                                  {brl(it.price)}
+                                </div>
                               </div>
                             </div>
                           );
                         })}
                         {extraCount > 0 && (
-                          <div className="text-xs text-muted-foreground text-center py-1">
+                          <div className="text-xs text-muted-foreground text-center pb-2">
                             + {extraCount} outro{extraCount > 1 ? "s" : ""} item{extraCount > 1 ? "s" : ""}
                           </div>
                         )}
