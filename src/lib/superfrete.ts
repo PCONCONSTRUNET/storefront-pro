@@ -58,7 +58,7 @@ export const calculateShippingFn = createServerFn({ method: "POST" })
           id: item.service || item.id,
           name: item.name,
           price: Number(item.price),
-          discountPrice: Number(item.discount),
+          discountPrice: Number(item.price) - Number(item.discount),
           deliveryTime: Number(item.delivery_time)
         }));
       }
