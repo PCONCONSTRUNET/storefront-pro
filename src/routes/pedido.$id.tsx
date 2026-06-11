@@ -112,14 +112,14 @@ function Page() {
           <h2 className="font-semibold mb-3">Acompanhamento</h2>
           <ol className="space-y-3">
             {flow.map((s, i) => {
-              // Se não foi pago, a entrega fica parada em "pendente".
-              // Porém se status do pedido é cancelado/reembolsado não mostra os de entrega como concluidos.
-              const isCompleted = i < currentIdx || (i === currentIdx && isPaid && s !== "pendente") || (s === "pendente" && isPaid);
-              const isCurrent = (s === "pendente" && !isPaid) ? true : (i === currentIdx && isPaid);
+              const isLastStep = i === flow.length - 1;
+              const isCompleted = i < currentIdx || (i === 0 && isPaid) || (i === currentIdx && isLastStep);
+              const isCurrent = (i === 0 && !isPaid) ? true : (i === currentIdx && currentIdx > 0 && !isLastStep);
+              
               return (
               <li key={s} className="flex items-center gap-3">
                 <div
-                  className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${isCompleted && !isCurrent ? "bg-success text-success-foreground" : isCurrent && isPaid ? "bg-success text-success-foreground" : isCurrent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  className={`w-7 h-7 rounded-full grid place-items-center text-xs font-bold ${isCompleted && !isCurrent ? "bg-success text-success-foreground" : isCurrent ? "bg-primary text-primary-foreground shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]" : "bg-muted text-muted-foreground"}`}
                 >
                   {isCompleted && !isCurrent ? (
                     <CheckCircle2 className="h-4 w-4" />
@@ -131,7 +131,7 @@ function Page() {
                   <div
                     className={
                       isCurrent
-                        ? "font-semibold"
+                        ? "font-bold text-primary"
                         : isCompleted
                         ? "text-foreground text-sm font-medium"
                         : "text-muted-foreground text-sm"
