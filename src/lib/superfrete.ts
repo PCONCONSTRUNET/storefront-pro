@@ -134,10 +134,35 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
     const cityMatch = data.address?.match(/,\s*([^,]+?)\s*[-–,]\s*[A-Z]{2}\s*[,\s-]?\s*CEP/i);
     const city = cityMatch ? cityMatch[1].trim() : "NA";
 
+    // Garante que o nome tenha sobrenome (exigência da API)
+    let fullName = data.customerName.trim();
+    if (!fullName.includes(" ")) fullName += " Cliente";
+
+    // Extrai logradouro, número e bairro do endereço (limite de 50 chars no logradouro)
+    const rawAddress = data.address || "Endereço não informado";
+    const addressParts = rawAddress.split(",");
+    let street = addressParts[0].trim();
+    if (street.length > 50) street = street.substring(0, 50);
+    
+    let number = "S/N";
+    let district = "NA";
+    if (addressParts.length > 1) {
+      const secondPart = addressParts[1].trim();
+      const numMatch = secondPart.match(/^(\d+)/);
+      if (numMatch) number = numMatch[1];
+      
+      const dashSplit = secondPart.split("-");
+      if (dashSplit.length > 1) {
+        district = dashSplit[1].trim();
+      }
+    }
+    if (district.length > 50) district = district.substring(0, 50);
+
     const toPayload = {
-      name: data.customerName,
-      address: data.address || "Endereço não informado",
-      district: "NA",
+      name: fullName,
+      address: street,
+      number: number,
+      district: district,
       city: city,
       state_abbr: stateAbbr,
       postal_code: cepDestino,
