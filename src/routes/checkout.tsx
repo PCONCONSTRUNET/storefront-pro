@@ -403,7 +403,10 @@ function Page() {
                                 <input type="radio" name="shipping" checked={selectedShipping?.id === opt.id} onChange={() => setSelectedShipping(opt)} className="hidden" />
                                 <div className={cn("w-4 h-4 rounded-full border-2", selectedShipping?.id === opt.id ? "border-primary bg-primary" : "border-border")} />
                                 <div>
-                                  <div className="font-semibold text-sm">{opt.name}</div>
+                                  <div className="font-semibold text-sm flex items-center gap-2">
+                                    {opt.name}
+                                    <img src="/correios.png" className="h-3 object-contain" alt="Correios" />
+                                  </div>
                                   <div className="text-[11px] text-muted-foreground">Chega em ~{opt.deliveryTime} dias úteis</div>
                                 </div>
                               </div>
