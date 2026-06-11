@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { playBeep } from "@/lib/sound";
 import { sendOrderConfirmationEmail } from "@/lib/emails";
+import { calculateShipping, type ShippingQuote } from "@/lib/superfrete";
 
 import { CardPaymentModal } from "@/components/CardPaymentModal";
 import { PixPaymentModal } from "@/components/PixPaymentModal";
@@ -60,6 +61,9 @@ function Page() {
     cpf: customer?.addressData?.cpf || "",
     notes: "",
   });
+  const [shippingOptions, setShippingOptions] = useState<ShippingQuote[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingQuote | null>(null);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [saveAddress, setSaveAddress] = useState(false);
   const [installmentInfo, setInstallmentInfo] = useState<{
     max: number;
@@ -77,6 +81,27 @@ function Page() {
       setInstallmentInfo({ max, maxSemJuros });
     });
   }, []);
+
+  useEffect(() => {
+    if (form.deliveryMethod !== "entrega") return;
+    const cep = form.cep.replace(/\D/g, "");
+    if (cep.length === 8) {
+      setIsCalculatingShipping(true);
+      calculateShipping(cep, totals.subtotal)
+        .then(options => {
+          setShippingOptions(options);
+          if (options.length > 0) {
+            setSelectedShipping(options[0]);
+          } else {
+            setSelectedShipping(null);
+          }
+        })
+        .finally(() => setIsCalculatingShipping(false));
+    } else {
+      setShippingOptions([]);
+      setSelectedShipping(null);
+    }
+  }, [form.cep, form.deliveryMethod, totals.subtotal]);
 
   if (cart.length === 0 && step < 4) {
     return (
@@ -113,6 +138,8 @@ function Page() {
   if (form.deliveryMethod === "entrega") {
     if (coupon?.type === "free_shipping") {
       computedShipping = 0;
+    } else if (selectedShipping) {
+      computedShipping = selectedShipping.discountPrice;
     } else {
       const rules = settings.shippingRules || [];
       const st = form.state.toUpperCase().trim();
@@ -371,9 +398,37 @@ function Page() {
                       onChange={(v) => setForm({ ...form, state: v })}
                     />
                   </div>
-                  <div className="text-xs text-muted-foreground mt-2">
-                    Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
                   </div>
+                  
+                  {form.cep.replace(/\D/g, "").length === 8 && (
+                    <div className="mt-3">
+                      <span className="text-xs font-medium text-foreground block mb-1">Opções de Frete</span>
+                      {isCalculatingShipping ? (
+                        <div className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Calculando...</div>
+                      ) : shippingOptions.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-2 mt-2">
+                          {shippingOptions.map(opt => (
+                            <label key={opt.id} className={cn("flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all", selectedShipping?.id === opt.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 bg-background")}>
+                              <div className="flex items-center gap-3">
+                                <input type="radio" name="shipping" checked={selectedShipping?.id === opt.id} onChange={() => setSelectedShipping(opt)} className="hidden" />
+                                <div className={cn("w-4 h-4 rounded-full border-2", selectedShipping?.id === opt.id ? "border-primary bg-primary" : "border-border")} />
+                                <div>
+                                  <div className="font-semibold text-sm">{opt.name}</div>
+                                  <div className="text-[11px] text-muted-foreground">Chega em ~{opt.deliveryTime} dias úteis</div>
+                                </div>
+                              </div>
+                              <div className="font-bold text-sm text-primary">{brl(opt.discountPrice)}</div>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-muted-foreground mt-2">
+                          Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {customer && (
                     <div className="flex items-center gap-2 mt-4">
                       <input 
@@ -481,7 +536,7 @@ function Page() {
                     label="Contato"
                     value={`${form.email} · ${form.phone}`}
                   />
-                  <Row label="Entrega" value={form.deliveryMethod === "retirada" ? "Retirada no ateliê" : <span className="flex items-center gap-1">Correios <CorreiosLogo className="h-3.5 w-auto" /></span>} />
+                  <Row label="Entrega" value={form.deliveryMethod === "retirada" ? "Retirada no ateliê" : <span className="flex items-center gap-1">{selectedShipping ? selectedShipping.name : "Correios"} <CorreiosLogo className="h-3.5 w-auto" /></span>} />
                   <Row label={form.deliveryMethod === "retirada" ? "Local" : "Endereço"} value={form.deliveryMethod === "retirada" ? settings.address : `${form.street}, ${form.number} - ${form.city}/${form.state}`} />
                   {form.notes.trim() && (
                     <Row label="Observações" value={form.notes} />
