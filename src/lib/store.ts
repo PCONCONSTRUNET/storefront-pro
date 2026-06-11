@@ -1513,6 +1513,7 @@ export const useStore = create<AppState>()(
           import("./admin.functions").then(({ getAdminSessionFn }) =>
             getAdminSessionFn()
               .then((r) => {
+                if (r && (r as any).error) return; // Ignora erros de rede
                 const serverHasAdmin = Boolean(r?.email);
                 const localSaysAdmin = useStore.getState().isAdmin;
                 if (localSaysAdmin && !serverHasAdmin) {

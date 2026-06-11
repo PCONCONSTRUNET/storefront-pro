@@ -97,9 +97,15 @@ export const getAdminSessionFn = createServerFn({ method: "GET" }).handler(
   async () => {
     const token = await getAdminSessionCookie();
     if (!token) return { email: null as string | null };
-    const { data } = await (supabaseAdmin as any)
+    const { data, error } = await (supabaseAdmin as any)
       .rpc("get_admin_session_record", { _token: token })
       .maybeSingle();
+      
+    if (error) {
+      console.error("Erro RPC ao validar sessão admin:", error);
+      return { email: null as string | null, error: true };
+    }
+      
     if (!data || new Date(data.expires_at).getTime() < Date.now()) {
       await clearAdminSessionCookie();
       return { email: null as string | null };
