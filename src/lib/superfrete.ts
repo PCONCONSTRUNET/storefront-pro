@@ -167,18 +167,18 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
         body: JSON.stringify({
           from: fromPayload,
           to: toPayload,
-          services: "1,2", // PAC e SEDEX
+          service: 1, // 1 = PAC. O usuário precisará emitir, defaultando pra PAC.
+          volumes: [{
+            weight: 0.3,
+            width: 15,
+            height: 15,
+            length: 15
+          }],
           options: {
             own_hand: false,
             receipt: false,
             insurance_value: data.total,
             non_commercial: true
-          },
-          package: {
-            weight: 0.3,
-            width: 15,
-            height: 15,
-            length: 15
           },
           order_id: data.orderId,
           products: products,
