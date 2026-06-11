@@ -201,6 +201,8 @@ export type StoreSettings = {
   email: string;
   cpfCnpj?: string;
   shippingRules?: { id: string; state: string; city: string; fee: number }[];
+  superfreteToken?: string;
+  superfreteCepOrigem?: string;
 };
 
 const defaultSettings: StoreSettings = {
@@ -216,6 +218,8 @@ const defaultSettings: StoreSettings = {
   acceptPix: true,
   bannerTitle: "Coleção Encantada 2026",
   bannerSubtitle: "Laços feitos com amor para princesas de todas as idades",
+  superfreteToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODExNDI2NDMsInN1YiI6IlF1RzJ4cmlITXdldXJZbVI1Q0hVdDA1eXh5ZjEifQ.TpxzJ_bMMFS7CconVPTzBpJh8cWZbPWujwrwuvrDac0",
+  superfreteCepOrigem: "88735000",
 };
 
 export type SessionKind = "admin" | "customer" | "affiliate";

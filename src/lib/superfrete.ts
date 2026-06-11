@@ -1,6 +1,4 @@
-const SUPERFRETE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODExNDI2NDMsInN1YiI6IlF1RzJ4cmlITXdldXJZbVI1Q0hVdDA1eXh5ZjEifQ.TpxzJ_bMMFS7CconVPTzBpJh8cWZbPWujwrwuvrDac0";
-// O ateliê fica em Lauro Müller (CEP geral 88735-000)
-const CEP_ORIGEM = "88735000"; 
+import { useStore } from "@/lib/store";
 
 export type ShippingQuote = {
   name: string;
@@ -11,6 +9,13 @@ export type ShippingQuote = {
 };
 
 export async function calculateShipping(cepDestino: string, insuranceValue: number = 0): Promise<ShippingQuote[]> {
+  // Ler configurações do painel
+  const settings = useStore.getState().settings;
+  const token = settings.superfreteToken;
+  const cepOrigem = settings.superfreteCepOrigem;
+
+  if (!token || !cepOrigem) return [];
+
   // Limpar CEP
   const toCep = cepDestino.replace(/\D/g, "");
   if (toCep.length !== 8) return [];
@@ -19,12 +24,12 @@ export async function calculateShipping(cepDestino: string, insuranceValue: numb
     const response = await fetch("https://app.superfrete.com/api/v2/calculator", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${SUPERFRETE_TOKEN}`,
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
       body: JSON.stringify({
-        from: { postal_code: CEP_ORIGEM },
+        from: { postal_code: cepOrigem },
         to: { postal_code: toCep },
         services: "1,2", // PAC e SEDEX
         options: {
