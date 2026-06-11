@@ -152,37 +152,45 @@ function Page() {
           </ol>
         </div>
 
-        {(() => {
+        {(["postado_correios", "saiu_para_entrega", "entregue"] as string[]).includes(deliveryStatus) && (() => {
           const code = order.trackingCode || order.notes?.match(/\[RASTREIO: (.*?)\]/)?.[1];
-          if (!code) return null;
           return (
             <div className="mt-4 bg-card rounded-2xl p-4 shadow-card text-sm flex flex-col gap-2 border-2 border-primary/20">
               <div className="flex items-center gap-2 font-bold text-foreground">
                 <Truck className="h-5 w-5 text-primary" /> Código de Rastreio
               </div>
-              <p className="text-muted-foreground text-xs">Acompanhe a sua entrega com o código abaixo:</p>
-              <div className="flex gap-2 mt-1">
-                <div className="flex-1 bg-muted/50 border border-border rounded-xl px-3 py-3 flex items-center font-mono font-bold text-primary select-all text-base tracking-widest">
-                  {code}
+              {code ? (
+                <>
+                  <p className="text-muted-foreground text-xs">Acompanhe a sua entrega com o código abaixo:</p>
+                  <div className="flex gap-2 mt-1">
+                    <div className="flex-1 bg-muted/50 border border-border rounded-xl px-3 py-3 flex items-center font-mono font-bold text-primary select-all text-base tracking-widest">
+                      {code}
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(code);
+                        toast.success("Código copiado!");
+                      }}
+                      className="h-14 px-4 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                    >
+                      <Copy className="h-4 w-4" /> Copiar
+                    </button>
+                  </div>
+                  <a
+                    href="https://rastreamento.correios.com.br/app/index.php"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-11 w-full rounded-xl border-2 border-primary/30 text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary/5 transition-all mt-1"
+                  >
+                    <Truck className="h-4 w-4" /> Rastrear nos Correios
+                  </a>
+                </>
+              ) : (
+                <div className="flex items-center gap-3 bg-muted/50 border border-dashed border-border rounded-xl px-4 py-3 mt-1">
+                  <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                  <p className="text-muted-foreground text-sm">Código disponível em breve</p>
                 </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(code);
-                    toast.success("Código copiado!");
-                  }}
-                  className="h-14 px-4 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
-                >
-                  <Copy className="h-4 w-4" /> Copiar
-                </button>
-              </div>
-              <a
-                href={`https://rastreamento.correios.com.br/app/index.php`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="h-11 w-full rounded-xl border-2 border-primary/30 text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary/5 transition-all mt-1"
-              >
-                <Truck className="h-4 w-4" /> Rastrear nos Correios
-              </a>
+              )}
             </div>
           );
         })()}
