@@ -218,7 +218,7 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
           options: {
             own_hand: false,
             receipt: false,
-            insurance_value: data.total,
+            insurance_value: data.total < 26 ? 0 : data.total,
             non_commercial: true
           },
           order_id: data.orderId,
