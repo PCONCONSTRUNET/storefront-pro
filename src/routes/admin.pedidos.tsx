@@ -830,7 +830,7 @@ function Page() {
                       onClick={async () => {
                         setBusy(true);
                         try {
-                          await createSuperfreteCartFn({ data: { orderId: order.id } });
+                          await createSuperFreteCartFn({ data: { orderId: order.id } });
                           sync();
                           toast.success("Etiqueta gerada no carrinho (Aguardando Pagamento)");
                         } catch(e:any) { toast.error(e.message); } finally { setBusy(false); }
