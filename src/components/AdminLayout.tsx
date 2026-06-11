@@ -121,10 +121,15 @@ export function AdminLayout({
   }, [hydrated, isAdmin, navigate]);
 
   // Poll cloud orders so new checkouts trigger the admin notification blip.
+  // Polling reduced to 60s and only when tab is visible to save Supabase DB requests.
   useEffect(() => {
     if (!isAdmin) return;
     void sync();
-    const interval = window.setInterval(() => void sync(), 10_000);
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void sync();
+      }
+    }, 60_000);
     return () => window.clearInterval(interval);
   }, [isAdmin, sync]);
   if (!isAdmin)

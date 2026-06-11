@@ -136,7 +136,9 @@ function SyncPage() {
 
   useEffect(() => {
     void load();
-    const t = window.setInterval(() => void load(), 15_000);
+    const t = window.setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, 120_000);
     return () => window.clearInterval(t);
   }, [load]);
 
@@ -145,7 +147,7 @@ function SyncPage() {
       <div className="space-y-5 max-w-5xl">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            Estado em tempo real do banco — atualiza a cada 15s. Verifique se pedidos,
+            Estado em tempo real do banco — atualiza a cada 2 min (se aba ativa). Verifique se pedidos,
             pagamentos, financeiro e logs estão chegando.
           </p>
           <button
