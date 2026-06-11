@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStore, selectCurrentCustomer } from "@/lib/store";
 import { formatDate } from "@/lib/format";
 
-interface Notification {
+interface CustomerNotif {
   id: string;
   order_id: string | null;
   type: string;
@@ -23,7 +23,7 @@ const TYPE_ICON: Record<string, React.ReactElement> = {
 export function NotificationBell() {
   const customer = useStore(selectCurrentCustomer);
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<CustomerNotif[]>([]);
   const [loading, setLoading] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +39,7 @@ export function NotificationBell() {
       .eq("customer_email", customer.email.toLowerCase().trim())
       .order("created_at", { ascending: false })
       .limit(50);
-    if (data) setNotifications(data as Notification[]);
+    if (data) setNotifications(data as CustomerNotif[]);
     setLoading(false);
   };
 

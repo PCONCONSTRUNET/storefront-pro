@@ -101,7 +101,7 @@ export function StoreHeader() {
           <NotificationBell />
         </div>
         <a
-          href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
+          href={`https://wa.me/${(settings.whatsapp || "").replace(/\D/g, "")}`}
           target="_blank"
           rel="noreferrer"
           className="hidden md:grid w-10 h-10 place-items-center rounded-full hover:bg-white/15 transition-colors"
