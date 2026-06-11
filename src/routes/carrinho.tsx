@@ -105,8 +105,10 @@ function Page() {
 
   if (cart.length === 0) {
     return (
-      <StoreLayout header={<CartHeader />}>
-        <div className="max-w-md mx-auto text-center py-20 px-4 min-h-[60vh] flex flex-col justify-center">
+      <div className="min-h-screen flex flex-col bg-background">
+        <CartHeader />
+        <main className="flex-1 animate-page-in">
+          <div className="max-w-md mx-auto text-center py-20 px-4 min-h-[60vh] flex flex-col justify-center">
           <div className="w-24 h-24 mx-auto rounded-full bg-muted/50 grid place-items-center mb-6">
             <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
           </div>
@@ -120,7 +122,8 @@ function Page() {
             Ir às compras
           </Link>
         </div>
-      </StoreLayout>
+        </main>
+      </div>
     );
   }
 
@@ -167,8 +170,9 @@ function Page() {
   const total = Math.max(0, subtotal - discount);
 
   return (
-    <StoreLayout header={<CartHeader />}>
-      <div className="bg-muted/30 min-h-screen pb-32 md:pb-40">
+    <div className="min-h-screen flex flex-col bg-background">
+      <CartHeader />
+      <main className="flex-1 animate-page-in bg-muted/30 pb-32 md:pb-40">
         <div className="max-w-6xl mx-auto md:px-4 md:py-6">
           {/* Desktop Table Header */}
           <div className="hidden md:grid grid-cols-[auto_1fr_150px_150px_150px_100px] gap-4 bg-card p-4 rounded-sm shadow-sm text-sm text-muted-foreground mb-4 items-center">
@@ -396,7 +400,7 @@ function Page() {
           </div>
 
         </div>
-      </div>
+      </main>
 
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-[0_-4px_10px_rgba(0,0,0,0.03)] z-40">
@@ -515,6 +519,6 @@ function Page() {
           </div>
         </div>
       )}
-    </StoreLayout>
+    </div>
   );
 }
