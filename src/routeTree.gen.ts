@@ -36,6 +36,7 @@ import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro
 import { Route as AdminSincronizacaoRouteImport } from './routes/admin.sincronizacao'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
+import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
 import { Route as AdminOrganizarRouteImport } from './routes/admin.organizar'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminLogsRouteImport } from './routes/admin.logs'
@@ -196,6 +197,11 @@ const AdminPedidosRoute = AdminPedidosRouteImport.update({
   path: '/admin/pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPagamentosRoute = AdminPagamentosRouteImport.update({
+  id: '/admin/pagamentos',
+  path: '/admin/pagamentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOrganizarRoute = AdminOrganizarRouteImport.update({
   id: '/admin/organizar',
   path: '/admin/organizar',
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/organizar': typeof AdminOrganizarRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/admin/sincronizacao': typeof AdminSincronizacaoRoute
@@ -399,6 +406,7 @@ export interface FileRoutesByTo {
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/organizar': typeof AdminOrganizarRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/admin/sincronizacao': typeof AdminSincronizacaoRoute
@@ -453,6 +461,7 @@ export interface FileRoutesById {
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/admin/organizar': typeof AdminOrganizarRoute
+  '/admin/pagamentos': typeof AdminPagamentosRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/admin/produtos': typeof AdminProdutosRoute
   '/admin/sincronizacao': typeof AdminSincronizacaoRoute
@@ -508,6 +517,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/notificacoes'
     | '/admin/organizar'
+    | '/admin/pagamentos'
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/sincronizacao'
@@ -561,6 +571,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/notificacoes'
     | '/admin/organizar'
+    | '/admin/pagamentos'
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/sincronizacao'
@@ -614,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/logs'
     | '/admin/notificacoes'
     | '/admin/organizar'
+    | '/admin/pagamentos'
     | '/admin/pedidos'
     | '/admin/produtos'
     | '/admin/sincronizacao'
@@ -668,6 +680,7 @@ export interface RootRouteChildren {
   AdminLogsRoute: typeof AdminLogsRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
   AdminOrganizarRoute: typeof AdminOrganizarRoute
+  AdminPagamentosRoute: typeof AdminPagamentosRoute
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminProdutosRoute: typeof AdminProdutosRoute
   AdminSincronizacaoRoute: typeof AdminSincronizacaoRoute
@@ -883,6 +896,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/pagamentos': {
+      id: '/admin/pagamentos'
+      path: '/admin/pagamentos'
+      fullPath: '/admin/pagamentos'
+      preLoaderRoute: typeof AdminPagamentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/organizar': {
       id: '/admin/organizar'
       path: '/admin/organizar'
@@ -1095,6 +1115,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLogsRoute: AdminLogsRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
   AdminOrganizarRoute: AdminOrganizarRoute,
+  AdminPagamentosRoute: AdminPagamentosRoute,
   AdminPedidosRoute: AdminPedidosRoute,
   AdminProdutosRoute: AdminProdutosRoute,
   AdminSincronizacaoRoute: AdminSincronizacaoRoute,
@@ -1121,12 +1142,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

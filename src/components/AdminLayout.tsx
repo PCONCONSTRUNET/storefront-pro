@@ -46,6 +46,8 @@ const DEFAULT_NAV = [
   { to: "/admin/categorias", label: "Categorias", icon: FolderTree },
   { to: "/admin/organizar", label: "Organizar Home", icon: ArrowUpDown },
   { to: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
+  { to: "/admin/pagamentos", label: "Pagamentos", icon: CreditCard },
+  { to: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { to: "/admin/clientes", label: "Clientes", icon: Users },
   { to: "/admin/avaliacoes", label: "Avaliações", icon: Star },
   { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },
