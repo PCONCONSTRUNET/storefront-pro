@@ -134,14 +134,18 @@ export function AdminLayout({
 
     sync().catch(() => {});
 
+    let syncTimeout: number | undefined;
+    const debouncedSync = () => {
+      if (syncTimeout) window.clearTimeout(syncTimeout);
+      syncTimeout = window.setTimeout(() => {
+        void sync();
+      }, 1000);
+    };
+
     const sub = supabase
       .channel('admin_realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-         void sync();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
-         void sync();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, debouncedSync)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, debouncedSync)
       .subscribe();
 
     // 60s fallback polling apenas quando a aba estiver visível
