@@ -6,11 +6,12 @@ import { useStore, selectCurrentCustomer } from "@/lib/store";
 import type { Product } from "@/lib/data";
 
 export function ProductCard({ product }: { product: Product }) {
+  if (!product) return null;
   const [imgError, setImgError] = useState(false);
   const customer = useStore(selectCurrentCustomer);
   const toggleFavorite = useStore((s) => s.toggleFavorite);
   const isFav = !!customer?.favorites?.includes(product.id);
-  const discount = product.oldPrice
+  const discount = (product && product.oldPrice && product.price)
     ? Math.round((1 - product.price / product.oldPrice) * 100)
     : 0;
   const reviews = useStore((s) => s.reviews);
@@ -107,9 +108,9 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="flex items-baseline gap-1 mt-0.5">
           <span className="text-[10px] text-primary font-medium">R$</span>
           <span className="text-base md:text-lg font-bold text-primary leading-none">
-            {product.price.toFixed(2).replace(".", ",")}
+            {typeof product?.price === 'number' ? product.price.toFixed(2).replace(".", ",") : "0,00"}
           </span>
-          {product.oldPrice && (
+          {product?.oldPrice && (
             <span className="text-[10px] text-muted-foreground line-through">
               {brl(product.oldPrice)}
             </span>

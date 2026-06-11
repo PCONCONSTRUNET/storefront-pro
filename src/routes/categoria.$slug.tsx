@@ -13,10 +13,10 @@ function Page() {
   const { slug } = Route.useParams();
   const hydrated = useStoreHydrated();
   const { categories } = useStore();
-  const cat = (categories || []).find((c) => c.id === slug);
+  const cat = (categories || []).find((c) => c?.id === slug);
   const list = useStore((s) =>
-    (s.products || []).filter(
-      (p) => (p.categories?.includes(slug) || p.category === slug) && p.active && !p.hidden,
+    (s?.products || []).filter(
+      (p) => p && ((p.categories && p.categories.includes(slug)) || p.category === slug) && p.active && !p.hidden,
     ),
   );
 
@@ -30,7 +30,13 @@ function Page() {
           <ChevronLeft className="h-4 w-4" /> Categorias
         </Link>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <span className="text-3xl">{cat?.image}</span>
+          <span className="text-3xl flex items-center justify-center">
+            {cat?.image?.startsWith("http") || cat?.image?.startsWith("data:") || cat?.image?.startsWith("/") ? (
+              <img src={cat.image} alt="" className="w-8 h-8 object-contain" />
+            ) : (
+              cat?.image
+            )}
+          </span>
           {cat?.name || "Categoria"}
         </h1>
         <p className="text-sm text-muted-foreground mb-5">
