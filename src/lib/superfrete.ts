@@ -57,8 +57,8 @@ export const calculateShippingFn = createServerFn({ method: "POST" })
         return resData.map((item: any) => ({
           id: item.service || item.id,
           name: item.name,
-          price: Number(item.price),
-          discountPrice: Number(item.price) - Number(item.discount),
+          price: Number(item.price), // Preço com desconto já aplicado pelo Superfrete
+          discountPrice: Number(item.price), // O preço final a ser cobrado do cliente
           deliveryTime: Number(item.delivery_time)
         }));
       }
