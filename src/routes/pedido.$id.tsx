@@ -32,20 +32,8 @@ function Page() {
   const order = useStore((s) => s.orders.find((o) => o.id === id));
   const [reorderOpen, setReorderOpen] = useState(false);
 
-  if (!order) {
-    return (
-      <StoreLayout>
-        <div className="text-center py-20">
-          <p>Pedido não encontrado.</p>
-          <Link to="/pedidos" className="text-primary font-semibold">
-            Voltar
-          </Link>
-        </div>
-      </StoreLayout>
-    );
-  }
-
   useEffect(() => {
+    if (!order?.id) return;
     supabase
       .rpc("get_order_tracking", { _id: order.id })
       .then(({ data, error }) => {
@@ -65,7 +53,20 @@ function Page() {
         }
       })
       .catch(() => {});
-  }, [order.id]);
+  }, [order?.id]);
+
+  if (!order) {
+    return (
+      <StoreLayout>
+        <div className="text-center py-20">
+          <p>Pedido não encontrado.</p>
+          <Link to="/pedidos" className="text-primary font-semibold">
+            Voltar
+          </Link>
+        </div>
+      </StoreLayout>
+    );
+  }
 
   const status = normalizeOrderStatus(order.status);
   const isPaid = status === "pago" || status === "em_separacao" || status === "concluido" || status === "saiu_para_entrega";
