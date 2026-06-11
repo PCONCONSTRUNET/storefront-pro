@@ -69,7 +69,7 @@ function StatusBadge({ o }: { o: Order }) {
   );
   if (delivery === "saiu_para_entrega") return (
     <span className="flex items-center gap-1 text-blue-600 text-xs font-semibold">
-      <Truck className="w-3.5 h-3.5" /> {o.deliveryMethod === "retirada" ? "Aguardando Retirada" : "A caminho"}
+      <Truck className="w-3.5 h-3.5" /> {o.deliveryMethod === "retirada" ? "Aguardando Retirada" : "Em trânsito"}
     </span>
   );
   if (delivery === "em_separacao" || status === "em_separacao") return (

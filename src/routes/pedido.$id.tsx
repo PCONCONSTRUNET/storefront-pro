@@ -82,7 +82,7 @@ function Page() {
       case "pendente": return isPaid ? "Pagamento aprovado" : "Aguardando pagamento";
       case "em_separacao": return "Em separação";
       case "postado_correios": return "Postado nos Correios";
-      case "saiu_para_entrega": return order.deliveryMethod === "retirada" ? "Aguardando retirada" : "Saiu para entrega";
+      case "saiu_para_entrega": return order.deliveryMethod === "retirada" ? "Aguardando retirada" : "Em trânsito";
       case "entregue": return "Entregue";
       default: return step;
     }

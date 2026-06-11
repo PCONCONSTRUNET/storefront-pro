@@ -534,7 +534,7 @@ function Page() {
                 {getOrderStatusLabel(order.status)}
               </span>
               <span className="text-xs inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold border bg-indigo-50 text-indigo-800 border-indigo-200">
-                <Truck className="h-3 w-3" /> {DELIVERY_STATUS_LABEL[deliveryStatus]}
+                <Truck className="h-3 w-3" /> {deliveryStatus === "saiu_para_entrega" ? (order.deliveryMethod === "retirada" ? "Aguardando retirada" : "Em trânsito") : DELIVERY_STATUS_LABEL[deliveryStatus]}
               </span>
               <span className="text-[11px] text-muted-foreground w-full">
                 {formatDate(order.createdAt)}

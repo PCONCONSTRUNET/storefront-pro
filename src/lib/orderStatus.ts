@@ -11,7 +11,7 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   aguardando_pagamento: "Aguardando pagamento",
   pago: "Pago",
   em_separacao: "Em separação",
-  saiu_para_entrega: "Aguardando retirada",
+  saiu_para_entrega: "Em trânsito",
   concluido: "Concluído",
   cancelado: "Cancelado",
   reembolsado: "Reembolsado",
@@ -64,7 +64,7 @@ export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
   pendente: "Pendente",
   em_separacao: "Em separação",
   postado_correios: "Postado nos Correios",
-  saiu_para_entrega: "Aguardando retirada",
+  saiu_para_entrega: "Em trânsito",
   entregue: "Entregue",
 };
 
