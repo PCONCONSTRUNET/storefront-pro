@@ -89,19 +89,21 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({
       orderId: z.string(),
+      // Dados do pedido passados direto do front (evita re-query com RLS)
+      customerName: z.string(),
+      customerEmail: z.string().default(""),
+      address: z.string().default(""),
+      total: z.number(),
+      items: z.array(z.object({
+        name: z.string(),
+        quantity: z.number(),
+        price: z.number(),
+      })),
     }).parse(input),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const token = getSuperfreteToken();
-
-    // Buscar dados do pedido
-    const { data: orderData, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .select("*")
-      .eq("id", data.orderId)
-      .single();
-    if (orderError || !orderData) throw new Error("Pedido não encontrado");
 
     // Buscar configurações da loja — a tabela armazena { id, data } onde data é o JSON das settings
     const { data: storeSettingsRow } = await supabaseAdmin
@@ -113,39 +115,34 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
     // Extrai as settings do campo `data`, com fallback para objeto vazio
     const settings = (storeSettingsRow?.data as Partial<StoreSettings>) || {};
 
-    const parsedItems = Array.isArray(orderData.items)
-      ? (orderData.items as any[])
-      : JSON.parse((orderData.items as string) || "[]");
-
-    const products = parsedItems.map((i: any) => ({
+    const products = data.items.map((i) => ({
       name: i.name,
       quantity: String(i.quantity),
       unitary_value: String(i.price)
     }));
 
     // Extrai CEP do endereço — formato: "... CEP: 88735-000" ou "CEP: 88735000"
-    const cepMatch = orderData.address?.match(/CEP[:\s]+([0-9]{5}-?[0-9]{3})/i);
+    const cepMatch = data.address?.match(/CEP[:\s]+([0-9]{5}-?[0-9]{3})/i);
     const cepDestino = cepMatch ? cepMatch[1].replace(/\D/g, "") : "00000000";
 
     // Extrai UF do endereço — formato: "... SC, CEP..." ou "...Estado: SC"
-    // Tenta capturar a sigla de estado de 2 letras que aparece antes do CEP
-    const stateMatch = orderData.address?.match(/[,\s-]\s*([A-Z]{2})\s*[,\s-]?\s*CEP/i)
-      || orderData.address?.match(/,\s*([A-Z]{2})\s*$/i);
+    const stateMatch = data.address?.match(/[,\s-]\s*([A-Z]{2})\s*[,\s-]?\s*CEP/i)
+      || data.address?.match(/,\s*([A-Z]{2})\s*$/i);
     const stateAbbr = stateMatch ? stateMatch[1].toUpperCase() : (settings.superfreteAddressState || "SC");
 
-    // Extrai cidade do endereço — tenta capturar antes da UF
-    const cityMatch = orderData.address?.match(/,\s*([^,]+?)\s*[-–,]\s*[A-Z]{2}\s*[,\s-]?\s*CEP/i);
+    // Extrai cidade do endereço
+    const cityMatch = data.address?.match(/,\s*([^,]+?)\s*[-–,]\s*[A-Z]{2}\s*[,\s-]?\s*CEP/i);
     const city = cityMatch ? cityMatch[1].trim() : "NA";
 
     const toPayload = {
-      name: orderData.customer_name,
-      address: orderData.address || "Endereço não informado",
+      name: data.customerName,
+      address: data.address || "Endereço não informado",
       district: "NA",
       city: city,
       state_abbr: stateAbbr,
       postal_code: cepDestino,
-      email: orderData.customer_email || "",
-      document: (orderData as any).customer_document || "00000000000"
+      email: data.customerEmail || "",
+      document: "00000000000"
     };
 
     const fromPayload = {
@@ -174,7 +171,7 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
           options: {
             own_hand: false,
             receipt: false,
-            insurance_value: orderData.total,
+            insurance_value: data.total,
             non_commercial: true
           },
           package: {
@@ -193,7 +190,6 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         console.error("SuperFrete Cart Error:", responseText);
-        // Tenta extrair mensagem legível da resposta da API
         let apiMsg = "";
         try {
           const parsed = JSON.parse(responseText);
@@ -209,7 +205,7 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
         throw new Error(`SuperFrete não retornou ID do carrinho. Resposta: ${responseText.slice(0, 200)}`);
       }
 
-      // Salvar no BD
+      // Salvar o superfreteOrderId no banco
       await supabaseAdmin
         .from("orders")
         // @ts-ignore
@@ -219,17 +215,15 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
       return { ok: true, superfreteOrderId: superfreteId };
     } catch (error: any) {
       console.error("SuperFrete Cart Exception:", error?.message || error, "| Response:", responseText);
-      // Re-lança o erro original (não engole mais com mensagem genérica)
       throw error instanceof Error ? error : new Error(String(error));
     }
   });
 
 
-export async function createSuperFreteCart(orderData: { id: string }) {
+export async function createSuperFreteCart(orderData: { id: string; customerName: string; customerEmail: string; address: string; total: number; items: Array<{name: string; quantity: number; price: number}> }) {
   const settings = useStore.getState().settings;
   const isActive = settings.superfreteActive !== false;
-  
   if (!isActive) return;
-
-  return await createSuperFreteCartFn({ data: { orderId: orderData.id } });
+  return await createSuperFreteCartFn({ data: orderData });
 }
+
