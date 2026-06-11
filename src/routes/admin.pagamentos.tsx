@@ -76,20 +76,27 @@ function Page() {
           />
         </div>
         
-        <div className="flex items-center gap-1 bg-card border border-border rounded-full p-1 self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
-          <Filter className="h-3.5 w-3.5 ml-2 text-muted-foreground shrink-0" />
-          {(["todos", "pendentes", "aprovados", "cancelados"] as const).map((f) => (
+        <div className="flex flex-wrap items-center gap-2 bg-card border border-border p-1 rounded-full overflow-x-auto no-scrollbar">
+          {(
+            [
+              { id: "todos", label: "Todos", icon: null },
+              { id: "pendentes", label: "Pendentes", icon: Clock },
+              { id: "aprovados", label: "Aprovados", icon: CheckCircle2 },
+              { id: "cancelados", label: "Cancelados", icon: XCircle },
+            ] as const
+          ).map((f) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
+              key={f.id}
+              onClick={() => setFilter(f.id as typeof filter)}
               className={cn(
-                "text-xs px-3 py-1.5 rounded-full font-semibold transition whitespace-nowrap",
-                filter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 select-none",
+                filter === f.id
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              {f === "todos" ? "Todos" : f.charAt(0).toUpperCase() + f.slice(1)}
+              {f.icon && <f.icon className="w-3.5 h-3.5" />}
+              {f.label}
             </button>
           ))}
         </div>
