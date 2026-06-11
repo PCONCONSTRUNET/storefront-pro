@@ -260,12 +260,13 @@ function Page() {
                             {ci.quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateCartQty(
-                                p.id,
-                                Math.min(p.stock || 99, ci.quantity + 1)
-                              )
-                            }
+                            onClick={() => {
+                              if (p.stock !== undefined && ci.quantity >= p.stock) {
+                                toast.error(`Apenas ${p.stock} unidade(s) disponível(is) em estoque.`);
+                                return;
+                              }
+                              updateCartQty(p.id, ci.quantity + 1);
+                            }}
                             className="w-8 h-8 flex items-center justify-center hover:bg-muted/50 text-foreground/70"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -333,12 +334,13 @@ function Page() {
                               {ci.quantity}
                             </span>
                             <button
-                              onClick={() =>
-                                updateCartQty(
-                                  p.id,
-                                  Math.min(p.stock || 99, ci.quantity + 1)
-                                )
-                              }
+                              onClick={() => {
+                                if (p.stock !== undefined && ci.quantity >= p.stock) {
+                                  toast.error(`Apenas ${p.stock} unidade(s) disponível(is) em estoque.`);
+                                  return;
+                                }
+                                updateCartQty(p.id, ci.quantity + 1);
+                              }}
                               className="w-7 h-7 flex items-center justify-center"
                             >
                               <Plus className="w-3 h-3" />
