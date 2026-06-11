@@ -159,7 +159,7 @@ const toProduct = (r: any): Product => ({
 
 const toCoupon = (r: any): Coupon => ({
   code: r.code,
-  type: r.kind === "fixed" ? "fixed" : "percent",
+  type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
   value: Number(r.value) || 0,
   validUntil: r.expires_at || "",
   maxUses: r.extra?.maxUses ?? 999,
