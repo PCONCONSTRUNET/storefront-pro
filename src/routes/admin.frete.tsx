@@ -13,7 +13,7 @@ function Page() {
   const { settings, updateSettings } = useStore();
   
   const [defaultFee, setDefaultFee] = useState(settings.shippingFee.toString());
-  const [token, setToken] = useState(settings.superfreteToken || "");
+  const [active, setActive] = useState(settings.superfreteActive !== false);
   const [cep, setCep] = useState(settings.superfreteCepOrigem || "");
 
   const saveSettings = () => {
@@ -23,7 +23,7 @@ function Page() {
     updateSettings({ 
       ...settings, 
       shippingFee: val,
-      superfreteToken: token,
+      superfreteActive: active,
       superfreteCepOrigem: cep
     });
     
@@ -49,16 +49,17 @@ function Page() {
           </div>
           
           <div className="space-y-4">
-            <label className="block">
-              <span className="text-xs font-medium text-foreground">Token da API (SuperFrete)</span>
+            <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
               <input 
-                type="password" 
-                value={token} 
-                onChange={e => setToken(e.target.value)}
-                placeholder="Cole o token JWT aqui..."
-                className="mt-1 w-full h-11 px-3 rounded-xl bg-muted/50 border border-border outline-none focus:ring-2 ring-primary/40 font-mono text-sm"
+                type="checkbox"
+                checked={active}
+                onChange={e => setActive(e.target.checked)}
+                className="w-5 h-5 rounded border-2 border-primary/50 text-primary focus:ring-primary accent-primary cursor-pointer"
               />
-              <span className="text-[10px] text-muted-foreground mt-1 block">Gerado no painel da SuperFrete em Integrações &gt; API.</span>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-foreground">Ativar Integração</div>
+                <div className="text-[11px] text-muted-foreground leading-tight">Exibe as cotações em tempo real no checkout</div>
+              </div>
             </label>
 
             <label className="block">

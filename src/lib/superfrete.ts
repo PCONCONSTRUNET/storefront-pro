@@ -1,5 +1,7 @@
 import { useStore } from "@/lib/store";
 
+const SUPERFRETE_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODExNDI2NDMsInN1YiI6IlF1RzJ4cmlITXdldXJZbVI1Q0hVdDA1eXh5ZjEifQ.TpxzJ_bMMFS7CconVPTzBpJh8cWZbPWujwrwuvrDac0";
+
 export type ShippingQuote = {
   name: string;
   price: number;
@@ -11,10 +13,10 @@ export type ShippingQuote = {
 export async function calculateShipping(cepDestino: string, insuranceValue: number = 0): Promise<ShippingQuote[]> {
   // Ler configurações do painel
   const settings = useStore.getState().settings;
-  const token = settings.superfreteToken;
+  const isActive = settings.superfreteActive !== false;
   const cepOrigem = settings.superfreteCepOrigem;
 
-  if (!token || !cepOrigem) return [];
+  if (!isActive || !cepOrigem) return [];
 
   // Limpar CEP
   const toCep = cepDestino.replace(/\D/g, "");
@@ -24,7 +26,7 @@ export async function calculateShipping(cepDestino: string, insuranceValue: numb
     const response = await fetch("https://app.superfrete.com/api/v2/calculator", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": `Bearer ${SUPERFRETE_TOKEN}`,
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
