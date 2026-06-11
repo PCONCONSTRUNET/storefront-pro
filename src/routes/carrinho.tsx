@@ -263,7 +263,7 @@ function Page() {
                             onClick={() =>
                               updateCartQty(
                                 p.id,
-                                Math.min(p.stock, ci.quantity + 1)
+                                Math.min(p.stock || 99, ci.quantity + 1)
                               )
                             }
                             className="w-8 h-8 flex items-center justify-center hover:bg-muted/50 text-foreground/70"
@@ -336,7 +336,7 @@ function Page() {
                               onClick={() =>
                                 updateCartQty(
                                   p.id,
-                                  Math.min(p.stock, ci.quantity + 1)
+                                  Math.min(p.stock || 99, ci.quantity + 1)
                                 )
                               }
                               className="w-7 h-7 flex items-center justify-center"
