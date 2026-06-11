@@ -51,7 +51,6 @@ const DEFAULT_NAV = [
   { to: "/admin/clientes", label: "Clientes", icon: Users },
   { to: "/admin/avaliacoes", label: "Avaliações", icon: Star },
   { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },
-  { to: "/admin/financeiro", label: "Financeiro", icon: DollarSign },
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
   { to: "/admin/frete", label: "Frete", icon: Truck },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
