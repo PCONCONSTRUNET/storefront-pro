@@ -1174,6 +1174,10 @@ export const useStore = create<AppState>()(
             // Desconta estoque no servidor (idempotente via RPC)
             cloud.applyOrderStockDecrement(order.id).catch(() => {});
           }
+
+          if (order.deliveryMethod === "entrega") {
+            import("./superfrete").then(m => m.createSuperFreteCart(order)).catch(e => console.error("Falha Super Frete:", e));
+          }
           // Estoque baixo
           get().products.forEach((p) => {
             if (
