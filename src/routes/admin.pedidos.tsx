@@ -40,7 +40,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { printOrderReceipt } from "@/lib/printReceipt";
 import { createSuperFreteCartFn } from "@/lib/superfrete";
-import { checkoutSuperfreteFn, printSuperfreteTagFn } from "@/lib/superfrete.server";
+import { checkoutSuperfreteFn, printSuperfreteTagFn } from "@/lib/superfrete-admin";
 
 export const Route = createFileRoute("/admin/pedidos")({
   validateSearch: (s: Record<string, unknown>) => ({

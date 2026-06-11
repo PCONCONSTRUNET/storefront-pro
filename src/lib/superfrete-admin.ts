@@ -5,10 +5,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getSuperfreteToken } from "./superfrete";
 
 export const checkoutSuperfreteFn = createServerFn({ method: "POST" })
-  // @ts-ignore - Middleware type mismatch workaround
-  .middleware([requireAdminAuth])
   .inputValidator((input) => z.object({ orderId: z.string() }).parse(input))
   .handler(async ({ data }) => {
+    await requireAdminAuth();
     const token = getSuperfreteToken();
 
     // @ts-ignore - superfrete_order_id not in generated types yet
@@ -49,10 +48,9 @@ export const checkoutSuperfreteFn = createServerFn({ method: "POST" })
   });
 
 export const printSuperfreteTagFn = createServerFn({ method: "POST" })
-  // @ts-ignore - Middleware type mismatch workaround
-  .middleware([requireAdminAuth])
   .inputValidator((input) => z.object({ orderId: z.string() }).parse(input))
   .handler(async ({ data }) => {
+    await requireAdminAuth();
     const token = getSuperfreteToken();
 
     // @ts-ignore - superfrete_order_id not in generated types yet
