@@ -52,7 +52,7 @@ export function ConfirmHost() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center sm:p-3 animate-overlay-in"
+      className="fixed inset-0 z-[10000] bg-black/50 flex items-end sm:items-center justify-center sm:p-3 animate-overlay-in"
       onClick={() => close(false)}
     >
       <div
