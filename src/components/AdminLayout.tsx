@@ -23,7 +23,9 @@ import {
   Activity,
   Star,
   Truck,
+  RefreshCw,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useStore, useStoreHydrated } from "@/lib/store";
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -120,17 +122,34 @@ export function AdminLayout({
     if (hydrated && !isAdmin) navigate({ to: "/admin/login" });
   }, [hydrated, isAdmin, navigate]);
 
-  // Poll cloud orders so new checkouts trigger the admin notification blip.
-  // Polling reduced to 60s and only when tab is visible to save Supabase DB requests.
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Real-time listener for orders and transactions to trigger admin blip instantly
+  // Also keeps a 60s fallback polling just in case.
   useEffect(() => {
     if (!isAdmin) return;
     void sync();
+
+    const sub = supabase
+      .channel('admin_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+         void sync();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+         void sync();
+      })
+      .subscribe();
+
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
         void sync();
       }
     }, 60_000);
-    return () => window.clearInterval(interval);
+
+    return () => {
+      window.clearInterval(interval);
+      supabase.removeChannel(sub);
+    };
   }, [isAdmin, sync]);
   if (!isAdmin)
     return (
@@ -254,7 +273,18 @@ export function AdminLayout({
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="text-lg font-bold truncate">{title}</h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={async () => {
+                setIsRefreshing(true);
+                await sync();
+                setTimeout(() => setIsRefreshing(false), 500);
+              }}
+              className="h-9 w-9 rounded-full hover:bg-muted grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
+              title="Atualizar dados manuamente"
+            >
+              <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin text-primary")} />
+            </button>
             <GlobalSearch />
           </div>
         </header>

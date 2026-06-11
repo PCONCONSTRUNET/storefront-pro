@@ -41,20 +41,25 @@ export function playAdminNotificationBlip() {
   const c = getCtx();
   if (!c) return;
   const fire = () => {
-    // "Venda Aprovada" Gateway / POS Sound (Loud & Bright)
-    // 3 quick ascending notes (C6, E6, G6)
-    const vol = 0.9;
-    const bright = 0.25;
+    // "Cha-Ching" Cash Register Sound
+    // High metallic scrape (white noise / high frequencies) + bright bell ring
+    const vol = 0.8;
+    const bright = 0.3;
+
+    // The "Cha" (mechanical slide/scrape)
+    tone(6000, 0.05, 0, "square", vol * 0.5);
+    tone(8000, 0.05, 0.02, "sawtooth", vol * 0.4);
     
-    // C6
-    tone(1046.50, 0.1, 0, "sine", vol);
-    tone(1046.50, 0.1, 0, "square", bright);
-    // E6
-    tone(1318.51, 0.1, 0.1, "sine", vol);
-    tone(1318.51, 0.1, 0.1, "square", bright);
-    // G6 (rings out)
-    tone(1567.98, 0.4, 0.2, "sine", vol);
-    tone(1567.98, 0.4, 0.2, "square", bright);
+    // The "Ching" (bright bell ringing out)
+    // A high D major chord (D6, F#6, A6)
+    tone(1174.66, 0.5, 0.1, "sine", vol);
+    tone(1174.66, 0.2, 0.1, "square", bright);
+    
+    tone(1479.98, 0.6, 0.12, "sine", vol * 0.8);
+    tone(1479.98, 0.2, 0.12, "square", bright * 0.8);
+    
+    tone(1760.00, 0.8, 0.15, "sine", vol * 0.6);
+    tone(1760.00, 0.2, 0.15, "square", bright * 0.6);
   };
   if (c.state === "suspended") {
     c.resume().then(fire).catch(fire);
