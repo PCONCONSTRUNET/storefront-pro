@@ -138,10 +138,12 @@ function Page() {
   if (form.deliveryMethod === "entrega") {
     if (coupon?.type === "free_shipping") {
       computedShipping = 0;
-    } else if (selectedShipping) {
+    } else if (shippingOptions.length > 0 && selectedShipping) {
       computedShipping = selectedShipping.discountPrice;
+    } else if (settings.shippingFeeActive !== false) {
+      computedShipping = settings.shippingFee;
     } else {
-      computedShipping = settings.shippingFeeActive !== false ? settings.shippingFee : 0;
+      computedShipping = 0; // se o frete for nulo, ainda cobraremos zero temporariamente, mas não mostramos grátis
     }
   }
 
@@ -352,7 +354,12 @@ function Page() {
                     label="CEP"
                     value={form.cep}
                     placeholder="00000-000"
-                    onChange={(v) => setForm({ ...form, cep: v })}
+                    onChange={(v) => {
+                      let cep = v.replace(/\D/g, "");
+                      if (cep.length > 5) cep = cep.replace(/^(\d{5})(\d)/, "$1-$2");
+                      if (cep.length > 9) cep = cep.slice(0, 9);
+                      setForm({ ...form, cep });
+                    }}
                   />
                   <Field
                     label="Rua / Avenida"
@@ -419,8 +426,8 @@ function Page() {
                           Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
                         </div>
                       ) : (
-                        <div className="text-xs text-primary font-bold mt-2">
-                          Frete Grátis
+                        <div className="text-xs text-destructive font-semibold mt-2">
+                          Informe um CEP válido para calcular
                         </div>
                       )}
                     </div>
