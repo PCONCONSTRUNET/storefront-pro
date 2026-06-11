@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Bell, Package, Truck, CheckCircle2, X, BellOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStore, selectCurrentCustomer } from "@/lib/store";
@@ -14,7 +14,7 @@ interface Notification {
   created_at: string;
 }
 
-const TYPE_ICON: Record<string, React.ReactNode> = {
+const TYPE_ICON: Record<string, React.ReactElement> = {
   order_approved: <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
   status_update: <Truck className="h-4 w-4 text-blue-500" />,
   default: <Package className="h-4 w-4 text-primary" />,
