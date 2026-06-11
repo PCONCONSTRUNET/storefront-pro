@@ -12,7 +12,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const ADMIN_COOKIE = "princesa_admin_session";
 
-const ONE_DAY_SECONDS = 60 * 60 * 24;
+const THIRTY_DAYS_SECONDS = 60 * 60 * 24 * 30; // 30 dias — renovado a cada request via rotate/refresh
 const ROTATE_AFTER_MS = 30 * 60 * 1000;
 
 export function setAdminSessionCookie(token: string) {
@@ -21,7 +21,7 @@ export function setAdminSessionCookie(token: string) {
     secure: true,
     sameSite: "none",
     path: "/",
-    maxAge: ONE_DAY_SECONDS,
+    maxAge: THIRTY_DAYS_SECONDS,
   });
 }
 

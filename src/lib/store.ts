@@ -274,6 +274,8 @@ type AppState = {
   customers: Customer[];
   currentCustomerId: string | null;
   isAdmin: boolean;
+  /** true enquanto aguarda revalidação da sessão admin no servidor (F5 / hidratação) */
+  adminRevalidating: boolean;
   settings: StoreSettings;
   appliedCoupon: string | null;
   affiliates: Affiliate[];
@@ -476,6 +478,7 @@ export const useStore = create<AppState>()(
       customers: [],
       currentCustomerId: null,
       isAdmin: false,
+      adminRevalidating: false,
       settings: defaultSettings,
       appliedCoupon: null,
       affiliates: [],
@@ -876,9 +879,14 @@ export const useStore = create<AppState>()(
           if (!res.ok) return { ok: false, message: res.message };
           set((s) => ({
             isAdmin: true,
+            adminRevalidating: false,
             adminToken: null, // cookie httpOnly — token nunca toca o JS
             sessions: { ...s.sessions, admin: makeSession(normalized) },
           }));
+          // Backup robusto no localStorage para sobreviver F5
+          try {
+            localStorage.setItem("princesa-admin-auth", JSON.stringify({ isAdmin: true, email: normalized }));
+          } catch {}
           cloud.logActivity({
             action: "admin_login",
             category: "auth",
@@ -894,8 +902,10 @@ export const useStore = create<AppState>()(
         import("./admin.functions").then(({ logoutAdminFn }) =>
           logoutAdminFn().catch(() => {}),
         );
+        try { localStorage.removeItem("princesa-admin-auth"); } catch {}
         set((s) => ({
           isAdmin: false,
+          adminRevalidating: false,
           adminToken: null,
           sessions: { ...s.sessions, admin: null },
         }));
@@ -1457,11 +1467,31 @@ export const useStore = create<AppState>()(
         const patch: Partial<AppState> = {};
         const nextSessions = { ...sessions };
 
-        // --- ADMIN: invalida se sessão expirou ---
-        if (!isSessionValid(sessions.admin) && state.isAdmin) {
-          patch.isAdmin = false;
-          patch.adminToken = null;
-          nextSessions.admin = null;
+        // --- ADMIN: NUNCA reseta isAdmin diretamente aqui.
+        // Em vez disso, seta adminRevalidating=true e aguarda o servidor confirmar.
+        // Isso elimina a race condition do F5 que causava redirect prematuro.
+        const adminHadSession = state.isAdmin;
+        if (adminHadSession && typeof window !== "undefined") {
+          // Verifica também o backup no localStorage
+          let adminBackupOk = false;
+          try {
+            const backupStr = localStorage.getItem("princesa-admin-auth");
+            if (backupStr) {
+              const backup = JSON.parse(backupStr);
+              adminBackupOk = Boolean(backup?.isAdmin);
+            }
+          } catch {}
+
+          if (adminBackupOk) {
+            // Mantém isAdmin=true e sinaliza que está revalidando
+            patch.adminRevalidating = true;
+          } else {
+            // Sem backup — reseta imediatamente (nunca logou ou limpou)
+            patch.isAdmin = false;
+            patch.adminToken = null;
+            patch.adminRevalidating = false;
+            nextSessions.admin = null;
+          }
         }
 
         // --- BACKUP ROBUSTO DO CLIENTE ---
@@ -1516,16 +1546,25 @@ export const useStore = create<AppState>()(
         useStore.setState({ ...patch, sessions: nextSessions });
 
         // Revalida sessão admin via cookie httpOnly no servidor.
+        // CRÍTICO: só chama navigate para /login DEPOIS que essa promise resolver.
         if (typeof window !== "undefined") {
           import("./admin.functions").then(({ getAdminSessionFn }) =>
             getAdminSessionFn()
               .then((r) => {
                 if (r && (r as any).error) return; // Ignora erros de rede
                 const serverHasAdmin = Boolean(r?.email);
-                const localSaysAdmin = useStore.getState().isAdmin;
-                if (localSaysAdmin && !serverHasAdmin) {
+                if (serverHasAdmin) {
+                  // Cookie válido — mantém sessão admin
+                  useStore.setState({
+                    isAdmin: true,
+                    adminRevalidating: false,
+                  });
+                } else {
+                  // Cookie inválido ou expirado — desloga
+                  try { localStorage.removeItem("princesa-admin-auth"); } catch {}
                   useStore.setState({
                     isAdmin: false,
+                    adminRevalidating: false,
                     adminToken: null,
                     sessions: {
                       ...useStore.getState().sessions,
@@ -1534,7 +1573,10 @@ export const useStore = create<AppState>()(
                   });
                 }
               })
-              .catch(() => {}),
+              .catch(() => {
+                // Erro de rede: mantém o estado local para não deslogar em falhas transitórias
+                useStore.setState({ adminRevalidating: false });
+              }),
           );
 
           // SOLUÇÃO DEFINITIVA: Se há currentCustomerId mas o objeto customer

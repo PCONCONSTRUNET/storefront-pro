@@ -70,6 +70,7 @@ export function AdminLayout({
   const navigate = useNavigate();
   const hydrated = useStoreHydrated();
   const isAdmin = useStore((s) => s.isAdmin);
+  const adminRevalidating = useStore((s) => s.adminRevalidating);
   const logout = useStore((s) => s.logoutAdmin);
   const sync = useStore((s) => s.sync);
   const path = useRouterState({ select: (r) => r.location.pathname });
@@ -119,8 +120,10 @@ export function AdminLayout({
   };
 
   useEffect(() => {
-    if (hydrated && !isAdmin) navigate({ to: "/admin/login" });
-  }, [hydrated, isAdmin, navigate]);
+    // Só redireciona para login DEPOIS que a revalidação do servidor terminar.
+    // Sem isso, o F5 causava redirect prematuro enquanto o cookie ainda era válido.
+    if (hydrated && !isAdmin && !adminRevalidating) navigate({ to: "/admin/login" });
+  }, [hydrated, isAdmin, adminRevalidating, navigate]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -130,12 +133,12 @@ export function AdminLayout({
   // Also keeps a 60s fallback polling just in case.
   useEffect(() => {
     if (!isAdmin) return;
-    
+
     const st = useStore.getState();
     if (st.orders.length > 0 || st.products.length > 0) {
       setIsInitialLoading(false);
     }
-    
+
     sync().finally(() => {
       setIsInitialLoading(false);
     });
@@ -150,6 +153,7 @@ export function AdminLayout({
       })
       .subscribe();
 
+    // 60s fallback polling apenas quando a aba estiver visível
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
         void sync();
@@ -161,12 +165,16 @@ export function AdminLayout({
       supabase.removeChannel(sub);
     };
   }, [isAdmin, sync]);
-  if (!isAdmin)
+
+  // Enquanto aguarda confirmação do servidor, mostra loading (não redireciona)
+  if (!hydrated || adminRevalidating)
     return (
       <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
         Carregando...
       </div>
     );
+
+  if (!isAdmin) return null;
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
