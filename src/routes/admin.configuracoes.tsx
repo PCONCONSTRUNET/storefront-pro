@@ -62,6 +62,42 @@ function Page() {
             onChange={(v) => setS({ ...s, email: v })}
           />
         </Card>
+        <Card title="Endereço Remetente (SuperFrete)">
+          <Field
+            label="CEP"
+            value={s.superfreteCepOrigem || ""}
+            onChange={(v) => setS({ ...s, superfreteCepOrigem: v })}
+          />
+          <Field
+            label="Rua"
+            value={s.superfreteAddressStreet || ""}
+            onChange={(v) => setS({ ...s, superfreteAddressStreet: v })}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <Field
+              label="Número"
+              value={s.superfreteAddressNumber || ""}
+              onChange={(v) => setS({ ...s, superfreteAddressNumber: v })}
+            />
+            <Field
+              label="Bairro"
+              value={s.superfreteAddressNeighborhood || ""}
+              onChange={(v) => setS({ ...s, superfreteAddressNeighborhood: v })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Field
+              label="Cidade"
+              value={s.superfreteAddressCity || ""}
+              onChange={(v) => setS({ ...s, superfreteAddressCity: v })}
+            />
+            <Field
+              label="Estado (Sigla)"
+              value={s.superfreteAddressState || ""}
+              onChange={(v) => setS({ ...s, superfreteAddressState: v })}
+            />
+          </div>
+        </Card>
         <Card title="Sistema">
           <div className="text-sm text-muted-foreground mb-3">
             Se o sistema foi atualizado recentemente e as mudanças não apareceram, você pode forçar a atualização limpando o cache do navegador.

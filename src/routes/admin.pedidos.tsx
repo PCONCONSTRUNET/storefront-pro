@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { printOrderReceipt } from "@/lib/printReceipt";
+import { createSuperFreteCartFn as createSuperfreteCartFn, checkoutSuperfreteFn, printSuperfreteTagFn } from "@/lib/superfrete";
 
 export const Route = createFileRoute("/admin/pedidos")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -819,6 +820,62 @@ function Page() {
                 >
                   <Package className="h-4 w-4" /> Imprimir Declaração Correios
                 </button>
+              )}
+              {order.deliveryMethod === "entrega" && settings.superfreteActive && (
+                <>
+                  {!order.superfreteOrderId && (
+                    <button
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          await createSuperfreteCartFn({ data: { orderId: order.id } });
+                          sync();
+                          toast.success("Etiqueta gerada no carrinho (Aguardando Pagamento)");
+                        } catch(e:any) { toast.error(e.message); } finally { setBusy(false); }
+                      }}
+                      className="col-span-2 h-10 rounded-full bg-blue-100 text-blue-800 border border-blue-300 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-blue-200 disabled:opacity-50"
+                    >
+                      <Package className="h-4 w-4" /> Emitir Etiqueta SuperFrete
+                    </button>
+                  )}
+                  {order.superfreteOrderId && !order.trackingCode && (
+                    <button
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          await checkoutSuperfreteFn({ data: { orderId: order.id } });
+                          sync();
+                          toast.success("Checkout SuperFrete realizado (Pago)!");
+                        } catch(e:any) { toast.error(e.message); } finally { setBusy(false); }
+                      }}
+                      className="col-span-2 h-10 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-200 disabled:opacity-50"
+                    >
+                      <DollarSign className="h-4 w-4" /> Finalizar Pagamento (SuperFrete)
+                    </button>
+                  )}
+                  {order.superfreteOrderId && order.trackingCode && (
+                    <button
+                      disabled={busy}
+                      onClick={async () => {
+                        if (order.superfreteLabelUrl) {
+                           window.open(order.superfreteLabelUrl, "_blank");
+                           return;
+                        }
+                        setBusy(true);
+                        try {
+                          const res = await printSuperfreteTagFn({ data: { orderId: order.id } });
+                          sync();
+                          window.open(res.url, "_blank");
+                        } catch(e:any) { toast.error(e.message); } finally { setBusy(false); }
+                      }}
+                      className="col-span-2 h-10 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-300 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-indigo-200 disabled:opacity-50"
+                    >
+                      <Printer className="h-4 w-4" /> Imprimir Etiqueta (PDF SuperFrete)
+                    </button>
+                  )}
+                </>
               )}
               <button
                 onClick={async () => {

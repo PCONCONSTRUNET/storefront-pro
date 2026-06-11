@@ -114,6 +114,8 @@ export type Order = {
   mpPaymentId?: string;
   pixExpiresAt?: string;
   trackingCode?: string;
+  superfreteOrderId?: string;
+  superfreteLabelUrl?: string;
 };
 
 export type Affiliate = {
@@ -204,6 +206,11 @@ export type StoreSettings = {
   shippingRules?: { id: string; state: string; city: string; fee: number }[];
   superfreteActive?: boolean;
   superfreteCepOrigem?: string;
+  superfreteAddressStreet?: string;
+  superfreteAddressNumber?: string;
+  superfreteAddressNeighborhood?: string;
+  superfreteAddressCity?: string;
+  superfreteAddressState?: string;
   shippingFeeActive?: boolean;
 };
 
