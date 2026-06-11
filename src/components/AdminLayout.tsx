@@ -157,8 +157,8 @@ export function AdminLayout({
     };
   }, [isAdmin, sync]);
 
-  // Enquanto aguarda confirmação do servidor, mostra loading (não redireciona)
-  if (!hydrated || adminRevalidating)
+  // Enquanto aguarda a hidratação do IndexedDB, mostra um loading (quase instantâneo)
+  if (!hydrated)
     return (
       <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
         Carregando...
@@ -284,10 +284,10 @@ export function AdminLayout({
           <h1 className="text-lg font-bold truncate">{title}</h1>
           <div className="ml-auto flex items-center gap-2">
             <button
-              onClick={async () => {
+              onClick={() => {
                 setIsRefreshing(true);
-                await sync();
-                setTimeout(() => setIsRefreshing(false), 500);
+                sync().catch(() => {});
+                setTimeout(() => setIsRefreshing(false), 1000);
               }}
               className="h-9 w-9 rounded-full hover:bg-muted grid place-items-center text-muted-foreground hover:text-foreground transition-colors"
               title="Atualizar dados manuamente"
