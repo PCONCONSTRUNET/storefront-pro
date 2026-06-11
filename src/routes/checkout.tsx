@@ -4,6 +4,7 @@ import { fetchInstallmentConfig } from "@/lib/mercadopago";
 import { useStore, selectCartTotals, selectCurrentCustomer } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { StoreLayout } from "@/components/StoreLayout";
+import { CorreiosLogo } from "@/components/CorreiosLogo";
 import { brl } from "@/lib/format";
 import {
   CheckCircle2,
@@ -405,7 +406,7 @@ function Page() {
                                 <div>
                                   <div className="font-semibold text-sm flex items-center gap-2">
                                     {opt.name}
-                                    <img src="/correios.png" className="h-3 object-contain" alt="Correios" />
+                                    <CorreiosLogo className="h-3 object-contain" />
                                   </div>
                                   <div className="text-[11px] text-muted-foreground">Chega em ~{opt.deliveryTime} dias úteis</div>
                                 </div>
