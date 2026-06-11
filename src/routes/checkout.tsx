@@ -26,7 +26,6 @@ import type { CreatePixInput } from "@/lib/mercadopago";
 import mpIcon from "@/assets/mercadopago-icon.png";
 import pixIcon from "@/assets/pix-icon.png";
 import cardIcon from "@/assets/card-icon.png";
-import { CorreiosLogo } from "@/components/CorreiosLogo";
 
 export const Route = createFileRoute("/checkout")({
   component: Page,
