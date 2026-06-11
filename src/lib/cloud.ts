@@ -528,6 +528,14 @@ export const cloud = {
       } catch (e) {
         console.warn("[cloud] stock decrement failed", e);
       }
+      // Notifica o cliente que o pagamento foi aprovado
+      const shortId = String(id).slice(0, 5).toUpperCase();
+      supabase.rpc("notify_customer_order" as any, {
+        _order_id: id,
+        _type: "order_approved",
+        _title: `Pedido #${shortId} confirmado! ✅`,
+        _message: "Recebemos seu pagamento e já estamos separando seu pedido.",
+      }).then(() => {}).catch(() => {});
     }
   },
   async applyOrderStockDecrement(id: string) {
@@ -539,6 +547,35 @@ export const cloud = {
   },
   async updateDeliveryStatus(id: string, status: string) {
     await adminPatch("orders", { id }, { delivery_status: status });
+    // Notifica o cliente sobre a mudança de status
+    const shortId = String(id).slice(0, 5).toUpperCase();
+    const msgs: Record<string, { title: string; message: string }> = {
+      em_separacao: {
+        title: `Pedido #${shortId} em preparação 📦`,
+        message: "Estamos separando e embalando o seu pedido com carinho!",
+      },
+      postado_correios: {
+        title: `Pedido #${shortId} postado nos Correios 🚚`,
+        message: "Seu pedido foi enviado! Acompanhe pelo código de rastreio.",
+      },
+      saiu_para_entrega: {
+        title: `Pedido #${shortId} saiu para entrega 🚛`,
+        message: "Seu pedido está a caminho! Fique de olho.",
+      },
+      entregue: {
+        title: `Pedido #${shortId} entregue! 🎉`,
+        message: "Pedido entregue com sucesso. Aproveite muito! Obrigada pela compra.",
+      },
+    };
+    const notif = msgs[status];
+    if (notif) {
+      supabase.rpc("notify_customer_order" as any, {
+        _order_id: id,
+        _type: "status_update",
+        _title: notif.title,
+        _message: notif.message,
+      }).then(() => {}).catch(() => {});
+    }
   },
   async updateOrderNotes(id: string, notes: string) {
     await adminPatch("orders", { id }, { notes });

@@ -1,7 +1,8 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { Search, Bell, MessageCircle } from "lucide-react";
+import { Search, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useStore, selectCartCount, selectCurrentCustomer } from "@/lib/store";
+import { NotificationBell } from "@/components/NotificationBell";
 import logo from "@/assets/logo-princesa.png";
 
 const STORE_ROUTES_TO_PRELOAD = [
@@ -96,13 +97,9 @@ export function StoreHeader() {
           </div>
         </form>
 
-        <Link
-          to="/perfil"
-          className="hidden md:grid w-10 h-10 place-items-center rounded-full hover:bg-white/15 transition-colors"
-          aria-label="Notificações"
-        >
-          <Bell className="h-5 w-5" />
-        </Link>
+        <div className="hidden md:flex items-center">
+          <NotificationBell />
+        </div>
         <a
           href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
           target="_blank"
@@ -112,6 +109,11 @@ export function StoreHeader() {
         >
           <MessageCircle className="h-5 w-5" />
         </a>
+
+        {/* Notification bell - mobile (before cart) */}
+        <div className="flex md:hidden items-center">
+          <NotificationBell />
+        </div>
 
         <Link
           to="/carrinho"
