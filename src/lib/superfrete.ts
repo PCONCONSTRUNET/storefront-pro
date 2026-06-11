@@ -189,11 +189,16 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
       responseText = await response.text();
 
       if (!response.ok) {
-        console.error("SuperFrete Cart Error:", responseText);
+        // Tenta extrair mensagem legível da resposta da API
         let apiMsg = "";
         try {
           const parsed = JSON.parse(responseText);
-          apiMsg = parsed?.message || parsed?.error || JSON.stringify(parsed);
+          if (parsed?.errors) {
+            // A API retorna um objeto errors com os campos inválidos
+            apiMsg = `${parsed.message || 'Erro'}: ${JSON.stringify(parsed.errors)}`;
+          } else {
+            apiMsg = parsed?.message || parsed?.error || JSON.stringify(parsed);
+          }
         } catch { apiMsg = responseText.slice(0, 200); }
         throw new Error(`SuperFrete: ${apiMsg || response.statusText}`);
       }
