@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Truck, Settings, ShieldAlert } from "lucide-react";
@@ -16,6 +16,13 @@ function Page() {
   const [active, setActive] = useState(settings.superfreteActive !== false);
   const [feeActive, setFeeActive] = useState(settings.shippingFeeActive !== false);
   const [cep, setCep] = useState(settings.superfreteCepOrigem || "");
+
+  useEffect(() => {
+    setDefaultFee(settings.shippingFee.toString());
+    setActive(settings.superfreteActive !== false);
+    setFeeActive(settings.shippingFeeActive !== false);
+    setCep(settings.superfreteCepOrigem || "");
+  }, [settings.shippingFee, settings.superfreteActive, settings.shippingFeeActive, settings.superfreteCepOrigem]);
 
   const saveSettings = () => {
     const val = parseFloat(defaultFee);
