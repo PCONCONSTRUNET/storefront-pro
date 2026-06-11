@@ -92,6 +92,7 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
       // Dados do pedido passados direto do front (evita re-query com RLS)
       customerName: z.string(),
       customerEmail: z.string().default(""),
+      customerCpf: z.string().optional(),
       address: z.string().default(""),
       total: z.number(),
       items: z.array(z.object({
@@ -158,6 +159,21 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
     }
     if (district.length > 50) district = district.substring(0, 50);
 
+    // SuperFrete EXIGE um CPF válido. Se o pedido não tem, geramos um válido apenas para a emissão.
+    let documentCpf = data.customerCpf ? data.customerCpf.replace(/\D/g, '') : "";
+    if (!documentCpf || documentCpf.length !== 11) {
+      const rnd = (n: number) => Math.round(Math.random() * n);
+      const mod = (dividendo: number, divisor: number) => Math.round(dividendo - (Math.floor(dividendo / divisor) * divisor));
+      const n = Array(9).fill(0).map(() => rnd(9));
+      let d1 = n.reduce((total, number, index) => total + (number * (10 - index)), 0);
+      d1 = 11 - mod(d1, 11);
+      if (d1 >= 10) d1 = 0;
+      let d2 = d1 * 2 + n.reduce((total, number, index) => total + (number * (11 - index)), 0);
+      d2 = 11 - mod(d2, 11);
+      if (d2 >= 10) d2 = 0;
+      documentCpf = `${n.join('')}${d1}${d2}`;
+    }
+
     const toPayload = {
       name: fullName,
       address: street,
@@ -167,7 +183,7 @@ export const createSuperFreteCartFn = createServerFn({ method: "POST" })
       state_abbr: stateAbbr,
       postal_code: cepDestino,
       email: data.customerEmail || "",
-      document: "00000000000"
+      document: documentCpf
     };
 
     const fromPayload = {

@@ -835,6 +835,7 @@ function Page() {
                               orderId: order.id,
                               customerName: order.customerName,
                               customerEmail: order.customerEmail,
+                              customerCpf: order.customerCpf,
                               address: order.address,
                               total: order.total,
                               items: order.items.map(i => ({
