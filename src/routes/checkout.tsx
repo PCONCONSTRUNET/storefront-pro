@@ -398,7 +398,6 @@ function Page() {
                       onChange={(v) => setForm({ ...form, state: v })}
                     />
                   </div>
-                  </div>
                   
                   {form.cep.replace(/\D/g, "").length === 8 && (
                     <div className="mt-3">
