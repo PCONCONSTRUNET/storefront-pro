@@ -390,7 +390,7 @@ function Page() {
           {/* Shipping notice */}
           <div className="bg-card p-4 md:rounded-sm shadow-sm mt-4 text-sm flex items-center gap-2 border-y border-border md:border-none">
             <CorreiosLogo className="h-4 w-auto" />
-            <span className="text-muted-foreground">Frete grátis em fretes até R$ 20,00 para pedidos acima de R$ 199,00</span>
+            <span className="text-muted-foreground">Frete grátis para compras acima de R$ 197,90</span>
           </div>
 
         </div>
