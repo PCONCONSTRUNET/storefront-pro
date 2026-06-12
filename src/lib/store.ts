@@ -1702,10 +1702,9 @@ export function hydrateFromCloud(): Promise<void> {
 
       // --- PHASE 1a: CORE PRODUCTS & CATEGORIES ---
       // Baixa apenas o estritamente necessário para desenhar a vitrine na hora.
-      // Omitimos a coluna `images` (que tem 12MB em base64) para a vitrine carregar em 300ms!
       const [catsRes, prodsRes] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-        supabase.from("products").select("id, name, description, price, original_price, category_id, stock, extra, active, variations"),
+        supabase.from("products").select("*"),
       ]);
 
       const coreCategories = (catsRes.data || []).map((r: any) => ({
@@ -1714,8 +1713,8 @@ export function hydrateFromCloud(): Promise<void> {
       const coreProducts = (prodsRes.data || []).map((r: any) => ({
         id: r.id, name: r.name, description: r.description || "", price: Number(r.price) || 0,
         oldPrice: r.original_price != null ? Number(r.original_price) : undefined,
-        image: "", // Placeholder, imagens virão na Phase 1c
-        gallery: [], // Placeholder
+        image: Array.isArray(r.images) && r.images[0] ? r.images[0] : "",
+        gallery: Array.isArray(r.images) ? r.images.slice(1) : [],
         category: r.category_id || "", categories: r.extra?.categories || (r.category_id ? [r.category_id] : []),
         stock: r.stock ?? 0, sku: r.extra?.sku || "", active: r.active !== false, hidden: r.extra?.hidden || false,
         minStock: r.extra?.minStock, sortOrder: r.extra?.sortOrder, variations: Array.isArray(r.variations) ? r.variations : [],
@@ -1741,26 +1740,6 @@ export function hydrateFromCloud(): Promise<void> {
           : s.categories.filter(c => !isSampleCatId(c.id)),
         isCloudSyncing: false, // End skeletons INSTANTLY after products arrive!
       }));
-
-      // --- PHASE 1c: FETCH HEAVY IMAGES ASYNC ---
-      // As imagens estão em base64 no banco (pesam megabytes). Baixamos separadamente para não bloquear a vitrine.
-      supabase.from("products").select("id, images").then(imgRes => {
-        if (imgRes.data) {
-          useStore.setState(s => ({
-            products: s.products.map(p => {
-              const remote = imgRes.data.find((r: any) => r.id === p.id);
-              if (!remote) return p;
-              const hasImages = Array.isArray(remote.images) && remote.images.length > 0;
-              // Se a imagem local é válida e remota também, mas a local já tem os dados (ex: cache offline), mantém
-              return {
-                ...p,
-                image: hasImages ? remote.images[0] : p.image,
-                gallery: hasImages ? remote.images.slice(1) : p.gallery,
-              };
-            })
-          }));
-        }
-      }).catch(err => console.warn("Failed to fetch product images:", err));
 
       // --- PHASE 1b: SECONDARY PUBLIC DATA ---
       // Coisas que não bloqueiam a renderização inicial da vitrine (Avaliações podem ser pesadas).
