@@ -2,33 +2,27 @@ import { useState, useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
-import { Star, Trash2, X, Play, ImageIcon } from "lucide-react";
+import { Star, Trash2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import { cloud } from "@/lib/cloud";
 
 export const Route = createFileRoute("/admin/avaliacoes")({
   component: Page,
 });
 
-type FilterType = "all" | "photos" | "comments" | "1star" | "2star" | "3star" | "4star" | "5star";
+type FilterType = "all" | "comments" | "1star" | "2star" | "3star" | "4star" | "5star";
 
 function Page() {
   const { reviews, products, deleteReview } = useStore();
   const [filter, setFilter] = useState<FilterType>("all");
-  const [photoView, setPhotoView] = useState<string | null>(null);
-  const [videoView, setVideoView] = useState<string | null>(null);
 
   const filteredReviews = useMemo(() => {
     let list = reviews.slice();
-    if (filter === "photos") {
-      list = list.filter((r) => (r.photos?.length || 0) + (r.videos?.length || 0) > 0);
-    } else if (filter === "comments") {
+    if (filter === "comments") {
       list = list.filter((r) => r.comment && r.comment.trim().length > 0);
     } else if (filter.endsWith("star")) {
       const stars = parseInt(filter[0]);
       list = list.filter((r) => r.rating === stars);
     }
-    // Order by date, newest first
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [reviews, filter]);
 
@@ -86,7 +80,6 @@ function Page() {
       {/* Filtros */}
       <div className="flex flex-wrap gap-2 mb-4">
         <FilterChip f="all" label="Todas" count={reviews.length} />
-        <FilterChip f="photos" label={<><ImageIcon className="h-3 w-3" /> Com Mídia</>} count={reviews.filter(r => (r.photos?.length || 0) + (r.videos?.length || 0) > 0).length} />
         <FilterChip f="comments" label="Com Comentário" count={reviews.filter(r => r.comment?.trim()).length} />
         <div className="w-px h-6 bg-border mx-1 self-center hidden sm:block" />
         <FilterChip f="5star" label="5 Estrelas" count={reviews.filter(r => r.rating === 5).length} />
@@ -165,63 +158,12 @@ function Page() {
                   {r.comment && (
                     <p className="mt-3 text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{r.comment}</p>
                   )}
-
-                  {(r.photos?.length > 0 || r.videos?.length > 0) && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {r.photos?.map((src, i) => (
-                        <button
-                          key={`p${i}`}
-                          onClick={() => setPhotoView(src)}
-                          className="w-16 h-16 rounded-xl overflow-hidden bg-muted border border-border hover:opacity-80 transition-opacity shadow-sm"
-                        >
-                          <img src={src} alt="Foto da avaliação" className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                      {r.videos?.map((src, i) => (
-                        <button
-                          key={`v${i}`}
-                          onClick={() => setVideoView(src)}
-                          className="relative w-16 h-16 rounded-xl overflow-hidden bg-black grid place-items-center shadow-sm hover:opacity-80 transition-opacity border border-border"
-                        >
-                          <video src={src} className="w-full h-full object-cover" />
-                          <Play className="absolute inset-0 m-auto h-5 w-5 text-white drop-shadow-md" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             );
           })
         )}
       </div>
-
-      {/* Lightboxes */}
-      {photoView && (
-        <div
-          onClick={() => setPhotoView(null)}
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm grid place-items-center p-4 cursor-zoom-out animate-overlay-in"
-        >
-          <img src={photoView} alt="" className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain animate-modal-in" />
-          <button className="absolute top-4 right-4 w-10 h-10 grid place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      )}
-      
-      {videoView && (
-        <div
-          onClick={() => setVideoView(null)}
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm grid place-items-center p-4 cursor-zoom-out animate-overlay-in"
-        >
-          <div className="relative max-w-full max-h-full rounded-2xl overflow-hidden shadow-2xl animate-modal-in" onClick={e => e.stopPropagation()}>
-            <video src={videoView} controls autoPlay className="w-full h-full max-h-[85vh] object-contain bg-black" />
-          </div>
-          <button className="absolute top-4 right-4 w-10 h-10 grid place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      )}
     </AdminLayout>
   );
 }

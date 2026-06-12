@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
-import { Star, Camera, X, Trash2, ImageIcon, Video, Play, Loader2 } from "lucide-react";
+import { Star, X, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { cloud } from "@/lib/cloud";
@@ -56,17 +56,10 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [videos, setVideos] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [filterStars, setFilterStars] = useState<number | null>(null);
-  const [filterMedia, setFilterMedia] = useState<"all" | "photos" | "comments">("all");
+  const [filterMedia, setFilterMedia] = useState<"all" | "comments">("all");
   const [sort, setSort] = useState<SortKey>("recent");
-  const [photoView, setPhotoView] = useState<string | null>(null);
-  const [videoView, setVideoView] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLInputElement>(null);
 
   const [eligible, setEligible] = useState<{
     eligible: boolean;
@@ -90,24 +83,20 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   const summary = useMemo(() => {
     const total = reviews.length;
-    if (!total) return { avg: 0, total: 0, dist: [0, 0, 0, 0, 0], withPhoto: 0, withComment: 0 };
+    if (!total) return { avg: 0, total: 0, dist: [0, 0, 0, 0, 0], withComment: 0 };
     const dist = [0, 0, 0, 0, 0];
-    let withPhoto = 0;
     let withComment = 0;
     reviews.forEach((r) => {
       dist[5 - r.rating]++;
-      if ((r.photos?.length || 0) + (r.videos?.length || 0) > 0) withPhoto++;
       if (r.comment?.trim()) withComment++;
     });
     const avg = reviews.reduce((a, r) => a + r.rating, 0) / total;
-    return { avg, total, dist, withPhoto, withComment };
+    return { avg, total, dist, withComment };
   }, [reviews]);
 
   const filtered = useMemo(() => {
     let list = reviews.slice();
     if (filterStars) list = list.filter((r) => r.rating === filterStars);
-    if (filterMedia === "photos")
-      list = list.filter((r) => (r.photos?.length || 0) + (r.videos?.length || 0) > 0);
     if (filterMedia === "comments") list = list.filter((r) => r.comment?.trim());
     list.sort((a, b) => {
       if (sort === "recent") return +new Date(b.createdAt) - +new Date(a.createdAt);
@@ -118,45 +107,10 @@ export function ProductReviews({ productId }: { productId: string }) {
     return list;
   }, [reviews, filterStars, filterMedia, sort]);
 
-  const onPickFiles = async (files: FileList | null, kind: "photo" | "video") => {
-    if (!files || !files.length || !currentCustomerId) return;
-    
-    // Total media limit is 1
-    if (photos.length + videos.length >= 1) {
-      toast.error("Você já enviou a quantidade máxima (1 mídia)");
-      return;
-    }
-
-    const limitBytes = kind === "photo" ? 15 * 1024 * 1024 : 50 * 1024 * 1024; // Let photo sizes be larger before compression
-    const file = files[0]; // take only the first one
-
-    if (file.size > limitBytes) {
-      toast.error(kind === "photo" ? "A foto deve ter até 15MB" : "O vídeo deve ter até 50MB");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      let fileToUpload = file;
-      if (kind === "photo") {
-        const { compressImage } = await import("@/lib/imageCompression");
-        fileToUpload = await compressImage(file, 1080, 1080, 0.75);
-      }
-
-      const url = await cloud.uploadReviewMedia(fileToUpload, currentCustomerId);
-      if (kind === "photo") setPhotos([url]); // replace just in case
-      else setVideos([url]);
-    } catch (e: any) {
-      toast.error(e?.message || "Falha ao enviar mídia");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const submit = async () => {
     setSubmitting(true);
     try {
-      const res = await addReview({ productId, rating, comment, photos, videos });
+      const res = await addReview({ productId, rating, comment, photos: [], videos: [] });
       if (!res.ok) {
         toast.error(res.message);
         return;
@@ -164,16 +118,10 @@ export function ProductReviews({ productId }: { productId: string }) {
       toast.success(res.message);
       setRating(0);
       setComment("");
-      setPhotos([]);
-      setVideos([]);
     } finally {
       setSubmitting(false);
     }
   };
-
-  const reviewPhotos = reviews.flatMap((r) =>
-    (r.photos || []).map((src) => ({ src, name: r.customerName })),
-  );
 
   return (
     <section className="mt-10">
@@ -217,9 +165,6 @@ export function ProductReviews({ productId }: { productId: string }) {
           <FilterChip active={filterMedia === "all" && !filterStars} onClick={() => { setFilterMedia("all"); setFilterStars(null); }}>
             Tudo ({summary.total})
           </FilterChip>
-          <FilterChip active={filterMedia === "photos"} onClick={() => setFilterMedia(filterMedia === "photos" ? "all" : "photos")}>
-            Com foto/vídeo ({summary.withPhoto})
-          </FilterChip>
           <FilterChip active={filterMedia === "comments"} onClick={() => setFilterMedia(filterMedia === "comments" ? "all" : "comments")}>
             Com comentário ({summary.withComment})
           </FilterChip>
@@ -238,26 +183,6 @@ export function ProductReviews({ productId }: { productId: string }) {
             <option value="highest">Maior nota</option>
             <option value="lowest">Menor nota</option>
           </select>
-        </div>
-      )}
-
-      {/* Galeria de fotos dos clientes */}
-      {reviewPhotos.length > 0 && (
-        <div className="mt-4">
-          <div className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-            <ImageIcon className="h-4 w-4 text-primary" /> Fotos dos clientes ({reviewPhotos.length})
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {reviewPhotos.slice(0, 12).map((p, i) => (
-              <button
-                key={i}
-                onClick={() => setPhotoView(p.src)}
-                className="shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-muted border border-border hover:opacity-80"
-              >
-                <img src={p.src} alt={`Foto de ${p.name}`} className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
         </div>
       )}
 
@@ -300,77 +225,9 @@ export function ProductReviews({ productId }: { productId: string }) {
               placeholder="Conte como foi sua experiência com o produto..."
               className="w-full px-3 py-2 rounded-xl bg-muted/70 border border-border text-sm outline-none focus:ring-2 focus:ring-primary/50 resize-none"
             />
-            <div className="flex flex-wrap items-center gap-2">
-              {photos.map((src, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted">
-                  <img src={src} alt="" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
-                    className="absolute top-0.5 right-0.5 w-5 h-5 grid place-items-center rounded-full bg-destructive text-destructive-foreground"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              {videos.map((src, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-black grid place-items-center">
-                  <video src={src} className="w-full h-full object-cover" />
-                  <Play className="absolute inset-0 m-auto h-5 w-5 text-white drop-shadow" />
-                  <button
-                    onClick={() => setVideos((v) => v.filter((_, idx) => idx !== i))}
-                    className="absolute top-0.5 right-0.5 w-5 h-5 grid place-items-center rounded-full bg-destructive text-destructive-foreground"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              {photos.length + videos.length < 1 && (
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="w-16 h-16 rounded-lg border-2 border-dashed border-border grid place-items-center text-muted-foreground hover:border-primary hover:text-primary disabled:opacity-50"
-                >
-                  {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
-                </button>
-              )}
-              {photos.length + videos.length < 1 && (
-                <button
-                  type="button"
-                  onClick={() => videoRef.current?.click()}
-                  disabled={uploading}
-                  className="w-16 h-16 rounded-lg border-2 border-dashed border-border grid place-items-center text-muted-foreground hover:border-primary hover:text-primary disabled:opacity-50"
-                >
-                  <Video className="h-5 w-5" />
-                </button>
-              )}
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  onPickFiles(e.target.files, "photo");
-                  e.target.value = "";
-                }}
-              />
-              <input
-                ref={videoRef}
-                type="file"
-                accept="video/*"
-                className="hidden"
-                onChange={(e) => {
-                  onPickFiles(e.target.files, "video");
-                  e.target.value = "";
-                }}
-              />
-              <span className="text-[11px] text-muted-foreground ml-auto">
-                {photos.length + videos.length}/1 mídia
-              </span>
-            </div>
             <button
               onClick={submit}
-              disabled={rating === 0 || submitting || uploading}
+              disabled={rating === 0 || submitting}
               className="w-full h-10 rounded-full gradient-primary text-primary-foreground font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -432,59 +289,11 @@ export function ProductReviews({ productId }: { productId: string }) {
                 {r.comment && (
                   <p className="mt-2 text-sm text-foreground/90 whitespace-pre-wrap">{r.comment}</p>
                 )}
-                {(r.photos?.length > 0 || r.videos?.length > 0) && (
-                  <div className="mt-2 flex gap-2 flex-wrap">
-                    {r.photos?.map((src, i) => (
-                      <button
-                        key={`p${i}`}
-                        onClick={() => setPhotoView(src)}
-                        className="w-20 h-20 rounded-lg overflow-hidden bg-muted hover:opacity-80"
-                      >
-                        <img src={src} alt="" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                    {r.videos?.map((src, i) => (
-                      <button
-                        key={`v${i}`}
-                        onClick={() => setVideoView(src)}
-                        className="relative w-20 h-20 rounded-lg overflow-hidden bg-black grid place-items-center"
-                      >
-                        <video src={src} className="w-full h-full object-cover" />
-                        <Play className="absolute inset-0 m-auto h-6 w-6 text-white drop-shadow" />
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })
         )}
       </div>
-
-      {/* Lightbox foto */}
-      {photoView && (
-        <div
-          onClick={() => setPhotoView(null)}
-          className="fixed inset-0 z-50 bg-black/80 grid place-items-center p-4 cursor-zoom-out"
-        >
-          <img src={photoView} alt="" className="max-w-full max-h-full rounded-xl object-contain" />
-          <button className="absolute top-4 right-4 w-10 h-10 grid place-items-center rounded-full bg-white/10 text-white">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      )}
-      {/* Lightbox vídeo */}
-      {videoView && (
-        <div
-          onClick={() => setVideoView(null)}
-          className="fixed inset-0 z-50 bg-black/90 grid place-items-center p-4"
-        >
-          <video src={videoView} controls autoPlay className="max-w-full max-h-full rounded-xl" />
-          <button className="absolute top-4 right-4 w-10 h-10 grid place-items-center rounded-full bg-white/10 text-white">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      )}
     </section>
   );
 }
