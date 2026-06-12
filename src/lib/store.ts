@@ -1700,11 +1700,50 @@ export function hydrateFromCloud(): Promise<void> {
       const isSampleId = (id: string) => ["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10"].includes(id);
       const isSampleCatId = (id: string) => ["lacos", "tiaras", "bicos", "kits", "elasticos", "presilhas"].includes(id);
 
-      // --- PHASE 1: PUBLIC DATA ---
-      // Leituras públicas rápidas (RLS permite anon SELECT)
-      const [catsRes, prodsRes, coupsRes, revsRes, settingsRes, faqRes] = await Promise.all([
+      // --- PHASE 1a: CORE PRODUCTS & CATEGORIES ---
+      // Baixa apenas o estritamente necessário para desenhar a vitrine na hora.
+      const [catsRes, prodsRes] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order", { ascending: true }),
         supabase.from("products").select("*"),
+      ]);
+
+      const coreCategories = (catsRes.data || []).map((r: any) => ({
+        id: r.id, name: r.name, image: r.image || "🎀", order: r.sort_order ?? 0,
+      }));
+      const coreProducts = (prodsRes.data || []).map((r: any) => ({
+        id: r.id, name: r.name, description: r.description || "", price: Number(r.price) || 0,
+        oldPrice: r.original_price != null ? Number(r.original_price) : undefined,
+        image: Array.isArray(r.images) && r.images[0] ? r.images[0] : "",
+        gallery: Array.isArray(r.images) ? r.images.slice(1) : [],
+        category: r.category_id || "", categories: r.extra?.categories || (r.category_id ? [r.category_id] : []),
+        stock: r.stock ?? 0, sku: r.extra?.sku || "", active: r.active !== false, hidden: r.extra?.hidden || false,
+        minStock: r.extra?.minStock, sortOrder: r.extra?.sortOrder, variations: Array.isArray(r.variations) ? r.variations : [],
+      }));
+
+      const realProducts = coreProducts.filter(p => !isSampleId(p.id));
+      const realCategories = coreCategories.filter(c => !isSampleCatId(c.id));
+
+      if (realProducts.length !== coreProducts.length) {
+         coreProducts.filter(p => isSampleId(p.id)).forEach(p => cloud.deleteProduct(p.id).catch(() => {}));
+      }
+      if (realCategories.length !== coreCategories.length) {
+         coreCategories.filter(c => isSampleCatId(c.id)).forEach(c => cloud.deleteCategory(c.id).catch(() => {}));
+      }
+
+      // ⚡ Update store immediately with products (Unblocks Skeletons!)
+      useStore.setState(s => ({
+        products: realProducts.length
+          ? mergeById(s.products.filter(p => !isSampleId(p.id)), realProducts)
+          : s.products.filter(p => !isSampleId(p.id)),
+        categories: realCategories.length
+          ? mergeById(s.categories.filter(c => !isSampleCatId(c.id)), realCategories)
+          : s.categories.filter(c => !isSampleCatId(c.id)),
+        isCloudSyncing: false, // End skeletons INSTANTLY after products arrive!
+      }));
+
+      // --- PHASE 1b: SECONDARY PUBLIC DATA ---
+      // Coisas que não bloqueiam a renderização inicial da vitrine (Avaliações podem ser pesadas).
+      const [coupsRes, revsRes, settingsRes, faqRes] = await Promise.all([
         supabase.from("coupons").select("*"),
         supabase.from("reviews").select("*").order("created_at", { ascending: false }),
         supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
@@ -1712,18 +1751,6 @@ export function hydrateFromCloud(): Promise<void> {
       ]);
 
       const publicSnap = {
-        categories: (catsRes.data || []).map((r: any) => ({
-          id: r.id, name: r.name, image: r.image || "🎀", order: r.sort_order ?? 0,
-        })),
-        products: (prodsRes.data || []).map((r: any) => ({
-          id: r.id, name: r.name, description: r.description || "", price: Number(r.price) || 0,
-          oldPrice: r.original_price != null ? Number(r.original_price) : undefined,
-          image: Array.isArray(r.images) && r.images[0] ? r.images[0] : "",
-          gallery: Array.isArray(r.images) ? r.images.slice(1) : [],
-          category: r.category_id || "", categories: r.extra?.categories || (r.category_id ? [r.category_id] : []),
-          stock: r.stock ?? 0, sku: r.extra?.sku || "", active: r.active !== false, hidden: r.extra?.hidden || false,
-          minStock: r.extra?.minStock, sortOrder: r.extra?.sortOrder, variations: Array.isArray(r.variations) ? r.variations : [],
-        })),
         coupons: (coupsRes.data || []).map((r: any) => ({
           code: r.code, type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
           value: Number(r.value) || 0, validUntil: r.expires_at || "", maxUses: r.extra?.maxUses ?? 999, usedCount: r.extra?.usedCount ?? 0,
@@ -1741,24 +1768,7 @@ export function hydrateFromCloud(): Promise<void> {
         })),
       };
 
-      const realProducts = publicSnap.products.filter(p => !isSampleId(p.id));
-      const realCategories = publicSnap.categories.filter(c => !isSampleCatId(c.id));
-
-      if (realProducts.length !== publicSnap.products.length) {
-         publicSnap.products.filter(p => isSampleId(p.id)).forEach(p => cloud.deleteProduct(p.id).catch(() => {}));
-      }
-      if (realCategories.length !== publicSnap.categories.length) {
-         publicSnap.categories.filter(c => isSampleCatId(c.id)).forEach(c => cloud.deleteCategory(c.id).catch(() => {}));
-      }
-
-      // Update store immediately with public data (unblocks UI for products!)
       useStore.setState(s => ({
-        products: realProducts.length
-          ? mergeById(s.products.filter(p => !isSampleId(p.id)), realProducts)
-          : s.products.filter(p => !isSampleId(p.id)),
-        categories: realCategories.length
-          ? mergeById(s.categories.filter(c => !isSampleCatId(c.id)), realCategories)
-          : s.categories.filter(c => !isSampleCatId(c.id)),
         coupons: publicSnap.coupons.length
           ? mergeByCode(s.coupons, publicSnap.coupons)
           : s.coupons,
@@ -1767,7 +1777,6 @@ export function hydrateFromCloud(): Promise<void> {
         settings: publicSnap.settings
           ? ({ ...s.settings, ...publicSnap.settings } as StoreSettings)
           : s.settings,
-        isCloudSyncing: false, // End skeletons as products are ready
       }));
 
       // --- PHASE 2: ADMIN DATA ---
