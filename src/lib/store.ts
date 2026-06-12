@@ -296,6 +296,8 @@ type AppState = {
   activityLogs: ActivityLog[];
   referralId: string | null;
   setReferralId: (id: string | null) => void;
+  isCloudSyncing: boolean;
+  setCloudSyncing: (val: boolean) => void;
 
   refreshSession: (kind: SessionKind) => void;
   findAccountByEmail: (
@@ -493,7 +495,9 @@ export const useStore = create<AppState>()(
       activityLogs: [],
       referralId: null,
       sessions: { admin: null, customer: null, affiliate: null },
+      isCloudSyncing: false,
 
+      setCloudSyncing: (val) => set({ isCloudSyncing: val }),
       setReferralId: (id) => set({ referralId: id }),
 
       refreshSession: (kind) => {
@@ -1650,6 +1654,7 @@ let _hydratingFromCloud: Promise<void> | null = null;
 export function hydrateFromCloud(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (_hydratingFromCloud) return _hydratingFromCloud;
+  useStore.getState().setCloudSyncing(true);
   _hydratingFromCloud = (async () => {
     try {
       // CRITICAL: Aguarda a hidratação do IndexedDB terminar ANTES de buscar
@@ -1808,6 +1813,8 @@ export function hydrateFromCloud(): Promise<void> {
       }
     } catch (e) {
       console.warn("[hydrateFromCloud] failed", e);
+    } finally {
+      useStore.getState().setCloudSyncing(false);
     }
   })();
   return _hydratingFromCloud;

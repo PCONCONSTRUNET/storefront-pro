@@ -57,8 +57,9 @@ function useCountdown(hours: number) {
 }
 
 function Home() {
-  const { products, categories, settings, coupons } = useStore();
+  const { products, categories, settings, coupons, isCloudSyncing } = useStore();
   const hydrated = useStoreHydrated();
+  const showSkeletons = !hydrated || (isCloudSyncing && products.length === 0);
   const sortedCategories = useMemo(
     () => [...categories].sort((a, b) => (a.order ?? 999) - (b.order ?? 999)),
     [categories],
@@ -207,7 +208,7 @@ function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 p-2 md:p-3">
-              {!hydrated ? (
+              {showSkeletons ? (
                 <ProductGridSkeleton count={4} />
               ) : (
                 flash.map((p) => <ProductCard key={p.id} product={p} />)
@@ -219,7 +220,7 @@ function Home() {
 
       {/* Products by Category */}
       <section className="mt-4 max-w-6xl mx-auto pb-6 space-y-8">
-        {!hydrated ? (
+        {showSkeletons ? (
           <div className="mx-3 md:mx-4">
             <ProductGridSkeleton count={10} />
           </div>
