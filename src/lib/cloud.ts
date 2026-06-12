@@ -315,6 +315,41 @@ export const cloud = {
   },
 
   async upsertProduct(p: Product) {
+    // Intercept base64 images and upload to storage to keep the database small
+    const processImage = async (img: string, idx: number) => {
+      if (!img || !img.startsWith("data:image")) return img;
+      try {
+        const match = img.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (!match) return img;
+        const mime = match[1];
+        const data = match[2];
+        const ext = mime.split('/')[1] || 'png';
+        const path = `products/${p.id}_${idx}_${Date.now()}.${ext}`;
+        
+        const byteCharacters = atob(data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mime });
+
+        const { error } = await supabase.storage.from('review-media').upload(path, blob, { contentType: mime, upsert: true });
+        if (error) {
+          console.error("Failed to upload product image", error);
+          return img;
+        }
+        const { data: pubData } = supabase.storage.from('review-media').getPublicUrl(path);
+        return pubData.publicUrl;
+      } catch (e) {
+        console.error("Error processing base64 image", e);
+        return img;
+      }
+    };
+
+    const newImage = await processImage(p.image, 0);
+    const newGallery = await Promise.all((p.gallery || []).map((img, i) => processImage(img, i + 1)));
+
     await adminUpsert(
       "products",
       {
@@ -324,7 +359,7 @@ export const cloud = {
         price: p.price,
         original_price: p.oldPrice ?? null,
         description: p.description,
-        images: [p.image, ...(p.gallery || [])].filter(Boolean),
+        images: [newImage, ...newGallery].filter(Boolean),
         category_id: p.category,
         stock: p.stock,
         active: p.active,
