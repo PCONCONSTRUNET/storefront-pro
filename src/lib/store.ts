@@ -1657,46 +1657,31 @@ export function hydrateFromCloud(): Promise<void> {
   useStore.getState().setCloudSyncing(true);
   _hydratingFromCloud = (async () => {
     try {
-      // CRITICAL: Aguarda a hidratação do IndexedDB terminar ANTES de buscar
-      // dados na nuvem. Sem isso, uma race condition fazia o cloud chegar antes
-      // do IDB, resultando em cur.customers = [] e deslogando o cliente.
       if (!useStore.persist.hasHydrated()) {
         await new Promise<void>((resolve) => {
           const unsub = useStore.persist.onFinishHydration(() => {
             unsub();
             resolve();
           });
-          // safety timeout: se o IDB demorar mais de 3s, continua mesmo assim
           setTimeout(resolve, 3000);
         });
       }
 
-      const snap = await fetchCloudSnapshot();
       const cur = useStore.getState();
-      // Merge by id: prefer cloud rows, keep any local-only items the cloud doesn't know yet.
       const mergeById = <T extends { id: string }>(local: T[], remote: T[]) => {
         const map = new Map<string, T>();
         local.forEach((x) => map.set(x.id, x));
         remote.forEach((x) => {
           const loc = map.get(x.id);
           if (loc) {
-            // Standard fallback
             const isPlaceholder = (url: string) =>
-              !url ||
-              url === "" ||
-              url === "null" ||
-              (!url.startsWith("http") &&
-                !url.startsWith("/") &&
-                !url.startsWith("data:"));
+              !url || url === "" || url === "null" ||
+              (!url.startsWith("http") && !url.startsWith("/") && !url.startsWith("data:"));
 
             if (isPlaceholder((x as any).image)) {
               (x as any).image = (loc as any).image;
             }
-            if (
-              !(x as any).gallery ||
-              (x as any).gallery.length === 0 ||
-              isPlaceholder((x as any).gallery[0])
-            ) {
+            if (!(x as any).gallery || (x as any).gallery.length === 0 || isPlaceholder((x as any).gallery[0])) {
               (x as any).gallery = (loc as any).gallery;
             }
           }
@@ -1704,111 +1689,159 @@ export function hydrateFromCloud(): Promise<void> {
         });
         return Array.from(map.values());
       };
-      const mergeByCode = <T extends { code: string }>(
-        local: T[],
-        remote: T[],
-      ) => {
+
+      const mergeByCode = <T extends { code: string }>(local: T[], remote: T[]) => {
         const map = new Map<string, T>();
         local.forEach((x) => map.set(x.code, x));
         remote.forEach((x) => map.set(x.code, x));
         return Array.from(map.values());
       };
-      // TEMPORARY CLEANUP: Exclui produtos e categorias de demonstração que ficaram no banco de dados.
+
       const isSampleId = (id: string) => ["p1","p2","p3","p4","p5","p6","p7","p8","p9","p10"].includes(id);
       const isSampleCatId = (id: string) => ["lacos", "tiaras", "bicos", "kits", "elasticos", "presilhas"].includes(id);
-      
-      const realProducts = snap.products.filter(p => !isSampleId(p.id));
-      const realCategories = snap.categories.filter(c => !isSampleCatId(c.id));
 
-      if (realProducts.length !== snap.products.length) {
-         snap.products.filter(p => isSampleId(p.id)).forEach(p => cloud.deleteProduct(p.id).catch(() => {}));
+      // --- PHASE 1: PUBLIC DATA ---
+      // Leituras públicas rápidas (RLS permite anon SELECT)
+      const [catsRes, prodsRes, coupsRes, revsRes, settingsRes, faqRes] = await Promise.all([
+        supabase.from("categories").select("*").order("sort_order", { ascending: true }),
+        supabase.from("products").select("*"),
+        supabase.from("coupons").select("*"),
+        supabase.from("reviews").select("*").order("created_at", { ascending: false }),
+        supabase.from("store_settings").select("data").eq("id", 1).maybeSingle(),
+        supabase.from("faq_items").select("*").order("sort_order", { ascending: true }),
+      ]);
+
+      const publicSnap = {
+        categories: (catsRes.data || []).map((r: any) => ({
+          id: r.id, name: r.name, image: r.image || "🎀", order: r.sort_order ?? 0,
+        })),
+        products: (prodsRes.data || []).map((r: any) => ({
+          id: r.id, name: r.name, description: r.description || "", price: Number(r.price) || 0,
+          oldPrice: r.original_price != null ? Number(r.original_price) : undefined,
+          image: Array.isArray(r.images) && r.images[0] ? r.images[0] : "",
+          gallery: Array.isArray(r.images) ? r.images.slice(1) : [],
+          category: r.category_id || "", categories: r.extra?.categories || (r.category_id ? [r.category_id] : []),
+          stock: r.stock ?? 0, sku: r.extra?.sku || "", active: r.active !== false, hidden: r.extra?.hidden || false,
+          minStock: r.extra?.minStock, sortOrder: r.extra?.sortOrder, variations: Array.isArray(r.variations) ? r.variations : [],
+        })),
+        coupons: (coupsRes.data || []).map((r: any) => ({
+          code: r.code, type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
+          value: Number(r.value) || 0, validUntil: r.expires_at || "", maxUses: r.extra?.maxUses ?? 999, usedCount: r.extra?.usedCount ?? 0,
+          minOrder: Number(r.min_subtotal) || 0, active: r.active !== false,
+        })),
+        reviews: (revsRes.data || []).map((r: any) => ({
+          id: r.id, productId: r.product_id, customerId: r.customer_id || "", customerName: r.customer_name,
+          rating: r.rating, comment: r.comment || "", photos: Array.isArray(r.photos) ? r.photos : [],
+          videos: Array.isArray(r.videos) ? r.videos : [], verified: !!r.verified, variation: r.variation || undefined,
+          orderId: r.order_id || undefined, createdAt: r.created_at,
+        })),
+        settings: (settingsRes.data?.data as any) || null,
+        faq: (faqRes.data || []).map((r: any) => ({
+          id: r.id, category: r.category, question: r.question, answer: r.answer, sortOrder: r.sort_order,
+        })),
+      };
+
+      const realProducts = publicSnap.products.filter(p => !isSampleId(p.id));
+      const realCategories = publicSnap.categories.filter(c => !isSampleCatId(c.id));
+
+      if (realProducts.length !== publicSnap.products.length) {
+         publicSnap.products.filter(p => isSampleId(p.id)).forEach(p => cloud.deleteProduct(p.id).catch(() => {}));
       }
-      if (realCategories.length !== snap.categories.length) {
-         snap.categories.filter(c => isSampleCatId(c.id)).forEach(c => cloud.deleteCategory(c.id).catch(() => {}));
+      if (realCategories.length !== publicSnap.categories.length) {
+         publicSnap.categories.filter(c => isSampleCatId(c.id)).forEach(c => cloud.deleteCategory(c.id).catch(() => {}));
       }
 
-      // SEGURANÇA: para não-admins, snap.customers e snap.orders vêm vazios.
-      // Nunca sobrescreva a lista local com uma lista vazia — isso deslogaria o cliente.
-      const isAdmin = cur.isAdmin;
-      const mergedCustomers = isAdmin && snap.customers.length > 0
-        ? mergeById(cur.customers, snap.customers)
-        : cur.customers; // preserva 100% os dados locais do cliente
-
-      const mergedOrders = isAdmin && snap.orders.length > 0
-        ? mergeById(cur.orders, snap.orders)
-        : cur.orders;
-
-      const mergedAffiliates = isAdmin && snap.affiliates.length > 0
-        ? mergeById(cur.affiliates, snap.affiliates)
-        : cur.affiliates;
-
-      const mergedAffiliateSales = isAdmin && snap.affiliateSales.length > 0
-        ? mergeById(cur.affiliateSales, snap.affiliateSales)
-        : cur.affiliateSales;
-
-      const mergedTransactions = isAdmin && snap.transactions.length > 0
-        ? mergeById(cur.transactions, snap.transactions)
-        : cur.transactions;
-
-      const mergedWaitlist = isAdmin && snap.waitlist.length > 0
-        ? mergeById(cur.waitlist, snap.waitlist)
-        : cur.waitlist;
-
-      const mergedActivityLogs = isAdmin && snap.activityLogs.length > 0
-        ? mergeById(cur.activityLogs, snap.activityLogs)
-        : cur.activityLogs;
-
-      useStore.setState({
-        customers: mergedCustomers,
+      // Update store immediately with public data (unblocks UI for products!)
+      useStore.setState(s => ({
         products: realProducts.length
-          ? mergeById(cur.products.filter(p => !isSampleId(p.id)), realProducts)
-          : cur.products.filter(p => !isSampleId(p.id)),
+          ? mergeById(s.products.filter(p => !isSampleId(p.id)), realProducts)
+          : s.products.filter(p => !isSampleId(p.id)),
         categories: realCategories.length
-          ? mergeById(cur.categories.filter(c => !isSampleCatId(c.id)), realCategories)
-          : cur.categories.filter(c => !isSampleCatId(c.id)),
-        coupons: snap.coupons.length
-          ? mergeByCode(cur.coupons, snap.coupons)
-          : cur.coupons,
-        affiliates: mergedAffiliates,
-        affiliateSales: mergedAffiliateSales,
-        transactions: mergedTransactions,
-        reviews: mergeById(cur.reviews, snap.reviews),
-        orders: mergedOrders,
-        faq: mergeById(cur.faq, snap.faq),
-        waitlist: mergedWaitlist,
-        activityLogs: mergedActivityLogs,
-        settings: snap.settings
-          ? ({ ...cur.settings, ...snap.settings } as StoreSettings)
-          : cur.settings,
-      });
+          ? mergeById(s.categories.filter(c => !isSampleCatId(c.id)), realCategories)
+          : s.categories.filter(c => !isSampleCatId(c.id)),
+        coupons: publicSnap.coupons.length
+          ? mergeByCode(s.coupons, publicSnap.coupons)
+          : s.coupons,
+        reviews: mergeById(s.reviews, publicSnap.reviews),
+        faq: mergeById(s.faq, publicSnap.faq),
+        settings: publicSnap.settings
+          ? ({ ...s.settings, ...publicSnap.settings } as StoreSettings)
+          : s.settings,
+        isCloudSyncing: false, // End skeletons as products are ready
+      }));
+
+      // --- PHASE 2: ADMIN DATA ---
+      const isAdmin = useStore.getState().isAdmin;
+      if (isAdmin) {
+        try {
+          const { adminReadTableFn } = await import("./admin.functions");
+          const read = async (table: "customers" | "affiliates" | "affiliate_sales" | "transactions" | "orders" | "product_waitlist" | "activity_logs", orderBy?: string, orderDir: "asc" | "desc" = "desc", limit = 1000) => {
+            const r = await adminReadTableFn({ data: { table: table as any, limit, orderBy: orderBy ?? null, orderDir } });
+            if (!r.ok) throw new Error(r.message || "admin read failed");
+            return r.rows as Record<string, unknown>[];
+          };
+
+          const [customers, affiliates, affiliateSales, transactions, orders, waitlist, activityLogs] = await Promise.all([
+            read("customers"), read("affiliates"), read("affiliate_sales", "created_at", "desc"),
+            read("transactions", "date", "desc"), read("orders", "created_at", "desc", 500),
+            read("product_waitlist"), read("activity_logs", "created_at", "desc", 200),
+          ]);
+
+          const adminSnap = {
+            customers: customers.map((r: any) => ({
+              id: r.id, name: r.name, email: r.email, phone: r.phone || "", password: "", address: r.address || undefined,
+              addresses: Array.isArray(r.addresses) ? r.addresses : [], favorites: Array.isArray(r.favorites) ? r.favorites : [], createdAt: r.created_at,
+            })),
+            affiliates: affiliates.map((r: any) => ({
+              id: r.id, name: r.name, email: r.email, password: "", phone: r.phone || "", commissionType: r.commission_type === "fixed" ? "fixed" : "percent",
+              commissionValue: Number(r.commission_value) || 0, active: r.active !== false, createdAt: r.created_at,
+            })),
+            affiliateSales: affiliateSales.map((r: any) => ({
+              id: r.id, affiliateId: r.affiliate_id, customerName: r.customer_name, customerPhone: r.customer_phone || undefined,
+              productDescription: r.product_description, saleValue: Number(r.sale_value) || 0, commissionEarned: Number(r.commission_earned) || 0,
+              status: (r.status as any) || "pendente", notes: r.notes || undefined, createdAt: r.created_at,
+            })),
+            transactions: transactions.map((r: any) => ({
+              id: r.id, kind: r.kind, category: r.category, description: r.description, amount: Number(r.amount) || 0,
+              date: r.date, affiliateId: r.affiliate_id || undefined, productSummary: r.product_summary || undefined, notes: r.notes || undefined, createdAt: r.created_at,
+            })),
+            orders: orders.map((r: any) => ({
+              id: r.id, customerId: "guest", customerName: r.customer_name, customerEmail: r.customer_email, customerPhone: r.customer_phone,
+              customerCpf: r.customer_document || r.customer_cpf, items: Array.isArray(r.items) ? r.items : [], subtotal: Number(r.subtotal) || 0,
+              discount: Number(r.discount) || 0, shipping: Number(r.shipping) || 0, total: Number(r.total) || 0, paymentMethod: r.payment_method,
+              deliveryMethod: r.delivery_method, status: normalizeOrderStatus(r.payment_status), deliveryStatus: normalizeDeliveryStatus(r.delivery_status),
+              createdAt: r.created_at, address: r.address || "", notes: r.notes || undefined, paymentStatus: r.payment_status || undefined,
+              paidAt: r.paid_at || undefined, mpPaymentId: r.mp_payment_id || undefined, pixExpiresAt: r.pix_expires_at || undefined, trackingCode: r.tracking_code || undefined,
+            })),
+            waitlist: waitlist.map((r: any) => ({
+              id: r.id, productId: r.product_id, email: r.email, customerId: r.customer_id || undefined, notified: r.notified, createdAt: r.created_at,
+            })),
+            activityLogs: activityLogs.map((r: any) => ({
+              id: r.id, action: r.action, category: r.category as any, description: r.description, metadata: r.metadata, userId: r.user_id || undefined, createdAt: r.created_at,
+            })),
+          };
+
+          // Update store with Admin Data
+          useStore.setState(s => ({
+            customers: adminSnap.customers.length > 0 ? mergeById(s.customers, adminSnap.customers) : s.customers,
+            orders: adminSnap.orders.length > 0 ? mergeById(s.orders, adminSnap.orders) : s.orders,
+            affiliates: adminSnap.affiliates.length > 0 ? mergeById(s.affiliates, adminSnap.affiliates) : s.affiliates,
+            affiliateSales: adminSnap.affiliateSales.length > 0 ? mergeById(s.affiliateSales, adminSnap.affiliateSales) : s.affiliateSales,
+            transactions: adminSnap.transactions.length > 0 ? mergeById(s.transactions, adminSnap.transactions) : s.transactions,
+            waitlist: adminSnap.waitlist.length > 0 ? mergeById(s.waitlist, adminSnap.waitlist) : s.waitlist,
+            activityLogs: adminSnap.activityLogs.length > 0 ? mergeById(s.activityLogs, adminSnap.activityLogs) : s.activityLogs,
+          }));
+
+        } catch (err) {
+          console.warn("[hydrateFromCloud] admin fetch failed", err);
+        }
+      }
+
       // One-shot push of any local-only items so legacy localStorage data lands in the cloud.
       const pushed = "cloud_initial_push_v1";
       if (!localStorage.getItem(pushed)) {
-        cur.customers
-          .filter((c) => !snap.customers.find((x) => x.id === c.id))
-          .forEach((c) => cloud.upsertCustomer(c));
-        cur.products
-          .filter((p) => !snap.products.find((x) => x.id === p.id))
-          .forEach((p) => cloud.upsertProduct(p));
-        cur.categories
-          .filter((c) => !snap.categories.find((x) => x.id === c.id))
-          .forEach((c) => cloud.upsertCategory(c));
-        cur.coupons
-          .filter((c) => !snap.coupons.find((x) => x.code === c.code))
-          .forEach((c) => cloud.upsertCoupon(c));
-        cur.affiliates
-          .filter((a) => !snap.affiliates.find((x) => x.id === a.id))
-          .forEach((a) => cloud.upsertAffiliate(a));
-        cur.affiliateSales
-          .filter((s) => !snap.affiliateSales.find((x) => x.id === s.id))
-          .forEach((s) => cloud.upsertAffiliateSale(s));
-        cur.transactions
-          .filter((t) => !snap.transactions.find((x) => x.id === t.id))
-          .forEach((t) => cloud.upsertTransaction(t));
-        cur.reviews
-          .filter((r) => !snap.reviews.find((x) => x.id === r.id))
-          .forEach((r) => cloud.upsertReview(r));
-        if (!snap.settings) cloud.upsertSettings(cur.settings);
+        const s = useStore.getState();
+        s.customers.filter((c) => !c.id.includes("-")).forEach((c) => cloud.upsertCustomer(c)); // Simplified check for legacy local IDs
         localStorage.setItem(pushed, "1");
       }
     } catch (e) {
