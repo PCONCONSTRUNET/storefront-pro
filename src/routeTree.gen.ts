@@ -48,7 +48,6 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
 import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
-import { Route as AdminChatbotRouteImport } from './routes/admin.chatbot'
 import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
 import { Route as AdminBiRouteImport } from './routes/admin.bi'
 import { Route as AdminAvaliacoesRouteImport } from './routes/admin.avaliacoes'
@@ -257,11 +256,6 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
   path: '/admin/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminChatbotRoute = AdminChatbotRouteImport.update({
-  id: '/admin/chatbot',
-  path: '/admin/chatbot',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
   id: '/admin/categorias',
   path: '/admin/categorias',
@@ -340,7 +334,6 @@ export interface FileRoutesByFullPath {
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
-  '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
@@ -394,7 +387,6 @@ export interface FileRoutesByTo {
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
-  '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
@@ -449,7 +441,6 @@ export interface FileRoutesById {
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
   '/admin/categorias': typeof AdminCategoriasRoute
-  '/admin/chatbot': typeof AdminChatbotRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/configuracoes': typeof AdminConfiguracoesRoute
   '/admin/cupons': typeof AdminCuponsRoute
@@ -505,7 +496,6 @@ export interface FileRouteTypes {
     | '/admin/avaliacoes'
     | '/admin/bi'
     | '/admin/categorias'
-    | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/cupons'
@@ -559,7 +549,6 @@ export interface FileRouteTypes {
     | '/admin/avaliacoes'
     | '/admin/bi'
     | '/admin/categorias'
-    | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/cupons'
@@ -613,7 +602,6 @@ export interface FileRouteTypes {
     | '/admin/avaliacoes'
     | '/admin/bi'
     | '/admin/categorias'
-    | '/admin/chatbot'
     | '/admin/clientes'
     | '/admin/configuracoes'
     | '/admin/cupons'
@@ -668,7 +656,6 @@ export interface RootRouteChildren {
   AdminAvaliacoesRoute: typeof AdminAvaliacoesRoute
   AdminBiRoute: typeof AdminBiRoute
   AdminCategoriasRoute: typeof AdminCategoriasRoute
-  AdminChatbotRoute: typeof AdminChatbotRoute
   AdminClientesRoute: typeof AdminClientesRoute
   AdminConfiguracoesRoute: typeof AdminConfiguracoesRoute
   AdminCuponsRoute: typeof AdminCuponsRoute
@@ -980,13 +967,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/chatbot': {
-      id: '/admin/chatbot'
-      path: '/admin/chatbot'
-      fullPath: '/admin/chatbot'
-      preLoaderRoute: typeof AdminChatbotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/categorias': {
       id: '/admin/categorias'
       path: '/admin/categorias'
@@ -1103,7 +1083,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAvaliacoesRoute: AdminAvaliacoesRoute,
   AdminBiRoute: AdminBiRoute,
   AdminCategoriasRoute: AdminCategoriasRoute,
-  AdminChatbotRoute: AdminChatbotRoute,
   AdminClientesRoute: AdminClientesRoute,
   AdminConfiguracoesRoute: AdminConfiguracoesRoute,
   AdminCuponsRoute: AdminCuponsRoute,
@@ -1142,3 +1121,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
