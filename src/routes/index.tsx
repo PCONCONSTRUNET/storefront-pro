@@ -41,25 +41,6 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-function useCountdown(hours: number) {
-  // Use a fixed initial value (0) for SSR, then update after mount to avoid React hydration error #418
-  const [mounted, setMounted] = useState(false);
-  const [end] = useState(() => Date.now() + hours * 3600 * 1000);
-  const [now, setNow] = useState(0);
-  useEffect(() => {
-    setMounted(true);
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  if (!mounted) return { h: "00", m: "00", s: "00" };
-  const diff = Math.max(0, end - now);
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return { h: pad(h), m: pad(m), s: pad(s) };
-}
 
 function Home() {
   const { products, categories, settings, coupons, isCloudSyncing } = useStore();
@@ -87,8 +68,6 @@ function Home() {
     () => sortedProducts.filter((p) => p.active && !p.hidden),
     [sortedProducts],
   );
-  const { h, m, s } = useCountdown(8);
-
   const banners = [
     {
       icon: Crown,
@@ -191,23 +170,9 @@ function Home() {
               <h2 className="font-bold text-sm md:text-lg uppercase tracking-wide">
                 Ofertas Relâmpago
               </h2>
-              <div className="flex items-center gap-1 ml-auto md:ml-2 text-xs">
-                <span className="hidden md:inline opacity-90">Termina em</span>
-                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">
-                  {h}
-                </span>
-                <span className="font-bold">:</span>
-                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">
-                  {m}
-                </span>
-                <span className="font-bold">:</span>
-                <span className="bg-background text-foreground font-bold px-1.5 py-0.5 rounded font-mono text-[11px] md:text-sm">
-                  {s}
-                </span>
-              </div>
               <Link
                 to="/categorias"
-                className="hidden md:inline-flex items-center text-xs font-semibold hover:underline ml-2"
+                className="ml-auto inline-flex items-center text-xs font-semibold hover:underline"
               >
                 Ver todas <ChevronRight className="h-3 w-3" />
               </Link>
