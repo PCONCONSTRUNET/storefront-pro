@@ -42,12 +42,17 @@ export const Route = createFileRoute("/")({
 });
 
 function useCountdown(hours: number) {
+  // Use a fixed initial value (0) for SSR, then update after mount to avoid React hydration error #418
+  const [mounted, setMounted] = useState(false);
   const [end] = useState(() => Date.now() + hours * 3600 * 1000);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   useEffect(() => {
+    setMounted(true);
+    setNow(Date.now());
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
+  if (!mounted) return { h: "00", m: "00", s: "00" };
   const diff = Math.max(0, end - now);
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);

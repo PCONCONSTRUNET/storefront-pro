@@ -47,21 +47,30 @@ export function NotificationBell() {
     if (!customer?.email) return;
     fetchNotifications();
     
-    // Inscrição em tempo real (Realtime WebSockets) em vez de ficar perguntando a cada 30s
+    // Inscrição em tempo real — protegida contra falhas de permissão/RLS
     const emailFilter = customer.email.toLowerCase().trim();
-    const sub = supabase
-      .channel('customer_notifs_realtime')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'customer_notifications', filter: `customer_email=eq.${emailFilter}` },
-        () => {
-          fetchNotifications();
-        }
-      )
-      .subscribe();
+    let sub: ReturnType<typeof supabase.channel> | null = null;
+    try {
+      sub = supabase
+        .channel('customer_notifs_realtime_' + emailFilter.replace(/[^a-z0-9]/g, '_'))
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'customer_notifications', filter: `customer_email=eq.${emailFilter}` },
+          () => {
+            fetchNotifications();
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.warn('[NotificationBell] Realtime subscription failed — falling back to polling');
+          }
+        });
+    } catch (e) {
+      console.warn('[NotificationBell] Realtime setup error:', e);
+    }
 
     return () => {
-      supabase.removeChannel(sub);
+      if (sub) supabase.removeChannel(sub);
     };
   }, [customer?.email]);
 
