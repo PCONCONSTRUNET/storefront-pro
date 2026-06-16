@@ -117,12 +117,27 @@ function Page() {
                         canvas.height = size;
                         const ctx = canvas.getContext("2d");
                         if (ctx) {
-                           // manter aspecto
                            const scale = Math.min(size / img.width, size / img.height);
                            const w = img.width * scale;
                            const h = img.height * scale;
                            ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-                           setEditing({ ...editing, image: canvas.toDataURL("image/webp") });
+                           canvas.toBlob(async (blob) => {
+                             if (!blob) {
+                               setEditing({ ...editing, image: ev.target?.result as string });
+                               return;
+                             }
+                             try {
+                               const { supabase } = await import("@/integrations/supabase/client");
+                               const fileName = `cat_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.webp`;
+                               const { error } = await supabase.storage.from("products-media").upload(fileName, blob, { contentType: "image/webp" });
+                               if (error) throw error;
+                               const { data } = supabase.storage.from("products-media").getPublicUrl(fileName);
+                               setEditing({ ...editing, image: data.publicUrl });
+                             } catch (err) {
+                               console.error(err);
+                               setEditing({ ...editing, image: canvas.toDataURL("image/webp") });
+                             }
+                           }, "image/webp", 0.9);
                         } else {
                            setEditing({ ...editing, image: ev.target?.result as string });
                         }

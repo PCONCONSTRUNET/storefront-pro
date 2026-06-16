@@ -46,9 +46,23 @@ export function NotificationBell() {
   useEffect(() => {
     if (!customer?.email) return;
     fetchNotifications();
-    // Poll a cada 30s enquanto a página está aberta
-    const interval = setInterval(fetchNotifications, 30_000);
-    return () => clearInterval(interval);
+    
+    // Inscrição em tempo real (Realtime WebSockets) em vez de ficar perguntando a cada 30s
+    const emailFilter = customer.email.toLowerCase().trim();
+    const sub = supabase
+      .channel('customer_notifs_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'customer_notifications', filter: `customer_email=eq.${emailFilter}` },
+        () => {
+          fetchNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(sub);
+    };
   }, [customer?.email]);
 
   // Close on outside click

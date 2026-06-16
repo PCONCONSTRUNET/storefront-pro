@@ -54,7 +54,6 @@ const DEFAULT_NAV = [
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
   { to: "/admin/frete", label: "Frete", icon: Truck },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
-  { to: "/admin/chatbot", label: "Chatbot", icon: WhatsAppIcon },
   { to: "/admin/logs", label: "Logs de Auditoria", icon: FileText },
   { to: "/admin/sincronizacao", label: "Sincronização", icon: Activity },
   { to: "/admin/gateway", label: "Gateway", icon: CreditCard },
@@ -149,15 +148,7 @@ export function AdminLayout({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, debouncedSync)
       .subscribe();
 
-    // 60s fallback polling apenas quando a aba estiver visível
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === "visible") {
-        void sync();
-      }
-    }, 60_000);
-
     return () => {
-      window.clearInterval(interval);
       supabase.removeChannel(sub);
     };
   }, [isAdmin, sync]);

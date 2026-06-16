@@ -1654,6 +1654,17 @@ let _hydratingFromCloud: Promise<void> | null = null;
 export function hydrateFromCloud(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (_hydratingFromCloud) return _hydratingFromCloud;
+
+  // CACHE LOCK: Avoid re-fetching too often (especially on dev hot-reloads)
+  const lastSyncStr = sessionStorage.getItem("last_cloud_sync");
+  if (lastSyncStr) {
+    const lastSync = parseInt(lastSyncStr, 10);
+    if (Date.now() - lastSync < 60000 * 5) { // 5 minutes cache
+      console.log("[hydrateFromCloud] Skipped due to cache lock (5m). Reload tab to force fetch.");
+      return Promise.resolve();
+    }
+  }
+
   useStore.getState().setCloudSyncing(true);
   _hydratingFromCloud = (async () => {
     try {
@@ -1791,9 +1802,9 @@ export function hydrateFromCloud(): Promise<void> {
           };
 
           const [customers, affiliates, affiliateSales, transactions, orders, waitlist, activityLogs] = await Promise.all([
-            read("customers"), read("affiliates"), read("affiliate_sales", "created_at", "desc"),
-            read("transactions", "date", "desc"), read("orders", "created_at", "desc", 500),
-            read("product_waitlist"), read("activity_logs", "created_at", "desc", 200),
+            read("customers", "created_at", "desc", 50), read("affiliates", "created_at", "desc", 50), read("affiliate_sales", "created_at", "desc", 50),
+            read("transactions", "date", "desc", 50), read("orders", "created_at", "desc", 50),
+            read("product_waitlist", "created_at", "desc", 50), read("activity_logs", "created_at", "desc", 50),
           ]);
 
           const adminSnap = {
@@ -1853,10 +1864,13 @@ export function hydrateFromCloud(): Promise<void> {
         s.customers.filter((c) => !c.id.includes("-")).forEach((c) => cloud.upsertCustomer(c)); // Simplified check for legacy local IDs
         localStorage.setItem(pushed, "1");
       }
+
+      sessionStorage.setItem("last_cloud_sync", Date.now().toString());
     } catch (e) {
       console.warn("[hydrateFromCloud] failed", e);
     } finally {
       useStore.getState().setCloudSyncing(false);
+      _hydratingFromCloud = null;
     }
   })();
   return _hydratingFromCloud;

@@ -564,8 +564,25 @@ function GalleryEditor({
                   const ctx = canvas.getContext("2d");
                   if (ctx) {
                     ctx.drawImage(img, 0, 0, width, height);
-                    // Comprime para WebP (muito mais leve que PNG/JPEG original)
-                    resolve(canvas.toDataURL("image/webp", 0.8));
+                    // Comprime para WebP e envia para o Supabase
+                    canvas.toBlob(async (blob) => {
+                      if (!blob) {
+                        resolve(event.target?.result as string);
+                        return;
+                      }
+                      try {
+                        const { supabase } = await import("@/integrations/supabase/client");
+                        const fileName = `p_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.webp`;
+                        const { error } = await supabase.storage.from("products-media").upload(fileName, blob, { contentType: "image/webp" });
+                        if (error) throw error;
+                        const { data } = supabase.storage.from("products-media").getPublicUrl(fileName);
+                        resolve(data.publicUrl);
+                      } catch (err) {
+                        console.error("Storage upload error:", err);
+                        // Fallback to base64 if storage fails
+                        resolve(canvas.toDataURL("image/webp", 0.8));
+                      }
+                    }, "image/webp", 0.8);
                   } else {
                     resolve(event.target?.result as string); // fallback
                   }
