@@ -36,7 +36,7 @@ function Page() {
                 >
                   <div className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl bg-primary" />
                   <div className="w-10 h-10 rounded-full gradient-primary text-primary-foreground grid place-items-center font-bold ml-1">
-                    {c.name[0]?.toUpperCase()}
+                    {c.name?.[0]?.toUpperCase() || "C"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">{c.name}</div>
@@ -130,7 +130,7 @@ function CustomerDetailsModal({
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full gradient-primary text-primary-foreground grid place-items-center font-bold text-2xl shrink-0">
-              {customer.name[0]?.toUpperCase()}
+              {customer.name?.[0]?.toUpperCase() || "C"}
             </div>
             <div>
               <div className="font-bold text-lg leading-tight">

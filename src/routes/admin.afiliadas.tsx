@@ -227,7 +227,7 @@ function Page() {
                       style={{ backgroundColor: a.active ? "#22c55e" : "#ef4444" }}
                     />
                     <div className="w-10 h-10 rounded-full gradient-primary text-primary-foreground grid place-items-center font-bold ml-1 shrink-0">
-                      {a.name[0]?.toUpperCase()}
+                      {a.name?.[0]?.toUpperCase() || "A"}
                     </div>
                     <div className="flex-1 min-w-[200px]">
                       <div className="font-semibold text-sm flex items-center gap-2">
