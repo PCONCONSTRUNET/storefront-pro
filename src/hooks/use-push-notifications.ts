@@ -237,6 +237,11 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
       return false;
     } catch (err) {
       console.error('[push] enable error:', err);
+      const el = document.getElementById("os-debug-log");
+      if (el) {
+        el.style.display = "block";
+        el.innerText = `Erro Push:\n${err?.toString() || "Desconhecido"}`;
+      }
       return false;
     } finally {
       setLoading(false);

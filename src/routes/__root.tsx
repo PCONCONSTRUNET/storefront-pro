@@ -319,7 +319,7 @@ function RootComponent() {
         if (path.startsWith("/admin") && sessions.admin) {
           role = "admin";
           activeUser = {
-            id: sessions.admin.subjectId,
+            id: "admin-user",
             email: sessions.admin.subjectId,
           };
         } else if (path.startsWith("/afiliada") && sessions.affiliate) {

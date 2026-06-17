@@ -239,7 +239,11 @@ function Page() {
           <span className="opacity-50 block mb-0.5 uppercase text-[8px]">
             Subscription ID
           </span>
-          {osId}
+          {osId || "Aguardando..."}
+        </div>
+        
+        {/* Nova caixa de Erro para Diagnóstico */}
+        <div className="bg-destructive/10 dark:bg-destructive/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-destructive/20 text-destructive hidden empty:hidden" id="os-debug-log">
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
