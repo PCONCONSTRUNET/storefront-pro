@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useStore } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl, formatDate } from "@/lib/format";
+import { cloud } from "@/lib/cloud";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/clientes")({
   component: Page,
@@ -92,6 +94,20 @@ function CustomerDetailsModal({
   );
   // Remove duplicate addresses
   const uniqueAddresses = Array.from(new Set(addressList));
+
+  const handleDelete = async () => {
+    if (!window.confirm("ATENÇÃO: Deseja realmente excluir este cliente? Isso pode afetar ou excluir seus pedidos e histórico na loja. Esta ação é irreversível.")) return;
+    
+    const tId = toast.loading("Excluindo cliente...");
+    try {
+      await cloud.deleteCustomer(customer.id);
+      useStore.setState((s) => ({ customers: s.customers.filter((c) => c.id !== customer.id) }));
+      toast.success("Cliente excluído com sucesso!", { id: tId });
+      onClose();
+    } catch (e: any) {
+      toast.error("Erro ao excluir: " + e.message, { id: tId });
+    }
+  };
 
   return (
     <div
@@ -185,12 +201,21 @@ function CustomerDetailsModal({
           </div>
         </div>
 
-        <button
-          onClick={onClose}
-          className="w-full h-11 rounded-full bg-muted font-semibold mt-2 hover:bg-muted/80 transition-colors"
-        >
-          Fechar
-        </button>
+        <div className="flex gap-3 mt-2">
+          <button
+            onClick={handleDelete}
+            className="w-11 h-11 rounded-full border border-red-200 bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition-colors shrink-0"
+            title="Excluir cliente"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 h-11 rounded-full bg-muted font-semibold hover:bg-muted/80 transition-colors"
+          >
+            Fechar
+          </button>
+        </div>
       </div>
     </div>
   );
