@@ -416,9 +416,11 @@ function Page() {
                                   </div>
                                   <div className="text-[11px] text-muted-foreground">Chega em ~{opt.deliveryTime} dias úteis</div>
                                 </div>
+                              </div>
                               <div className="font-bold text-sm text-primary">
                                 {coupon?.type === "free_shipping" ? "Grátis" : brl(opt.discountPrice)}
                               </div>
+                            </label>
                           ))}
                         </div>
                       ) : settings.shippingFeeActive !== false ? (
