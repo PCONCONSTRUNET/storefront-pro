@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/gateway")({
 
 
 const WEBHOOK_URL =
-  "https://glezvjgtzplflzevclor.supabase.co/functions/v1/mp-webhook";
+  "https://sngwphzblesurcydzkyc.supabase.co/functions/v1/mp-webhook";
 
 function defaultFees(max: number): Record<string, number> {
   const out: Record<string, number> = {};
