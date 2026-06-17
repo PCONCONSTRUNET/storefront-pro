@@ -62,7 +62,7 @@ export function StoreFooter() {
 
       <div className="max-w-6xl mx-auto px-4 mt-8 pt-8 border-t border-black/5 flex flex-col items-center gap-3">
         <p className="text-xs text-muted-foreground font-medium text-center">
-          &copy; {new Date().getFullYear()} {settings.storeName}. {settings.cpfCnpj ? `CNPJ: ${settings.cpfCnpj}` : "Todos os direitos reservados"}.
+          &copy; {new Date().getFullYear()} {settings.storeName}. CNPJ: 46.975.287/0001-76
         </p>
         
         <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60 tracking-wide">
