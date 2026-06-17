@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrocasRouteImport } from './routes/trocas'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as PedidosRouteImport } from './routes/pedidos'
@@ -61,6 +63,16 @@ import { Route as ApiBotStatusRouteImport } from './routes/api/bot/status'
 import { Route as ApiBotNotifyRouteImport } from './routes/api/bot/notify'
 import { Route as ApiBotLogoutRouteImport } from './routes/api/bot/logout'
 
+const TrocasRoute = TrocasRouteImport.update({
+  id: '/trocas',
+  path: '/trocas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuporteRoute = SuporteRouteImport.update({
   id: '/suporte',
   path: '/suporte',
@@ -330,6 +342,8 @@ export interface FileRoutesByFullPath {
   '/pedidos': typeof PedidosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/suporte': typeof SuporteRoute
+  '/termos': typeof TermosRoute
+  '/trocas': typeof TrocasRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
@@ -383,6 +397,8 @@ export interface FileRoutesByTo {
   '/pedidos': typeof PedidosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/suporte': typeof SuporteRoute
+  '/termos': typeof TermosRoute
+  '/trocas': typeof TrocasRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
@@ -437,6 +453,8 @@ export interface FileRoutesById {
   '/pedidos': typeof PedidosRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/suporte': typeof SuporteRoute
+  '/termos': typeof TermosRoute
+  '/trocas': typeof TrocasRoute
   '/admin/afiliadas': typeof AdminAfiliadasRoute
   '/admin/avaliacoes': typeof AdminAvaliacoesRoute
   '/admin/bi': typeof AdminBiRoute
@@ -492,6 +510,8 @@ export interface FileRouteTypes {
     | '/pedidos'
     | '/redefinir-senha'
     | '/suporte'
+    | '/termos'
+    | '/trocas'
     | '/admin/afiliadas'
     | '/admin/avaliacoes'
     | '/admin/bi'
@@ -545,6 +565,8 @@ export interface FileRouteTypes {
     | '/pedidos'
     | '/redefinir-senha'
     | '/suporte'
+    | '/termos'
+    | '/trocas'
     | '/admin/afiliadas'
     | '/admin/avaliacoes'
     | '/admin/bi'
@@ -598,6 +620,8 @@ export interface FileRouteTypes {
     | '/pedidos'
     | '/redefinir-senha'
     | '/suporte'
+    | '/termos'
+    | '/trocas'
     | '/admin/afiliadas'
     | '/admin/avaliacoes'
     | '/admin/bi'
@@ -652,6 +676,8 @@ export interface RootRouteChildren {
   PedidosRoute: typeof PedidosRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SuporteRoute: typeof SuporteRoute
+  TermosRoute: typeof TermosRoute
+  TrocasRoute: typeof TrocasRoute
   AdminAfiliadasRoute: typeof AdminAfiliadasRoute
   AdminAvaliacoesRoute: typeof AdminAvaliacoesRoute
   AdminBiRoute: typeof AdminBiRoute
@@ -694,6 +720,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trocas': {
+      id: '/trocas'
+      path: '/trocas'
+      fullPath: '/trocas'
+      preLoaderRoute: typeof TrocasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/suporte': {
       id: '/suporte'
       path: '/suporte'
@@ -1079,6 +1119,8 @@ const rootRouteChildren: RootRouteChildren = {
   PedidosRoute: PedidosRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   SuporteRoute: SuporteRoute,
+  TermosRoute: TermosRoute,
+  TrocasRoute: TrocasRoute,
   AdminAfiliadasRoute: AdminAfiliadasRoute,
   AdminAvaliacoesRoute: AdminAvaliacoesRoute,
   AdminBiRoute: AdminBiRoute,
@@ -1121,12 +1163,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
