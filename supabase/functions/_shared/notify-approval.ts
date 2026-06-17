@@ -1,10 +1,9 @@
-// Dispara WhatsApp + e-mail quando um pedido é aprovado.
-// Usado pelo webhook do MP e pelo simulador de sandbox.
+// Dispara e-mail e push quando um pedido é aprovado.
+// Usado pelo webhook do MP.
 import {
   sendOrderConfirmationEmailOnce,
 } from "./order-confirmation-email.ts";
-const BOT_BASE = "http://178.105.54.230:3005";
-const BOT_TOKEN = "princesa_secret_123";
+
 
 type SupabaseClient = {
   functions: { invoke: (n: string, opts: any) => Promise<any> };
@@ -43,29 +42,11 @@ export async function notifyOrderApproved(
   supabase: SupabaseClient,
   order: any,
 ) {
-  console.log("[notify-approval] start order=", order.id, "email=", order.customer_email, "phone=", order.customer_phone);
-  const phone = String(order.customer_phone ?? "").replace(/\D/g, "");
+  console.log("[notify-approval] start order=", order.id, "email=", order.customer_email);
   const total = formatTotal(order);
   const firstName = String(order.customer_name ?? "Cliente").split(" ")[0];
   const method = order.payment_method === "card" ? "Cartão de crédito" : "Pix";
 
-  const mensagem = `Olá ${firstName}! 💖\n\nSeu pagamento foi *aprovado* e seu pedido na Princesa de Laços está confirmado!\n\n🧾 Pedido: #${String(order.id).slice(0, 8)}\n💳 Forma: ${method}\n💰 Valor: ${total}\n\n📍 Como nossos produtos já são prontos, seu pedido está *aguardando retirada no ateliê*. Vamos te chamar por aqui para combinar o melhor horário! ✨`;
-
-  // WhatsApp via VPS
-  if (phone) {
-    try {
-      await fetch(`${BOT_BASE}/webhook/notificacao`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-webhook-token": BOT_TOKEN,
-        },
-        body: JSON.stringify({ numero: phone, mensagem }),
-      });
-    } catch (e) {
-      console.error("[notify-approval] WhatsApp falhou:", e);
-    }
-  }
 
   // E-mail de confirmação (Resend direto — invoke entre edge functions falha em produção)
   if (order.customer_email) {

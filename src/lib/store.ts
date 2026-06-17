@@ -1451,10 +1451,15 @@ export const useStore = create<AppState>()(
       storage: createJSONStorage(() => idbStorage),
       skipHydration: typeof window === "undefined",
       partialize: (state) => {
+        const { isAdmin, adminToken, adminRevalidating, sessions, ...rest } = state;
         return {
-          ...state,
+          ...rest,
+          sessions: {
+            ...sessions,
+            admin: null, // Admin session is restored entirely via httpOnly cookie + local backup
+          },
           activityLogs: [], 
-        };
+        } as unknown as AppState;
       },
       migrate: (persistedState: any, version: number) => {
         const persisted = persistedState as any;
