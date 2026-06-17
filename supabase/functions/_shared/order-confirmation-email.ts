@@ -68,6 +68,39 @@ export function buildOrderConfirmationHtml(
   );
 }
 
+export function buildAdminOrderAlertHtml(
+  payload: OrderConfirmationPayload & { items: OrderConfirmationItem[] },
+): string {
+  const fmt = (v: number) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const shortId = String(payload.orderId).slice(0, 8);
+  const rows = payload.items
+    .map(
+      (i) => `
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #f3e8ee">${i.name} <span style="color:#999">×${i.quantity}</span></td>
+        <td style="padding:8px 0;border-bottom:1px solid #f3e8ee;text-align:right">${fmt(i.price * i.quantity)}</td>
+      </tr>`,
+    )
+    .join("");
+
+  return baseLayout(
+    "Nova Venda Aprovada! 💰",
+    `<p>O pedido <strong>#${shortId}</strong> do cliente <strong>${payload.customerName || payload.email}</strong> acabou de ter o pagamento aprovado.</p>
+       <p style="margin:16px 0;color:#555"><strong>Pagamento:</strong> ${payload.paymentMethod || "Não informado"}</p>
+       <table style="width:100%;border-collapse:collapse;margin-top:8px">
+         ${rows}
+         <tr>
+           <td style="padding:14px 0;font-weight:bold;font-size:16px">Total</td>
+           <td style="padding:14px 0;font-weight:bold;font-size:16px;text-align:right;color:#be185d">${fmt(payload.total)}</td>
+         </tr>
+       </table>
+       <div style="margin-top:24px;text-align:center;">
+         <a href="https://princesadelacos.com.br/admin" style="background:#be185d;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;display:inline-block;">Acessar Painel Admin</a>
+       </div>`,
+  );
+}
+
 export async function sendOrderConfirmationEmailDirect(
   payload: OrderConfirmationPayload,
 ) {
@@ -77,11 +110,26 @@ export async function sendOrderConfirmationEmailDirect(
   }
 
   const shortId = String(payload.orderId).slice(0, 8);
+  
+  // 1. Envia para o cliente
   await sendEmail({
     to: payload.email,
     subject: `Pedido aprovado #${shortId} — pronto para retirada`,
     html: buildOrderConfirmationHtml({ ...payload, items }),
   });
+
+  // 2. Envia para a dona (E-mail mãe)
+  const adminEmail = Deno.env.get("ADMIN_EMAIL") || "jessicamendes-20@outlook.com";
+  try {
+    await sendEmail({
+      to: adminEmail,
+      subject: `[Venda] Pedido aprovado #${shortId} - Cliente: ${payload.customerName || payload.email}`,
+      html: buildAdminOrderAlertHtml({ ...payload, items }),
+    });
+    console.log(`[push] E-mail admin enviado para ${adminEmail}`);
+  } catch (err) {
+    console.error("[push] Erro ao enviar e-mail admin", err);
+  }
 }
 
 type ActivityLogClient = {
