@@ -7,6 +7,7 @@ import {
   saveGatewayConfigFn,
 } from "@/lib/admin.functions";
 import { Loader2, Eye, EyeOff, Copy, Check, X } from "lucide-react";
+import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/gateway")({
   component: Page,
@@ -24,6 +25,7 @@ function defaultFees(max: number): Record<string, number> {
 }
 
 function Page() {
+  const { settings, updateSettings } = useStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showToken, setShowToken] = useState(false);
@@ -204,7 +206,23 @@ function Page() {
           </div>
         </Card>
 
-        <Card title="Parcelamento no cartão">
+        <Card title="Pagamento com Cartão de Crédito">
+          <div className="mb-4">
+            <Toggle
+              label="Aceitar Cartão de Crédito"
+              value={settings.acceptCard}
+              onChange={(v) => {
+                updateSettings({ acceptCard: v });
+                toast.success("Opção de cartão atualizada!");
+              }}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Desative para ocultar temporariamente o cartão de crédito no checkout.
+            </p>
+          </div>
+          
+          <hr className="border-border my-4" />
+
           <Field label="Nº máximo de parcelas (1 a 12)">
             <input
               type="number"
@@ -276,6 +294,31 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <label className="block">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <div className="mt-1">{children}</div>
+    </label>
+  );
+}
+
+function Toggle({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between gap-2 cursor-pointer p-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+      <span className="text-sm font-semibold">{label}</span>
+      <button
+        type="button"
+        onClick={() => onChange(!value)}
+        className={`w-11 h-6 rounded-full transition-colors relative ${value ? "bg-primary" : "bg-border"}`}
+      >
+        <span
+          className={`absolute top-0.5 ${value ? "left-5" : "left-0.5"} w-5 h-5 rounded-full bg-white shadow transition-all`}
+        />
+      </button>
     </label>
   );
 }

@@ -477,10 +477,6 @@ function Page() {
                   <button
                     key={p.id}
                     onClick={() => {
-                      if (p.id === "card") {
-                        setShowCardMaintenance(true);
-                        return;
-                      }
                       setForm({ ...form, payment: p.id });
                     }}
                     className={cn(
