@@ -216,11 +216,11 @@ export type StoreSettings = {
 
 const defaultSettings: StoreSettings = {
   storeName: "Princesa de Laços",
-  whatsapp: "(48) 8864-4474",
+  whatsapp: "4888644474",
   email: "jessicamendes-20@outlook.com",
   address: "Rua Jaime Locatelli — Bairro Farroupilha",
-  instagram: "@princesadelacos",
-  facebook: "/princesadelacos",
+  instagram: "princesadelacos58",
+  facebook: "",
   shippingFee: 12.9,
   acceptCash: true,
   acceptCard: true,

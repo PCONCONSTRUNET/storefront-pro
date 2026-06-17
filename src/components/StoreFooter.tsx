@@ -41,15 +41,21 @@ export function StoreFooter() {
         <div className="flex flex-col items-center md:items-start gap-3">
           <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Siga e Fale com a Gente</h3>
           <div className="flex gap-4 mt-1">
-            <a href={wppLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition-colors shadow-sm" aria-label="WhatsApp">
-              <Phone className="h-4 w-4" />
-            </a>
-            <a href={instaLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-pink-100 transition-colors shadow-sm" aria-label="Instagram">
-              <Instagram className="h-4 w-4" />
-            </a>
-            <a href={faceLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm" aria-label="Facebook">
-              <Facebook className="h-4 w-4" />
-            </a>
+            {settings.whatsapp && (
+              <a href={wppLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition-colors shadow-sm" aria-label="WhatsApp">
+                <Phone className="h-4 w-4" />
+              </a>
+            )}
+            {settings.instagram && (
+              <a href={instaLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-pink-100 transition-colors shadow-sm" aria-label="Instagram">
+                <Instagram className="h-4 w-4" />
+              </a>
+            )}
+            {settings.facebook && settings.facebook !== "/" && settings.facebook !== "/princesadelacos" && (
+              <a href={faceLink} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors shadow-sm" aria-label="Facebook">
+                <Facebook className="h-4 w-4" />
+              </a>
+            )}
           </div>
         </div>
       </div>
