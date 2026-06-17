@@ -416,14 +416,16 @@ function Page() {
                                   </div>
                                   <div className="text-[11px] text-muted-foreground">Chega em ~{opt.deliveryTime} dias úteis</div>
                                 </div>
+                              <div className="font-bold text-sm text-primary">
+                                {coupon?.type === "free_shipping" ? "Grátis" : brl(opt.discountPrice)}
                               </div>
-                              <div className="font-bold text-sm text-primary">{brl(opt.discountPrice)}</div>
-                            </label>
                           ))}
                         </div>
                       ) : settings.shippingFeeActive !== false ? (
                         <div className="text-xs text-muted-foreground mt-2">
-                          Frete fixo: <span className="font-medium text-foreground">{brl(settings.shippingFee)}</span>
+                          Frete fixo: <span className="font-medium text-foreground">
+                            {coupon?.type === "free_shipping" ? "Grátis" : brl(settings.shippingFee)}
+                          </span>
                         </div>
                       ) : (
                         <div className="text-xs text-destructive font-semibold mt-2">

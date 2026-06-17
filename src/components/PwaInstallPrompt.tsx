@@ -90,7 +90,7 @@ export function PwaInstallPrompt() {
             <button
               onClick={dismiss}
               aria-label="Fechar"
-              className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground"
+              className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground z-10"
             >
               <X className="h-4 w-4" />
             </button>
@@ -119,7 +119,7 @@ export function PwaInstallPrompt() {
             <button
               onClick={dismiss}
               aria-label="Fechar"
-              className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground"
+              className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground z-10"
             >
               <X className="h-4 w-4" />
             </button>

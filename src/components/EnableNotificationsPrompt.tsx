@@ -1,11 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X, Bell } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 
+const DISMISS_KEY = "push_notifications_dismissed_at";
+const DISMISS_DAYS = 7;
+
 export function EnableNotificationsPrompt() {
   const isAdmin = useStore((s) => s.isAdmin);
   const currentCustomerId = useStore((s) => s.currentCustomerId);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
+    const fresh = Date.now() - dismissedAt < DISMISS_DAYS * 24 * 60 * 60 * 1000;
+    if (fresh) setDismissed(true);
+  }, []);
+
+  const dismiss = () => {
+    localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    setDismissed(true);
+  };
 
   const role = isAdmin ? "admin" : "cliente";
   const userId = isAdmin ? null : currentCustomerId;
@@ -17,11 +32,13 @@ export function EnableNotificationsPrompt() {
   // - Suportado
   // - Permissão ainda não foi pedida (default)
   // - Não está inscrito ainda
+  // - Não foi descartado
   const shouldShow =
     supported &&
     !subscribed &&
     permission === "default" &&
-    !loading;
+    !loading &&
+    !dismissed;
 
   // Se já tem permissão mas não está inscrito (caso pós-troca de App ID),
   // o hook já tenta o optIn silencioso automaticamente — não exibimos modal.
@@ -36,9 +53,9 @@ export function EnableNotificationsPrompt() {
       <div className="pointer-events-auto max-w-sm mx-auto bg-card rounded-2xl shadow-2xl border border-border overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
         <div className="relative p-4">
           <button
-            onClick={() => {/* dismiss — não temos estado de open aqui, componente some ao inscrever */}}
+            onClick={dismiss}
             aria-label="Fechar"
-            className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground"
+            className="absolute right-2 top-2 w-7 h-7 grid place-items-center rounded-full hover:bg-muted text-muted-foreground z-10"
           >
             <X className="h-4 w-4" />
           </button>

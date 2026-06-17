@@ -187,27 +187,38 @@ function Page() {
   const testNotification = async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
-      if (!osId) {
-        toast.error("Dispositivo não registrado ainda.");
-        return;
-      }
 
-      const { error } = await supabase.functions.invoke("send-push", {
-        body: {
-          title: "Teste Admin Push 🚀",
-          message: `Recebido! ${new Date().toLocaleTimeString()}`,
-          subscriptionIds: [osId],
-          externalUserIds: ["admin-user"],
-        },
-      });
+      // Se não tem ID ou tem ID local (offline), envia para todos os admins
+      const isRealId = osId && !osId.startsWith("local-");
+
+      const body = isRealId
+        ? {
+            title: "Teste Admin Push 🚀",
+            message: `Recebido! ${new Date().toLocaleTimeString()}`,
+            subscriptionIds: [osId],
+          }
+        : {
+            title: "Teste Admin Push 🚀",
+            message: `Recebido! ${new Date().toLocaleTimeString()} (broadcast admin)`,
+            audience: "admin",
+          };
+
+      const { error } = await supabase.functions.invoke("send-push", { body });
 
       if (error) throw error;
-      toast.success(`Push enviado para o ID: ${osId.slice(0, 8)}...`);
+
+      if (isRealId) {
+        toast.success(`Push enviado para o ID: ${osId!.slice(0, 8)}...`);
+      } else {
+        toast.success("Push enviado para todos os admins! (este dispositivo precisa ressincronizar)");
+        toast.info("Toque em 'Limpar Tudo' e depois 'Sincronizar' para registrar este celular.", { duration: 6000 });
+      }
     } catch (err) {
       console.error("[push-test]", err);
       toast.error(`Erro: ${(err as Error).message}`);
     }
   };
+
 
   return (
     <AdminLayout title="Notificações">

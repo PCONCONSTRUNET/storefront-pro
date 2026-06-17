@@ -417,6 +417,11 @@ function Page() {
                       Desconto aplicado: {brl(discount)}
                     </div>
                   )}
+                  {couponObj?.type === "free_shipping" && (
+                    <div className="text-xs text-success font-medium">
+                      Cupom de Frete Grátis aplicado!
+                    </div>
+                  )}
                 </div>
                 
                 <button
