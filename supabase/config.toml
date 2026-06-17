@@ -1,4 +1,4 @@
-project_id = "glezvjgtzplflzevclor"
+project_id = "sngwphzblesurcydzkyc"
 
 [functions.send-welcome-email]
 verify_jwt = false
@@ -16,9 +16,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.mp-webhook]
-verify_jwt = false
-
-[functions.mp-simulate-approve]
 verify_jwt = false
 
 [functions.send-push]
