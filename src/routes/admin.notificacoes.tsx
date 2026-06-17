@@ -156,10 +156,21 @@ function Page() {
     if (!(await confirmDialog({ title: "Resetar notificações?", description: "Isso vai limpar todas as configurações de notificação e recarregar a página.", confirmLabel: "Continuar" }))) return;
     
     try {
-      // Desregistra todos os Service Workers
       if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const registration of registrations) {
+          try {
+            // Destrói a inscrição de push nativa travada no aparelho
+            if (registration.pushManager) {
+              const subscription = await registration.pushManager.getSubscription();
+              if (subscription) {
+                await subscription.unsubscribe();
+                console.log("[push] Inscrição antiga destruída com sucesso!");
+              }
+            }
+          } catch (e) {
+            console.error("[push] Erro ao destruir inscrição antiga:", e);
+          }
           await registration.unregister();
         }
       }
