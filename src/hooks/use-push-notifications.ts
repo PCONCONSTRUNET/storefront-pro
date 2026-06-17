@@ -36,8 +36,6 @@ async function initOneSignal(): Promise<void> {
       appId: ONESIGNAL_APP_ID,
       safari_web_id: "web.onesignal.auto.47a2f439-afd3-4bb7-8cdd-92cc4f5ee46c",
       allowLocalhostAsSecureOrigin: true,
-      // Service Worker em scope padrão (raiz) — arquivo já existe em /public/
-      autoRegister: false,
       autoResubscribe: true,
       welcomeNotification: { disable: true },
       notifyButton: { enable: false },
