@@ -26,15 +26,15 @@ export function StoreFooter() {
         {/* Coluna 2: Políticas */}
         <div className="flex flex-col items-center md:items-start gap-3">
           <h3 className="font-bold text-sm uppercase tracking-wider text-primary">Dúvidas e Políticas</h3>
-          <Link to="/suporte" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+          <Link to="/trocas" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" /> Trocas e Devoluções
           </Link>
-          <Link to="/suporte" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+          <Link to="/termos" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" /> Privacidade e Termos de Uso
           </Link>
-          <Link to="/suporte" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+          <a href={wppLink} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5">
             <Phone className="h-3.5 w-3.5" /> Fale Conosco
-          </Link>
+          </a>
         </div>
 
         {/* Coluna 3: Redes Sociais */}
