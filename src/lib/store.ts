@@ -691,16 +691,20 @@ export const useStore = create<AppState>()(
           return { cart: [...s.cart, { productId, quantity, variation }] };
         }),
       removeFromCart: (productId) =>
-        set((s) => ({ cart: s.cart.filter((i) => i.productId !== productId) })),
+        set((s) => {
+          const cart = s.cart.filter((i) => i.productId !== productId);
+          return { cart, ...(cart.length === 0 ? { appliedCoupon: null } : {}) };
+        }),
       updateCartQty: (productId, qty) =>
-        set((s) => ({
-          cart:
+        set((s) => {
+          const cart =
             qty <= 0
               ? s.cart.filter((i) => i.productId !== productId)
               : s.cart.map((i) =>
                   i.productId === productId ? { ...i, quantity: qty } : i,
-                ),
-        })),
+                );
+          return { cart, ...(cart.length === 0 ? { appliedCoupon: null } : {}) };
+        }),
       clearCart: () => set({ cart: [], appliedCoupon: null }),
 
       applyCoupon: (code) => {
