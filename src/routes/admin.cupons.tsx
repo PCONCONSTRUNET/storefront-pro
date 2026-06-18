@@ -53,7 +53,7 @@ function Page() {
                 · Mín {c.minOrder}
               </div>
               <div className="text-xs text-muted-foreground">
-                Usos: {c.usedCount}/{c.maxUses} · Até {c.validUntil}
+                Usos: {c.usedCount}/{c.maxUses} · Até {c.validUntil ? new Date(c.validUntil).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : ""}
               </div>
               <span
                 className={`text-[10px] mt-1 inline-block px-2 py-0.5 rounded-full font-semibold ${c.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}
@@ -152,7 +152,7 @@ function Page() {
               <Field
                 label="Validade"
                 type="date"
-                value={editing.validUntil}
+                value={editing.validUntil ? editing.validUntil.split('T')[0] : ""}
                 onChange={(v) => setEditing({ ...editing, validUntil: v })}
               />
               <label className="flex items-center gap-2 mt-6">
