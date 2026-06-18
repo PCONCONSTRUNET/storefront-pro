@@ -346,8 +346,7 @@ function Page() {
                 <Store className="h-4 w-4 text-primary" /> Retirada no ateliê
               </div>
               <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-primary" /> Compra
-                protegida
+                <Truck className="h-4 w-4 text-primary" /> Enviamos via Correios
               </div>
             </div>
           </div>
