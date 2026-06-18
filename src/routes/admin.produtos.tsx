@@ -168,7 +168,18 @@ function Page() {
             categories={categories.map((c) => ({ id: c.id, name: c.name }))}
             onSave={async (p) => {
               try {
-                await upsertProduct(p);
+                // Ensure variations strings are parsed to numbers
+                const parsedVariations = (p.variations ?? []).map(v => ({
+                  ...v,
+                  options: v.options.map(o => {
+                    if (typeof o === 'string') return o;
+                    return {
+                      ...o,
+                      priceDelta: o.priceDelta !== undefined ? parseFloat(o.priceDelta as any) : undefined
+                    };
+                  })
+                }));
+                await upsertProduct({ ...p, variations: parsedVariations });
                 toast.success("Salvo!");
                 setEditing(null);
               } catch (e: any) {
@@ -204,7 +215,13 @@ function ProductForm({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSave(p);
+        onSave({
+          ...p,
+          price: parseFloat(p.price as any) || 0,
+          oldPrice: p.oldPrice ? parseFloat(p.oldPrice as any) : undefined,
+          stock: parseInt(p.stock as any) || 0,
+          minStock: parseInt(p.minStock as any) || 0,
+        });
       }}
       className="space-y-3"
     >
@@ -274,17 +291,17 @@ function ProductForm({
           <Field
             label="Preço"
             type="number"
-            value={String(p.price)}
-            onChange={(v) => setP({ ...p, price: parseFloat(v) || 0 })}
+            value={p.price as any ?? ""}
+            onChange={(v) => setP({ ...p, price: v as any })}
             required
             step="0.01"
           />
           <Field
             label="Promocional"
             type="number"
-            value={String(p.oldPrice ?? "")}
+            value={p.oldPrice as any ?? ""}
             onChange={(v) =>
-              setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })
+              setP({ ...p, oldPrice: v ? (v as any) : undefined })
             }
             step="0.01"
           />
@@ -292,16 +309,16 @@ function ProductForm({
             <Field
               label="Estoque"
               type="number"
-              value={String(p.stock)}
-              onChange={(v) => setP({ ...p, stock: parseInt(v) || 0 })}
+              value={p.stock as any ?? ""}
+              onChange={(v) => setP({ ...p, stock: v as any })}
               className="flex-1"
               required
             />
             <Field
               label="Estoque mínimo"
               type="number"
-              value={String(p.minStock ?? 5)}
-              onChange={(v) => setP({ ...p, minStock: parseInt(v) || 0 })}
+              value={p.minStock as any ?? ""}
+              onChange={(v) => setP({ ...p, minStock: v as any })}
               className="flex-1"
             />
             <button
@@ -412,9 +429,8 @@ function FlatVariationsEditor({
   };
 
   const updateDelta = (i: number, val: string) => {
-    const d = parseFloat(val);
     const next = opts.map((o, idx) =>
-      idx === i ? { ...o, priceDelta: isNaN(d) || val === "" ? undefined : d } : o
+      idx === i ? { ...o, priceDelta: val === "" ? undefined : (val as any) } : o
     );
     onChange(toVariations(next));
   };
@@ -460,7 +476,7 @@ function FlatVariationsEditor({
             type="number"
             step="0.01"
             min="0"
-            value={o.priceDelta ?? ""}
+            value={o.priceDelta as any ?? ""}
             onChange={(e) => updateDelta(i, e.target.value)}
             placeholder="0,00"
             className="w-24 h-9 px-2 text-sm rounded-lg bg-card outline-none text-right focus:ring-2 ring-primary/40"

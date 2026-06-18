@@ -90,7 +90,13 @@ function Page() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              upsertCoupon({ ...editing, code: editing.code.toUpperCase() });
+              upsertCoupon({
+                ...editing,
+                code: editing.code.toUpperCase(),
+                value: parseFloat(editing.value as any) || 0,
+                minOrder: parseFloat(editing.minOrder as any) || 0,
+                maxUses: parseInt(editing.maxUses as any) || 0,
+              });
               toast.success("Salvo!");
               setEditing(null);
             }}
@@ -127,29 +133,23 @@ function Page() {
                 <Field
                   label="Valor"
                   type="number"
-                  value={String(editing.value)}
-                  onChange={(v) =>
-                    setEditing({ ...editing, value: parseFloat(v) || 0 })
-                  }
+                  value={editing.value as any ?? ""}
+                  onChange={(v) => setEditing({ ...editing, value: v as any })}
                   step="0.01"
                 />
               )}
               <Field
                 label="Pedido mínimo"
                 type="number"
-                value={String(editing.minOrder)}
-                onChange={(v) =>
-                  setEditing({ ...editing, minOrder: parseFloat(v) || 0 })
-                }
+                value={editing.minOrder as any ?? ""}
+                onChange={(v) => setEditing({ ...editing, minOrder: v as any })}
                 step="0.01"
               />
               <Field
                 label="Máx. usos"
                 type="number"
-                value={String(editing.maxUses)}
-                onChange={(v) =>
-                  setEditing({ ...editing, maxUses: parseInt(v) || 0 })
-                }
+                value={editing.maxUses as any ?? ""}
+                onChange={(v) => setEditing({ ...editing, maxUses: v as any })}
               />
               <Field
                 label="Validade"
