@@ -1437,6 +1437,10 @@ export const useStore = create<AppState>()(
               : s.settings,
           };
 
+          if (s.appliedCoupon && !snap.coupons.find(c => c.code === s.appliedCoupon)) {
+            updates.appliedCoupon = null;
+          }
+
           if (s.isAdmin) {
             updates.customers = snap.customers;
             updates.affiliates = snap.affiliates;

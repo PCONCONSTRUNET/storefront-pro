@@ -325,10 +325,10 @@ function Page() {
                <span>Cupom de Desconto</span>
              </div>
              
-             {appliedCoupon ? (
+             {couponObj ? (
                 <div className="flex items-center justify-between bg-success/10 text-success rounded px-3 py-2 flex-1 max-w-sm md:ml-auto">
                   <span className="text-sm font-medium flex items-center gap-1.5">
-                    {appliedCoupon}
+                    {couponObj.code}
                   </span>
                   <button onClick={removeCoupon} className="text-xs underline hover:no-underline">
                     Remover
