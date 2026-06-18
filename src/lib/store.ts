@@ -1767,11 +1767,18 @@ export function hydrateFromCloud(): Promise<void> {
       ]);
 
       const publicSnap = {
-        coupons: (coupsRes.data || []).map((r: any) => ({
-          code: r.code, type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
-          value: Number(r.value) || 0, validUntil: r.expires_at || "", maxUses: r.extra?.maxUses ?? 999, usedCount: r.extra?.usedCount ?? 0,
-          minOrder: Number(r.min_subtotal) || 0, active: r.active !== false,
-        })),
+        coupons: (coupsRes.data || []).map((r: any) => {
+          let extra = r.extra;
+          if (typeof extra === "string") {
+            try { extra = JSON.parse(extra); } catch(e){}
+          }
+          return {
+            code: r.code, type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
+            value: Number(r.value) || 0, validUntil: r.expires_at || "", maxUses: extra?.maxUses ?? 999, usedCount: extra?.usedCount ?? 0,
+            minOrder: Number(r.min_subtotal) || 0, active: r.active !== false,
+            freeShipping: extra?.freeShipping === true || extra?.freeShipping === "true",
+          };
+        }),
         reviews: (revsRes.data || []).map((r: any) => ({
           id: r.id, productId: r.product_id, customerId: r.customer_id || "", customerName: r.customer_name,
           rating: r.rating, comment: r.comment || "", photos: Array.isArray(r.photos) ? r.photos : [],
