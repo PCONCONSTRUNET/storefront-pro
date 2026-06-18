@@ -59,13 +59,20 @@ export const submitLocalOrderFn = createServerFn({ method: "POST" })
       paid_at: data.status === "pago" ? new Date().toISOString() : null,
     };
 
+    const paymentStatusMap: Record<string, string> = {
+      pago: "approved",
+      aguardando_pagamento: "pending",
+      cancelado: "cancelled",
+    };
+    row.payment_status = paymentStatusMap[data.status] || "pending";
+
     const { error } = await supabaseAdmin.from("orders").insert(row);
     if (error) {
       console.error("[submitLocalOrderFn] Insert failed:", error);
       return { ok: false, message: error.message };
     }
 
-    if (row.payment_status === "pago") {
+    if (row.payment_status === "approved") {
       await supabaseAdmin.rpc("apply_order_stock_decrement", {
         _order_id: row.id,
       });
