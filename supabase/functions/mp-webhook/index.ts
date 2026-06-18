@@ -223,13 +223,9 @@ Deno.serve(async (req) => {
 
   // Notifica cliente + admin quando aprovado (apenas 1x — claim atômico acima)
   if (justApproved) {
-    try {
-      await supabase.rpc("apply_order_stock_decrement", {
-        _order_id: order.id,
-      });
-    } catch (e) {
-      console.error("[mp-webhook] stock decrement falhou:", e);
-    }
+    // O estoque já foi descontado no momento da criação do pedido local (reserva)
+    // para evitar que o produto seja vendido para outra pessoa enquanto o Pix não é pago.
+    // Portanto, não chamamos apply_order_stock_decrement aqui.
     await notifyOrderApproved(supabase, order);
   }
 

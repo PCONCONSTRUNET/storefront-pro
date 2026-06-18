@@ -72,11 +72,10 @@ export const submitLocalOrderFn = createServerFn({ method: "POST" })
       return { ok: false, message: error.message };
     }
 
-    if (row.payment_status === "approved") {
-      await supabaseAdmin.rpc("apply_order_stock_decrement", {
-        _order_id: row.id,
-      });
-    }
+    // Decrementa o estoque imediatamente para reservar o produto (independente do status de pagamento)
+    await supabaseAdmin.rpc("apply_order_stock_decrement", {
+      _order_id: row.id,
+    });
 
     return { ok: true };
   });
