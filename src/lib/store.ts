@@ -1192,9 +1192,6 @@ export const useStore = create<AppState>()(
                 }),
               )
               .catch(() => {});
-
-            // Desconta estoque no servidor (idempotente via RPC)
-            cloud.applyOrderStockDecrement(order.id).catch(() => {});
           }
 
           if (order.deliveryMethod === "entrega") {

@@ -64,5 +64,12 @@ export const submitLocalOrderFn = createServerFn({ method: "POST" })
       console.error("[submitLocalOrderFn] Insert failed:", error);
       return { ok: false, message: error.message };
     }
+
+    if (row.payment_status === "pago") {
+      await supabaseAdmin.rpc("apply_order_stock_decrement", {
+        _order_id: row.id,
+      });
+    }
+
     return { ok: true };
   });
