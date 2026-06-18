@@ -29,6 +29,7 @@ function Page() {
               usedCount: 0,
               minOrder: 0,
               active: true,
+              freeShipping: false,
             })
           }
           className="px-4 h-10 rounded-xl bg-primary text-primary-foreground font-semibold flex items-center gap-1.5"
@@ -49,8 +50,9 @@ function Page() {
             <div className="flex-1">
               <div className="font-bold">{c.code}</div>
               <div className="text-xs text-muted-foreground">
-                {c.type === "free_shipping" ? "Frete grátis" : c.type === "percent" ? `${c.value}% off` : `R$ ${c.value} off`}{" "}
-                · Mín {c.minOrder}
+                {c.type === "free_shipping" ? "Frete grátis" : c.type === "percent" ? `${c.value}% off` : `R$ ${c.value} off`}
+                {c.freeShipping && c.type !== "free_shipping" ? " + Frete grátis" : ""}
+                {" "}· Mín {c.minOrder}
               </div>
               <div className="text-xs text-muted-foreground">
                 Usos: {c.usedCount}/{c.maxUses} · Até {c.validUntil ? new Date(c.validUntil).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : ""}
@@ -167,6 +169,18 @@ function Page() {
                 />
                 <span className="text-sm">Ativo</span>
               </label>
+              {editing.type !== "free_shipping" && (
+                <label className="flex items-center gap-2 mt-6">
+                  <input
+                    type="checkbox"
+                    checked={editing.freeShipping || false}
+                    onChange={(e) =>
+                      setEditing({ ...editing, freeShipping: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm">+ Frete Grátis</span>
+                </label>
+              )}
             </div>
             <button className="w-full h-11 rounded-full gradient-primary text-primary-foreground font-semibold">
               Salvar

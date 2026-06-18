@@ -136,7 +136,7 @@ function Page() {
   const coupon = coupons.find(c => c.code === appliedCoupon);
   let computedShipping = 0;
   if (form.deliveryMethod === "entrega") {
-    if (coupon?.type === "free_shipping") {
+    if (coupon?.type === "free_shipping" || coupon?.freeShipping) {
       computedShipping = 0;
     } else if (shippingOptions.length > 0 && selectedShipping) {
       computedShipping = selectedShipping.discountPrice;
@@ -418,7 +418,7 @@ function Page() {
                                 </div>
                               </div>
                               <div className="font-bold text-sm text-primary">
-                                {coupon?.type === "free_shipping" ? "Grátis" : brl(opt.discountPrice)}
+                                {(coupon?.type === "free_shipping" || coupon?.freeShipping) ? "Grátis" : brl(opt.discountPrice)}
                               </div>
                             </label>
                           ))}
@@ -426,7 +426,7 @@ function Page() {
                       ) : settings.shippingFeeActive !== false ? (
                         <div className="text-xs text-muted-foreground mt-2">
                           Frete fixo: <span className="font-medium text-foreground">
-                            {coupon?.type === "free_shipping" ? "Grátis" : brl(settings.shippingFee)}
+                            {(coupon?.type === "free_shipping" || coupon?.freeShipping) ? "Grátis" : brl(settings.shippingFee)}
                           </span>
                         </div>
                       ) : (

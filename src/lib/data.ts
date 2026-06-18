@@ -48,6 +48,7 @@ export type Coupon = {
   usedCount: number;
   minOrder: number;
   active: boolean;
+  freeShipping?: boolean;
 };
 
 export const initialCoupons: Coupon[] = [

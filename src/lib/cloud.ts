@@ -166,6 +166,7 @@ const toCoupon = (r: any): Coupon => ({
   usedCount: r.extra?.usedCount ?? 0,
   minOrder: Number(r.min_subtotal) || 0,
   active: r.active !== false,
+  freeShipping: r.extra?.freeShipping === true,
 });
 
 const toAffiliate = (r: any): Affiliate => ({
@@ -401,7 +402,7 @@ export const cloud = {
         min_subtotal: c.minOrder,
         expires_at: c.validUntil || null,
         active: c.active,
-        extra: { maxUses: c.maxUses, usedCount: c.usedCount },
+        extra: { maxUses: c.maxUses, usedCount: c.usedCount, freeShipping: c.freeShipping },
       },
       "code",
     );
