@@ -157,17 +157,23 @@ const toProduct = (r: any): Product => ({
   variations: Array.isArray(r.variations) ? r.variations : [],
 });
 
-const toCoupon = (r: any): Coupon => ({
-  code: r.code,
-  type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
-  value: Number(r.value) || 0,
-  validUntil: r.expires_at || "",
-  maxUses: r.extra?.maxUses ?? 999,
-  usedCount: r.extra?.usedCount ?? 0,
-  minOrder: Number(r.min_subtotal) || 0,
-  active: r.active !== false,
-  freeShipping: r.extra?.freeShipping === true,
-});
+const toCoupon = (r: any): Coupon => {
+  let extra = r.extra;
+  if (typeof extra === "string") {
+    try { extra = JSON.parse(extra); } catch(e){}
+  }
+  return {
+    code: r.code,
+    type: r.kind === "free_shipping" ? "free_shipping" : r.kind === "fixed" ? "fixed" : "percent",
+    value: Number(r.value) || 0,
+    validUntil: r.expires_at || "",
+    maxUses: extra?.maxUses ?? 999,
+    usedCount: extra?.usedCount ?? 0,
+    minOrder: Number(r.min_subtotal) || 0,
+    active: r.active !== false,
+    freeShipping: extra?.freeShipping === true || extra?.freeShipping === "true",
+  };
+};
 
 const toAffiliate = (r: any): Affiliate => ({
   id: r.id,
