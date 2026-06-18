@@ -30,3 +30,39 @@ export const applyOrderStockDecrementFn = createServerFn({ method: "POST" })
     if (error) return { ok: false as const, message: error.message };
     return { ok: true as const };
   });
+
+export const submitLocalOrderFn = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.any().parse(input))
+  .handler(async ({ data }) => {
+    if (!data || !data.id || !data.customerName) return { ok: false };
+    
+    const row = {
+      id: data.id,
+      customer_id: data.customerId !== "guest" ? data.customerId : null,
+      customer_name: data.customerName,
+      customer_email: data.customerEmail,
+      customer_phone: data.customerPhone,
+      customer_document: data.customerCpf || null,
+      items: data.items,
+      subtotal: data.subtotal,
+      discount: data.discount,
+      shipping: data.shipping,
+      total: data.total,
+      payment_method: data.paymentMethod,
+      delivery_method: data.deliveryMethod,
+      payment_status: data.status,
+      delivery_status: data.deliveryStatus,
+      created_at: data.createdAt,
+      address: data.address,
+      notes: data.notes || null,
+      coupon_code: data.couponCode || null,
+      paid_at: data.status === "pago" ? new Date().toISOString() : null,
+    };
+
+    const { error } = await supabaseAdmin.from("orders").insert(row);
+    if (error) {
+      console.error("[submitLocalOrderFn] Insert failed:", error);
+      return { ok: false, message: error.message };
+    }
+    return { ok: true };
+  });

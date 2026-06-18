@@ -1217,7 +1217,11 @@ export const useStore = create<AppState>()(
         } catch {
           /* ignore */
         }
-        // ... cloud persistence logic continues ...
+        // Persiste o pedido localmente na base do Supabase
+        import("./secured.functions")
+          .then((m) => m.submitLocalOrderFn({ data: order }))
+          .catch((err) => console.error("Falha ao salvar pedido local:", err));
+
         return order;
       },
       saveRemoteOrder: (data) => {
