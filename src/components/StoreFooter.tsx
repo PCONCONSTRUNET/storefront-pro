@@ -69,7 +69,7 @@ export function StoreFooter() {
         
         <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/60 tracking-wide">
           <span>DESENVOLVIDO POR</span>
-          <strong className="text-foreground/70 tracking-widest uppercase font-black">P-CON Construnet</strong>
+          <a href="https://www.instagram.com/pconconstrunet/" target="_blank" rel="noopener noreferrer" className="text-foreground tracking-widest uppercase font-black hover:text-pink-600 transition-colors"><strong>P-CON Construnet</strong></a>
         </div>
       </div>
     </footer>
