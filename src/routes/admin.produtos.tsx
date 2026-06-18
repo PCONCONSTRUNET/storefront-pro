@@ -277,6 +277,7 @@ function ProductForm({
             value={String(p.price)}
             onChange={(v) => setP({ ...p, price: parseFloat(v) || 0 })}
             required
+            step="0.01"
           />
           <Field
             label="Promocional"
@@ -285,6 +286,7 @@ function ProductForm({
             onChange={(v) =>
               setP({ ...p, oldPrice: v ? parseFloat(v) : undefined })
             }
+            step="0.01"
           />
           <div className="col-span-2 flex gap-2">
             <Field
@@ -491,6 +493,7 @@ function Field({
   type = "text",
   className = "",
   required,
+  step,
 }: {
   label: string;
   value: string;
@@ -498,6 +501,7 @@ function Field({
   type?: string;
   className?: string;
   required?: boolean;
+  step?: string;
 }) {
   return (
     <label className={`block ${className}`}>
@@ -507,6 +511,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
+        step={step}
         className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40"
       />
     </label>

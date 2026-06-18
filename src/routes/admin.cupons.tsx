@@ -131,6 +131,7 @@ function Page() {
                   onChange={(v) =>
                     setEditing({ ...editing, value: parseFloat(v) || 0 })
                   }
+                  step="0.01"
                 />
               )}
               <Field
@@ -140,6 +141,7 @@ function Page() {
                 onChange={(v) =>
                   setEditing({ ...editing, minOrder: parseFloat(v) || 0 })
                 }
+                step="0.01"
               />
               <Field
                 label="Máx. usos"
@@ -181,11 +183,13 @@ function Field({
   value,
   onChange,
   type = "text",
+  step,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
+  step?: string;
 }) {
   return (
     <label className="block">
@@ -195,6 +199,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
+        step={step}
         className="mt-1 w-full h-11 px-3 rounded-xl bg-muted outline-none focus:ring-2 ring-primary/40"
       />
     </label>
