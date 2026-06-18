@@ -195,18 +195,18 @@ function Page() {
     }
 
     // Pix → abre modal com QR + copia e cola + polling
-    if (form.payment === "pix") {
+    if (total > 0 && form.payment === "pix") {
       setPixModal(sharedPayload);
       return;
     }
 
     // Cartão → abre modal próprio (Checkout Transparente Mercado Pago)
-    if (form.payment === "card") {
+    if (total > 0 && form.payment === "card") {
       setCardModal(sharedPayload);
       return;
     }
 
-    // Dinheiro → fluxo local
+    // Dinheiro ou pedido Grátis → fluxo local
     const order = placeOrder({
       customerName: form.name,
       customerEmail: form.email,

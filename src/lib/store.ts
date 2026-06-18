@@ -1102,7 +1102,7 @@ export const useStore = create<AppState>()(
           paymentMethod: data.paymentMethod,
           deliveryMethod: data.deliveryMethod,
           status:
-            data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
+            total === 0 ? "pago" : data.paymentMethod === "cash" ? "aguardando_pagamento" : "pago",
           deliveryStatus: "pendente",
           createdAt: new Date().toISOString(),
           address:
@@ -1192,6 +1192,7 @@ export const useStore = create<AppState>()(
                 }),
               )
               .catch(() => {});
+
             // Desconta estoque no servidor (idempotente via RPC)
             cloud.applyOrderStockDecrement(order.id).catch(() => {});
           }
