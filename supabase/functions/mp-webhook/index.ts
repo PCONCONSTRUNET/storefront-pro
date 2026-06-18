@@ -169,48 +169,7 @@ Deno.serve(async (req) => {
 
   const justApproved = shouldApprove && (updateRes.data?.length ?? 0) > 0;
 
-  if (shouldApprove) {
-    const productSummary = Array.isArray(order.items)
-      ? order.items
-          .map(
-            (item: Record<string, unknown>) =>
-              `${Number(item.quantity ?? 1)}x ${item.name ?? item.productId ?? "Produto"}`,
-          )
-          .join(", ")
-      : null;
-
-    await supabase.from("transactions").upsert({
-      id: order.id,
-      kind: "entrada",
-      category: "venda",
-      description: `Pedido ${order.id} — ${order.customer_name}`,
-      amount: order.total,
-      date: payment.date_approved ?? new Date().toISOString(),
-      product_summary: productSummary,
-      notes: `Mercado Pago: ${payment.id}`,
-    });
-
-    const { data: existingLog } = await supabase
-      .from("activity_logs")
-      .select("id")
-      .eq("action", "payment_approved")
-      .eq("metadata->>order_id", order.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (!existingLog) {
-      await supabase.from("activity_logs").insert({
-        action: "payment_approved",
-        category: "order",
-        description: `Pagamento aprovado do pedido ${order.id} — ${order.customer_name}`,
-        metadata: {
-          order_id: order.id,
-          mp_payment_id: String(payment.id),
-          total: Number(order.total),
-        },
-      });
-    }
-  }
+  // Movemos a inserção de transações e logs para baixo.
 
   // Loga evento
   await supabase.from("payment_events").insert({
@@ -223,6 +182,44 @@ Deno.serve(async (req) => {
 
   // Notifica cliente + admin quando aprovado (apenas 1x — claim atômico acima)
   if (justApproved) {
+    const productSummary = Array.isArray(order.items)
+      ? order.items
+          .map(
+            (item: Record<string, unknown>) =>
+              `${Number(item.quantity ?? 1)}x ${item.name ?? item.productId ?? "Produto"}`,
+          )
+          .join(", ")
+      : null;
+
+    try {
+      await supabase.from("transactions").insert({
+        kind: "entrada",
+        category: "venda",
+        description: `Pedido ${order.id} — ${order.customer_name}`,
+        amount: order.total,
+        date: payment.date_approved ?? new Date().toISOString(),
+        product_summary: productSummary,
+        notes: `Mercado Pago: ${payment.id}`,
+      });
+    } catch (e) {
+      console.error("[mp-webhook] transactions insert falhou:", e);
+    }
+
+    try {
+      await supabase.from("activity_logs").insert({
+        action: "payment_approved",
+        category: "order",
+        description: `Pagamento aprovado do pedido ${order.id} — ${order.customer_name}`,
+        metadata: {
+          order_id: order.id,
+          mp_payment_id: String(payment.id),
+          total: Number(order.total),
+        },
+      });
+    } catch (e) {
+      console.error("[mp-webhook] activity_logs insert falhou:", e);
+    }
+
     // O estoque já foi descontado no momento da criação do pedido local (reserva)
     // para evitar que o produto seja vendido para outra pessoa enquanto o Pix não é pago.
     // Portanto, não chamamos apply_order_stock_decrement aqui.
