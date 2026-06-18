@@ -133,6 +133,15 @@ Deno.serve(async (req) => {
     return json({ error: "Falha ao criar pedido" }, 500);
   }
 
+  // Reserva o estoque imediatamente
+  try {
+    await supabase.rpc("apply_order_stock_decrement", {
+      _order_id: order.id,
+    });
+  } catch (e) {
+    console.error("[mp-create-pix] stock decrement falhou:", e);
+  }
+
   await notifyNewOrderAdmin(supabase, order);
 
   // 2) Chama Mercado Pago
