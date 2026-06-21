@@ -1457,7 +1457,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "princesa-store-v2",
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => idbStorage),
       skipHydration: typeof window === "undefined",
       partialize: (state) => {
@@ -1471,13 +1471,27 @@ export const useStore = create<AppState>()(
           activityLogs: [], 
         } as unknown as AppState;
       },
-      migrate: (persistedState: any, version: number) => {
+      migrate: (persistedState: any, _version: number) => {
         const persisted = persistedState as any;
         if (!persisted) return persisted;
+        // v2: remove cupons fictícios hardcoded que foram removidos do data.ts
+        const FAKE_COUPON_CODES = ["PRIMEIRA10", "PRINCESA20", "FRETE15", "FRETE5"];
+        if (Array.isArray(persisted.coupons)) {
+          persisted.coupons = persisted.coupons.filter(
+            (c: any) => !FAKE_COUPON_CODES.includes(c.code)
+          );
+        }
         return persisted;
       },
       onRehydrateStorage: () => (state) => {
         if (!state) return;
+        // Remove cupons fictícios que possam ter ficado no cache mesmo após a migração
+        const FAKE_COUPON_CODES = ["PRIMEIRA10", "PRINCESA20", "FRETE15", "FRETE5"];
+        if (Array.isArray(state.coupons)) {
+          state.coupons = state.coupons.filter(
+            (c) => !FAKE_COUPON_CODES.includes(c.code)
+          );
+        }
         const sessions = state.sessions || {
           admin: null,
           customer: null,
