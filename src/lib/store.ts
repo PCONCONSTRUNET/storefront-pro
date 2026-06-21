@@ -1802,8 +1802,9 @@ export function hydrateFromCloud(): Promise<void> {
       };
 
       useStore.setState(s => ({
+        // Supabase é a fonte da verdade para cupons: substitui local totalmente quando retornar dados
         coupons: publicSnap.coupons.length
-          ? mergeByCode(s.coupons, publicSnap.coupons)
+          ? publicSnap.coupons
           : s.coupons,
         reviews: mergeById(s.reviews, publicSnap.reviews),
         faq: mergeById(s.faq, publicSnap.faq),

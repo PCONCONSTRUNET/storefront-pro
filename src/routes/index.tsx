@@ -149,7 +149,9 @@ function Home() {
                       {c.code}
                     </div>
                     <div className="text-[10px] text-muted-foreground">
-                      {c.type === "percent"
+                      {c.type === "free_shipping" || c.freeShipping
+                        ? "Frete Grátis"
+                        : c.type === "percent"
                         ? `${c.value}% OFF`
                         : `R$ ${c.value} OFF`}
                       {c.minOrder > 0 ? ` · acima de R$ ${c.minOrder}` : ""}

@@ -51,38 +51,7 @@ export type Coupon = {
   freeShipping?: boolean;
 };
 
-export const initialCoupons: Coupon[] = [
-  {
-    code: "PRIMEIRA10",
-    type: "percent",
-    value: 10,
-    validUntil: "2026-12-31",
-    maxUses: 100,
-    usedCount: 12,
-    minOrder: 0,
-    active: true,
-  },
-  {
-    code: "PRINCESA20",
-    type: "percent",
-    value: 20,
-    validUntil: "2026-12-31",
-    maxUses: 50,
-    usedCount: 7,
-    minOrder: 100,
-    active: true,
-  },
-  {
-    code: "FRETE15",
-    type: "fixed",
-    value: 15,
-    validUntil: "2026-12-31",
-    maxUses: 200,
-    usedCount: 33,
-    minOrder: 80,
-    active: true,
-  },
-];
+export const initialCoupons: Coupon[] = [];
 
 export const initialFAQ: FAQItem[] = [
   {
