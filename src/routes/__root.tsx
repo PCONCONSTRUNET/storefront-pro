@@ -10,7 +10,6 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useStore, hydrateFromCloud } from "@/lib/store";
-import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { Analytics } from "@/components/Analytics";
 import appCss from "../styles.css?url";
@@ -201,8 +200,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const currentCustomerId = useStore((s) => s.currentCustomerId);
   const isAdmin = useStore((s) => s.isAdmin);
-  const { loginUser, logoutUser } = usePushNotifications();
-
 
 
 
@@ -296,27 +293,6 @@ function RootComponent() {
     if (typeof window === "undefined") return;
     hydrateFromCloud();
   }, []);
-
-  // OneSignal Auto-Login Sync
-  useEffect(() => {
-    const path = location.pathname;
-    let role: "admin" | "affiliate" | null = null;
-    let id: string | null = null;
-
-    if (path.startsWith("/admin") && sessions.admin) {
-      role = "admin";
-      id = "admin-user"; // Or sessions.admin.subjectId
-    } else if (path.startsWith("/afiliada") && sessions.affiliate) {
-      role = "affiliate";
-      id = sessions.affiliate.subjectId;
-    }
-
-    if (role && id) {
-      loginUser(role, id);
-    } else {
-      logoutUser();
-    }
-  }, [sessions, location.pathname, loginUser, logoutUser]);
 
 
   return (
