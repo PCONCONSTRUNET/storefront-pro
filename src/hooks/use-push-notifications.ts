@@ -91,6 +91,9 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
         await initOneSignal();
         setInitialized(true);
 
+        // Pequena espera para o OneSignal restaurar estado do IndexedDB (importante no reload)
+        await new Promise(r => setTimeout(r, 300));
+
         const OS = OneSignal as any;
         const sub = OS.User?.PushSubscription;
         const isOptedIn: boolean = sub?.optedIn ?? false;
@@ -101,6 +104,7 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
         setPlayerId(currentId);
 
         console.log('[push] setup — optedIn:', isOptedIn, 'id:', currentId);
+
 
         // Escuta mudanças futuras (FCM sync, revogação de permissão, etc.)
         sub?.addEventListener(

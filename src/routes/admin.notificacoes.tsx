@@ -143,13 +143,16 @@ function Page() {
     }
   };
 
+  // Nota: AdminDeviceSyncBanner (no AdminLayout) já inicializou o OneSignal.
+  // Usamos autoInit=true aqui mas com um segundo hook — o singleton de init garante
+  // que o OneSignal não inicia duas vezes. O estado converge via event listeners.
   const { 
     playerId: osId, 
     subscribed: osActive, 
     loading: syncing, 
     enable: forceSync,
-    permission: osPermission
   } = usePushNotifications({ role: 'admin' });
+
 
   const nukeServiceWorker = async () => {
     const { confirmDialog } = await import("@/components/ConfirmDialog");
@@ -198,37 +201,83 @@ function Page() {
   const testNotification = async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
+      const OneSignal = (await import("react-onesignal")).default;
+      const OS = OneSignal as any;
 
-      // Se não tem ID ou tem ID local (offline), envia para todos os admins
-      const isRealId = osId && !osId.startsWith("local-");
+      // Re-aplica tag role=admin antes de enviar (garante que o filtro vai funcionar)
+      try {
+        await OS?.login?.("admin-user");
+        await OS?.User?.addTags?.({ role: "admin" });
+        console.log("[push-test] tags re-aplicadas");
+      } catch (e) {
+        console.warn("[push-test] nao conseguiu re-aplicar tags:", e);
+      }
 
-      const body = isRealId
-        ? {
-            title: "Teste Admin Push 🚀",
-            message: `Recebido! ${new Date().toLocaleTimeString()}`,
-            subscriptionIds: [osId],
-          }
-        : {
-            title: "Teste Admin Push 🚀",
-            message: `Recebido! ${new Date().toLocaleTimeString()} (broadcast admin)`,
-            audience: "admin",
-          };
+      // Aguarda um momento para as tags sincronizarem com os servidores do OneSignal
+      await new Promise(r => setTimeout(r, 1500));
 
-      const { error } = await supabase.functions.invoke("send-push", { body });
+      const currentId = OS?.User?.PushSubscription?.id ?? osId;
+      const isRealId = currentId && !currentId.startsWith("local-");
+      const now = new Date().toLocaleTimeString("pt-BR");
 
-      if (error) throw error;
+      // Envia para o subscription ID específico E por audience (dupla cobertura)
+      const promises: Promise<any>[] = [];
 
       if (isRealId) {
-        toast.success(`Push enviado para o ID: ${osId!.slice(0, 8)}...`);
+        promises.push(
+          supabase.functions.invoke("send-push", {
+            body: {
+              title: "🚀 Teste Push",
+              message: `Chegou! ${now}`,
+              subscriptionIds: [currentId],
+            },
+          })
+        );
+      }
+
+      // Sempre envia por audience também (garante mesmo sem subscription ID no servidor)
+      promises.push(
+        supabase.functions.invoke("send-push", {
+          body: {
+            title: "🚀 Teste Push Admin",
+            message: `Chegou! ${now}`,
+            audience: "admin",
+          },
+        })
+      );
+
+      const results = await Promise.allSettled(promises);
+      
+      let totalRecipients = 0;
+      let hasError = false;
+      for (const r of results) {
+        if (r.status === "fulfilled") {
+          const d = r.value?.data;
+          totalRecipients += d?.recipients ?? 0;
+          if (r.value?.error) hasError = true;
+        } else {
+          hasError = true;
+        }
+      }
+
+      console.log("[push-test] recipients:", totalRecipients, "error:", hasError);
+
+      if (hasError) {
+        toast.error("Erro ao enviar push. Verifique os logs da edge function.");
+      } else if (totalRecipients === 0) {
+        toast.warning(
+          "Push enviado mas 0 dispositivos receberam. O OneSignal não encontrou este dispositivo registrado. Tente: Limpar Tudo → Ativar Notificações.",
+          { duration: 8000 }
+        );
       } else {
-        toast.success("Push enviado para todos os admins! (este dispositivo precisa ressincronizar)");
-        toast.info("Toque em 'Limpar Tudo' e depois 'Sincronizar' para registrar este celular.", { duration: 6000 });
+        toast.success(`✅ Push enviado para ${totalRecipients} dispositivo(s)! Aguarde...`);
       }
     } catch (err) {
       console.error("[push-test]", err);
       toast.error(`Erro: ${(err as Error).message}`);
     }
   };
+
 
 
   return (
