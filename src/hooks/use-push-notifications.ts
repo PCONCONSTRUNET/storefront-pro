@@ -34,7 +34,7 @@ async function initOneSignal(): Promise<void> {
     console.log('[push] Inicializando OneSignal:', ONESIGNAL_APP_ID);
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      safari_web_id: 'web.onesignal.auto.47a2f439-afd3-4bb7-8cdd-92cc4f5ee46c',
+      safari_web_id: 'web.onesignal.auto.34e4584e-b851-4129-9188-f0d7c790d3df',
       allowLocalhostAsSecureOrigin: true,
       autoResubscribe: true,
       welcomeNotification: { disable: true },
