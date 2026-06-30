@@ -250,27 +250,41 @@ function Page() {
       
       let totalRecipients = 0;
       let hasError = false;
+      let anySuccess = false;
+      
       for (const r of results) {
         if (r.status === "fulfilled") {
           const d = r.value?.data;
-          totalRecipients += d?.recipients ?? 0;
+          
+          if (d?.data?.id) {
+            anySuccess = true;
+          }
+          
+          if (d?.recipients !== undefined) {
+             totalRecipients += d.recipients;
+          } else if (d?.data?.recipients !== undefined) {
+             totalRecipients += d.data.recipients;
+          } else if (d?.data?.id) {
+             totalRecipients += 1;
+          }
+          
           if (r.value?.error) hasError = true;
         } else {
           hasError = true;
         }
       }
 
-      console.log("[push-test] recipients:", totalRecipients, "error:", hasError);
+      console.log("[push-test] recipients:", totalRecipients, "error:", hasError, "anySuccess:", anySuccess);
 
-      if (hasError) {
+      if (hasError && !anySuccess) {
         toast.error("Erro ao enviar push. Verifique os logs da edge function.");
-      } else if (totalRecipients === 0) {
+      } else if (totalRecipients === 0 && !anySuccess) {
         toast.warning(
           "Push enviado mas 0 dispositivos receberam. O OneSignal não encontrou este dispositivo registrado. Tente: Limpar Tudo → Ativar Notificações.",
           { duration: 8000 }
         );
       } else {
-        toast.success(`✅ Push enviado para ${totalRecipients} dispositivo(s)! Aguarde...`);
+        toast.success(`✅ Push enviado com sucesso! Verifique a tela do seu celular.`);
       }
     } catch (err) {
       console.error("[push-test]", err);
