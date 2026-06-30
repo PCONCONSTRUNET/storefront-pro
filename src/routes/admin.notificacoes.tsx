@@ -92,12 +92,6 @@ function Page() {
     toast.success("Notificação enviada para o admin");
   };
 
-    } catch (err) {
-      console.error("[push-test]", err);
-      toast.error(`Erro: ${(err as Error).message}`);
-    }
-  };
-
 
 
   const { isReady, permission, isSubscribed, playerId, requestPermission } = usePushNotifications();
