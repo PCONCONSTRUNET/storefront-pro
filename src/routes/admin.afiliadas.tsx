@@ -4,6 +4,7 @@ import {
   useStore,
   type Affiliate,
   type AffiliateSaleStatus,
+  type AffiliateSale,
 } from "@/lib/store";
 import { AdminLayout } from "@/components/AdminLayout";
 import { brl } from "@/lib/format";
@@ -64,6 +65,7 @@ function Page() {
   }, [sync]);
   const [editing, setEditing] = useState<Affiliate | null>(null);
   const [viewing, setViewing] = useState<Affiliate | null>(null);
+  const [viewingSale, setViewingSale] = useState<AffiliateSale | null>(null);
   const [filterAff, setFilterAff] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<"" | AffiliateSaleStatus>(
     "",
@@ -468,7 +470,8 @@ function Page() {
                 return (
                   <li
                     key={s.id}
-                    className="relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm py-3 px-4 flex flex-wrap items-start gap-3"
+                    onClick={() => setViewingSale(s)}
+                    className="cursor-pointer relative overflow-hidden rounded-xl border border-border bg-background hover:bg-muted/40 transition-colors shadow-sm py-3 px-4 flex flex-wrap items-start gap-3"
                   >
                     <div
                       className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
@@ -507,7 +510,7 @@ function Page() {
                       </div>
                       <StatusBadge status={s.status} />
                     </div>
-                    <div className="flex gap-1 w-full sm:w-auto justify-end">
+                    <div className="flex gap-1 w-full sm:w-auto justify-end" onClick={e => e.stopPropagation()}>
                       <ActionBtn
                         onClick={() => {
                           updateStatus(s.id, "confirmada");
@@ -571,6 +574,71 @@ function Page() {
             setViewing(null);
           }}
         />
+      )}
+
+      {viewingSale && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 animate-overlay-in"
+          onClick={() => setViewingSale(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-card rounded-3xl p-5 w-full max-w-md space-y-4 shadow-soft animate-modal-in"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-bold text-lg">Detalhes da Venda</h3>
+              <button
+                onClick={() => setViewingSale(null)}
+                className="p-2 bg-muted rounded-full hover:bg-muted/80 text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-3 text-sm">
+              <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                <span className="text-xs text-muted-foreground mb-1">Cliente</span>
+                <span className="font-bold">{viewingSale.customerName}</span>
+                {viewingSale.customerPhone && (
+                  <span className="text-xs mt-1 font-mono">{viewingSale.customerPhone}</span>
+                )}
+              </div>
+
+              <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                <span className="text-xs text-muted-foreground mb-1">Produto / Serviço</span>
+                <span>{viewingSale.productDescription}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                  <span className="text-xs text-muted-foreground mb-1">Valor Total</span>
+                  <span className="font-bold text-base">{brl(viewingSale.saleValue)}</span>
+                </div>
+                <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                  <span className="text-xs text-gold mb-1">Comissão</span>
+                  <span className="font-bold text-base text-gold">{brl(viewingSale.commissionEarned)}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                <span className="text-xs text-muted-foreground mb-1">Status</span>
+                <div><StatusBadge status={viewingSale.status} /></div>
+              </div>
+              
+              <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                <span className="text-xs text-muted-foreground mb-1">Data de Registro</span>
+                <span>{new Date(viewingSale.createdAt).toLocaleString("pt-BR")}</span>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setViewingSale(null)}
+              className="w-full py-3 bg-muted hover:bg-muted/80 rounded-xl font-bold transition-colors mt-2"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
       )}
 
       {editing && (
