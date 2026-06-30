@@ -249,10 +249,22 @@ function Page() {
         {/* Subscription ID */}
         <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-3 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
           <span className="opacity-50 block mb-0.5 uppercase text-[8px]">Subscription ID</span>
-          <span className={osId ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-muted-foreground"}>
-            {syncing ? "Aguardando token FCM..." : (osId || "—")}
-          </span>
+          {syncing ? (
+            <span className="text-muted-foreground">Ativando...</span>
+          ) : osId ? (
+            osId.startsWith('local-') ? (
+              <span className="text-amber-600 dark:text-amber-400">
+                {osId}
+                <span className="block text-[8px] mt-0.5 opacity-70">⚠ sincronizando com FCM...</span>
+              </span>
+            ) : (
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">{osId}</span>
+            )
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
         </div>
+
 
         {/* Caixa de erro diagnóstico */}
         <div className="bg-destructive/10 dark:bg-destructive/20 p-2 rounded-xl mb-3 font-mono text-[10px] break-all border border-destructive/20 text-destructive hidden empty:hidden" id="os-debug-log" />
