@@ -47,12 +47,14 @@ async function initOneSignal(): Promise<void> {
 }
 
 /**
- * Aguarda o player_id (subscription ID) aparecer após optIn.
- * Usa event listener + polling para máxima confiabilidade no iOS/Android.
+ * Aguarda um player_id REAL (sem prefixo "local-") após optIn.
+ * IDs "local-" são temporários gerados quando o FCM ainda não registrou.
+ * Usa event listener + polling para máxima confiabilidade no Android/iOS.
  */
-function waitForPlayerId(timeoutMs = 12000): Promise<string | null> {
+function waitForPlayerId(timeoutMs = 15000): Promise<string | null> {
   const existing = (OneSignal as any).User?.PushSubscription?.id ?? null;
-  if (existing) return Promise.resolve(existing);
+  // Ignora IDs "local-" — eles são placeholders sem token FCM real
+  if (existing && !existing.startsWith('local-')) return Promise.resolve(existing);
 
   return new Promise((resolve) => {
     let resolved = false;
@@ -62,28 +64,38 @@ function waitForPlayerId(timeoutMs = 12000): Promise<string | null> {
       resolve(id);
     };
 
-    // Event listener — dispara imediatamente quando o token APNs/FCM chega
+    // Event listener — dispara quando o token FCM real chega do servidor
     try {
       (OneSignal as any).User?.PushSubscription?.addEventListener(
         'change',
         (event: { current: { id: string | null; optedIn: boolean } }) => {
-          if (event.current.id) finish(event.current.id);
+          const newId = event.current.id;
+          // Só aceita IDs reais (sem prefixo "local-")
+          if (newId && !newId.startsWith('local-')) {
+            console.log('[push] token FCM real recebido via evento:', newId);
+            finish(newId);
+          }
         }
       );
     } catch {/* noop */}
 
-    // Polling a cada 100ms como fallback
+    // Polling a cada 200ms como fallback
     const start = Date.now();
     const poll = () => {
       if (resolved) return;
       const id = (OneSignal as any).User?.PushSubscription?.id ?? null;
-      if (id) {
-        console.log(`[push] player_id em ${Date.now() - start}ms`);
+      if (id && !id.startsWith('local-')) {
+        console.log(`[push] token FCM real em ${Date.now() - start}ms:`, id);
         finish(id);
         return;
       }
-      if (Date.now() - start > timeoutMs) { finish(null); return; }
-      setTimeout(poll, 100);
+      if (Date.now() - start > timeoutMs) {
+        const finalId = (OneSignal as any).User?.PushSubscription?.id ?? null;
+        console.warn('[push] timeout — ID final:', finalId);
+        finish(null);
+        return;
+      }
+      setTimeout(poll, 200);
     };
     poll();
   });
@@ -119,36 +131,47 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
 
         const OS = OneSignal as any;
         const isOptedIn = OS.User?.PushSubscription?.optedIn ?? false;
-        const id = OS.User?.PushSubscription?.id ?? null;
-        setSubscribed(isOptedIn);
-        setPlayerId(id);
+        const rawId = OS.User?.PushSubscription?.id ?? null;
+        // IDs com prefixo "local-" são placeholders — o FCM ainda não registrou
+        const isRealId = rawId && !rawId.startsWith('local-');
+        setSubscribed(isOptedIn && isRealId);
+        setPlayerId(isRealId ? rawId : null);
 
-        // Escuta mudanças futuras (ex: usuário revoga permissão)
+        // Escuta mudanças futuras (ex: usuário revoga permissão ou FCM registra)
         OS.User?.PushSubscription?.addEventListener(
           'change',
           (event: { current: { optedIn: boolean; id: string | null } }) => {
-            setSubscribed(event.current.optedIn);
-            setPlayerId(event.current.id);
+            const newId = event.current.id;
+            const newIsReal = newId && !newId.startsWith('local-');
+            setSubscribed(event.current.optedIn && !!newIsReal);
+            setPlayerId(newIsReal ? newId : null);
           }
         );
 
-        // Se já tem permissão mas não está subscrito, tenta optIn silencioso
-        if (Notification.permission === 'granted' && !isOptedIn) {
-          console.log('[push] Permissão já concedida mas não inscrito — optIn silencioso');
+        // Se tem permissão mas ID é local- ou não está inscrito, força re-registro
+        if (Notification.permission === 'granted' && (!isOptedIn || !isRealId)) {
+          console.log('[push] Permissão concedida mas sem token FCM real — forçando re-registro');
           try {
+            // Ciclo optOut → optIn para forçar novo registro com FCM
+            if (isOptedIn && !isRealId) {
+              await OS?.User?.PushSubscription?.optOut?.();
+              await new Promise(r => setTimeout(r, 500));
+            }
             await OS?.User?.PushSubscription?.optIn?.();
-            const pid = await waitForPlayerId(5000);
+            const pid = await waitForPlayerId(15000);
             if (pid) {
               setPlayerId(pid);
               setSubscribed(true);
-              // Login no OneSignal com o ID correto
               const osUserId = role === 'admin' ? 'admin-user' : userId;
               if (osUserId) {
                 await OS?.login?.(osUserId);
-                OS?.User?.addTag?.('role', role);
+                OS?.User?.addTags?.({ role, ...(osUserId !== 'admin-user' ? { customer_id: osUserId } : {}) });
               }
+              console.log('[push] ✅ re-registro silencioso OK, pid=', pid);
+            } else {
+              console.warn('[push] re-registro silencioso: token FCM não chegou em 15s');
             }
-          } catch {/* noop */}
+          } catch (e) { console.warn('[push] re-registro silencioso falhou:', e); }
         }
       } catch (err) {
         console.error('[push] setup error:', err);
@@ -197,9 +220,21 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
         return false;
       }
 
-      // OptIn imediato + aguarda o token chegar
+      // Verifica se já existe um ID local- (precisa de re-registro)
+      const currentId = OS?.User?.PushSubscription?.id ?? null;
+      const hasLocalId = currentId && currentId.startsWith('local-');
+
+      if (hasLocalId) {
+        console.log('[push] ID local- detectado, forçando optOut → optIn para obter token FCM real');
+        try {
+          await OS?.User?.PushSubscription?.optOut?.();
+          await new Promise(r => setTimeout(r, 800));
+        } catch {/* noop */}
+      }
+
+      // OptIn + aguarda token FCM REAL (sem prefixo local-)
       OS?.User?.PushSubscription?.optIn?.().catch(() => {/* noop */});
-      const pid = await waitForPlayerId(12000);
+      const pid = await waitForPlayerId(20000);
 
       if (pid) {
         setPlayerId(pid);
@@ -209,7 +244,7 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
         const osUserId = role === 'admin' ? 'admin-user' : userId;
         if (osUserId) {
           await OS?.login?.(osUserId);
-          OS?.User?.addTag?.('role', role);
+          await OS?.User?.addTags?.({ role, ...(osUserId !== 'admin-user' ? { customer_id: osUserId } : {}) });
         }
 
         console.log('[push] ✅ inscrição completa, pid=', pid);
@@ -223,15 +258,14 @@ export function usePushNotifications({ role, userId, autoInit = true }: UsePushO
                 ? 'Admin: você receberá avisos de pedidos e pagamentos 💰'
                 : 'Você vai receber avisos dos seus pedidos 💖',
               subscriptionIds: [pid],
-              externalUserIds: [osUserId ?? pid],
             },
           }).catch(e => console.warn('[push] welcome push falhou:', e));
-        }, 1500);
+        }, 2000);
 
         return true;
       }
 
-      console.error('[push] ❌ player_id não chegou após 12s');
+      console.error('[push] ❌ token FCM real não chegou após 20s. ID atual:', OS?.User?.PushSubscription?.id);
       return false;
     } catch (err) {
       console.error('[push] enable error:', err);
