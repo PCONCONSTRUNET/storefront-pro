@@ -10,7 +10,6 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { useStore, hydrateFromCloud } from "@/lib/store";
-
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
 import { Analytics } from "@/components/Analytics";
@@ -202,14 +201,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const currentCustomerId = useStore((s) => s.currentCustomerId);
   const isAdmin = useStore((s) => s.isAdmin);
+  const { loginUser, logoutUser } = usePushNotifications();
 
 
 
-  // Inicialização global do OneSignal
-  usePushNotifications({
-    role: isAdmin ? "admin" : "cliente",
-    userId: isAdmin ? null : currentCustomerId,
-  });
+
 
   const sessions = useStore((s) => s.sessions);
   const customers = useStore((s) => s.customers);
@@ -301,64 +297,27 @@ function RootComponent() {
     hydrateFromCloud();
   }, []);
 
-  // OneSignal Tagging & Role Management
+  // OneSignal Auto-Login Sync
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const path = location.pathname;
+    let role: "admin" | "affiliate" | null = null;
+    let id: string | null = null;
 
-    const OS =
-      (window as any).OneSignalDeferred ||
-      ((window as any).OneSignalDeferred = []);
-    OS.push(async (OneSignal: any) => {
-      try {
-        const path = location.pathname;
-        let role: "admin" | "affiliate" | "customer" = "customer";
-        let activeUser: { id: string; email: string; name?: string } | null =
-          null;
+    if (path.startsWith("/admin") && sessions.admin) {
+      role = "admin";
+      id = "admin-user"; // Or sessions.admin.subjectId
+    } else if (path.startsWith("/afiliada") && sessions.affiliate) {
+      role = "affiliate";
+      id = sessions.affiliate.subjectId;
+    }
 
-        // Identifica o usuário ativo baseado na rota e na sessão
-        if (path.startsWith("/admin") && sessions.admin) {
-          role = "admin";
-          activeUser = {
-            id: "admin-user",
-            email: sessions.admin.subjectId,
-          };
-        } else if (path.startsWith("/afiliada") && sessions.affiliate) {
-          role = "affiliate";
-          const aff = affiliates.find(
-            (a) => a.id === sessions.affiliate?.subjectId,
-          );
-          if (aff)
-            activeUser = { id: aff.id, email: aff.email, name: aff.name };
-        } else if (sessions.customer) {
-          role = "customer";
-          const cust = customers.find(
-            (c) => c.id === sessions.customer?.subjectId,
-          );
-          if (cust)
-            activeUser = { id: cust.id, email: cust.email, name: cust.name };
-        }
+    if (role && id) {
+      loginUser(role, id);
+    } else {
+      logoutUser();
+    }
+  }, [sessions, location.pathname, loginUser, logoutUser]);
 
-        if (activeUser) {
-          console.log("[OneSignal] User identified:", role, activeUser.id);
-          // O login vincula o dispositivo ao external_id (id do usuário)
-          await OneSignal.login(activeUser.id);
-          // As tags permitem filtrar por público (admin, cliente, afiliada)
-          await OneSignal.User.addTags({
-            role: role,
-            email: activeUser.email,
-            full_name: activeUser.name || "",
-          });
-        } else {
-          console.log(
-            "[OneSignal] No active session, logging out of OneSignal",
-          );
-          await OneSignal.logout();
-        }
-      } catch (e) {
-        console.warn("[OneSignal] Role sync failed", e);
-      }
-    });
-  }, [sessions, customers, affiliates, location.pathname]);
 
   return (
     <>

@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AdminLayout } from "@/components/AdminLayout";
-import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { AdminLayout } from "@/components/AdminLayout";import { usePushNotifications } from "@/hooks/use-push-notifications";
 import {
   Bell,
   Send,
@@ -93,185 +92,6 @@ function Page() {
     toast.success("Notificação enviada para o admin");
   };
 
-  const [togglingPush, setTogglingPush] = useState(false);
-
-  const togglePush = async (enabled: boolean) => {
-    setTogglingPush(true);
-    try {
-      if (enabled) {
-        // ATIVAR
-        const OS = (window as any).OneSignal;
-
-        // Se permissão já foi concedida, apenas faz optIn
-        if (Notification.permission === "granted") {
-          const sub = OS?.User?.PushSubscription;
-          if (sub && !sub.optedIn) {
-            await sub.optIn();
-          }
-          // Vincula ao admin
-          if (OS) {
-            await OS.login("admin-user");
-            OS.User.addTag("role", "admin");
-          }
-          toast.success("Notificações reativadas neste dispositivo!");
-        } else {
-          // Pede permissão via store
-          const r = await requestPushPermission();
-          if (r === "granted") toast.success("Notificações ativadas!");
-          else if (r === "denied") toast.error("Permissão negada. Ative manualmente nas configurações do navegador.");
-          else toast.error("Seu navegador não suporta notificações push.");
-        }
-      } else {
-        // DESATIVAR — optOut no OneSignal
-        const OS = (window as any).OneSignal;
-        const sub = OS?.User?.PushSubscription;
-
-        if (sub?.optedIn) {
-          await sub.optOut();
-          await disablePush(); // Atualiza o estado no store
-          toast.success("Notificações desativadas neste dispositivo.");
-        } else {
-          await disablePush();
-          toast.info("Notificações já estavam desativadas.");
-        }
-      }
-    } catch (e) {
-      console.error("[togglePush]", e);
-      toast.error("Erro ao alterar as notificações. Tente novamente.");
-    } finally {
-      setTogglingPush(false);
-    }
-  };
-
-  // Nota: AdminDeviceSyncBanner (no AdminLayout) já inicializou o OneSignal.
-  // Usamos autoInit=true aqui mas com um segundo hook — o singleton de init garante
-  // que o OneSignal não inicia duas vezes. O estado converge via event listeners.
-  const { 
-    playerId: osId, 
-    subscribed: osActive, 
-    loading: syncing, 
-    enable: forceSync,
-  } = usePushNotifications({ role: 'admin' });
-
-
-  const nukeServiceWorker = async () => {
-    const { confirmDialog } = await import("@/components/ConfirmDialog");
-    if (!(await confirmDialog({ title: "Resetar notificações?", description: "Isso vai limpar todas as configurações de notificação e recarregar a página.", confirmLabel: "Continuar" }))) return;
-    
-    try {
-      if ("serviceWorker" in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          try {
-            // Destrói a inscrição de push nativa travada no aparelho
-            if (registration.pushManager) {
-              const subscription = await registration.pushManager.getSubscription();
-              if (subscription) {
-                await subscription.unsubscribe();
-                console.log("[push] Inscrição antiga destruída com sucesso!");
-              }
-            }
-          } catch (e) {
-            console.error("[push] Erro ao destruir inscrição antiga:", e);
-          }
-          await registration.unregister();
-        }
-      }
-      
-      // Limpa dados do OneSignal no localStorage e IndexedDB
-      localStorage.removeItem("push_prompt_accepted");
-      localStorage.removeItem("push_prompt_dismissed_at");
-      
-      // Limpa bancos de dados do OneSignal (IndexedDB)
-      const dbs = await window.indexedDB.databases();
-      dbs.forEach(db => {
-        if (db.name?.includes("OneSignal")) {
-          window.indexedDB.deleteDatabase(db.name);
-        }
-      });
-
-      window.alert("Sistema limpo! A página vai recarregar. Ative as notificações novamente ao voltar.");
-      window.location.reload();
-    } catch (err) {
-      console.error("Erro ao limpar:", err);
-      window.location.reload();
-    }
-  };
-
-  const testNotification = async () => {
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const OneSignal = (await import("react-onesignal")).default;
-      const OS = OneSignal as any;
-
-      // Re-aplica tag role=admin antes de enviar (garante que o filtro vai funcionar)
-      try {
-        await OS?.login?.("admin-user");
-        await OS?.User?.addTags?.({ role: "admin" });
-        console.log("[push-test] tags re-aplicadas");
-      } catch (e) {
-        console.warn("[push-test] nao conseguiu re-aplicar tags:", e);
-      }
-
-      // Aguarda um momento para as tags sincronizarem com os servidores do OneSignal
-      await new Promise(r => setTimeout(r, 1500));
-
-      const currentId = OS?.User?.PushSubscription?.id ?? osId;
-      const isRealId = currentId && !currentId.startsWith("local-");
-      const now = new Date().toLocaleTimeString("pt-BR");
-
-      // Envia para o subscription ID específico E por audience (dupla cobertura)
-      const promises: Promise<any>[] = [];
-
-      if (isRealId) {
-        promises.push(
-          supabase.functions.invoke("send-push", {
-            body: {
-              title: "🚀 Teste Push",
-              message: `Chegou! ${now}`,
-              subscriptionIds: [currentId],
-            },
-          })
-        );
-      }
-
-      // Sempre envia por audience também (garante mesmo sem subscription ID no servidor)
-      promises.push(
-        supabase.functions.invoke("send-push", {
-          body: {
-            title: "🚀 Teste Push Admin",
-            message: `Chegou! ${now}`,
-            audience: "admin",
-          },
-        })
-      );
-
-      const results = await Promise.allSettled(promises);
-      
-      let totalRecipients = 0;
-      let hasError = false;
-      for (const r of results) {
-        if (r.status === "fulfilled") {
-          const d = r.value?.data;
-          totalRecipients += d?.recipients ?? 0;
-          if (r.value?.error) hasError = true;
-        } else {
-          hasError = true;
-        }
-      }
-
-      console.log("[push-test] recipients:", totalRecipients, "error:", hasError);
-
-      if (hasError) {
-        toast.error("Erro ao enviar push. Verifique os logs da edge function.");
-      } else if (totalRecipients === 0) {
-        toast.warning(
-          "Push enviado mas 0 dispositivos receberam. O OneSignal não encontrou este dispositivo registrado. Tente: Limpar Tudo → Ativar Notificações.",
-          { duration: 8000 }
-        );
-      } else {
-        toast.success(`✅ Push enviado para ${totalRecipients} dispositivo(s)! Aguarde...`);
-      }
     } catch (err) {
       console.error("[push-test]", err);
       toast.error(`Erro: ${(err as Error).message}`);
@@ -280,103 +100,50 @@ function Page() {
 
 
 
+  const { isReady, permission, isSubscribed, playerId, requestPermission } = usePushNotifications();
+
   return (
     <AdminLayout title="Notificações">
       {/* Status do Push */}
-      <div className="bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-2xl border-2 border-indigo-500/20 shadow-lg relative z-[999] pointer-events-auto">
+      <div className="bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-2xl border-2 border-indigo-500/20 shadow-lg relative z-[999] pointer-events-auto mt-4 mx-4">
         <div className="flex items-center justify-between mb-3">
           <div className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-widest flex items-center gap-2">
             <Bell className="h-3 w-3" /> Status do Push
           </div>
           <div
-            className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${osActive ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isSubscribed ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive"}`}
           >
-            {osActive ? "CONECTADO" : "DESCONECTADO"}
+            {isSubscribed ? "CONECTADO" : "DESCONECTADO"}
           </div>
         </div>
 
         {/* Subscription ID */}
         <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-3 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
-          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">Subscription ID</span>
-          {syncing ? (
-            <span className="text-muted-foreground">Ativando...</span>
-          ) : osId ? (
-            osId.startsWith('local-') ? (
-              <span className="text-amber-600 dark:text-amber-400">
-                {osId}
-                <span className="block text-[8px] mt-0.5 opacity-70">⚠ sincronizando com FCM...</span>
-              </span>
-            ) : (
-              <span className="text-emerald-700 dark:text-emerald-400 font-bold">{osId}</span>
-            )
+          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">Subscription ID / Player ID</span>
+          {playerId ? (
+            <span className="text-emerald-700 dark:text-emerald-400 font-bold">{playerId}</span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}
         </div>
 
-
-        {/* Caixa de erro diagnóstico */}
-        <div className="bg-destructive/10 dark:bg-destructive/20 p-2 rounded-xl mb-3 font-mono text-[10px] break-all border border-destructive/20 text-destructive hidden empty:hidden" id="os-debug-log" />
+        {/* Permissão */}
+        <div className="text-xs mb-4">
+          Status de Permissão: <span className="font-bold">{permission}</span>
+        </div>
 
         {/* BOTÃO PRINCIPAL — ATIVAR NOTIFICAÇÕES */}
-        {!osActive && (
+        {!isSubscribed && (
           <button
-            id="btn-ativar-notificacoes"
-            onClick={(e) => {
-              e.stopPropagation();
-              forceSync();
-            }}
-            disabled={syncing}
+            onClick={() => requestPermission()}
+            disabled={!isReady}
             className="w-full h-14 mb-3 rounded-2xl font-black text-base shadow-lg active:scale-[0.97] transition-all flex items-center justify-center gap-3 text-white disabled:opacity-70"
             style={{ background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" }}
           >
-            {syncing ? (
-              <>
-                <RefreshCw className="h-5 w-5 animate-spin" />
-                Obtendo token FCM...
-              </>
-            ) : (
-              <>
-                <BellRing className="h-5 w-5" />
-                ATIVAR NOTIFICAÇÕES
-              </>
-            )}
+            <BellRing className="h-5 w-5" />
+            ATIVAR NOTIFICAÇÕES
           </button>
         )}
-
-        {/* Botões secundários */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nukeServiceWorker();
-            }}
-            className="h-11 bg-destructive/10 text-destructive rounded-xl font-bold text-[10px] shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-destructive/20"
-          >
-            Limpar Tudo
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              forceSync();
-            }}
-            disabled={syncing}
-            className="h-11 bg-white dark:bg-white/10 text-foreground rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-border disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "Aguardando..." : "Re-sincronizar"}
-          </button>
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            testNotification();
-          }}
-          className="w-full h-11 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
-        >
-          <TrendingUp className="h-4 w-4" /> Testar Push
-        </button>
       </div>
     </AdminLayout>
   );
