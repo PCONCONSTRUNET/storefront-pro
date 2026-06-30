@@ -233,7 +233,7 @@ function Page() {
 
   return (
     <AdminLayout title="Notificações">
-      {/* Barra de Diagnóstico Push - Reforçada para Mobile */}
+      {/* Status do Push */}
       <div className="bg-indigo-50 dark:bg-indigo-950/30 p-4 rounded-2xl border-2 border-indigo-500/20 shadow-lg relative z-[999] pointer-events-auto">
         <div className="flex items-center justify-between mb-3">
           <div className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-widest flex items-center gap-2">
@@ -246,17 +246,44 @@ function Page() {
           </div>
         </div>
 
-        <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
-          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">
-            Subscription ID
+        {/* Subscription ID */}
+        <div className="bg-white/50 dark:bg-black/20 p-2 rounded-xl mb-3 font-mono text-[10px] break-all border border-black/5 dark:border-white/5">
+          <span className="opacity-50 block mb-0.5 uppercase text-[8px]">Subscription ID</span>
+          <span className={osId ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-muted-foreground"}>
+            {syncing ? "Aguardando token FCM..." : (osId || "—")}
           </span>
-          {osId || "Aguardando..."}
-        </div>
-        
-        {/* Nova caixa de Erro para Diagnóstico */}
-        <div className="bg-destructive/10 dark:bg-destructive/20 p-2 rounded-xl mb-4 font-mono text-[10px] break-all border border-destructive/20 text-destructive hidden empty:hidden" id="os-debug-log">
         </div>
 
+        {/* Caixa de erro diagnóstico */}
+        <div className="bg-destructive/10 dark:bg-destructive/20 p-2 rounded-xl mb-3 font-mono text-[10px] break-all border border-destructive/20 text-destructive hidden empty:hidden" id="os-debug-log" />
+
+        {/* BOTÃO PRINCIPAL — ATIVAR NOTIFICAÇÕES */}
+        {!osActive && (
+          <button
+            id="btn-ativar-notificacoes"
+            onClick={(e) => {
+              e.stopPropagation();
+              forceSync();
+            }}
+            disabled={syncing}
+            className="w-full h-14 mb-3 rounded-2xl font-black text-base shadow-lg active:scale-[0.97] transition-all flex items-center justify-center gap-3 text-white disabled:opacity-70"
+            style={{ background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" }}
+          >
+            {syncing ? (
+              <>
+                <RefreshCw className="h-5 w-5 animate-spin" />
+                Obtendo token FCM...
+              </>
+            ) : (
+              <>
+                <BellRing className="h-5 w-5" />
+                ATIVAR NOTIFICAÇÕES
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Botões secundários */}
         <div className="grid grid-cols-2 gap-3 mb-3">
           <button
             onClick={(e) => {
@@ -270,13 +297,13 @@ function Page() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              window.alert("Sincronizando... aguarde o aviso de sucesso.");
               forceSync();
             }}
             disabled={syncing}
-            className="h-11 bg-white dark:bg-white/10 text-foreground rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-border"
+            className="h-11 bg-white dark:bg-white/10 text-foreground rounded-xl font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 border border-border disabled:opacity-50"
           >
-            {syncing ? "..." : "Sincronizar"}
+            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Aguardando..." : "Re-sincronizar"}
           </button>
         </div>
 
