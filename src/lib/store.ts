@@ -943,24 +943,29 @@ export const useStore = create<AppState>()(
           sessions: { ...s.sessions, affiliate: null },
         })),
       registerAffiliate: async (data) => {
-        const name = data.name.trim();
-        const email = data.email.trim().toLowerCase();
-        if (!name || !email || !data.password)
-          return { ok: false, message: "Preencha todos os campos" };
-        if (data.password.length < 4)
-          return { ok: false, message: "Senha muito curta" };
-        const { registerAffiliateFn } = await import("./auth.functions");
-        const res = await registerAffiliateFn({
-          data: { name, email, password: data.password, phone: data.phone.trim() },
-        });
-        if (!res.ok) return { ok: false, message: res.message };
-        const newA: Affiliate = { ...res.affiliate, password: "" };
-        set((s) => ({
-          affiliates: [...s.affiliates.filter((x) => x.id !== newA.id), newA],
-          currentAffiliateId: newA.id,
-          sessions: { ...s.sessions, affiliate: makeSession(newA.id) },
-        }));
-        return { ok: true, message: res.message };
+        try {
+          const name = data.name.trim();
+          const email = data.email.trim().toLowerCase();
+          if (!name || !email || !data.password)
+            return { ok: false, message: "Preencha todos os campos" };
+          if (data.password.length < 4)
+            return { ok: false, message: "Senha muito curta" };
+          const { registerAffiliateFn } = await import("./auth.functions");
+          const res = await registerAffiliateFn({
+            data: { name, email, password: data.password, phone: data.phone.trim() },
+          });
+          if (!res.ok) return { ok: false, message: res.message };
+          const newA: Affiliate = { ...res.affiliate, password: "" };
+          set((s) => ({
+            affiliates: [...s.affiliates.filter((x) => x.id !== newA.id), newA],
+            currentAffiliateId: newA.id,
+            sessions: { ...s.sessions, affiliate: makeSession(newA.id) },
+          }));
+          return { ok: true, message: res.message };
+        } catch (err: any) {
+          console.error("registerAffiliate error:", err);
+          return { ok: false, message: err?.message || "Erro interno de conexão. Tente novamente." };
+        }
       },
       upsertAffiliate: (a) => {
         set((s) => ({
