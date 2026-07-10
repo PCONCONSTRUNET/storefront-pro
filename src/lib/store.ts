@@ -19,6 +19,7 @@ import {
   detectAndAlertNewOrders,
   resetAdminOrderAlert,
 } from "./adminOrderAlert";
+import { getAffiliateSalesFn } from "./secured.functions";
 export {
   ORDER_STATUS_LABEL,
   getOrderStatusLabel,
@@ -978,7 +979,6 @@ export const useStore = create<AppState>()(
         const id = get().currentAffiliateId;
         if (!id) return;
         try {
-          const { getAffiliateSalesFn } = await import("./secured.functions");
           const res = await getAffiliateSalesFn({ data: id });
           if (res.ok && res.sales) {
             const mapped = res.sales.map((r: any) => ({
