@@ -81,7 +81,7 @@ export const deleteAffiliateSaleFn = createServerFn({ method: "POST" })
   });
 
 export const getAffiliateSalesFn = createServerFn({ method: "GET" })
-  .validator((input: string) => input) // receives affiliate_id
+  .inputValidator((input: string) => input) // receives affiliate_id
   .handler(async ({ data: affiliate_id }) => {
     const { data, error } = await supabaseAdmin
       .from("affiliate_sales")
