@@ -1506,12 +1506,8 @@ export const useStore = create<AppState>()(
         const patch: Partial<AppState> = {};
         const nextSessions = { ...sessions };
 
-        // --- ADMIN: NUNCA reseta isAdmin diretamente aqui.
-        // Em vez disso, seta adminRevalidating=true e aguarda o servidor confirmar.
-        // Isso elimina a race condition do F5 que causava redirect prematuro.
-        const adminHadSession = state.isAdmin;
-        if (adminHadSession && typeof window !== "undefined") {
-          // Verifica também o backup no localStorage
+        // --- ADMIN: Restaurar do backup para evitar race condition no F5
+        if (typeof window !== "undefined") {
           let adminBackupOk = false;
           try {
             const backupStr = localStorage.getItem("princesa-admin-auth");
@@ -1523,6 +1519,7 @@ export const useStore = create<AppState>()(
 
           if (adminBackupOk) {
             // Mantém isAdmin=true e sinaliza que está revalidando
+            patch.isAdmin = true;
             patch.adminRevalidating = true;
           } else {
             // Sem backup — reseta imediatamente (nunca logou ou limpou)
