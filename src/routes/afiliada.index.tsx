@@ -63,6 +63,7 @@ function Page() {
   const sales = useStore((s) => s.affiliateSales);
   const logout = useStore((s) => s.logoutAffiliate);
   const syncSales = useStore((s) => s.syncAffiliateSales);
+  const registerSale = useStore((s) => s.registerAffiliateSale);
 
   const me = useMemo(
     () => affiliates.find((a) => a.id === currentId) || null,
