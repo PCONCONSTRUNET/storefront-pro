@@ -459,12 +459,18 @@ export const cloud = {
       log("upsertAffiliateSale", e);
     }
   },
-  async deleteAffiliateSale(id: string) {
-    try {
-      const r = await deleteAffiliateSaleFn({ data: { id } });
-      if (!r.ok) log("deleteAffiliateSale", (r as any).message);
-    } catch (e) {
-      log("deleteAffiliateSale", e);
+  async deleteAffiliateSale(id: string, affiliateId?: string) {
+    if (affiliateId) {
+      // Afiliada excluindo a venda pelo painel dela
+      try {
+        const r = await deleteAffiliateSaleFn({ data: { id, affiliate_id: affiliateId } });
+        if (!r.ok) log("deleteAffiliateSale", (r as any).message);
+      } catch (e) {
+        log("deleteAffiliateSale", e);
+      }
+    } else {
+      // Admin excluindo a venda pelo painel geral
+      await adminDelete("affiliate_sales", { id });
     }
   },
 

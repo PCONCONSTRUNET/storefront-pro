@@ -51,8 +51,23 @@ export const submitAffiliateSaleFn = createServerFn({ method: "POST" })
   });
 
 export const deleteAffiliateSaleFn = createServerFn({ method: "POST" })
-  .inputValidator((input) => z.object({ id: z.string().min(1) }).parse(input))
+  .inputValidator((input) => z.object({ 
+    id: z.string().min(1),
+    affiliate_id: z.string().uuid()
+  }).parse(input))
   .handler(async ({ data }) => {
+    // Para segurança, uma afiliada só pode excluir sua PRÓPRIA venda
+    // e APENAS se a venda estiver "pendente". Se já foi paga/confirmada, não pode.
+    const { data: sale } = await supabaseAdmin
+      .from("affiliate_sales")
+      .select("status, affiliate_id")
+      .eq("id", data.id)
+      .single();
+
+    if (!sale) return { ok: false as const, message: "Venda não encontrada" };
+    if (sale.affiliate_id !== data.affiliate_id) return { ok: false as const, message: "Sem permissão" };
+    if (sale.status !== "pendente") return { ok: false as const, message: "Não é possível excluir uma venda que não está mais pendente" };
+
     const { error } = await supabaseAdmin
       .from("affiliate_sales")
       .delete()

@@ -1069,7 +1069,8 @@ export const useStore = create<AppState>()(
         set((s) => ({
           affiliateSales: s.affiliateSales.filter((v) => v.id !== id),
         }));
-        cloud.deleteAffiliateSale(id);
+        const affId = get().currentAffiliateId;
+        cloud.deleteAffiliateSale(id, affId || undefined);
       },
 
       placeOrder: (data) => {
