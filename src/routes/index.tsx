@@ -20,7 +20,7 @@ import {
   Pause,
   Play,
 } from "lucide-react";
-import bannerEncantada from "@/assets/banner-encantada-2026.png";
+import bannerEncantada from "@/assets/princesa.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
