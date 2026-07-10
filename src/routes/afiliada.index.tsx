@@ -547,10 +547,10 @@ function AffiliateHero({
     const todayKey = new Date().toISOString().slice(0, 10);
     const monthKey = new Date().toISOString().slice(0, 7);
     const today = sales.filter(
-      (s) => s.createdAt.slice(0, 10) === todayKey && s.status !== "cancelada",
+      (s) => s.createdAt?.slice(0, 10) === todayKey && s.status !== "cancelada",
     );
     const month = sales.filter(
-      (s) => s.createdAt.slice(0, 7) === monthKey && s.status !== "cancelada",
+      (s) => s.createdAt?.slice(0, 7) === monthKey && s.status !== "cancelada",
     );
     const paid = sales.filter((s) => s.status === "confirmada");
     return {
@@ -564,7 +564,7 @@ function AffiliateHero({
 
   const monthCount = sales.filter(
     (s) =>
-      s.createdAt.slice(0, 7) === new Date().toISOString().slice(0, 7) &&
+      s.createdAt?.slice(0, 7) === new Date().toISOString().slice(0, 7) &&
       s.status !== "cancelada",
   ).length;
   const goal = Math.max(10, Math.ceil(Math.max(monthCount, 1) / 10) * 10);

@@ -75,7 +75,9 @@ export default function Summary({
   const filtered = useMemo(
     () =>
       sales.filter((s) => {
+        if (!s.createdAt) return false;
         const d = new Date(s.createdAt);
+        if (isNaN(d.getTime())) return false;
         return d >= range.start && d <= range.end && s.status !== "cancelada";
       }),
     [sales, range],
@@ -116,7 +118,10 @@ export default function Summary({
       });
     }
     filtered.forEach((s) => {
-      const key = new Date(s.createdAt).toISOString().slice(0, 10);
+      if (!s.createdAt) return;
+      const d = new Date(s.createdAt);
+      if (isNaN(d.getTime())) return;
+      const key = d.toISOString().slice(0, 10);
       const cur = map.get(key);
       if (cur) {
         cur.vendas += 1;
