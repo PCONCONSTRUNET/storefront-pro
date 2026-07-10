@@ -348,12 +348,11 @@ type AppState = {
   registerAffiliate: (data: {
     name: string;
     email: string;
-    password: string;
     phone: string;
-  }) => Promise<{
-    ok: boolean;
-    message: string;
-  }>;
+    password?: string;
+  }) => Promise<{ ok: boolean; message: string }>;
+  syncAffiliateSales: () => Promise<void>;
+
   upsertAffiliate: (a: Affiliate) => void;
   deleteAffiliate: (id: string) => void;
   registerAffiliateSale: (
@@ -974,6 +973,31 @@ export const useStore = create<AppState>()(
             : [...s.affiliates, a],
         }));
         cloud.upsertAffiliate(a);
+      },
+      syncAffiliateSales: async () => {
+        const id = get().currentAffiliateId;
+        if (!id) return;
+        try {
+          const { getAffiliateSalesFn } = await import("./secured.functions");
+          const res = await getAffiliateSalesFn({ data: id });
+          if (res.ok && res.sales) {
+            const mapped = res.sales.map((r: any) => ({
+              id: r.id,
+              affiliateId: r.affiliate_id,
+              customerName: r.customer_name,
+              customerPhone: r.customer_phone || undefined,
+              productDescription: r.product_description,
+              saleValue: Number(r.sale_value) || 0,
+              commissionEarned: Number(r.commission_earned) || 0,
+              status: r.status as any,
+              notes: r.notes || undefined,
+              createdAt: r.created_at,
+            }));
+            set({ affiliateSales: mapped });
+          }
+        } catch (e) {
+          console.error("syncAffiliateSales falhou", e);
+        }
       },
       deleteAffiliate: (id) => {
         set((s) => ({

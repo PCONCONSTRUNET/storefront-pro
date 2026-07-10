@@ -80,6 +80,22 @@ export const deleteAffiliateSaleFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+export const getAffiliateSalesFn = createServerFn({ method: "GET" })
+  .validator((input: string) => input) // receives affiliate_id
+  .handler(async ({ data: affiliate_id }) => {
+    const { data, error } = await supabaseAdmin
+      .from("affiliate_sales")
+      .select("*")
+      .eq("affiliate_id", affiliate_id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[getAffiliateSalesFn] fetch failed:", error);
+      return { ok: false as const, sales: [] };
+    }
+    return { ok: true as const, sales: data };
+  });
+
 export const consumeResetTokenFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({ token: z.string().min(8).max(200) }).parse(input),

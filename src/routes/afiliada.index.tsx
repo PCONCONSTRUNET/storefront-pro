@@ -61,8 +61,8 @@ function Page() {
   const currentId = useStore((s) => s.currentAffiliateId);
   const affiliates = useStore((s) => s.affiliates);
   const sales = useStore((s) => s.affiliateSales);
-  const registerSale = useStore((s) => s.registerAffiliateSale);
   const logout = useStore((s) => s.logoutAffiliate);
+  const syncSales = useStore((s) => s.syncAffiliateSales);
 
   const me = useMemo(
     () => affiliates.find((a) => a.id === currentId) || null,
@@ -78,8 +78,11 @@ function Page() {
     if (!me) {
       logout();
       navigate({ to: "/afiliada/login" });
+      return;
     }
-  }, [hydrated, currentId, me, navigate, logout]);
+    // Sincroniza as vendas da afiliada ao carregar a página
+    syncSales();
+  }, [hydrated, currentId, me, navigate, logout, syncSales]);
 
   const [view, setView] = useState<View>("registrar");
 
