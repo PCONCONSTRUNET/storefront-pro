@@ -11,7 +11,7 @@ import {
   adminReadTableFn,
   updateCustomerFn,
 } from "./admin.functions";
-import { applyOrderStockDecrementFn, submitAffiliateSaleFn } from "./secured.functions";
+import { applyOrderStockDecrementFn, submitAffiliateSaleFn, deleteAffiliateSaleFn } from "./secured.functions";
 import type {
   Affiliate,
   AffiliateSale,
@@ -460,7 +460,12 @@ export const cloud = {
     }
   },
   async deleteAffiliateSale(id: string) {
-    await adminDelete("affiliate_sales", { id });
+    try {
+      const r = await deleteAffiliateSaleFn({ data: { id } });
+      if (!r.ok) log("deleteAffiliateSale", (r as any).message);
+    } catch (e) {
+      log("deleteAffiliateSale", e);
+    }
   },
 
   async upsertTransaction(t: Transaction) {

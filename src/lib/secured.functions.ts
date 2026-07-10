@@ -50,6 +50,21 @@ export const submitAffiliateSaleFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+export const deleteAffiliateSaleFn = createServerFn({ method: "POST" })
+  .inputValidator((input) => z.object({ id: z.string().min(1) }).parse(input))
+  .handler(async ({ data }) => {
+    const { error } = await supabaseAdmin
+      .from("affiliate_sales")
+      .delete()
+      .eq("id", data.id);
+
+    if (error) {
+      console.error("[deleteAffiliateSaleFn] delete failed:", error);
+      return { ok: false as const, message: error.message };
+    }
+    return { ok: true as const };
+  });
+
 export const consumeResetTokenFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({ token: z.string().min(8).max(200) }).parse(input),
