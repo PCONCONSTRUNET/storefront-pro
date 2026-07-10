@@ -11,7 +11,7 @@ import {
   adminReadTableFn,
   updateCustomerFn,
 } from "./admin.functions";
-import { applyOrderStockDecrementFn } from "./secured.functions";
+import { applyOrderStockDecrementFn, submitAffiliateSaleFn } from "./secured.functions";
 import type {
   Affiliate,
   AffiliateSale,
@@ -437,21 +437,27 @@ export const cloud = {
   },
 
   async upsertAffiliateSale(s: AffiliateSale) {
-    await adminUpsert(
-      "affiliate_sales",
-      {
-        id: s.id,
-        affiliate_id: s.affiliateId,
-        customer_name: s.customerName,
-        customer_phone: s.customerPhone || null,
-        product_description: s.productDescription,
-        sale_value: s.saleValue,
-        commission_earned: s.commissionEarned,
-        status: s.status,
-        notes: s.notes || null,
-      },
-      "id",
-    );
+    // Afiliadas não são admins, portanto não podemos usar adminUpsert aqui.
+    // Usamos submitAffiliateSaleFn (service_role via server fn) que bypassa o RLS.
+    try {
+      const r = await submitAffiliateSaleFn({
+        data: {
+          id: s.id,
+          affiliate_id: s.affiliateId,
+          customer_name: s.customerName,
+          customer_phone: s.customerPhone ?? null,
+          product_description: s.productDescription,
+          sale_value: s.saleValue,
+          commission_earned: s.commissionEarned,
+          status: s.status,
+          notes: s.notes ?? null,
+          created_at: s.createdAt,
+        },
+      });
+      if (!r.ok) log("upsertAffiliateSale", (r as any).message);
+    } catch (e) {
+      log("upsertAffiliateSale", e);
+    }
   },
   async deleteAffiliateSale(id: string) {
     await adminDelete("affiliate_sales", { id });

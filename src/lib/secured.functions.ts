@@ -5,6 +5,51 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+// Permite que a afiliada (sem sessão admin) salve uma venda no banco.
+// Usa supabaseAdmin (service_role) para bypassar o RLS da tabela affiliate_sales,
+// que é restrita — analogamente ao que submitLocalOrderFn faz para pedidos.
+export const submitAffiliateSaleFn = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z
+      .object({
+        id: z.string().min(1),
+        affiliate_id: z.string().uuid(),
+        customer_name: z.string().min(1).max(255),
+        customer_phone: z.string().max(50).nullable().optional(),
+        product_description: z.string().min(1).max(500),
+        sale_value: z.number().min(0),
+        commission_earned: z.number().min(0),
+        status: z.enum(["pendente", "confirmada", "cancelada"]),
+        notes: z.string().max(1000).nullable().optional(),
+        created_at: z.string().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const row = {
+      id: data.id,
+      affiliate_id: data.affiliate_id,
+      customer_name: data.customer_name,
+      customer_phone: data.customer_phone ?? null,
+      product_description: data.product_description,
+      sale_value: data.sale_value,
+      commission_earned: data.commission_earned,
+      status: data.status,
+      notes: data.notes ?? null,
+      created_at: data.created_at ?? new Date().toISOString(),
+    };
+
+    const { error } = await supabaseAdmin
+      .from("affiliate_sales")
+      .upsert(row, { onConflict: "id" });
+
+    if (error) {
+      console.error("[submitAffiliateSaleFn] upsert failed:", error);
+      return { ok: false as const, message: error.message };
+    }
+    return { ok: true as const };
+  });
+
 export const consumeResetTokenFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z.object({ token: z.string().min(8).max(200) }).parse(input),
