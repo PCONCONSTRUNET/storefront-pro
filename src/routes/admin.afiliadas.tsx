@@ -539,7 +539,15 @@ function Page() {
                       <ActionBtn
                         onClick={async () => {
                           const { confirmDialog } = await import("@/components/ConfirmDialog");
-                          if (await confirmDialog({ title: "Excluir esta venda?", confirmLabel: "Excluir" })) deleteSale(s.id);
+                          if (await confirmDialog({
+                            title: "Excluir esta venda?",
+                            description: `${s.customerName} · ${brl(s.saleValue)} — Esta ação não pode ser desfeita.`,
+                            confirmLabel: "Excluir",
+                            trashIcon: true,
+                          })) {
+                            deleteSale(s.id);
+                            toast.success("Venda excluída");
+                          }
                         }}
                         title="Excluir"
                         cls="text-destructive hover:bg-destructive/10"
@@ -583,18 +591,18 @@ function Page() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-card rounded-3xl p-5 w-full max-w-md space-y-4 shadow-soft animate-modal-in"
+            className="bg-card rounded-3xl p-5 w-full max-w-md shadow-soft animate-modal-in"
           >
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-lg">Detalhes da Venda</h3>
               <button
                 onClick={() => setViewingSale(null)}
-                className="p-2 bg-muted rounded-full hover:bg-muted/80 text-muted-foreground"
+                className="p-2 bg-muted rounded-full hover:bg-muted/80 text-muted-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            
+
             <div className="space-y-3 text-sm">
               <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
                 <span className="text-xs text-muted-foreground mb-1">Cliente</span>
@@ -624,19 +632,47 @@ function Page() {
                 <span className="text-xs text-muted-foreground mb-1">Status</span>
                 <div><StatusBadge status={viewingSale.status} /></div>
               </div>
-              
+
               <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
                 <span className="text-xs text-muted-foreground mb-1">Data de Registro</span>
                 <span>{new Date(viewingSale.createdAt).toLocaleString("pt-BR")}</span>
               </div>
+
+              {viewingSale.notes && (
+                <div className="flex flex-col bg-muted/30 p-3 rounded-lg border border-border">
+                  <span className="text-xs text-muted-foreground mb-1">Observações</span>
+                  <span className="text-xs whitespace-pre-wrap">{viewingSale.notes}</span>
+                </div>
+              )}
             </div>
-            
-            <button
-              onClick={() => setViewingSale(null)}
-              className="w-full py-3 bg-muted hover:bg-muted/80 rounded-xl font-bold transition-colors mt-2"
-            >
-              Fechar
-            </button>
+
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={async () => {
+                  const sale = viewingSale;
+                  const { confirmDialog } = await import("@/components/ConfirmDialog");
+                  if (await confirmDialog({
+                    title: "Excluir esta venda?",
+                    description: `${sale.customerName} · ${brl(sale.saleValue)} — Esta ação não pode ser desfeita.`,
+                    confirmLabel: "Excluir",
+                    trashIcon: true,
+                  })) {
+                    deleteSale(sale.id);
+                    toast.success("Venda excluída");
+                    setViewingSale(null);
+                  }
+                }}
+                className="h-10 px-4 rounded-xl border border-destructive/40 text-destructive hover:bg-destructive/10 transition-colors font-semibold text-sm flex items-center gap-1.5"
+              >
+                <Trash2 className="h-4 w-4" /> Excluir
+              </button>
+              <button
+                onClick={() => setViewingSale(null)}
+                className="flex-1 h-10 rounded-xl bg-muted hover:bg-muted/80 font-bold text-sm transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}
