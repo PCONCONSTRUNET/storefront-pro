@@ -14,7 +14,6 @@ import {
   Crown,
   Activity,
 } from "lucide-react";
-import { toast } from "sonner";
 import {
   AreaChart,
   Area,
@@ -24,8 +23,6 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-
-import { adminDeleteFn } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: Page,
@@ -37,43 +34,6 @@ function Page() {
   useEffect(() => {
     sync();
   }, [sync]);
-
-  useEffect(() => {
-    if (!localStorage.getItem("system_cleanup_done_v5")) {
-      const wipe = async () => {
-        try {
-          toast.loading("Realizando limpeza geral do banco de dados (pode demorar alguns segundos)...", { id: "nuke" });
-          const st = useStore.getState();
-          
-          // Execute sequentially to avoid blocking the browser network queue
-          for (const o of st.orders) { await adminDeleteFn({ data: { table: "orders", match: { id: o.id } } }); }
-          for (const c of st.customers) { await adminDeleteFn({ data: { table: "customers", match: { id: c.id } } }); }
-          for (const t of st.transactions) { await adminDeleteFn({ data: { table: "transactions", match: { id: t.id } } }); }
-          for (const a of st.affiliates) { await adminDeleteFn({ data: { table: "affiliates", match: { id: a.id } } }); }
-          for (const s of st.affiliateSales) { await adminDeleteFn({ data: { table: "affiliate_sales", match: { id: s.id } } }); }
-          for (const r of st.reviews) { await adminDeleteFn({ data: { table: "reviews", match: { id: r.id } } }); }
-          
-          useStore.setState({
-            orders: [],
-            customers: [],
-            affiliates: [],
-            affiliateSales: [],
-            transactions: [],
-            reviews: [],
-            waitlist: [],
-            activityLogs: []
-          });
-          
-          localStorage.setItem("system_cleanup_done_v5", "true");
-          toast.success("Limpeza concluída! Produtos, Categorias e Gateway mantidos.", { id: "nuke" });
-        } catch(e) {
-          console.error(e);
-          toast.error("Erro na limpeza do banco", { id: "nuke" });
-        }
-      };
-      wipe();
-    }
-  }, []);
 
   const stats = useMemo(() => {
     const today = new Date();
