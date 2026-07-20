@@ -213,6 +213,8 @@ export type StoreSettings = {
   superfreteAddressCity?: string;
   superfreteAddressState?: string;
   shippingFeeActive?: boolean;
+  freeShippingAutoActive?: boolean;
+  freeShippingAutoMinAmount?: number;
 };
 
 const defaultSettings: StoreSettings = {
@@ -231,6 +233,8 @@ const defaultSettings: StoreSettings = {
   superfreteActive: true,
   superfreteCepOrigem: "88735000",
   shippingFeeActive: true,
+  freeShippingAutoActive: false,
+  freeShippingAutoMinAmount: 200,
 };
 
 export type SessionKind = "admin" | "customer" | "affiliate";

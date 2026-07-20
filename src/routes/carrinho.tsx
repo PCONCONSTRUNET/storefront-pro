@@ -353,10 +353,12 @@ function Page() {
           </div>
           
           {/* Shipping notice */}
-          <div className="bg-card p-4 md:rounded-sm shadow-sm mt-4 text-sm flex items-center gap-2 border-y border-border md:border-none">
-            <CorreiosLogo className="h-4 w-auto" />
-            <span className="text-muted-foreground">Frete grátis para compras acima de R$ 197,90</span>
-          </div>
+          {settings.freeShippingAutoActive && (
+            <div className="bg-card p-4 md:rounded-sm shadow-sm mt-4 text-sm flex items-center gap-2 border-y border-border md:border-none">
+              <CorreiosLogo className="h-4 w-auto" />
+              <span className="text-muted-foreground">Frete grátis para compras acima de {brl(settings.freeShippingAutoMinAmount || 0)}</span>
+            </div>
+          )}
 
         </div>
       </main>
@@ -420,6 +422,11 @@ function Page() {
                   {(couponObj?.type === "free_shipping" || couponObj?.freeShipping) && (
                     <div className="text-xs text-success font-medium">
                       Cupom de Frete Grátis aplicado!
+                    </div>
+                  )}
+                  {(!couponObj?.type || (couponObj.type !== "free_shipping" && !couponObj.freeShipping)) && settings.freeShippingAutoActive && (total >= (settings.freeShippingAutoMinAmount || 0)) && (
+                    <div className="text-xs text-success font-medium">
+                      Frete Grátis Automático ativado!
                     </div>
                   )}
                 </div>

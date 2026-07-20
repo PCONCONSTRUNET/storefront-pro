@@ -24,6 +24,7 @@ import {
   Star,
   Truck,
   RefreshCw,
+  Gift,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
@@ -53,6 +54,7 @@ const DEFAULT_NAV = [
   { to: "/admin/afiliadas", label: "Afiliadas", icon: Sparkles },
   { to: "/admin/cupons", label: "Cupons", icon: Tag },
   { to: "/admin/frete", label: "Frete", icon: Truck },
+  { to: "/admin/frete-automatico", label: "Promoção Frete", icon: Gift },
   { to: "/admin/notificacoes", label: "Notificações", icon: Bell },
   { to: "/admin/logs", label: "Logs de Auditoria", icon: FileText },
   { to: "/admin/sincronizacao", label: "Sincronização", icon: Activity },
