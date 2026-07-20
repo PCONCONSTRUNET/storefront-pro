@@ -99,6 +99,7 @@ function Page() {
     removeCoupon,
     appliedCoupon,
     coupons,
+    settings,
   } = useStore();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
