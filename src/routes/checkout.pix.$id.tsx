@@ -57,9 +57,9 @@ function PixPage() {
           return;
         }
         timer = setTimeout(tick, 4000);
-      } catch (e) {
+      } catch (e: any) {
         if (cancelled) return;
-        setError(e instanceof Error ? e.message : String(e));
+        setError(e?.message || e?.details || String(e));
         setLoading(false);
       }
     };
