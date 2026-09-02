@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AdminPixGerarModal — Gerador de Pix Manual pelo painel admin.
  *
  * Fluxo em 3 etapas:
@@ -151,7 +151,7 @@ export function AdminPixGerarModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 animate-overlay-in" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-card rounded-3xl shadow-soft w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-modal-in">
+      <div onClick={(e) => e.stopPropagation()} className="bg-card rounded-3xl shadow-soft w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-modal-in">
 
         {/* Header */}
         <div className="relative flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
@@ -220,7 +220,7 @@ export function AdminPixGerarModal({ onClose }: { onClose: () => void }) {
 
               {/* Carrinho lateral — so desktop */}
               {cart.length > 0 && (
-                <div className="hidden md:flex flex-col w-44 shrink-0 min-h-0">
+                <div className="hidden md:flex flex-col w-52 shrink-0 min-h-0">
                   <div className="font-semibold text-sm mb-2 shrink-0 flex items-center gap-1.5">
                     <QrCode className="h-4 w-4 text-primary" />
                     Carrinho
