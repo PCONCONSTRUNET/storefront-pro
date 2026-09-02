@@ -14,9 +14,12 @@ import {
 const pixBodySchema = z.object({
   customer: z.object({
     name: z.string().trim().min(1).max(255),
-    email: z.string().trim().email().max(255),
-    phone: z.string().trim().min(8).max(30),
+    // email e phone são opcionais para pedidos manuais gerados pelo admin
+    email: z.string().trim().email().max(255).optional().nullable(),
+    phone: z.string().trim().max(30).optional().nullable(),
     document: z.string().trim().max(20).optional().nullable(),
+    // customer_id da tabela customers (para vincular ao cadastro existente)
+    customer_id: z.string().uuid().optional().nullable(),
   }),
   items: z.array(z.record(z.string(), z.any())).min(1).max(200),
   totals: z.object({
@@ -28,6 +31,8 @@ const pixBodySchema = z.object({
   delivery: z.enum(["entrega", "retirada"]).optional(),
   address: z.string().trim().max(1000).optional().nullable(),
   notes: z.string().trim().max(2000).optional().nullable(),
+  // indica que o pedido foi criado manualmente pelo painel admin
+  manual: z.boolean().optional(),
 });
 
 const corsHeaders = {
@@ -105,15 +110,21 @@ Deno.serve(async (req) => {
 
   const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
 
+  // Fallbacks para pedidos manuais sem dados completos da cliente
+  const FALLBACK_EMAIL = "cliente@sem-email.local";
+  const effectiveEmail = customer.email?.trim() || FALLBACK_EMAIL;
+  const effectivePhone = customer.phone?.replace(/\D/g, "") || "00000000000";
+
   // 1) Cria pedido no banco
   const { data: order, error: insErr } = await supabase
     .from("orders")
     .insert({
       id: shortId,
       customer_name: customer.name,
-      customer_email: customer.email,
-      customer_phone: String(customer.phone).replace(/\D/g, ""),
+      customer_email: effectiveEmail,
+      customer_phone: effectivePhone,
       customer_document: customer.document ?? null,
+      customer_id: customer.customer_id ?? null,
       delivery_method: body.delivery ?? "entrega",
       address: body.address ?? null,
       notes: body.notes ?? null,
@@ -124,6 +135,8 @@ Deno.serve(async (req) => {
       total,
       payment_method: "pix",
       payment_status: "pending",
+      // marca pedido criado manualmente pelo admin
+      ...(body.manual ? { source: "admin_manual" } : {}),
     })
     .select()
     .single();
@@ -147,6 +160,8 @@ Deno.serve(async (req) => {
   // 2) Chama Mercado Pago
   const [firstName, ...rest] = String(customer.name).trim().split(/\s+/);
   const lastName = rest.join(" ") || firstName;
+  // Usa o email efetivo (real ou fallback)
+  const payerEmail = effectiveEmail;
 
   const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mp-webhook`;
 
@@ -161,7 +176,7 @@ Deno.serve(async (req) => {
     external_reference: order.id,
     date_of_expiration: expirationDate.toISOString(),
     payer: {
-      email: customer.email,
+      email: payerEmail,
       first_name: firstName,
       last_name: lastName,
       ...(customer.document

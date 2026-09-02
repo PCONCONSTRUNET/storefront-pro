@@ -41,6 +41,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { printOrderReceipt } from "@/lib/printReceipt";
 import { createSuperFreteCartFn } from "@/lib/superfrete";
 import { checkoutSuperfreteFn, printSuperfreteTagFn } from "@/lib/superfrete-admin";
+import { AdminPixGerarModal } from "@/components/AdminPixGerarModal";
 
 export const Route = createFileRoute("/admin/pedidos")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -105,6 +106,7 @@ function Page() {
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState(initialQ);
   const [busy, setBusy] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
 
   useEffect(() => {
     setQuery(initialQ);
@@ -325,6 +327,12 @@ function Page() {
             className="px-2.5 py-1 rounded-full bg-muted hover:bg-muted/70 font-semibold"
           >
             Exportar CSV
+          </button>
+          <button
+            onClick={() => setShowPixModal(true)}
+            className="px-3 py-1 rounded-full gradient-primary text-primary-foreground font-semibold flex items-center gap-1.5 text-xs shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <span className="text-base leading-none">⚡</span> Gerar Pix
           </button>
         </div>
       </div>
@@ -915,6 +923,14 @@ function Page() {
         </Modal>
         );
       })()}
+      {showPixModal && (
+        <AdminPixGerarModal
+          onClose={() => {
+            setShowPixModal(false);
+            sync();
+          }}
+        />
+      )}
     </AdminLayout>
   );
 }

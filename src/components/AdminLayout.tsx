@@ -166,9 +166,9 @@ export function AdminLayout({
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
+    <div className="h-screen overflow-hidden bg-muted/30 flex">
       {/* Sidebar desktop */}
-      <aside className="hidden md:flex w-60 bg-card border-r border-border flex-col sticky top-0 h-screen">
+      <aside className="hidden md:flex w-60 bg-card border-r border-border flex-col h-full">
         <div className="p-5 border-b border-border">
           <div className="font-display text-xl text-primary">Admin</div>
           <div className="text-xs text-muted-foreground">Princesa de Laços</div>
@@ -270,7 +270,7 @@ export function AdminLayout({
         </div>
       )}
 
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <header className="bg-card border-b border-border h-14 flex items-center px-4 sticky top-0 z-30 gap-3">
           <button
             className="md:hidden"
@@ -295,7 +295,7 @@ export function AdminLayout({
             <GlobalSearch />
           </div>
         </header>
-        <main key={path} className="flex-1 p-4 md:p-6 animate-page-in">
+        <main key={path} className="flex-1 p-4 md:p-6 animate-page-in overflow-y-auto">
           {path === "/admin/notificacoes" && <AdminDeviceSyncBanner />}
           {children}
         </main>
