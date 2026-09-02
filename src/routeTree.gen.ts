@@ -9,118 +9,64 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TrocasRouteImport } from './routes/trocas'
-import { Route as TermosRouteImport } from './routes/termos'
-import { Route as SuporteRouteImport } from './routes/suporte'
-import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
-import { Route as PedidosRouteImport } from './routes/pedidos'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CategoriasRouteImport } from './routes/categorias'
-import { Route as CarrinhoRouteImport } from './routes/carrinho'
-import { Route as CadastroRouteImport } from './routes/cadastro'
-import { Route as BuscarRouteImport } from './routes/buscar'
-import { Route as ApresentacaoRouteImport } from './routes/apresentacao'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PerfilIndexRouteImport } from './routes/perfil.index'
-import { Route as AfiliadaIndexRouteImport } from './routes/afiliada.index'
+import { Route as ApresentacaoRouteImport } from './routes/apresentacao'
+import { Route as BuscarRouteImport } from './routes/buscar'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as CarrinhoRouteImport } from './routes/carrinho'
+import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PedidosRouteImport } from './routes/pedidos'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as SuporteRouteImport } from './routes/suporte'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as TrocasRouteImport } from './routes/trocas'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
-import { Route as PerfilTransacoesRouteImport } from './routes/perfil.transacoes'
-import { Route as PerfilFavoritosRouteImport } from './routes/perfil.favoritos'
-import { Route as PerfilEnderecosRouteImport } from './routes/perfil.enderecos'
-import { Route as PerfilConfiguracoesRouteImport } from './routes/perfil.configuracoes'
-import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
-import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
-import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
-import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro'
-import { Route as AdminSincronizacaoRouteImport } from './routes/admin.sincronizacao'
-import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
-import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
-import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
-import { Route as AdminOrganizarRouteImport } from './routes/admin.organizar'
-import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
-import { Route as AdminLogsRouteImport } from './routes/admin.logs'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminGatewayRouteImport } from './routes/admin.gateway'
-import { Route as AdminFreteRouteImport } from './routes/admin.frete'
-import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
-import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
-import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
-import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
-import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
-import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
-import { Route as AdminBiRouteImport } from './routes/admin.bi'
-import { Route as AdminAvaliacoesRouteImport } from './routes/admin.avaliacoes'
 import { Route as AdminAfiliadasRouteImport } from './routes/admin.afiliadas'
-import { Route as CheckoutPixIdRouteImport } from './routes/checkout.pix.$id'
-import { Route as ApiSitemapXmlRouteImport } from './routes/api/sitemap.xml'
-import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
-import { Route as ApiLovableBotNotifyRouteImport } from './routes/api/lovable-bot/notify'
-import { Route as ApiLovableBotLogoutRouteImport } from './routes/api/lovable-bot/logout'
-import { Route as ApiBotStatusRouteImport } from './routes/api/bot/status'
-import { Route as ApiBotNotifyRouteImport } from './routes/api/bot/notify'
+import { Route as AdminAvaliacoesRouteImport } from './routes/admin.avaliacoes'
+import { Route as AdminBiRouteImport } from './routes/admin.bi'
+import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
+import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminConfiguracoesRouteImport } from './routes/admin.configuracoes'
+import { Route as AdminCuponsRouteImport } from './routes/admin.cupons'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminFinanceiroRouteImport } from './routes/admin.financeiro'
+import { Route as AdminFreteRouteImport } from './routes/admin.frete'
+import { Route as AdminFreteAutomaticoRouteImport } from './routes/admin.frete-automatico'
+import { Route as AdminGatewayRouteImport } from './routes/admin.gateway'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminLogsRouteImport } from './routes/admin.logs'
+import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
+import { Route as AdminOrganizarRouteImport } from './routes/admin.organizar'
+import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
+import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
+import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
+import { Route as AdminSincronizacaoRouteImport } from './routes/admin.sincronizacao'
+import { Route as AfiliadaIndexRouteImport } from './routes/afiliada.index'
+import { Route as AfiliadaCadastroRouteImport } from './routes/afiliada.cadastro'
+import { Route as AfiliadaLoginRouteImport } from './routes/afiliada.login'
+import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
+import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
+import { Route as PerfilIndexRouteImport } from './routes/perfil.index'
+import { Route as PerfilConfiguracoesRouteImport } from './routes/perfil.configuracoes'
+import { Route as PerfilEnderecosRouteImport } from './routes/perfil.enderecos'
+import { Route as PerfilFavoritosRouteImport } from './routes/perfil.favoritos'
+import { Route as PerfilTransacoesRouteImport } from './routes/perfil.transacoes'
+import { Route as ProdutoIdRouteImport } from './routes/produto.$id'
 import { Route as ApiBotLogoutRouteImport } from './routes/api/bot/logout'
+import { Route as ApiBotNotifyRouteImport } from './routes/api/bot/notify'
+import { Route as ApiBotStatusRouteImport } from './routes/api/bot/status'
+import { Route as ApiLovableBotLogoutRouteImport } from './routes/api/lovable-bot/logout'
+import { Route as ApiLovableBotNotifyRouteImport } from './routes/api/lovable-bot/notify'
+import { Route as ApiLovableBotStatusRouteImport } from './routes/api/lovable-bot/status'
+import { Route as ApiSitemapXmlRouteImport } from './routes/api/sitemap.xml'
+import { Route as CheckoutPixIdRouteImport } from './routes/checkout.pix.$id'
 
-const TrocasRoute = TrocasRouteImport.update({
-  id: '/trocas',
-  path: '/trocas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TermosRoute = TermosRouteImport.update({
-  id: '/termos',
-  path: '/termos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SuporteRoute = SuporteRouteImport.update({
-  id: '/suporte',
-  path: '/suporte',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
-  id: '/redefinir-senha',
-  path: '/redefinir-senha',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PedidosRoute = PedidosRouteImport.update({
-  id: '/pedidos',
-  path: '/pedidos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
-  id: '/esqueci-senha',
-  path: '/esqueci-senha',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriasRoute = CategoriasRouteImport.update({
-  id: '/categorias',
-  path: '/categorias',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CarrinhoRoute = CarrinhoRouteImport.update({
-  id: '/carrinho',
-  path: '/carrinho',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CadastroRoute = CadastroRouteImport.update({
-  id: '/cadastro',
-  path: '/cadastro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuscarRoute = BuscarRouteImport.update({
-  id: '/buscar',
-  path: '/buscar',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApresentacaoRoute = ApresentacaoRouteImport.update({
@@ -128,19 +74,59 @@ const ApresentacaoRoute = ApresentacaoRouteImport.update({
   path: '/apresentacao',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const BuscarRoute = BuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PerfilIndexRoute = PerfilIndexRouteImport.update({
-  id: '/perfil/',
-  path: '/perfil/',
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AfiliadaIndexRoute = AfiliadaIndexRouteImport.update({
-  id: '/afiliada/',
-  path: '/afiliada/',
+const CarrinhoRoute = CarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidosRoute = PedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuporteRoute = SuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrocasRoute = TrocasRouteImport.update({
+  id: '/trocas',
+  path: '/trocas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -148,134 +134,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProdutoIdRoute = ProdutoIdRouteImport.update({
-  id: '/produto/$id',
-  path: '/produto/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilTransacoesRoute = PerfilTransacoesRouteImport.update({
-  id: '/perfil/transacoes',
-  path: '/perfil/transacoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilFavoritosRoute = PerfilFavoritosRouteImport.update({
-  id: '/perfil/favoritos',
-  path: '/perfil/favoritos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilEnderecosRoute = PerfilEnderecosRouteImport.update({
-  id: '/perfil/enderecos',
-  path: '/perfil/enderecos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilConfiguracoesRoute = PerfilConfiguracoesRouteImport.update({
-  id: '/perfil/configuracoes',
-  path: '/perfil/configuracoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PedidoIdRoute = PedidoIdRouteImport.update({
-  id: '/pedido/$id',
-  path: '/pedido/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
-  id: '/categoria/$slug',
-  path: '/categoria/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AfiliadaLoginRoute = AfiliadaLoginRouteImport.update({
-  id: '/afiliada/login',
-  path: '/afiliada/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AfiliadaCadastroRoute = AfiliadaCadastroRouteImport.update({
-  id: '/afiliada/cadastro',
-  path: '/afiliada/cadastro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSincronizacaoRoute = AdminSincronizacaoRouteImport.update({
-  id: '/admin/sincronizacao',
-  path: '/admin/sincronizacao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminProdutosRoute = AdminProdutosRouteImport.update({
-  id: '/admin/produtos',
-  path: '/admin/produtos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPedidosRoute = AdminPedidosRouteImport.update({
-  id: '/admin/pedidos',
-  path: '/admin/pedidos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPagamentosRoute = AdminPagamentosRouteImport.update({
-  id: '/admin/pagamentos',
-  path: '/admin/pagamentos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminOrganizarRoute = AdminOrganizarRouteImport.update({
-  id: '/admin/organizar',
-  path: '/admin/organizar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
-  id: '/admin/notificacoes',
-  path: '/admin/notificacoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLogsRoute = AdminLogsRouteImport.update({
-  id: '/admin/logs',
-  path: '/admin/logs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminGatewayRoute = AdminGatewayRouteImport.update({
-  id: '/admin/gateway',
-  path: '/admin/gateway',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFreteRoute = AdminFreteRouteImport.update({
-  id: '/admin/frete',
-  path: '/admin/frete',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
-  id: '/admin/financeiro',
-  path: '/admin/financeiro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/admin/dashboard',
-  path: '/admin/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCuponsRoute = AdminCuponsRouteImport.update({
-  id: '/admin/cupons',
-  path: '/admin/cupons',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
-  id: '/admin/configuracoes',
-  path: '/admin/configuracoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminClientesRoute = AdminClientesRouteImport.update({
-  id: '/admin/clientes',
-  path: '/admin/clientes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
-  id: '/admin/categorias',
-  path: '/admin/categorias',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminBiRoute = AdminBiRouteImport.update({
-  id: '/admin/bi',
-  path: '/admin/bi',
+const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
+  id: '/admin/afiliadas',
+  path: '/admin/afiliadas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAvaliacoesRoute = AdminAvaliacoesRouteImport.update({
@@ -283,39 +144,159 @@ const AdminAvaliacoesRoute = AdminAvaliacoesRouteImport.update({
   path: '/admin/avaliacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAfiliadasRoute = AdminAfiliadasRouteImport.update({
-  id: '/admin/afiliadas',
-  path: '/admin/afiliadas',
+const AdminBiRoute = AdminBiRouteImport.update({
+  id: '/admin/bi',
+  path: '/admin/bi',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutPixIdRoute = CheckoutPixIdRouteImport.update({
-  id: '/pix/$id',
-  path: '/pix/$id',
-  getParentRoute: () => CheckoutRoute,
-} as any)
-const ApiSitemapXmlRoute = ApiSitemapXmlRouteImport.update({
-  id: '/api/sitemap/xml',
-  path: '/api/sitemap/xml',
+const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
+  id: '/admin/categorias',
+  path: '/admin/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiLovableBotStatusRoute = ApiLovableBotStatusRouteImport.update({
-  id: '/api/lovable-bot/status',
-  path: '/api/lovable-bot/status',
+const AdminClientesRoute = AdminClientesRouteImport.update({
+  id: '/admin/clientes',
+  path: '/admin/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiLovableBotNotifyRoute = ApiLovableBotNotifyRouteImport.update({
-  id: '/api/lovable-bot/notify',
-  path: '/api/lovable-bot/notify',
+const AdminConfiguracoesRoute = AdminConfiguracoesRouteImport.update({
+  id: '/admin/configuracoes',
+  path: '/admin/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiLovableBotLogoutRoute = ApiLovableBotLogoutRouteImport.update({
-  id: '/api/lovable-bot/logout',
-  path: '/api/lovable-bot/logout',
+const AdminCuponsRoute = AdminCuponsRouteImport.update({
+  id: '/admin/cupons',
+  path: '/admin/cupons',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiBotStatusRoute = ApiBotStatusRouteImport.update({
-  id: '/api/bot/status',
-  path: '/api/bot/status',
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFinanceiroRoute = AdminFinanceiroRouteImport.update({
+  id: '/admin/financeiro',
+  path: '/admin/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFreteRoute = AdminFreteRouteImport.update({
+  id: '/admin/frete',
+  path: '/admin/frete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFreteAutomaticoRoute = AdminFreteAutomaticoRouteImport.update({
+  id: '/admin/frete-automatico',
+  path: '/admin/frete-automatico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGatewayRoute = AdminGatewayRouteImport.update({
+  id: '/admin/gateway',
+  path: '/admin/gateway',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/admin/logs',
+  path: '/admin/logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNotificacoesRoute = AdminNotificacoesRouteImport.update({
+  id: '/admin/notificacoes',
+  path: '/admin/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrganizarRoute = AdminOrganizarRouteImport.update({
+  id: '/admin/organizar',
+  path: '/admin/organizar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPagamentosRoute = AdminPagamentosRouteImport.update({
+  id: '/admin/pagamentos',
+  path: '/admin/pagamentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPedidosRoute = AdminPedidosRouteImport.update({
+  id: '/admin/pedidos',
+  path: '/admin/pedidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProdutosRoute = AdminProdutosRouteImport.update({
+  id: '/admin/produtos',
+  path: '/admin/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSincronizacaoRoute = AdminSincronizacaoRouteImport.update({
+  id: '/admin/sincronizacao',
+  path: '/admin/sincronizacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadaIndexRoute = AfiliadaIndexRouteImport.update({
+  id: '/afiliada/',
+  path: '/afiliada/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadaCadastroRoute = AfiliadaCadastroRouteImport.update({
+  id: '/afiliada/cadastro',
+  path: '/afiliada/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfiliadaLoginRoute = AfiliadaLoginRouteImport.update({
+  id: '/afiliada/login',
+  path: '/afiliada/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
+  id: '/categoria/$slug',
+  path: '/categoria/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoIdRoute = PedidoIdRouteImport.update({
+  id: '/pedido/$id',
+  path: '/pedido/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilIndexRoute = PerfilIndexRouteImport.update({
+  id: '/perfil/',
+  path: '/perfil/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilConfiguracoesRoute = PerfilConfiguracoesRouteImport.update({
+  id: '/perfil/configuracoes',
+  path: '/perfil/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilEnderecosRoute = PerfilEnderecosRouteImport.update({
+  id: '/perfil/enderecos',
+  path: '/perfil/enderecos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilFavoritosRoute = PerfilFavoritosRouteImport.update({
+  id: '/perfil/favoritos',
+  path: '/perfil/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilTransacoesRoute = PerfilTransacoesRouteImport.update({
+  id: '/perfil/transacoes',
+  path: '/perfil/transacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutoIdRoute = ProdutoIdRouteImport.update({
+  id: '/produto/$id',
+  path: '/produto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBotLogoutRoute = ApiBotLogoutRouteImport.update({
+  id: '/api/bot/logout',
+  path: '/api/bot/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBotNotifyRoute = ApiBotNotifyRouteImport.update({
@@ -323,9 +304,34 @@ const ApiBotNotifyRoute = ApiBotNotifyRouteImport.update({
   path: '/api/bot/notify',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiBotLogoutRoute = ApiBotLogoutRouteImport.update({
-  id: '/api/bot/logout',
-  path: '/api/bot/logout',
+const ApiBotStatusRoute = ApiBotStatusRouteImport.update({
+  id: '/api/bot/status',
+  path: '/api/bot/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLovableBotLogoutRoute = ApiLovableBotLogoutRouteImport.update({
+  id: '/api/lovable-bot/logout',
+  path: '/api/lovable-bot/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLovableBotNotifyRoute = ApiLovableBotNotifyRouteImport.update({
+  id: '/api/lovable-bot/notify',
+  path: '/api/lovable-bot/notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLovableBotStatusRoute = ApiLovableBotStatusRouteImport.update({
+  id: '/api/lovable-bot/status',
+  path: '/api/lovable-bot/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSitemapXmlRoute = ApiSitemapXmlRouteImport.update({
+  id: '/api/sitemap/xml',
+  path: '/api/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutPixIdRoute = CheckoutPixIdRouteImport.update({
+  id: '/checkout/pix/$id',
+  path: '/checkout/pix/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -336,7 +342,6 @@ export interface FileRoutesByFullPath {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
@@ -354,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/frete': typeof AdminFreteRoute
+  '/admin/frete-automatico': typeof AdminFreteAutomaticoRoute
   '/admin/gateway': typeof AdminGatewayRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/logs': typeof AdminLogsRoute
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/perfil/': typeof PerfilIndexRoute
   '/api/bot/logout': typeof ApiBotLogoutRoute
   '/api/bot/notify': typeof ApiBotNotifyRoute
@@ -391,7 +398,6 @@ export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
@@ -409,6 +415,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/frete': typeof AdminFreteRoute
+  '/admin/frete-automatico': typeof AdminFreteAutomaticoRoute
   '/admin/gateway': typeof AdminGatewayRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/logs': typeof AdminLogsRoute
@@ -429,6 +436,7 @@ export interface FileRoutesByTo {
   '/produto/$id': typeof ProdutoIdRoute
   '/admin': typeof AdminIndexRoute
   '/afiliada': typeof AfiliadaIndexRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/perfil': typeof PerfilIndexRoute
   '/api/bot/logout': typeof ApiBotLogoutRoute
   '/api/bot/notify': typeof ApiBotNotifyRoute
@@ -447,7 +455,6 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/pedidos': typeof PedidosRoute
@@ -465,6 +472,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/financeiro': typeof AdminFinanceiroRoute
   '/admin/frete': typeof AdminFreteRoute
+  '/admin/frete-automatico': typeof AdminFreteAutomaticoRoute
   '/admin/gateway': typeof AdminGatewayRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/logs': typeof AdminLogsRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/produto/$id': typeof ProdutoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/afiliada/': typeof AfiliadaIndexRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/perfil/': typeof PerfilIndexRoute
   '/api/bot/logout': typeof ApiBotLogoutRoute
   '/api/bot/notify': typeof ApiBotNotifyRoute
@@ -504,7 +513,6 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/carrinho'
     | '/categorias'
-    | '/checkout'
     | '/esqueci-senha'
     | '/login'
     | '/pedidos'
@@ -522,6 +530,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/frete'
+    | '/admin/frete-automatico'
     | '/admin/gateway'
     | '/admin/login'
     | '/admin/logs'
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/produto/$id'
     | '/admin/'
     | '/afiliada/'
+    | '/checkout/'
     | '/perfil/'
     | '/api/bot/logout'
     | '/api/bot/notify'
@@ -559,7 +569,6 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/carrinho'
     | '/categorias'
-    | '/checkout'
     | '/esqueci-senha'
     | '/login'
     | '/pedidos'
@@ -577,6 +586,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/frete'
+    | '/admin/frete-automatico'
     | '/admin/gateway'
     | '/admin/login'
     | '/admin/logs'
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
     | '/produto/$id'
     | '/admin'
     | '/afiliada'
+    | '/checkout'
     | '/perfil'
     | '/api/bot/logout'
     | '/api/bot/notify'
@@ -614,7 +625,6 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/carrinho'
     | '/categorias'
-    | '/checkout'
     | '/esqueci-senha'
     | '/login'
     | '/pedidos'
@@ -632,6 +642,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/financeiro'
     | '/admin/frete'
+    | '/admin/frete-automatico'
     | '/admin/gateway'
     | '/admin/login'
     | '/admin/logs'
@@ -652,6 +663,7 @@ export interface FileRouteTypes {
     | '/produto/$id'
     | '/admin/'
     | '/afiliada/'
+    | '/checkout/'
     | '/perfil/'
     | '/api/bot/logout'
     | '/api/bot/notify'
@@ -670,7 +682,6 @@ export interface RootRouteChildren {
   CadastroRoute: typeof CadastroRoute
   CarrinhoRoute: typeof CarrinhoRoute
   CategoriasRoute: typeof CategoriasRoute
-  CheckoutRoute: typeof CheckoutRouteWithChildren
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   PedidosRoute: typeof PedidosRoute
@@ -688,6 +699,7 @@ export interface RootRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminFinanceiroRoute: typeof AdminFinanceiroRoute
   AdminFreteRoute: typeof AdminFreteRoute
+  AdminFreteAutomaticoRoute: typeof AdminFreteAutomaticoRoute
   AdminGatewayRoute: typeof AdminGatewayRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminLogsRoute: typeof AdminLogsRoute
@@ -708,6 +720,7 @@ export interface RootRouteChildren {
   ProdutoIdRoute: typeof ProdutoIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AfiliadaIndexRoute: typeof AfiliadaIndexRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
   PerfilIndexRoute: typeof PerfilIndexRoute
   ApiBotLogoutRoute: typeof ApiBotLogoutRoute
   ApiBotNotifyRoute: typeof ApiBotNotifyRoute
@@ -716,92 +729,16 @@ export interface RootRouteChildren {
   ApiLovableBotNotifyRoute: typeof ApiLovableBotNotifyRoute
   ApiLovableBotStatusRoute: typeof ApiLovableBotStatusRoute
   ApiSitemapXmlRoute: typeof ApiSitemapXmlRoute
+  CheckoutPixIdRoute: typeof CheckoutPixIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/trocas': {
-      id: '/trocas'
-      path: '/trocas'
-      fullPath: '/trocas'
-      preLoaderRoute: typeof TrocasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/termos': {
-      id: '/termos'
-      path: '/termos'
-      fullPath: '/termos'
-      preLoaderRoute: typeof TermosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/suporte': {
-      id: '/suporte'
-      path: '/suporte'
-      fullPath: '/suporte'
-      preLoaderRoute: typeof SuporteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/redefinir-senha': {
-      id: '/redefinir-senha'
-      path: '/redefinir-senha'
-      fullPath: '/redefinir-senha'
-      preLoaderRoute: typeof RedefinirSenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pedidos': {
-      id: '/pedidos'
-      path: '/pedidos'
-      fullPath: '/pedidos'
-      preLoaderRoute: typeof PedidosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/esqueci-senha': {
-      id: '/esqueci-senha'
-      path: '/esqueci-senha'
-      fullPath: '/esqueci-senha'
-      preLoaderRoute: typeof EsqueciSenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/categorias': {
-      id: '/categorias'
-      path: '/categorias'
-      fullPath: '/categorias'
-      preLoaderRoute: typeof CategoriasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carrinho': {
-      id: '/carrinho'
-      path: '/carrinho'
-      fullPath: '/carrinho'
-      preLoaderRoute: typeof CarrinhoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cadastro': {
-      id: '/cadastro'
-      path: '/cadastro'
-      fullPath: '/cadastro'
-      preLoaderRoute: typeof CadastroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/buscar': {
-      id: '/buscar'
-      path: '/buscar'
-      fullPath: '/buscar'
-      preLoaderRoute: typeof BuscarRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/apresentacao': {
@@ -811,25 +748,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApresentacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/buscar': {
+      id: '/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof BuscarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/perfil/': {
-      id: '/perfil/'
-      path: '/perfil'
-      fullPath: '/perfil/'
-      preLoaderRoute: typeof PerfilIndexRouteImport
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/afiliada/': {
-      id: '/afiliada/'
-      path: '/afiliada'
-      fullPath: '/afiliada/'
-      preLoaderRoute: typeof AfiliadaIndexRouteImport
+    '/carrinho': {
+      id: '/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof CarrinhoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/esqueci-senha': {
+      id: '/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/esqueci-senha'
+      preLoaderRoute: typeof EsqueciSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedidos': {
+      id: '/pedidos'
+      path: '/pedidos'
+      fullPath: '/pedidos'
+      preLoaderRoute: typeof PedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suporte': {
+      id: '/suporte'
+      path: '/suporte'
+      fullPath: '/suporte'
+      preLoaderRoute: typeof SuporteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trocas': {
+      id: '/trocas'
+      path: '/trocas'
+      fullPath: '/trocas'
+      preLoaderRoute: typeof TrocasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -839,186 +832,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/produto/$id': {
-      id: '/produto/$id'
-      path: '/produto/$id'
-      fullPath: '/produto/$id'
-      preLoaderRoute: typeof ProdutoIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil/transacoes': {
-      id: '/perfil/transacoes'
-      path: '/perfil/transacoes'
-      fullPath: '/perfil/transacoes'
-      preLoaderRoute: typeof PerfilTransacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil/favoritos': {
-      id: '/perfil/favoritos'
-      path: '/perfil/favoritos'
-      fullPath: '/perfil/favoritos'
-      preLoaderRoute: typeof PerfilFavoritosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil/enderecos': {
-      id: '/perfil/enderecos'
-      path: '/perfil/enderecos'
-      fullPath: '/perfil/enderecos'
-      preLoaderRoute: typeof PerfilEnderecosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil/configuracoes': {
-      id: '/perfil/configuracoes'
-      path: '/perfil/configuracoes'
-      fullPath: '/perfil/configuracoes'
-      preLoaderRoute: typeof PerfilConfiguracoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pedido/$id': {
-      id: '/pedido/$id'
-      path: '/pedido/$id'
-      fullPath: '/pedido/$id'
-      preLoaderRoute: typeof PedidoIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/categoria/$slug': {
-      id: '/categoria/$slug'
-      path: '/categoria/$slug'
-      fullPath: '/categoria/$slug'
-      preLoaderRoute: typeof CategoriaSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/afiliada/login': {
-      id: '/afiliada/login'
-      path: '/afiliada/login'
-      fullPath: '/afiliada/login'
-      preLoaderRoute: typeof AfiliadaLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/afiliada/cadastro': {
-      id: '/afiliada/cadastro'
-      path: '/afiliada/cadastro'
-      fullPath: '/afiliada/cadastro'
-      preLoaderRoute: typeof AfiliadaCadastroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/sincronizacao': {
-      id: '/admin/sincronizacao'
-      path: '/admin/sincronizacao'
-      fullPath: '/admin/sincronizacao'
-      preLoaderRoute: typeof AdminSincronizacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/produtos': {
-      id: '/admin/produtos'
-      path: '/admin/produtos'
-      fullPath: '/admin/produtos'
-      preLoaderRoute: typeof AdminProdutosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/pedidos': {
-      id: '/admin/pedidos'
-      path: '/admin/pedidos'
-      fullPath: '/admin/pedidos'
-      preLoaderRoute: typeof AdminPedidosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/pagamentos': {
-      id: '/admin/pagamentos'
-      path: '/admin/pagamentos'
-      fullPath: '/admin/pagamentos'
-      preLoaderRoute: typeof AdminPagamentosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/organizar': {
-      id: '/admin/organizar'
-      path: '/admin/organizar'
-      fullPath: '/admin/organizar'
-      preLoaderRoute: typeof AdminOrganizarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/notificacoes': {
-      id: '/admin/notificacoes'
-      path: '/admin/notificacoes'
-      fullPath: '/admin/notificacoes'
-      preLoaderRoute: typeof AdminNotificacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/logs': {
-      id: '/admin/logs'
-      path: '/admin/logs'
-      fullPath: '/admin/logs'
-      preLoaderRoute: typeof AdminLogsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/gateway': {
-      id: '/admin/gateway'
-      path: '/admin/gateway'
-      fullPath: '/admin/gateway'
-      preLoaderRoute: typeof AdminGatewayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/frete': {
-      id: '/admin/frete'
-      path: '/admin/frete'
-      fullPath: '/admin/frete'
-      preLoaderRoute: typeof AdminFreteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/financeiro': {
-      id: '/admin/financeiro'
-      path: '/admin/financeiro'
-      fullPath: '/admin/financeiro'
-      preLoaderRoute: typeof AdminFinanceiroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/dashboard': {
-      id: '/admin/dashboard'
-      path: '/admin/dashboard'
-      fullPath: '/admin/dashboard'
-      preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/cupons': {
-      id: '/admin/cupons'
-      path: '/admin/cupons'
-      fullPath: '/admin/cupons'
-      preLoaderRoute: typeof AdminCuponsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/configuracoes': {
-      id: '/admin/configuracoes'
-      path: '/admin/configuracoes'
-      fullPath: '/admin/configuracoes'
-      preLoaderRoute: typeof AdminConfiguracoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/clientes': {
-      id: '/admin/clientes'
-      path: '/admin/clientes'
-      fullPath: '/admin/clientes'
-      preLoaderRoute: typeof AdminClientesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/categorias': {
-      id: '/admin/categorias'
-      path: '/admin/categorias'
-      fullPath: '/admin/categorias'
-      preLoaderRoute: typeof AdminCategoriasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/bi': {
-      id: '/admin/bi'
-      path: '/admin/bi'
-      fullPath: '/admin/bi'
-      preLoaderRoute: typeof AdminBiRouteImport
+    '/admin/afiliadas': {
+      id: '/admin/afiliadas'
+      path: '/admin/afiliadas'
+      fullPath: '/admin/afiliadas'
+      preLoaderRoute: typeof AdminAfiliadasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/avaliacoes': {
@@ -1028,60 +846,214 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAvaliacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/afiliadas': {
-      id: '/admin/afiliadas'
-      path: '/admin/afiliadas'
-      fullPath: '/admin/afiliadas'
-      preLoaderRoute: typeof AdminAfiliadasRouteImport
+    '/admin/bi': {
+      id: '/admin/bi'
+      path: '/admin/bi'
+      fullPath: '/admin/bi'
+      preLoaderRoute: typeof AdminBiRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/pix/$id': {
-      id: '/checkout/pix/$id'
-      path: '/pix/$id'
-      fullPath: '/checkout/pix/$id'
-      preLoaderRoute: typeof CheckoutPixIdRouteImport
-      parentRoute: typeof CheckoutRoute
-    }
-    '/api/sitemap/xml': {
-      id: '/api/sitemap/xml'
-      path: '/api/sitemap/xml'
-      fullPath: '/api/sitemap/xml'
-      preLoaderRoute: typeof ApiSitemapXmlRouteImport
+    '/admin/categorias': {
+      id: '/admin/categorias'
+      path: '/admin/categorias'
+      fullPath: '/admin/categorias'
+      preLoaderRoute: typeof AdminCategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/lovable-bot/status': {
-      id: '/api/lovable-bot/status'
-      path: '/api/lovable-bot/status'
-      fullPath: '/api/lovable-bot/status'
-      preLoaderRoute: typeof ApiLovableBotStatusRouteImport
+    '/admin/clientes': {
+      id: '/admin/clientes'
+      path: '/admin/clientes'
+      fullPath: '/admin/clientes'
+      preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/lovable-bot/notify': {
-      id: '/api/lovable-bot/notify'
-      path: '/api/lovable-bot/notify'
-      fullPath: '/api/lovable-bot/notify'
-      preLoaderRoute: typeof ApiLovableBotNotifyRouteImport
+    '/admin/configuracoes': {
+      id: '/admin/configuracoes'
+      path: '/admin/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AdminConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/lovable-bot/logout': {
-      id: '/api/lovable-bot/logout'
-      path: '/api/lovable-bot/logout'
-      fullPath: '/api/lovable-bot/logout'
-      preLoaderRoute: typeof ApiLovableBotLogoutRouteImport
+    '/admin/cupons': {
+      id: '/admin/cupons'
+      path: '/admin/cupons'
+      fullPath: '/admin/cupons'
+      preLoaderRoute: typeof AdminCuponsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/bot/status': {
-      id: '/api/bot/status'
-      path: '/api/bot/status'
-      fullPath: '/api/bot/status'
-      preLoaderRoute: typeof ApiBotStatusRouteImport
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/bot/notify': {
-      id: '/api/bot/notify'
-      path: '/api/bot/notify'
-      fullPath: '/api/bot/notify'
-      preLoaderRoute: typeof ApiBotNotifyRouteImport
+    '/admin/financeiro': {
+      id: '/admin/financeiro'
+      path: '/admin/financeiro'
+      fullPath: '/admin/financeiro'
+      preLoaderRoute: typeof AdminFinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/frete': {
+      id: '/admin/frete'
+      path: '/admin/frete'
+      fullPath: '/admin/frete'
+      preLoaderRoute: typeof AdminFreteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/frete-automatico': {
+      id: '/admin/frete-automatico'
+      path: '/admin/frete-automatico'
+      fullPath: '/admin/frete-automatico'
+      preLoaderRoute: typeof AdminFreteAutomaticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/gateway': {
+      id: '/admin/gateway'
+      path: '/admin/gateway'
+      fullPath: '/admin/gateway'
+      preLoaderRoute: typeof AdminGatewayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/admin/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/notificacoes': {
+      id: '/admin/notificacoes'
+      path: '/admin/notificacoes'
+      fullPath: '/admin/notificacoes'
+      preLoaderRoute: typeof AdminNotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/organizar': {
+      id: '/admin/organizar'
+      path: '/admin/organizar'
+      fullPath: '/admin/organizar'
+      preLoaderRoute: typeof AdminOrganizarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pagamentos': {
+      id: '/admin/pagamentos'
+      path: '/admin/pagamentos'
+      fullPath: '/admin/pagamentos'
+      preLoaderRoute: typeof AdminPagamentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pedidos': {
+      id: '/admin/pedidos'
+      path: '/admin/pedidos'
+      fullPath: '/admin/pedidos'
+      preLoaderRoute: typeof AdminPedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/produtos': {
+      id: '/admin/produtos'
+      path: '/admin/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AdminProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/sincronizacao': {
+      id: '/admin/sincronizacao'
+      path: '/admin/sincronizacao'
+      fullPath: '/admin/sincronizacao'
+      preLoaderRoute: typeof AdminSincronizacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliada/': {
+      id: '/afiliada/'
+      path: '/afiliada'
+      fullPath: '/afiliada/'
+      preLoaderRoute: typeof AfiliadaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliada/cadastro': {
+      id: '/afiliada/cadastro'
+      path: '/afiliada/cadastro'
+      fullPath: '/afiliada/cadastro'
+      preLoaderRoute: typeof AfiliadaCadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/afiliada/login': {
+      id: '/afiliada/login'
+      path: '/afiliada/login'
+      fullPath: '/afiliada/login'
+      preLoaderRoute: typeof AfiliadaLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categoria/$slug': {
+      id: '/categoria/$slug'
+      path: '/categoria/$slug'
+      fullPath: '/categoria/$slug'
+      preLoaderRoute: typeof CategoriaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$id': {
+      id: '/pedido/$id'
+      path: '/pedido/$id'
+      fullPath: '/pedido/$id'
+      preLoaderRoute: typeof PedidoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil/': {
+      id: '/perfil/'
+      path: '/perfil'
+      fullPath: '/perfil/'
+      preLoaderRoute: typeof PerfilIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil/configuracoes': {
+      id: '/perfil/configuracoes'
+      path: '/perfil/configuracoes'
+      fullPath: '/perfil/configuracoes'
+      preLoaderRoute: typeof PerfilConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil/enderecos': {
+      id: '/perfil/enderecos'
+      path: '/perfil/enderecos'
+      fullPath: '/perfil/enderecos'
+      preLoaderRoute: typeof PerfilEnderecosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil/favoritos': {
+      id: '/perfil/favoritos'
+      path: '/perfil/favoritos'
+      fullPath: '/perfil/favoritos'
+      preLoaderRoute: typeof PerfilFavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil/transacoes': {
+      id: '/perfil/transacoes'
+      path: '/perfil/transacoes'
+      fullPath: '/perfil/transacoes'
+      preLoaderRoute: typeof PerfilTransacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produto/$id': {
+      id: '/produto/$id'
+      path: '/produto/$id'
+      fullPath: '/produto/$id'
+      preLoaderRoute: typeof ProdutoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/bot/logout': {
@@ -1091,20 +1063,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBotLogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bot/notify': {
+      id: '/api/bot/notify'
+      path: '/api/bot/notify'
+      fullPath: '/api/bot/notify'
+      preLoaderRoute: typeof ApiBotNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bot/status': {
+      id: '/api/bot/status'
+      path: '/api/bot/status'
+      fullPath: '/api/bot/status'
+      preLoaderRoute: typeof ApiBotStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/lovable-bot/logout': {
+      id: '/api/lovable-bot/logout'
+      path: '/api/lovable-bot/logout'
+      fullPath: '/api/lovable-bot/logout'
+      preLoaderRoute: typeof ApiLovableBotLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/lovable-bot/notify': {
+      id: '/api/lovable-bot/notify'
+      path: '/api/lovable-bot/notify'
+      fullPath: '/api/lovable-bot/notify'
+      preLoaderRoute: typeof ApiLovableBotNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/lovable-bot/status': {
+      id: '/api/lovable-bot/status'
+      path: '/api/lovable-bot/status'
+      fullPath: '/api/lovable-bot/status'
+      preLoaderRoute: typeof ApiLovableBotStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sitemap/xml': {
+      id: '/api/sitemap/xml'
+      path: '/api/sitemap/xml'
+      fullPath: '/api/sitemap/xml'
+      preLoaderRoute: typeof ApiSitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/pix/$id': {
+      id: '/checkout/pix/$id'
+      path: '/checkout/pix/$id'
+      fullPath: '/checkout/pix/$id'
+      preLoaderRoute: typeof CheckoutPixIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
-
-interface CheckoutRouteChildren {
-  CheckoutPixIdRoute: typeof CheckoutPixIdRoute
-}
-
-const CheckoutRouteChildren: CheckoutRouteChildren = {
-  CheckoutPixIdRoute: CheckoutPixIdRoute,
-}
-
-const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
-  CheckoutRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -1113,7 +1122,6 @@ const rootRouteChildren: RootRouteChildren = {
   CadastroRoute: CadastroRoute,
   CarrinhoRoute: CarrinhoRoute,
   CategoriasRoute: CategoriasRoute,
-  CheckoutRoute: CheckoutRouteWithChildren,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   PedidosRoute: PedidosRoute,
@@ -1131,6 +1139,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminFinanceiroRoute: AdminFinanceiroRoute,
   AdminFreteRoute: AdminFreteRoute,
+  AdminFreteAutomaticoRoute: AdminFreteAutomaticoRoute,
   AdminGatewayRoute: AdminGatewayRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminLogsRoute: AdminLogsRoute,
@@ -1151,6 +1160,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProdutoIdRoute: ProdutoIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   AfiliadaIndexRoute: AfiliadaIndexRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
   PerfilIndexRoute: PerfilIndexRoute,
   ApiBotLogoutRoute: ApiBotLogoutRoute,
   ApiBotNotifyRoute: ApiBotNotifyRoute,
@@ -1159,16 +1169,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLovableBotNotifyRoute: ApiLovableBotNotifyRoute,
   ApiLovableBotStatusRoute: ApiLovableBotStatusRoute,
   ApiSitemapXmlRoute: ApiSitemapXmlRoute,
+  CheckoutPixIdRoute: CheckoutPixIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
