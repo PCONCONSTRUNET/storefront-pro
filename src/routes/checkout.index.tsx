@@ -27,7 +27,7 @@ import mpIcon from "@/assets/mercadopago-icon.png";
 import pixIcon from "@/assets/pix-icon.png";
 import cardIcon from "@/assets/card-icon.png";
 
-export const Route = createFileRoute("/checkout")({
+export const Route = createFileRoute("/checkout/")({
   component: Page,
 });
 
