@@ -35,6 +35,8 @@ import {
   DollarSign,
   Filter,
   ListFilter,
+  Link2,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -723,9 +725,9 @@ function Page() {
                 </button>
               </Row>
               <Row icon={CreditCard} label="Método">
-                {order.paymentMethod.toUpperCase()}
+                {order.paymentMethod?.toUpperCase() || "N/A"}
               </Row>
-              {order.paymentMethod.toLowerCase() === "pix" && (
+              {order.paymentMethod?.toLowerCase() === "pix" && (
                 <>
                   <Row icon={Link2} label="Página do Pix">
                     <button
