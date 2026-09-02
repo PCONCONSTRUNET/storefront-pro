@@ -725,6 +725,32 @@ function Page() {
               <Row icon={CreditCard} label="Método">
                 {order.paymentMethod.toUpperCase()}
               </Row>
+              {order.paymentMethod.toLowerCase() === "pix" && (
+                <>
+                  <Row icon={Link2} label="Página do Pix">
+                    <button
+                      onClick={() => copy(`${window.location.origin}/checkout/pix/${order.id}`, "Link da página copiado")}
+                      className="text-xs hover:text-primary inline-flex items-center gap-1 text-primary/80 font-medium"
+                    >
+                      Copiar Link <Copy className="h-3 w-3" />
+                    </button>
+                  </Row>
+                  <Row icon={MessageCircle} label="WhatsApp">
+                    <button
+                      onClick={() => {
+                        const link = `${window.location.origin}/checkout/pix/${order.id}`;
+                        const phone = order.customerPhone.replace(/\D/g, "");
+                        const nome = order.customerName.split(" ")[0];
+                        const msg = encodeURIComponent(`Olá ${nome}! 🎀 Segue o link para pagar o seu pedido via Pix:\n${link}\n\nValor: ${brl(order.total)}`);
+                        window.open(phone ? `https://wa.me/55${phone}?text=${msg}` : `https://wa.me/?text=${msg}`, "_blank");
+                      }}
+                      className="text-xs hover:text-[#25D366] inline-flex items-center gap-1 text-[#25D366]/90 font-medium"
+                    >
+                      Enviar Link Pix <MessageCircle className="h-3 w-3" />
+                    </button>
+                  </Row>
+                </>
+              )}
               {order.mpPaymentId && (
                 <Row icon={Hash} label="MP ID">
                   <button
@@ -742,6 +768,7 @@ function Page() {
                 </Row>
               )}
             </div>
+
 
             {(order.notes || "").replace(/\[RASTREIO: .*?\]\n?/g, "").trim() && (
               <div className="p-3 rounded-xl bg-gold/10 border border-gold/30">
