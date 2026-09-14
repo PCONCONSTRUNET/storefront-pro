@@ -44,6 +44,7 @@ import { printOrderReceipt } from "@/lib/printReceipt";
 import { createSuperFreteCartFn } from "@/lib/superfrete";
 import { checkoutSuperfreteFn, printSuperfreteTagFn } from "@/lib/superfrete-admin";
 import { AdminPixGerarModal } from "@/components/AdminPixGerarModal";
+import { AdminPedidoManualModal } from "@/components/AdminPedidoManualModal";
 
 export const Route = createFileRoute("/admin/pedidos")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -109,6 +110,7 @@ function Page() {
   const [query, setQuery] = useState(initialQ);
   const [busy, setBusy] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
+  const [showManualOrderModal, setShowManualOrderModal] = useState(false);
 
   useEffect(() => {
     setQuery(initialQ);
@@ -329,6 +331,12 @@ function Page() {
             className="px-2.5 py-1 rounded-full bg-muted hover:bg-muted/70 font-semibold"
           >
             Exportar CSV
+          </button>
+          <button
+            onClick={() => setShowManualOrderModal(true)}
+            className="px-3 py-1 rounded-full bg-emerald-500 text-white font-semibold flex items-center gap-1.5 text-xs shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <span className="text-base leading-none">📝</span> Registrar Pedido
           </button>
           <button
             onClick={() => setShowPixModal(true)}
@@ -956,6 +964,14 @@ function Page() {
         <AdminPixGerarModal
           onClose={() => {
             setShowPixModal(false);
+            sync();
+          }}
+        />
+      )}
+      {showManualOrderModal && (
+        <AdminPedidoManualModal
+          onClose={() => {
+            setShowManualOrderModal(false);
             sync();
           }}
         />

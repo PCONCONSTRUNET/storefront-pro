@@ -112,7 +112,7 @@ export const consumeResetTokenFn = createServerFn({ method: "POST" })
 
 export const applyOrderStockDecrementFn = createServerFn({ method: "POST" })
   .inputValidator((input) =>
-    z.object({ orderId: z.string().uuid() }).parse(input),
+    z.object({ orderId: z.string().min(1) }).parse(input),
   )
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.rpc("apply_order_stock_decrement", {

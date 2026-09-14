@@ -585,3 +585,157 @@ export const fetchCustomerByIdFn = createServerFn({ method: "POST" })
       },
     };
   });
+
+export const createManualAdminOrderFn = createServerFn({ method: "POST" })
+  .inputValidator((i) =>
+    z
+      .object({
+        customer: z.object({
+          name: z.string().min(1, "Nome da cliente é obrigatório"),
+          email: z.string().optional(),
+          phone: z.string().optional(),
+          document: z.string().optional(),
+          customerId: z.string().nullable().optional(),
+        }),
+        items: z
+          .array(
+            z.object({
+              productId: z.string().min(1),
+              name: z.string().min(1),
+              price: z.number().min(0),
+              quantity: z.number().int().min(1),
+              image: z.string().optional(),
+              variation: z.string().optional(),
+            }),
+          )
+          .min(1, "Adicione ao menos um produto"),
+        totals: z.object({
+          subtotal: z.number().min(0),
+          discount: z.number().min(0).default(0),
+          shipping: z.number().min(0).default(0),
+          total: z.number().min(0),
+        }),
+        delivery: z.enum(["entrega", "retirada"]).default("entrega"),
+        address: z.string().optional(),
+        notes: z.string().optional(),
+        paymentStatus: z.enum(["pago", "aguardando_pagamento"]).default("pago"),
+        paymentMethod: z
+          .enum(["dinheiro", "cartao", "pix", "outro"])
+          .default("dinheiro"),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data }) => {
+    let adminEmail = "admin";
+    try {
+      const auth = await requireAdminAuth();
+      adminEmail = auth.adminEmail;
+    } catch (authErr) {
+      console.warn("[createManualAdminOrderFn] Admin auth notice:", authErr);
+    }
+
+    const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const isPaid = data.paymentStatus === "pago";
+    const effectiveEmail = data.customer.email?.trim() || "cliente@sem-email.local";
+    const effectivePhone = data.customer.phone?.replace(/\D/g, "") || "00000000000";
+
+    const orderRow = {
+      id: shortId,
+      customer_id:
+        data.customer.customerId && data.customer.customerId !== "guest"
+          ? data.customer.customerId
+          : null,
+      customer_name: data.customer.name.trim(),
+      customer_email: effectiveEmail,
+      customer_phone: effectivePhone,
+      customer_document: data.customer.document?.trim() || null,
+      items: data.items,
+      subtotal: Number(data.totals.subtotal),
+      discount: Number(data.totals.discount || 0),
+      shipping: Number(data.totals.shipping || 0),
+      total: Number(data.totals.total),
+      payment_method: data.paymentMethod,
+      delivery_method: data.delivery,
+      payment_status: (isPaid ? "approved" : "pending") as any,
+      delivery_status: "pendente",
+      address:
+        data.delivery === "retirada"
+          ? "Retirada no balcão"
+          : data.address?.trim() || null,
+      notes: data.notes?.trim() || null,
+      paid_at: isPaid ? new Date().toISOString() : null,
+      created_at: new Date().toISOString(),
+    };
+
+    const { data: insertedOrder, error: insErr } = await (supabaseAdmin as any)
+      .from("orders")
+      .insert(orderRow)
+      .select()
+      .single();
+
+    if (insErr) {
+      console.error("[createManualAdminOrderFn] Insert failed:", insErr);
+      return { ok: false as const, message: insErr.message || "Falha ao registrar pedido" };
+    }
+
+    // 1) Decrementa o estoque usando a RPC do banco
+    try {
+      await (supabaseAdmin as any).rpc("apply_order_stock_decrement", {
+        _order_id: shortId,
+      });
+    } catch (stockErr) {
+      console.error("[createManualAdminOrderFn] apply_order_stock_decrement RPC:", stockErr);
+      // Fallback: decrementa diretamente em cada produto
+      for (const item of data.items) {
+        if (item.productId && item.quantity > 0) {
+          try {
+            const { data: prod } = await (supabaseAdmin as any)
+              .from("products")
+              .select("stock")
+              .eq("id", item.productId)
+              .maybeSingle();
+            if (prod && typeof prod.stock === "number") {
+              await (supabaseAdmin as any)
+                .from("products")
+                .update({ stock: Math.max(0, prod.stock - item.quantity) })
+                .eq("id", item.productId);
+            }
+          } catch {}
+        }
+      }
+    }
+
+    // 2) Se o pedido foi marcado como Pago, registra a transação de entrada
+    if (isPaid) {
+      const txRow = {
+        id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        kind: "entrada",
+        category: "venda",
+        description: `Pedido ${shortId} — ${data.customer.name.trim()}`,
+        amount: Number(data.totals.total),
+        date: new Date().toISOString(),
+        product_summary: data.items.map((i) => `${i.quantity}x ${i.name}`).join(", "),
+        created_at: new Date().toISOString(),
+      };
+      await (supabaseAdmin as any)
+        .from("transactions")
+        .insert(txRow)
+        .then(() => {})
+        .catch((err: any) => console.warn("[createManualAdminOrderFn] tx insert warning:", err));
+    }
+
+    // 3) Audit log
+    await audit(
+      adminEmail,
+      "order.manual_created",
+      `Pedido manual #${shortId} registrado (${isPaid ? "Pago" : "Aguardando pagamento"})`,
+      { orderId: shortId, total: data.totals.total, customer: data.customer.name }
+    ).catch(() => {});
+
+    return {
+      ok: true as const,
+      orderId: shortId,
+      order: insertedOrder || orderRow,
+    };
+  });
+
