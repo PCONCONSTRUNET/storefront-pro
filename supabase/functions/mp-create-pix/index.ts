@@ -111,8 +111,8 @@ Deno.serve(async (req) => {
   const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
 
   // Fallbacks para pedidos manuais sem dados completos da cliente
-  // Nota: o MP rejeita domínios .local — geramos um email único com o shortId
-  const effectiveEmail = customer.email?.trim() || `pedido.${shortId.toLowerCase()}@sememail.princesa`;
+  // Nota: o MP rejeita domínios inválidos — geramos um email único com o shortId
+  const effectiveEmail = customer.email?.trim() || `pedido.${shortId.toLowerCase()}@princesadelacos.com.br`;
   const effectivePhone = customer.phone?.replace(/\D/g, "") || "00000000000";
 
   // 1) Cria pedido no banco
