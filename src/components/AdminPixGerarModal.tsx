@@ -323,7 +323,7 @@ export function AdminPixGerarModal({ onClose }: { onClose: () => void }) {
 
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 block">E-mail</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1 block">E-mail (opcional)</label>
                 <input type="email" value={clienteEmail} onChange={(e) => setClienteEmail(e.target.value)} placeholder="email@exemplo.com"
                   className="w-full h-10 px-3 rounded-xl bg-background border border-border text-sm outline-none focus:ring-2 ring-primary/30" />
               </div>

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type CreatePixInput = {
-  customer: { name: string; email: string; phone: string; document?: string };
+  customer: { name: string; email?: string; phone?: string; document?: string };
   items: Array<{
     productId: string;
     name: string;
