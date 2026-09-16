@@ -636,7 +636,8 @@ export const createManualAdminOrderFn = createServerFn({ method: "POST" })
 
     const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
     const isPaid = data.paymentStatus === "pago";
-    const effectiveEmail = data.customer.email?.trim() || "cliente@sem-email.local";
+    // Não usamos .local pois pode ser rejeitado por serviços de email — geramos único por pedido
+    const effectiveEmail = data.customer.email?.trim() || `pedido.${shortId.toLowerCase()}@sememail.princesa`;
     const effectivePhone = data.customer.phone?.replace(/\D/g, "") || "00000000000";
 
     const orderRow = {

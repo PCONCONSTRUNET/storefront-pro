@@ -15,7 +15,7 @@ const pixBodySchema = z.object({
   customer: z.object({
     name: z.string().trim().min(1).max(255),
     // email e phone são opcionais para pedidos manuais gerados pelo admin
-    email: z.string().trim().email().max(255).optional().nullable(),
+    email: z.string().trim().max(255).optional().nullable(),
     phone: z.string().trim().max(30).optional().nullable(),
     document: z.string().trim().max(20).optional().nullable(),
     // customer_id da tabela customers (para vincular ao cadastro existente)
@@ -111,8 +111,8 @@ Deno.serve(async (req) => {
   const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
 
   // Fallbacks para pedidos manuais sem dados completos da cliente
-  const FALLBACK_EMAIL = "cliente@sem-email.local";
-  const effectiveEmail = customer.email?.trim() || FALLBACK_EMAIL;
+  // Nota: o MP rejeita domínios .local — geramos um email único com o shortId
+  const effectiveEmail = customer.email?.trim() || `pedido.${shortId.toLowerCase()}@sememail.princesa`;
   const effectivePhone = customer.phone?.replace(/\D/g, "") || "00000000000";
 
   // 1) Cria pedido no banco
