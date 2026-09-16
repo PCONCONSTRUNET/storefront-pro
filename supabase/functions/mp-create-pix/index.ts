@@ -135,8 +135,6 @@ Deno.serve(async (req) => {
       total,
       payment_method: "pix",
       payment_status: "pending",
-      // marca pedido criado manualmente pelo admin
-      ...(body.manual ? { source: "admin_manual" } : {}),
     })
     .select()
     .single();
