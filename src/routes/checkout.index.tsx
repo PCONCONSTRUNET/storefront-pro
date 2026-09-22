@@ -594,7 +594,7 @@ function Page() {
             >
               {submitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Gerando Pix...
+                  <Loader2 className="h-4 w-4 animate-spin" /> Processando...
                 </>
               ) : form.payment === "pix" ? (
                 <>
